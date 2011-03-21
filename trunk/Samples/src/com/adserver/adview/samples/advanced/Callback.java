@@ -1,0 +1,53 @@
+/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
+package com.adserver.adview.samples.advanced;
+
+import android.app.Activity;
+import android.content.Context;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.adserver.adview.AdServerView;
+import com.adserver.adview.AdServerViewCore.OnAdDownload;
+import com.adserver.adview.samples.R;
+
+public class Callback extends Activity {
+    /** Called when the activity is first created. */
+	private Context context;
+	private LinearLayout linearLayout;
+	
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        setContentView(R.layout.main);
+        context = this;
+        linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
+        
+        AdServerView adserverView = new AdServerView(this,"8061","20249");
+        adserverView.setOnAdDownload(new UserAdDownload());
+        adserverView.setDefaultImage(R.drawable.robot2);
+        adserverView.setId(1);
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));
+		linearLayout.addView(adserverView);
+    }
+    
+    class UserAdDownload implements OnAdDownload
+    {
+
+		public void begin() {
+			Log.d("Callback", "begin");
+			
+		}
+
+		public void end() {
+			Log.d("Callback", "end");
+		}
+
+		public void error(String arg0) {
+			Log.d("Callback","error: "+arg0+"\n");
+		}
+    	
+    }
+}
