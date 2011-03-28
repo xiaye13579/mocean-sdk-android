@@ -168,6 +168,7 @@ public abstract class AdServerViewCore extends WebView {
 	private static final String PREF_IS_FIRST_APP_LAUNCH = "isFirstAppLaunch";
 	private static final String FIRST_APP_LAUNCH_URL = "http://www.moceanmobile.com/appconversion.php";
 	private static final long AD_RELOAD_PERIOD = 120000; //in milliseconds
+	private static final long AD_STOP_CHECK_PERIOD = 10000; //in milliseconds
 	private Handler handler = new Handler(Looper.getMainLooper());
 	private Integer defaultImageResource;
 	private ContentThread contentThread;
@@ -713,6 +714,13 @@ public abstract class AdServerViewCore extends WebView {
 			break;
 		}
 		
+		if((adReloadPeriod != null) && (adReloadPeriod == 0)) {
+			if(isRepeat) {
+				isRequestAd = false;
+				isRefreshAd = false;
+			}
+		}
+    	
 		String data = "";
 		
 		if(isRefreshAd) {
@@ -749,50 +757,50 @@ public abstract class AdServerViewCore extends WebView {
 					if(adDownload != null) {
 						adDownload.error(Utils.scrape(data, "<!--", "-->"));
 					}
-				}
-				
-				if(isRefreshAd) {
-					handler.post(new RemoveAllChildViews(view));
-					String externalCampaignData = Utils.scrape(data, "<external_campaign", "</external_campaign>");
-
-					if((externalCampaignData != null) && (externalCampaignData.length() > 0)) {
-						String type = Utils.scrape(externalCampaignData, "<type>", "</type>");
-						String campaignId = Utils.scrape(externalCampaignData, "<campaign_id>", "</campaign_id>");
-						String trackUrl = Utils.scrape(externalCampaignData, "<track_url>", "</track_url>");
-						String externalParams = Utils.scrape(externalCampaignData, "<external_params>", "</external_params>");
-						
-						if("iVdopia".equals(type)) {
-							String applicationKey = Utils.scrape(externalParams, "<param name=\"applicationKey\">", "</param>");
+				} else {
+					if(isRefreshAd) {
+						handler.post(new RemoveAllChildViews(view));
+						String externalCampaignData = Utils.scrape(data, "<external_campaign", "</external_campaign>");
+	
+						if((externalCampaignData != null) && (externalCampaignData.length() > 0)) {
+							String type = Utils.scrape(externalCampaignData, "<type>", "</type>");
+							String campaignId = Utils.scrape(externalCampaignData, "<campaign_id>", "</campaign_id>");
+							String trackUrl = Utils.scrape(externalCampaignData, "<track_url>", "</track_url>");
+							String externalParams = Utils.scrape(externalCampaignData, "<external_params>", "</external_params>");
 							
-							if((applicationKey != null) && (applicationKey.length() > 0)) {
-								handler.post(new SetupiVdopiaAction(context, view, 
-										applicationKey, campaignId, trackUrl));
+							if("iVdopia".equals(type)) {
+								String applicationKey = Utils.scrape(externalParams, "<param name=\"applicationKey\">", "</param>");
+								
+								if((applicationKey != null) && (applicationKey.length() > 0)) {
+									handler.post(new SetupiVdopiaAction(context, view, 
+											applicationKey, campaignId, trackUrl));
+								}
+							} else if("GreyStripe".equals(type)) {
+								String applicationId = Utils.scrape(externalParams, "<param name=\"id\">", "</param>");
+								
+								if((applicationId != null) && (applicationId.length() > 0)) {
+									handler.post(new SetupGreyStripe(context, view, 
+											applicationId, campaignId, trackUrl));
+								}
 							}
-						} else if("GreyStripe".equals(type)) {
-							String applicationId = Utils.scrape(externalParams, "<param name=\"id\">", "</param>");
-							
-							if((applicationId != null) && (applicationId.length() > 0)) {
-								handler.post(new SetupGreyStripe(context, view, 
-										applicationId, campaignId, trackUrl));
-							}
-						}
-					} else {
-						String videoData = Utils.scrape(data, "<video", "/>");
-
-						if((videoData != null) && (videoData.length() > 0)) {
-							String videoUrl = Utils.scrape(videoData, "src=\"", "\"");
-							String clickUrl = Utils.scrape(data, "href=\"", "\"");
-							handler.post(new SetupVideoAction(context, view, videoUrl, clickUrl));
 						} else {
-							data =  "<html><head>" +
-							"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
-							"</head>" +
-							"<body style=\"margin: 0px; padding: 0px;\">" +
-							data + 
-							"</body></html>";
-							mContent = data;
-							view.setBackgroundColor(Color.WHITE);
-							view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
+							String videoData = Utils.scrape(data, "<video", "/>");
+	
+							if((videoData != null) && (videoData.length() > 0)) {
+								String videoUrl = Utils.scrape(videoData, "src=\"", "\"");
+								String clickUrl = Utils.scrape(data, "href=\"", "\"");
+								handler.post(new SetupVideoAction(context, view, videoUrl, clickUrl));
+							} else {
+								data =  "<html><head>" +
+								"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
+								"</head>" +
+								"<body style=\"margin: 0px; padding: 0px;\">" +
+								data + 
+								"</body></html>";
+								mContent = data;
+								view.setBackgroundColor(Color.WHITE);
+								view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
+							}
 						}
 					}
 				}
@@ -810,7 +818,11 @@ public abstract class AdServerViewCore extends WebView {
 			ReloadTask reloadTask = new ReloadTask(context, view, false, isRepeat);
 			
 			if((adReloadPeriod != null) && (adReloadPeriod >= 0)) {
-				reloadTimer.schedule(reloadTask, adReloadPeriod);
+				if(adReloadPeriod > 0) {
+					reloadTimer.schedule(reloadTask, adReloadPeriod);
+				} else {
+					reloadTimer.schedule(reloadTask, AD_STOP_CHECK_PERIOD);
+				}
 			} else {
 				reloadTimer.schedule(reloadTask, AD_RELOAD_PERIOD);
 			}
@@ -1123,6 +1135,7 @@ public abstract class AdServerViewCore extends WebView {
 			try {
 				if(backgroundResource != null) {
 					view.setBackgroundResource(backgroundResource);
+					view.setBackgroundColor(0); 
 				}
 			} catch (Exception e) {
 			}

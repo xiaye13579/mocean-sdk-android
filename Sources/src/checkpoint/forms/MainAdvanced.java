@@ -109,6 +109,9 @@ public class MainAdvanced extends Activity {
 		adserverView.setMaxSizeY(50);
 		adserverView.getMaxSizeY();
 		
+		adserverView.setDefaultImage(R.drawable.test_banner);
+		
+		
 		adserverView.setBackgroundColor("33CCFF");
 		adserverView.getBackgroundColor();
 		
