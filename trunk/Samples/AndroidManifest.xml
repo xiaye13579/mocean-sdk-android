@@ -36,18 +36,6 @@
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-		<activity android:label="Simple/Greystripe/Ad" android:name=".simple.Greystripe.GreystripeAd">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>
-                <category android:name="android.intent.category.SAMPLE_CODE"></category>
-            </intent-filter>
-        </activity>
-        <activity android:label="Simple/Greystripe/mOceanBackfill" android:name=".simple.Greystripe.GreystripemOceanBackfill">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>
-                <category android:name="android.intent.category.SAMPLE_CODE"></category>
-            </intent-filter>
-        </activity>
         <activity android:label="Simple/ORRMA/Banner" android:name=".simple.ORRMA.ORRMABanner">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
@@ -67,18 +55,6 @@
             </intent-filter>
         </activity>
         <activity android:label="Simple/ORRMA/level3" android:name=".simple.ORRMA.ORRMAlevel3">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>
-                <category android:name="android.intent.category.SAMPLE_CODE"></category>
-            </intent-filter>
-        </activity>
-        <activity android:label="Simple/iVdopia/Ad" android:name=".simple.iVdopia.iVdopiaAd">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>
-                <category android:name="android.intent.category.SAMPLE_CODE"></category>
-            </intent-filter>
-        </activity>
-        <activity android:label="Simple/iVdopia/mOceanBackfill" android:name=".simple.iVdopia.iVdopiamOceanBackfill">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
