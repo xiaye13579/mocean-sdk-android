@@ -570,10 +570,6 @@ public abstract class AdServerViewCore extends WebView {
 		setWebViewClient(new AdWebViewClient(context));
 		setWebChromeClient(mWebChromeClient);
 		
-		if(reloadTimer == null) {
-			reloadTimer = new Timer();
-		}
-		
 		if(contentThread == null) {
 			contentThread = new ContentThread(context, this, true, true);
 		}
@@ -581,8 +577,15 @@ public abstract class AdServerViewCore extends WebView {
 	
 	@Override
 	protected void onAttachedToWindow() {
-		if(contentThread != null) { 
-			contentThread.start();
+		reloadTimer = new Timer();
+		
+		if(contentThread != null) {
+			if(contentThread.getState().equals(Thread.State.NEW)) {
+				contentThread.start();			
+			} else if(contentThread.getState().equals(Thread.State.TERMINATED)) {
+				contentThread = new ContentThread(getContext(), this, false, true);
+				contentThread.start();			
+			}
 		}
 		
 		super.onAttachedToWindow();
