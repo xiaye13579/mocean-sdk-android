@@ -26,13 +26,6 @@
 	    	android:layout_height="wrap_content"
     	/>
 
-    	<Button 
-	    	android:id="@+id/updateAd" 
-	    	android:text="Update Ad" 
-	    	android:layout_width="wrap_content" 
-	    	android:layout_height="wrap_content"
-    	/>
-    
 		 <!--
 	   	<com.adserver.adview.AdServerView 
 	    	android:id="@+id/adViewer1" 

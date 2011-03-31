@@ -6,6 +6,7 @@ import java.util.Hashtable;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +22,8 @@ public class MainAdvanced extends Activity {
     /** Called when the activity is first created. */
 	private Context context;
 	private LinearLayout linearLayout;
-	
+	 AdServerView adserverView;
+	 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +49,7 @@ public class MainAdvanced extends Activity {
 				interstitialView.setShowCloseButtonTime(3);
 				interstitialView.setAutoCloseInterstitialTime(20);
 				interstitialView.setIsShowPhoneStatusBar(true);
-				interstitialView.show();
+				interstitialView.show();				
 			}
         });
         
@@ -68,17 +70,9 @@ public class MainAdvanced extends Activity {
 //        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 250));
 //		linearLayout.addView(adserverView);
 //
-        Button updateAd = (Button) findViewById(R.id.updateAd);
-        updateAd.setVisibility(View.GONE);
-//        updateAd.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				adserverView.update();
-//			}
-//        });
         
-        
-        AdServerView adserverView = new AdServerView(this, "5441", "9312");
+        //AdServerView adserverView = new AdServerView(this, "5441", "9312");
+        adserverView = new AdServerView(this, "8061", "20249");
 //        adserverView.setSite("5441");
 //        adserverView.getSite();
 //
@@ -109,11 +103,11 @@ public class MainAdvanced extends Activity {
 		adserverView.setMaxSizeY(50);
 		adserverView.getMaxSizeY();
 		
-		adserverView.setDefaultImage(R.drawable.test_banner);
+		//adserverView.setDefaultImage(R.drawable.test_banner);
 		
 		
-		adserverView.setBackgroundColor("33CCFF");
-		adserverView.getBackgroundColor();
+		//adserverView.setBackgroundColor("33CCFF");
+		//adserverView.getBackgroundColor();
 		
 		adserverView.setTextColor("11CC22");
 		adserverView.getTextColor();
@@ -136,7 +130,7 @@ public class MainAdvanced extends Activity {
 		adserverView.setGroupCode("TR57");
 		adserverView.getGroupCode();
 		
-		adserverView.setUpdateTime(25);
+		adserverView.setUpdateTime(2);
 		adserverView.getUpdateTime();
 		
 		adserverView.setLatitude("40.756054");

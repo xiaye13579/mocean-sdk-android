@@ -139,7 +139,8 @@ public class AdServerView extends AdServerViewCore {
 	@Override
 	
 	protected void onAttachedToWindow() {
-		if(autoDetectParametersThread != null) {
+		if((autoDetectParametersThread != null) 
+				&& (autoDetectParametersThread.getState().equals(Thread.State.NEW))) { 
 			autoDetectParametersThread.start();
 		}
 		
