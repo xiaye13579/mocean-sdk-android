@@ -40,5 +40,9 @@ public class mOceanInterstitial extends Activity {
 			}
         });
 
+        AdServerInterstitialView adS = new AdServerInterstitialView(context, "8061", "16112");
+		adS.setMinSizeX(320);
+		adS.setMinSizeY(320);
+		adS.show();		
     }
 }

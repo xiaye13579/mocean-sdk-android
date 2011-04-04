@@ -10,7 +10,7 @@
 	    android:orientation="vertical"
 	    android:layout_height="fill_parent"
 	    android:layout_width="fill_parent" 
-	    android:background="#00ff00"
+	    android:background="@drawable/mocean_blackbkg_xsml"
     >
 
     </LinearLayout>
