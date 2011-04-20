@@ -25,7 +25,7 @@ public class ORRMAlevel2 extends Activity {
          
         AdServerView adserverView = new AdServerView(this,"8061","17488");
         adserverView.setId(1);
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 200));
 		linearLayout.addView(adserverView);
     }
 }

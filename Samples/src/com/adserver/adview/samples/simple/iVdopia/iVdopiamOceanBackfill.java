@@ -1,5 +1,5 @@
 /*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
-package com.adserver.adview.samples.simple.mOcean;
+package com.adserver.adview.samples.simple.iVdopia;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 import com.adserver.adview.AdServerView;
 import com.adserver.adview.samples.R;
 
-public class mOceanDefault extends Activity {
+public class iVdopiamOceanBackfill extends Activity {
     /** Called when the activity is first created. */
 	private Context context;
 	private LinearLayout linearLayout;
@@ -23,16 +23,9 @@ public class mOceanDefault extends Activity {
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         
          
-        AdServerView adserverView = new AdServerView(this,"8061","20249");
-        
-        adserverView.setMinSizeX(320);
-	    adserverView.setMinSizeY(50);
-	    adserverView.setMaxSizeX(320);
-	    adserverView.setMaxSizeY(50);
-	    
+        AdServerView adserverView = new AdServerView(this,"8061","19506");
         adserverView.setId(1);
-        //adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 56));
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(320, 50));
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));
 		linearLayout.addView(adserverView);
     }
 }

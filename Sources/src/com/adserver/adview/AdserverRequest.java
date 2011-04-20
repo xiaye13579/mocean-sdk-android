@@ -8,6 +8,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.telephony.TelephonyManager;
+
 public class AdserverRequest {
 	private Map<String, String> parameters = new HashMap<String, String>();
 	private final String parameter_site = "site";
@@ -37,18 +41,42 @@ public class AdserverRequest {
 	private final String parameter_version = "version";
 	private final String parameter_connection_speed = "connection_speed";
 	private final String parameter_size_required = "size_required";
+	//private final String parameter_debug = "debug";
+	public final static String parameter_device_id = "udid";
 	
 	private String adserverURL = "http://ads.mocean.mobi/ad";
 	private Hashtable<String, String> customParameters;
 	
-	public AdserverRequest() {
+	public AdserverRequest() {		
 	}
 
 	public AdserverRequest(String site, String zone) {
 		setSite(site);
-		setZone(zone);
+		setZone(zone);		
 	}
 
+	void InitDefaultParameters(Context context)
+	{
+		TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+		String deviceId = tm.getDeviceId();
+		String deviceIdMD5 = Utils.md5(deviceId);
+		
+		if((deviceIdMD5 != null) && (deviceIdMD5.length() > 0)) {
+			parameters.put(parameter_device_id, deviceIdMD5);
+			/*StringBuilder url = new StringBuilder(FIRST_APP_LAUNCH_URL);
+			url.append("?advertiser_id=" + URLEncoder.encode(advertiserId));
+			url.append("&group_code=" + URLEncoder.encode(groupCode));
+			url.append("&deviceid=" + URLEncoder.encode(deviceIdMD5));
+			
+			sendGetRequest(url.toString());
+			
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putBoolean(PREF_IS_FIRST_APP_LAUNCH, false);
+			editor.commit();*/
+		}
+		
+		
+	}
 	/**
 	 * Get URL of ad server.
 	 * @return
@@ -698,11 +726,11 @@ public class AdserverRequest {
 
 	public synchronized String toString() {
 		StringBuilder builderToString = new StringBuilder();
-		String adserverURL = this.adserverURL + "?1=1";
+		String adserverURL = this.adserverURL+"?";//+ "?1=1";		
 		builderToString.append(adserverURL);
 		appendParameters(builderToString, parameters);
 		appendParameters(builderToString, customParameters);
-		return builderToString.toString();
+		return builderToString.toString().equals(adserverURL) ?  this.adserverURL : builderToString.toString();
 	}
 
 	private void appendParameters(StringBuilder builderToString, Map<String, String> parameters) {

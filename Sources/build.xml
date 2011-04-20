@@ -1,36 +1,69 @@
-<project name="AdViewer" default="release.build">
-    <property name="android.dir" value="C:\Program Files\android-sdk-windows-1.6_r1"/>
+<project name="AdViewer" default="release.build.3rdPaty">
+    <property name="android.dir" value="c:\eclipse\android-sdk-windows-1.5_r3"/>
     <property name="android.jar" value="${android.dir}\platforms\android-8\android.jar"/>
 
     <property name="release.dir" value="release"/>
     <property name="demo.mocean.dir" value="${release.dir}\ads.mocean.mobi"/>
     <property name="lib.mocean.dir" value="${demo.mocean.dir}\Lib"/>
-    <property name="source.mocean.dir" value="${demo.mocean.dir}\Sample"/>
+    <property name="sample.mocean.dir" value="${demo.mocean.dir}\Sample"/>
     <property name="doc.mocean.dir" value="${demo.mocean.dir}\Documentation"/>
     <property name="temp.dir" value="${release.dir}\temp"/>
     <property name="temp.classes.dir" value="${temp.dir}\classes"/>
 	<property name="jar.name" value="AdserverView.jar"/>
 
-	<target name="release.build"  depends="clean, make.dirs">
-		<antcall target="release.build.mocean"/>
-		<antcall target="source.mocean"/>
+	<target name="release.build.3rdPaty"  depends="clean, make.dirs">
+		<antcall target="release.build.mocean.3rdPaty"/>
+		<!--<antcall target="source.mocean"/>-->
+		<antcall target="sample"/>
 		<antcall target="javadoc.mocean"/>
         <delete dir="${temp.dir}"/>
 	</target>
 	
+	<target name="release.build.mOcean"  depends="clean, make.dirs">
+			<antcall target="release.build.mocean"/>
+		<!--<antcall target="source.mocean"/>-->
+			<antcall target="javadoc.mocean"/>
+	        <delete dir="${temp.dir}"/>
+		</target>
+	
 	<target name="release.build.mocean"  depends="compile.sources">
-		<jar destfile="${lib.mocean.dir}/${jar.name}"
-	    	basedir="${temp.classes.dir}"
-			manifest="MANIFEST.MF">
-			<fileset dir="js"/>
-			<zipfileset includes="**/*.class" src="lib/iVdopia_Android_SDK_v1.4.3.jar"/>
-			<zipfileset includes="**/*.class" src="lib/gssdk_1.5.0.jar"/>
-		</jar>
-	</target>
-
+				<jar destfile="${lib.mocean.dir}/${jar.name}"
+			    	basedir="${temp.classes.dir}"
+					manifest="MANIFEST.MF">
+					<fileset dir="js"/>					
+				</jar>
+		</target>
 	<target name="compile.sources">
+			<javac destdir="${temp.classes.dir}" debug="on" debuglevel="vars">
+				<src path="src\com\adserver\adview" />
+				<src path="srcmOcean\com\adserver\adview" />
+				<classpath>
+					<pathelement path="${android.jar}"/>
+					<fileset dir="lib">
+						<include name="**/*.jar"/>
+					</fileset>
+			    </classpath>
+	        </javac>
+		</target>
+	
+	<target name="release.build.mocean.3rdPaty"  depends="compile.sources.3rdPaty">
+			<jar destfile="${lib.mocean.dir}/${jar.name}"
+		    	basedir="${temp.classes.dir}"
+				manifest="MANIFEST.MF">
+				<fileset dir="js"/>
+				<zipfileset includes="**/*.class" src="lib/iVdopia_Android_SDK_v1.4.3.jar"/>
+				<zipfileset includes="**/*.class" src="lib/gssdk_1.5.0.jar"/>
+				<zipfileset includes="**/*.class" src="lib/admob-sdk-android.jar"/>
+				<zipfileset includes="**/*.class" src="lib/MMAdView.jar"/>	
+				<zipfileset includes="**/*.class" src="lib/MedialetsUniversalSDK-Android.jar"/>
+				<zipfileset includes="**/*.class" src="lib/SmartAdServer.jar"/>
+			</jar>
+		</target>
+	
+	<target name="compile.sources.3rdPaty">
 		<javac destdir="${temp.classes.dir}" debug="on" debuglevel="vars">
 			<src path="src\com\adserver\adview" />
+			<src path="src3rdParty\com\adserver\adview" />
 			<classpath>
 				<pathelement path="${android.jar}"/>
 				<fileset dir="lib">
@@ -40,12 +73,12 @@
         </javac>
 	</target>
 	
-    <target name="make.dirs">
+	<target name="make.dirs">
 	    <mkdir dir="${temp.dir}"/>
 	    <mkdir dir="${temp.classes.dir}"/>
     	<mkdir dir="${demo.mocean.dir}"/>
 	    <mkdir dir="${lib.mocean.dir}"/>
-	    <mkdir dir="${source.mocean.dir}"/>
+	    <mkdir dir="${sample.mocean.dir}"/>
 	    <mkdir dir="${doc.mocean.dir}"/>
 	</target>
 	
@@ -53,7 +86,33 @@
         <delete dir="${release.dir}"/>
     </target>
 	
-	<target name="source.mocean">
+	<target name="sample">
+			<copy todir="${sample.mocean.dir}">
+	    	    <fileset 
+	    	    	dir="test/" 
+	    	    	includes=",res/,src/,AndroidManifest.xml,.classpath,default.properties" 
+	    	    	casesensitive="false"
+	    	    />				
+			</copy>
+		    <copy todir="${sample.mocean.dir}/lib">
+			    	    <fileset 
+			    	    	dir="${lib.mocean.dir}" 
+			    	    	includes="${jar.name}" 
+			    	    	casesensitive="false"
+			    	    />				
+					</copy>
+	    	<zip destfile="${sample.mocean.dir}/sample.zip"
+	 	    	basedir="${sample.mocean.dir}"
+			/>
+	    	<delete includeemptydirs="true">
+				<fileset 
+					dir="${sample.mocean.dir}" 
+					includes="**/*" 
+					excludes="**/sample.zip"
+				/>
+			</delete>
+	</target>
+	<!--<target name="source.mocean">
 		<copy todir="${source.mocean.dir}">
     	    <fileset 
     	    	dir="" 
@@ -72,7 +131,7 @@
 				excludes="**/source.zip"
 			/>
 		</delete>
-    </target>
+    </target>-->
 	
 	<target name="javadoc.mocean">
 		<javadoc destdir="${doc.mocean.dir}">

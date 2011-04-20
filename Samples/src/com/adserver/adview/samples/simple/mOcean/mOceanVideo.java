@@ -22,6 +22,10 @@ public class mOceanVideo extends Activity {
          
         AdServerView adserverView = new AdServerView(this,"8061","16109");
         adserverView.setUpdateTime(30000);
+        adserverView.setMinSizeX(320);
+	    adserverView.setMinSizeY(50);
+	    adserverView.setMaxSizeX(320);
+	    adserverView.setMaxSizeY(50);
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 200));
 		linearLayout.addView(adserverView);

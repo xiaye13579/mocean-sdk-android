@@ -8,14 +8,77 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
 	<uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
+	<uses-permission android:name="android.permission.READ_CALENDAR"></uses-permission>
+	<uses-permission android:name="android.permission.WRITE_CALENDAR"></uses-permission>
+	<uses-permission android:name="android.permission.CALL_PHONE"></uses-permission>
+	<uses-permission android:name="android.permission.SEND_SMS"></uses-permission>
+	<uses-permission android:name="android.permission.CAMERA"></uses-permission>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
     
 
     <application android:icon="@drawable/icon" android:label="@string/app_name">
+    	<activity android:name="com.admob.android.ads.AdMobActivity" 
+              android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+              android:configChanges="orientation|keyboard|keyboardHidden"
+              />
+        <activity android:name="com.millennialmedia.android.MMAdViewOverlayActivity" 
+                    android:theme="@android:style/Theme.Translucent.NoTitleBar">
+        </activity>        
+        <activity android:name="com.millennialmedia.android.VideoPlayer" 
+                    android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+                    android:configChanges="keyboardHidden|orientation|keyboard" >
+        </activity>
+    
+    
         <activity android:name=".ApiDemos"
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>    
+        <activity android:name=".simple.SAS.SASAd" android:label="3d party/SmartAdServer">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
+        <activity android:name=".simple.SAS.SASmOceanBackfill" android:label="Simple/SmartAdServer/mOceanBackfill">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+            </intent-filter>
+        </activity>
+        <activity android:name=".simple.Millennial.MillennialAd" android:label="3d party/Millennial">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
+        <activity android:label="Simple/Millennial/mOceanBackfill" android:name=".simple.Millennial.MillennialmOceanBackfill">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+            </intent-filter>
+        </activity>    
+        <activity android:name=".simple.AdMob.AdMobAd" android:label="3d party/AdMob">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
+        <activity android:label="Simple/AdMob/mOceanBackfill" android:name=".simple.AdMob.AdMobBackfill">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+            </intent-filter>
+        </activity>
+        <activity android:name=".simple.iVdopia.iVdopiaAd" android:label="3d party/iVdopia">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>        
+        <activity android:label="Simple/iVdopia/mOceanBackfill" android:name=".simple.iVdopia.iVdopiamOceanBackfill">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
             </intent-filter>
         </activity>
         <activity android:name=".simple.mOcean.mOceanDefault" android:label="Simple/mOcean/Default">
