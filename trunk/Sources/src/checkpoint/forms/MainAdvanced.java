@@ -54,9 +54,9 @@ public class MainAdvanced extends Activity {
         });
         
         Hashtable<String, String> customParameters = new Hashtable<String, String>();
-        customParameters.put("key1", "value1");
-        customParameters.put("key2", "value2");
-        customParameters.put("key3", "value3");
+        customParameters.put("debug", "1");
+        //customParameters.put("key2", "value2");
+        //customParameters.put("key3", "value3");
         
         //Old API
 //        final AdServerView adserverView = new AdServerView(this,
@@ -72,7 +72,21 @@ public class MainAdvanced extends Activity {
 //
         
         //AdServerView adserverView = new AdServerView(this, "5441", "9312");
-        adserverView = new AdServerView(this, "8061", "20249");
+        adserverView = new AdServerView(this, "8061", "20249");//Default mOcean ad
+//        adserverView = new AdServerView(this, "8061", "18165");//iVdopia
+//        adserverView = new AdServerView(this, "8061", "16111");//Greystripe
+//        adserverView = new AdServerView(this, "8061", "16685");//Medialets
+//        adserverView = new AdServerView(this, "8061", "21676");//SAS/YOC
+//        adserverView = new AdServerView(this, "8061", "21637");//AdMod
+//        adserverView = new AdServerView(this, "8061", "16938");//Millennial
+//      adserverView = new AdServerView(this, "8061", "16685");//Medialets
+//        adserverView = new AdServerView(this, "10113", "20991");
+//        adserverView = new AdServerView(this, "8061", "31");
+//        adserverView.setAdserverURL("http://192.168.1.153/mocean/ad/");
+        
+//        adserverView.setCustomParameters(customParameters);
+
+//        adserverView.setTest(true);
 //        adserverView.setSite("5441");
 //        adserverView.getSite();
 //
@@ -82,7 +96,7 @@ public class MainAdvanced extends Activity {
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 250));
 		
-		adserverView.setTest(false);
+/*		adserverView.setTest(false);
 		adserverView.getTest();
 		
 		adserverView.setPremium(AdServerView.PREMIUM_STATUS_PREMIUM);
@@ -187,7 +201,10 @@ public class MainAdvanced extends Activity {
 		};
 		adserverView.setOnAdDownload(adDownload);
 		adserverView.getOnAdDownload();
-		
+		*/
+        
+       
+        
 		linearLayout.addView(adserverView);
 		
     }

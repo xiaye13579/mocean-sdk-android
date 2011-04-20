@@ -82,7 +82,7 @@ public class AdServerView extends AdServerViewCore {
 			String target, String url, Hashtable<String, String> customParameters) {
 		super(context, 
 				minSizeX, minSizeY, sizeX, sizeY, 
-				isInternalBrowser, adClickListener, 
+				adClickListener, 
 				defaultImage, adReloadPeriod, visibleMode, 
 				site, zone, keywords,  
 				latitude, longitude, ua, premium, isTestModeEnabled, 

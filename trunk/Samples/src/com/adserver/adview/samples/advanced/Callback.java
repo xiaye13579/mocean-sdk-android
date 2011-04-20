@@ -33,6 +33,10 @@ public class Callback extends Activity {
         AdServerView adserverView = new AdServerView(this,"8061","20249");
         adserverView.setOnAdDownload(new UserAdDownload());
         adserverView.setDefaultImage(R.drawable.robot2);
+        adserverView.setMinSizeX(320);
+	    adserverView.setMinSizeY(50);
+	    adserverView.setMaxSizeX(320);
+	    adserverView.setMaxSizeY(50);
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));
 		linearLayout.addView(adserverView);
