@@ -215,7 +215,10 @@ public class AdServerView extends AdServerViewCore {
 					}
 				}
 
-				if(adserverRequest.getCarrier() == null) {
+				if(adserverRequest.getPremium() == null) {
+					adserverRequest.setPremium(2);					
+				}
+				/*if(adserverRequest.getCarrier() == null) {
 					if(autoDetectParameters.getCarrier() == null) {
 						TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
 						String networkOperatorName = telephonyManager.getNetworkOperatorName();
@@ -241,7 +244,7 @@ public class AdServerView extends AdServerViewCore {
 					} else {
 						adserverRequest.setCountry(autoDetectParameters.getCountry());
 					}
-				}
+				}*/
 
 				if(adserverRequest.getUa() == null) {
 					if(autoDetectParameters.getUa() == null) {

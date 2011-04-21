@@ -584,6 +584,7 @@ public abstract class AdServerViewCore extends WebView {
 		if(reloadTimer != null) {
 			try {
 				reloadTimer.cancel();
+				reloadTimer = null;
 			} catch (Exception e) {
 			}
 		}
@@ -756,6 +757,7 @@ public abstract class AdServerViewCore extends WebView {
 							String campaignId = Utils.scrape(externalCampaignData, "<campaign_id>", "</campaign_id>");
 							String trackUrl = Utils.scrape(externalCampaignData, "<track_url>", "</track_url>");
 							String externalParams = Utils.scrape(externalCampaignData, "<external_params>", "</external_params>");
+							interceptOnAdDownload.SetCampaingId(campaignId);
 							
 							AdBridgeAbstract currentBrige = AdBridgeFactory.CreateBridge(context,view,campaignId,type, externalParams,trackUrl);
 							if(currentBrige != null)
@@ -763,39 +765,15 @@ public abstract class AdServerViewCore extends WebView {
 								currentBrige.OnAdDownload(interceptOnAdDownload);
 								currentBrige.OnAdClickListener(adClickListener);
 								handler.post(currentBrige);
-							}
-							
-							
-							/*if("iVdopia".equals(type)) {
-								String applicationKey = Utils.scrape(externalParams, "<param name=\"applicationKey\">", "</param>");
-								
-								if((applicationKey != null) && (applicationKey.length() > 0)) {
-									handler.post(new SetupiVdopiaAction(context, view, 
-											applicationKey, campaignId, trackUrl));
-								}
-							} else if("GreyStripe".equals(type)) {
-								String applicationId = Utils.scrape(externalParams, "<param name=\"id\">", "</param>");
-								
-								if((applicationId != null) && (applicationId.length() > 0)) {
-									handler.post(new SetupGreyStripe(context, view, 
-											applicationId, campaignId, trackUrl));
-								}
-							} else if("Millennial".equals(type))
+							} else
 							{
-								String applicationId = Utils.scrape(externalParams, "<param name=\"id\">", "</param>");
-								String adType = Utils.scrape(externalParams, "<param name=\"adType\">", "</param>");
-								String zip = Utils.scrape(externalParams, "<param name=\"zip\">", "</param>");
-								String longet = Utils.scrape(externalParams, "<param name=\"long\">", "</param>");
-								String lat = Utils.scrape(externalParams, "<param name=\"lat\">", "</param>");
-								if((applicationId != null) && (applicationId.length() > 0)) {
-									handler.post(new SetupMillennial(context, view, 
-											applicationId, adType, campaignId, trackUrl));
-								}
-								
-							} */
+								RestartExcampaings(campaignId,context,view,isFirstTime,isRepeat);
+							}
 						} else {
 							String videoData = Utils.scrape(data, "<video", "/>");
-	
+							
+							StartTimer(context, view, false, isRepeat);
+							
 							if((videoData != null) && (videoData.length() > 0)) {
 								String videoUrl = Utils.scrape(videoData, "src=\"", "\"");
 								String clickUrl = Utils.scrape(data, "href=\"", "\"");
@@ -815,7 +793,7 @@ public abstract class AdServerViewCore extends WebView {
 								view.setBackgroundColor(Color.WHITE);
 								view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 								if(isRepeat) StartTimer(context,view,isFirstTime,isRepeat);
-							}
+							}							
 						}
 					}
 				}
@@ -829,26 +807,27 @@ public abstract class AdServerViewCore extends WebView {
 			return;
 		}
 		
-		/*if(isRepeat) {
-			ReloadTask reloadTask = new ReloadTask(context, view, false, isRepeat);
-			
-			if((adReloadPeriod != null) && (adReloadPeriod >= 0)) {
-				if(adReloadPeriod > 0) {
-					reloadTimer.schedule(reloadTask, adReloadPeriod);
-				} else {
-					reloadTimer.schedule(reloadTask, AD_STOP_CHECK_PERIOD);
-				}
-			} else {
-				reloadTimer.schedule(reloadTask, AD_RELOAD_PERIOD);
-			}
-		}*/
-		StartTimer(context, view, false, isRepeat);
+		//StartTimer(context, view, false, isRepeat);
 	}
 
+	private void RestartExcampaings(String campaignId,Context context, WebView view, boolean isFirstTime,
+			boolean isRepeat)
+	{
+		boolean flag = false;
+		if (excampaigns.contains(campaignId))
+			StartTimer(context, view, false, isRepeat);
+		else
+		{
+			excampaigns.add(campaignId);
+			update();
+		}
+	}
+	
 	private void StartTimer(Context context, WebView view, boolean isFirstTime,
 			boolean isRepeat)
 	{
-		{
+		{			
+			if(reloadTimer== null) return;
 			ReloadTask reloadTask = new ReloadTask(context, view, false, isRepeat);
 			
 			if((adReloadPeriod != null) && (adReloadPeriod >= 0)) {
@@ -869,14 +848,22 @@ public abstract class AdServerViewCore extends WebView {
 		private WebView view;
 		private boolean isFirstTime = false;
 		private boolean isRepeat = true;
-	
+		String campaignId = null;
+		
 		public InterceptOnAdDownload(Context context, WebView view, boolean isFirstTime,
 				boolean isRepeat) {
 			this.context = context;
 			this.view = view;
 			this.isFirstTime = isFirstTime;
 			this.isRepeat = isRepeat;
+			
 		}
+		
+		public void SetCampaingId(String campaignId)
+		{
+			this.campaignId = campaignId;
+		}
+		
 		
 		@Override
 		public void begin() {
@@ -885,39 +872,20 @@ public abstract class AdServerViewCore extends WebView {
 
 		@Override
 		public void end() {
+			StartTimer(context, view, false, isRepeat);
 			if(adDownload!= null) adDownload.end();
-			//StartTimer(context, view, false, isRepeat);
 		}
 
 		@Override
 		public void error(String error) {
-			if(adDownload!= null) adDownload.error(error);
-			
-			
-			
+			if(campaignId != null)
+				RestartExcampaings(campaignId,context, view, false, isRepeat);
+			else StartTimer(context, view, false, isRepeat);
+			if(adDownload!= null) adDownload.error(error);			
 		}
 		
 	}
 
-	
-	/*private OnAdDownload onAdDownload = new OnAdDownload() {
-		@Override
-		public void begin() {
-			//if (reloadTimer != null) reloadTimer.
-			if(adDownload!= null) adDownload.begin();
-		}
-
-		@Override
-		public void end() {
-			if(adDownload!= null) adDownload.end();
-		}
-
-		@Override
-		public void error(String error) {
-			if(adDownload!= null) adDownload.error(error);
-		}
-	};*/
-	
 	private String getExcampaignsString() {
 		StringBuilder result = new StringBuilder();
 		
@@ -1013,199 +981,7 @@ public abstract class AdServerViewCore extends WebView {
 			}
 		}
 	}
-/*
-	private class SetupMillennial implements Runnable {
 
-		private Context context;
-		private WebView view;
-		private String applicationId;
-		private String adType;
-		private String trackUrl;
-		private String campaignId;
-		
-		public SetupMillennial(Context context, WebView view,
-				String applicationId, String adType, String campaignId, String trackUrl) {
-			this.context = context;
-			this.view = view;
-			this.applicationId = applicationId;
-			this.adType = adType;
-			this.trackUrl = trackUrl;
-			this.campaignId = campaignId;
-		}
-		
-		public void run() {
-			try {
-				
-				
-				//applicationId="28911";
-				//adType="MMBannerAdBottom";
-				
-				MMAdView adview = new MMAdView((Activity)context, applicationId, adType,30);
-				adview.setLayoutParams(view.getLayoutParams());
-				adview.setListener(new MillennialListener(campaignId,trackUrl));
-				
-				view.addView(adview);
-				view.setBackgroundColor(Color.WHITE);
-				view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
-							   
-			} catch (Exception e) {
-			}
-		}
-	}
-	
-	public class MillennialListener implements MMAdListener 	
-	{
-		private String campaignId;
-		private String trackUrl;
-  
-		public MillennialListener(String campaignId, String trackUrl) {
-			this.campaignId = campaignId;
-			this.trackUrl = trackUrl;
-		}
-		
-		public void MMAdFailed(MMAdView adview)
-		{
-			Log.i("SampleApp", "Millennial Ad View Failed" );
-		}
-
-		public void MMAdReturned(MMAdView adview)
-		{
-			Log.i("SampleApp", "Millennial Ad View Success" );
-		}
-		
-		public void MMAdClickedToNewBrowser(MMAdView adview)
-		{
-			Log.i("SampleApp", "Millennial Ad clicked, new browser launched" );
-			try {
-				if((trackUrl != null) && (trackUrl.length() > 0)) {
-					sendGetRequest(trackUrl);
-				}
-			} catch (Exception e) {
-			}
-		}
-		
-		public void MMAdClickedToOverlay(MMAdView adview)
-		{
-			Log.i("SampleApp", "Millennial Ad Clicked to overlay" );
-		}
-		
-		public void MMAdOverlayLaunched(MMAdView adview)
-		{
-			Log.i("SampleApp", "Millennial Ad Overlay Launched" );
-		}		
-	}*/
-	
-	/*private class SetupGreyStripe implements Runnable {
-		private Context context;
-		private WebView view;
-		private String applicationId;
-		private String campaignId;
-		private String trackUrl;
-		
-		public SetupGreyStripe(Context context, WebView view,
-				String applicationId, String campaignId, String trackUrl) {
-			this.context = context;
-			this.view = view;
-			this.applicationId = applicationId;
-			this.campaignId = campaignId;
-			this.trackUrl = trackUrl;
-		}
-
-		@Override
-		public void run() {
-			try {
-			    GSSDK.initialize(context, applicationId);
-			    BannerView myBanner = new BannerView(context);
-			    myBanner.setLayoutParams(view.getLayoutParams());
-			    myBanner.addListener(new GreyStripeBannerListener(campaignId, trackUrl));
-		        view.addView(myBanner);
-				view.setBackgroundColor(Color.WHITE);
-				view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
-		        myBanner.refresh();
-			} catch (Exception e) {
-			}
-		}
-	}
-	
-	private class GreyStripeBannerListener implements BannerListener {
-		private String campaignId;
-		private String trackUrl;
-  
-		public GreyStripeBannerListener(String campaignId, String trackUrl) {
-			this.campaignId = campaignId;
-			this.trackUrl = trackUrl;
-		}
-
-		@Override
-		public void onReceivedAd(BannerView bannerView) {
-			try {
-				if((trackUrl != null) && (trackUrl.length() > 0)) {
-					sendGetRequest(trackUrl);
-				}
-			} catch (Exception e) {
-			}
-		}
-
-		@Override
-		public void onFailedToReceiveAd(BannerView bannerView) {
-			excampaigns.add(campaignId);
-		}
-	}
-	
-	private class SetupiVdopiaAction implements Runnable {
-		private Context context;
-		private WebView view;
-		private String applicationKey;
-		private String campaignId;
-		private String trackUrl;
-		
-		public SetupiVdopiaAction(Context context, WebView view,
-				String applicationKey, String campaignId, String trackUrl) {
-			this.context = context;
-			this.view = view;
-			this.applicationKey = applicationKey;
-			this.campaignId = campaignId;
-			this.trackUrl = trackUrl;
-		}
-
-		@Override
-		public void run() {
-			try {
-				VDOView iVdopiaView = new VDOView(context);
-				iVdopiaView.setLayoutParams(view.getLayoutParams());
-		        VDO.initialize(applicationKey, context);
-		        VDO.setListener(new VdopiaEventListener(campaignId, trackUrl));
-		        view.addView(iVdopiaView);
-				view.setBackgroundColor(Color.WHITE);
-				view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
-			} catch (Exception e) {
-			}
-		}
-	}
-	
-	private class VdopiaEventListener implements VDO.AdEventListener {
-		private String campaignId;
-		private String trackUrl;
-  
-		public VdopiaEventListener(String campaignId, String trackUrl) {
-			this.campaignId = campaignId;
-			this.trackUrl = trackUrl;
-		}
-
-		public void adShown(int type) {
-			try {
-				if((trackUrl != null) && (trackUrl.length() > 0)) {
-					sendGetRequest(trackUrl);
-				}
-			} catch (Exception e) {
-			}
-		}
-		
-		public void noAdsAvailable(int type, int willCheckAgainAfterSeconds) {
-			excampaigns.add(campaignId);
-		}
-	}*/
-	
 	private class AdWebViewClient extends WebViewClient {
 		private Context context;
 		
@@ -1215,20 +991,25 @@ public abstract class AdServerViewCore extends WebView {
 
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			if(adClickListener != null) {
-					adClickListener.click(url);
-			}else {
-		    	int isAccessNetworkState = context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE);
-		    	
-		    	if(isAccessNetworkState == PackageManager.PERMISSION_GRANTED) {
-					if(isInternetAvailable(context)) {
+			try
+			{
+				if(adClickListener != null) {
+						adClickListener.click(url);
+				}else {
+			    	int isAccessNetworkState = context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE);
+			    	
+			    	if(isAccessNetworkState == PackageManager.PERMISSION_GRANTED) {
+						if(isInternetAvailable(context)) {
+							openUrlInExternalBrowser(context, url);
+						} else {
+		    				Toast.makeText(context, "Internet is not available", Toast.LENGTH_LONG).show();
+						}
+			    	} else if(isAccessNetworkState == PackageManager.PERMISSION_DENIED) {
 						openUrlInExternalBrowser(context, url);
-					} else {
-	    				Toast.makeText(context, "Internet is not available", Toast.LENGTH_LONG).show();
-					}
-		    	} else if(isAccessNetworkState == PackageManager.PERMISSION_DENIED) {
-					openUrlInExternalBrowser(context, url);
-		    	}
+			    	}
+				}
+			}catch(Exception e){
+				
 			}
 			
 			return true;
@@ -1311,8 +1092,12 @@ public abstract class AdServerViewCore extends WebView {
 	}	
 
 	private void openUrlInExternalBrowser(Context context, String url) {
-		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-		context.startActivity(intent);
+		try
+		{
+			Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+			context.startActivity(intent);
+		}catch (Exception e) {
+		}		
 	}
 	
 	private boolean isInternetAvailable(Context context) {

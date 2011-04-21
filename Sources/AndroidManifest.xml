@@ -23,6 +23,9 @@
 			android:multiprocess="true"
 			android:exported="false" 
 		/>
+		
+		<activity android:name="com.google.ads.AdActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
+		
         <activity android:name="com.greystripe.android.sdk.AdView" 
                   android:configChanges="keyboard|keyboardHidden|orientation" > 
             <intent-filter>

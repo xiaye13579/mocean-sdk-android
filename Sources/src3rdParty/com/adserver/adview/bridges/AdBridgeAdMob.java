@@ -1,11 +1,12 @@
 package com.adserver.adview.bridges;
 
-import com.admob.android.ads.AdListener;
-import com.admob.android.ads.AdManager;
-import com.admob.android.ads.AdView;
-import com.admob.android.ads.SimpleAdListener;
-import com.admob.android.ads.view.AdMobWebView;
 import com.adserver.adview.Utils;
+import com.google.ads.Ad;
+import com.google.ads.AdListener;
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
+import com.google.ads.AdRequest.ErrorCode;
 
 import android.app.Activity;
 import android.content.Context;
@@ -25,14 +26,36 @@ public class AdBridgeAdMob extends AdBridgeAbstract {
 	@Override
 	public void run() {
 		try {
-			String publisherID = Utils.scrape(externalParams, "<param name=\"publisherid\">", "</param>");
-			String size = Utils.scrape(externalParams, "<param name=\"size\">", "</param>");
+			String adUnitId = Utils.scrape(externalParams, "<param name=\"publisherid\">", "</param>");
+			/*String size = Utils.scrape(externalParams, "<param name=\"size\">", "</param>");
 			String backgroundColor = Utils.scrape(externalParams, "<param name=\"backgroundColor\">", "</param>");
 			String primaryTextColor = Utils.scrape(externalParams, "<param name=\"primaryTextColor\">", "</param>");
 			String secondaryTextColor = Utils.scrape(externalParams, "<param name=\"secondaryTextColor\">", "</param>");
-			String zip = Utils.scrape(externalParams, "<param name=\"zip\">", "</param>");			
+			String zip = Utils.scrape(externalParams, "<param name=\"zip\">", "</param>");	*/		
 			
-			//AdManager.setTestDevices( new String[] { "085435FDBACAAE775764A9E27F40E0FB" } );
+			//AdSize adSize = new AdSize(view.getWidth(), view.getHeight());
+			AdSize adSize = new AdSize(320,50);
+			AdView adView = new AdView((Activity)context, adSize, adUnitId);
+			
+			
+			adView.setLayoutParams(view.getLayoutParams());
+			adView.setAdListener(new AdBridgeAdListener());
+			adView.setOnClickListener(new OnClickListener() {			
+				public void onClick(View v) {
+					Click();
+				}
+			});   
+			
+			
+			AdRequest adReq = new AdRequest();			
+			//adReq.setTesting(true);
+			adView.loadAd(adReq);
+			
+			view.addView(adView);
+			view.setBackgroundColor(Color.WHITE);
+			view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
+			
+			/*//AdManager.setTestDevices( new String[] { "085435FDBACAAE775764A9E27F40E0FB" } );
 			AdManager.setPublisherId(publisherID);			
 			
 			AdView adView = new AdView((Activity)context);
@@ -55,12 +78,42 @@ public class AdBridgeAdMob extends AdBridgeAbstract {
 				}
 			});
 			view.setBackgroundColor(Color.WHITE);
-			view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);			
+			view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);	*/		
 		} catch (Exception e) {
 		}
 	}
 	
-	private class AdBridgeAdListener extends SimpleAdListener
+	private class AdBridgeAdListener implements AdListener
+	{
+
+		@Override
+		public void onDismissScreen(Ad arg0) {
+			
+		}
+
+		@Override
+		public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
+			DownloadError("[ERROR] AdBridgeAdMob: onFailedToReceiveAd");
+		}
+
+		@Override
+		public void onLeaveApplication(Ad arg0) {
+			
+		}
+
+		@Override
+		public void onPresentScreen(Ad arg0) {
+			
+		}
+
+		@Override
+		public void onReceiveAd(Ad arg0) {
+			DownloadEnd();			
+		}
+		
+	}
+	
+	/*private class AdBridgeAdListener extends SimpleAdListener
     {
 		
 		
@@ -87,6 +140,6 @@ public class AdBridgeAdMob extends AdBridgeAbstract {
 			super.onReceiveRefreshedAd(adView);
 		}
     	
-    }
+    }*/
 
 }

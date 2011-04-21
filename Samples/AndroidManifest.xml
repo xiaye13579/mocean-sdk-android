@@ -37,32 +37,33 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>    
-        <activity android:name=".simple.SAS.SASAd" android:label="3d party/SmartAdServer">
+        <activity android:name=".simple.SAS.SASAd" android:label="3d party/SmartAdServer/Ad">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:name=".simple.SAS.SASmOceanBackfill" android:label="Simple/SmartAdServer/mOceanBackfill">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>
-            </intent-filter>
-        </activity>
-        <activity android:name=".simple.Millennial.MillennialAd" android:label="3d party/Millennial">
+        <activity android:name=".simple.SAS.SASmOceanBackfill" android:label="3d party/SmartAdServer/mOceanBackfill">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Simple/Millennial/mOceanBackfill" android:name=".simple.Millennial.MillennialmOceanBackfill">
+        <activity android:name=".simple.Millennial.MillennialAd" android:label="3d party/Millennial/Ad">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
+        <activity android:label="3d party/Millennial/mOceanBackfill" android:name=".simple.Millennial.MillennialmOceanBackfill">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>    
         <activity android:name=".simple.AdMob.AdMobAd" android:label="3d party/AdMob">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>
-                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+                <action android:name="android.intent.action.MAIN"></action>                
             </intent-filter>
         </activity>
         <activity android:label="Simple/AdMob/mOceanBackfill" android:name=".simple.AdMob.AdMobBackfill">
@@ -70,15 +71,16 @@
                 <action android:name="android.intent.action.MAIN"></action>
             </intent-filter>
         </activity>
-        <activity android:name=".simple.iVdopia.iVdopiaAd" android:label="3d party/iVdopia">
+        <activity android:name=".simple.iVdopia.iVdopiaAd" android:label="3d party/iVdopia/Ad">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>        
-        <activity android:label="Simple/iVdopia/mOceanBackfill" android:name=".simple.iVdopia.iVdopiamOceanBackfill">
+        <activity android:label="3d party/iVdopia/mOceanBackfill" android:name=".simple.iVdopia.iVdopiamOceanBackfill">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
         <activity android:name=".simple.mOcean.mOceanDefault" android:label="Simple/mOcean/Default">
