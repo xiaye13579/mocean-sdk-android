@@ -51,9 +51,9 @@
 		    	basedir="${temp.classes.dir}"
 				manifest="MANIFEST.MF">
 				<fileset dir="js"/>
-				<zipfileset includes="**/*.class" src="lib/iVdopia_Android_SDK_v1.4.3.jar"/>
+				<zipfileset includes="**/*.class" src="lib/iVdopia_Android_SDK_v1.4.7.jar"/>
 				<zipfileset includes="**/*.class" src="lib/gssdk_1.5.0.jar"/>
-				<zipfileset includes="**/*.class" src="lib/admob-sdk-android.jar"/>
+				<zipfileset includes="**/*.class" src="lib/GoogleAdMobAdsSdk-4.0.4.jar"/>
 				<zipfileset includes="**/*.class" src="lib/MMAdView.jar"/>	
 				<zipfileset includes="**/*.class" src="lib/MedialetsUniversalSDK-Android.jar"/>
 				<zipfileset includes="**/*.class" src="lib/SmartAdServer.jar"/>
@@ -87,28 +87,35 @@
     </target>
 	
 	<target name="sample">
-			<copy todir="${sample.mocean.dir}">
+			<copy todir="${sample.mocean.dir}/Samples">
 	    	    <fileset 
 	    	    	dir="test/" 
 	    	    	includes=",res/,src/,AndroidManifest.xml,.classpath,default.properties" 
 	    	    	casesensitive="false"
 	    	    />				
 			</copy>
-		    <copy todir="${sample.mocean.dir}/lib">
+		    <copy todir="${sample.mocean.dir}/Samples/lib">
 			    	    <fileset 
 			    	    	dir="${lib.mocean.dir}" 
 			    	    	includes="${jar.name}" 
 			    	    	casesensitive="false"
 			    	    />				
 					</copy>
-	    	<zip destfile="${sample.mocean.dir}/sample.zip"
+		 	<copy todir="${sample.mocean.dir}">
+					    	    <fileset 
+					    	    	dir="${lib.mocean.dir}" 
+					    	    	includes="${jar.name}" 
+					    	    	casesensitive="false"
+					    	    />				
+							</copy>
+	    	<zip destfile="${sample.mocean.dir}/mOcean_with3rdparty_Android_SDK_2_x_x.zip"
 	 	    	basedir="${sample.mocean.dir}"
 			/>
 	    	<delete includeemptydirs="true">
 				<fileset 
 					dir="${sample.mocean.dir}" 
 					includes="**/*" 
-					excludes="**/sample.zip"
+					excludes="**/mOcean_with3rdparty_Android_SDK_2_x_x.zip"
 				/>
 			</delete>
 	</target>

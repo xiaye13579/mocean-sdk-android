@@ -19,6 +19,8 @@ public abstract class AdBridgeAbstract implements Runnable{
 		String trackUrl;
 		private OnAdDownload onAdDownload;
 		private OnAdClickListener onAdClickListener;
+		private boolean IsDownloadEnd = false;
+		private boolean IsDownloadError = false;
 	
 		public AdBridgeAbstract(Context context, WebView view, String campaignId, String externalParams,String trackUrl)
 		{
@@ -39,19 +41,22 @@ public abstract class AdBridgeAbstract implements Runnable{
 			this.onAdClickListener = adClickListener;
 		}
 		
-		/*void DownloadBegin()
-		{
-			if(onAdDownload !=null) onAdDownload.begin();
-		}*/
-		
 		void DownloadEnd()
 		{
-			if(onAdDownload !=null) onAdDownload.end();
+			if(!IsDownloadEnd)
+			{
+				IsDownloadEnd =true;
+				if(onAdDownload !=null) onAdDownload.end();
+			}
 		}
 		
 		void DownloadError(String error)
 		{
-			if(onAdDownload !=null) onAdDownload.error(error);
+			if(!IsDownloadError)
+			{
+				IsDownloadError =true;
+				if(onAdDownload !=null) onAdDownload.error(error);
+			}
 		}
 		
 		void Click()

@@ -42,7 +42,7 @@ public class AdBridgeSAS extends AdBridgeAbstract implements SmartAdServerAdView
 
 	@Override
 	public void onAdDownloadFailed(SmartAdServerAdView arg0) {
-		DownloadError("");
+		DownloadError("[ERROR] AdBridgeSAS: onAdDownloadFailed");
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class AdBridgeSAS extends AdBridgeAbstract implements SmartAdServerAdView
 
 	@Override
 	public void onAdImageDownloadFailed(SmartAdServerAdView arg0, boolean arg1) {
-		DownloadError("");		
+		//DownloadError("");		
 	}
 
 	@Override

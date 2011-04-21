@@ -43,6 +43,7 @@ public class AdBridgeMillennial extends AdBridgeAbstract {
 		{
 			//Log.i("SampleApp", "Millennial Ad View Failed" );
 			//DownloadError(context.getString(R.string.millennial_download_error));
+			DownloadError("[ERROR] AdBridgeMillennial: MMAdFailed");
 		}
 
 		public void MMAdReturned(MMAdView adview)
