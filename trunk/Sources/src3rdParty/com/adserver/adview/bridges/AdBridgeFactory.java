@@ -12,7 +12,7 @@ public class AdBridgeFactory {
 		if(type.equals("Millennial")) return new AdBridgeMillennial(context, view, campaignId, externalParams,trackUrl);			
 		if(type.equals("smartadserver")) return new AdBridgeSAS(context, view, campaignId, externalParams,trackUrl);
 		//if(type.equals("admob")) return new AdBridgeAdMob(context, view, campaignId, externalParams,trackUrl);
-		//if(type.equals("GreyStripe")) return new AdBridgeGreyStripe(context, view, campaignId, externalParams,trackUrl);
+		if(type.equals("GreyStripe")) return new AdBridgeGreyStripe(context, view, campaignId, externalParams,trackUrl);
 		//if(type.equals("Medialets")) return new AdBridgeMedialets(context, view, campaignId, externalParams,trackUrl);
 		
 		return null;		

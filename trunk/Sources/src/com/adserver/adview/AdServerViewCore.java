@@ -182,7 +182,6 @@ public abstract class AdServerViewCore extends WebView {
 	private String groupCode;
 	private OnAdDownload adDownload;
 	private int AdsType = ADS_TYPE_TEXT_AND_IMAGES;
-	
 
 	private static final int MESSAGE_RESIZE = 1000;
 	private static final int MESSAGE_CLOSE = 1001;
@@ -494,7 +493,7 @@ public abstract class AdServerViewCore extends WebView {
 					null);
 		}
 	}
-	
+		
 	private void loadContent(Context context,
 			Integer minSizeX, Integer minSizeY, Integer sizeX, Integer sizeY, 
 			Integer defaultImage,   
@@ -554,6 +553,7 @@ public abstract class AdServerViewCore extends WebView {
 		addJavascriptInterface(mAssetController, "ORMMAAssetsControllerBridge");
 		
 		setScriptPath();
+		//mScriptPath ="/data/data/checkpoint.forms/files/OrmmaAdController.js";
 		
 		setWebViewClient(new AdWebViewClient(context));
 		setWebChromeClient(mWebChromeClient);
@@ -581,6 +581,8 @@ public abstract class AdServerViewCore extends WebView {
 
 	@Override
 	protected void onDetachedFromWindow() {
+		loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
+		removeAllViews();
 		if(reloadTimer != null) {
 			try {
 				reloadTimer.cancel();
@@ -680,6 +682,8 @@ public abstract class AdServerViewCore extends WebView {
 			new InstallNotificationThread(context, advertiserId, groupCode);
 		installNotificationThread.start();
 
+		setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+
 		boolean isRequestAd, isRefreshAd;
 		boolean isShownView = view.isShown();
 		
@@ -733,7 +737,7 @@ public abstract class AdServerViewCore extends WebView {
 						interceptOnAdDownload.begin();
 						
 						adserverRequest.setExcampaigns(getExcampaignsString());
-						data = requestGet(adserverRequest.createURL());
+						data = requestGet(adserverRequest.createURL());						
 					}
 				}
 			} catch (Exception e) {
@@ -749,7 +753,7 @@ public abstract class AdServerViewCore extends WebView {
 					}
 				} else*/ {
 					if(isRefreshAd) {
-						handler.post(new RemoveAllChildViews(view));
+						//handler.post(new RemoveAllChildViews(view));
 						String externalCampaignData = Utils.scrape(data, "<external_campaign", "</external_campaign>");
 	
 						if((externalCampaignData != null) && (externalCampaignData.length() > 0)) {
@@ -770,9 +774,9 @@ public abstract class AdServerViewCore extends WebView {
 								RestartExcampaings(campaignId,context,view,isFirstTime,isRepeat);
 							}
 						} else {
+							handler.post(new RemoveAllChildViews(view));
 							String videoData = Utils.scrape(data, "<video", "/>");
-							
-							StartTimer(context, view, false, isRepeat);
+							//StartTimer(context, view, false, isRepeat);
 							
 							if((videoData != null) && (videoData.length() > 0)) {
 								String videoUrl = Utils.scrape(videoData, "src=\"", "\"");
@@ -780,15 +784,16 @@ public abstract class AdServerViewCore extends WebView {
 								handler.post(new SetupVideoAction(context, view, videoUrl, clickUrl));
 								if(isRepeat) StartTimer(context,view,isFirstTime,isRepeat);
 							} else {
-								data =  "<html><head>" +
+								
+								data = "<html><body style=\"background-color:#"+getBackgroundColor()+";margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
+
+								/*data =  "<html><head>" +
 								"<style>* {margin:0;padding:0}</style>"+
 								"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
 								"</head>" +
-								//"<body style=\"border:1px #000 solid; margin: 0px; padding: 0px;\">" +
-								//"<body style=\"border:1px #000 solid; margin: 0px; padding: 0px;width: 320px;height: 50px;\">" +
 								"<body>" +
 								data + 
-								"</body></html>";
+								"</body></html>";*/
 								mContent = data;
 								view.setBackgroundColor(Color.WHITE);
 								view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
@@ -799,6 +804,7 @@ public abstract class AdServerViewCore extends WebView {
 				}
 			}
 		} catch (Exception e) {
+			StartTimer(context,view,isFirstTime,isRepeat);
 		}
 
     	try {
@@ -813,6 +819,7 @@ public abstract class AdServerViewCore extends WebView {
 	private void RestartExcampaings(String campaignId,Context context, WebView view, boolean isFirstTime,
 			boolean isRepeat)
 	{
+		AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_WARNING, "RestartExcampaings", campaignId);
 		boolean flag = false;
 		if (excampaigns.contains(campaignId))
 			StartTimer(context, view, false, isRepeat);
@@ -849,14 +856,15 @@ public abstract class AdServerViewCore extends WebView {
 		private boolean isFirstTime = false;
 		private boolean isRepeat = true;
 		String campaignId = null;
+		int childCount;
 		
 		public InterceptOnAdDownload(Context context, WebView view, boolean isFirstTime,
 				boolean isRepeat) {
 			this.context = context;
 			this.view = view;
+			this.childCount = view.getChildCount();
 			this.isFirstTime = isFirstTime;
-			this.isRepeat = isRepeat;
-			
+			this.isRepeat = isRepeat;			
 		}
 		
 		public void SetCampaingId(String campaignId)
@@ -872,12 +880,17 @@ public abstract class AdServerViewCore extends WebView {
 
 		@Override
 		public void end() {
-			StartTimer(context, view, false, isRepeat);
+			view.setBackgroundColor(Color.WHITE);
+			view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
+			handler.post(new RemoveChildsView(view,childCount,true));
+			StartTimer(context, view, false, isRepeat);			
 			if(adDownload!= null) adDownload.end();
 		}
 
 		@Override
 		public void error(String error) {
+			handler.post(new RemoveChildsView(view,childCount,false));
+			
 			if(campaignId != null)
 				RestartExcampaings(campaignId,context, view, false, isRepeat);
 			else StartTimer(context, view, false, isRepeat);
@@ -901,6 +914,35 @@ public abstract class AdServerViewCore extends WebView {
 		
 		return result.toString();
 	}
+	
+	private class RemoveChildsView implements Runnable {
+		private ViewGroup view;
+		private int beforChildCount;
+		private boolean removeOld;
+		
+		public RemoveChildsView(ViewGroup view, int beforChildCount, boolean removeOld) {
+			this.view = view;
+			this.beforChildCount = beforChildCount;
+			this.removeOld =removeOld;
+		}
+
+		@Override
+		public void run() {
+			try {
+				//view.removeAllViews();
+				if(removeOld)
+				{
+					view.removeViews(0, beforChildCount);
+				}
+				else
+				{
+					view.removeViews(beforChildCount, view.getChildCount() - beforChildCount);
+				}
+				
+			} catch (Exception e) {
+			}
+		}
+	}	
 	
 	private class RemoveAllChildViews implements Runnable {
 		private ViewGroup view;
@@ -1184,16 +1226,24 @@ public abstract class AdServerViewCore extends WebView {
 		client.execute(get);
 	}
 	
+	static int RequestCounter = 0;
+	
 	private static String requestGet(String url) throws IOException {
+		RequestCounter++;
+		int rcounterLocal = RequestCounter;
+		
+		AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "requestGet["+String.valueOf(rcounterLocal)+"]" , url);
+		
 		DefaultHttpClient client = new DefaultHttpClient();
 		HttpGet get = new HttpGet(url);
 		HttpResponse response = client.execute(get);
 		HttpEntity entity = response.getEntity();
 		InputStream inputStream = entity.getContent();
-		BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+		BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream,8192);
 		String responseValue = readInputStream(bufferedInputStream);
 		bufferedInputStream.close();
 		inputStream.close();
+		AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "requestGet result["+String.valueOf(rcounterLocal)+"]", responseValue);
 		return responseValue;
 	}
 	
@@ -1645,7 +1695,7 @@ public abstract class AdServerViewCore extends WebView {
 		if(adserverRequest != null) {
 			return adserverRequest.getParamBG();
 		} else {
-			return null;
+			return "FFFFFF";
 		}
 	}
 

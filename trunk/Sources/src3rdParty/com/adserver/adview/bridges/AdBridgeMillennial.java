@@ -30,10 +30,11 @@ public class AdBridgeMillennial extends AdBridgeAbstract {
 			adview.setLayoutParams(view.getLayoutParams());
 			adview.setListener(new MillennialListener());
 			view.addView(adview);
-			view.setBackgroundColor(Color.WHITE);
-			view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
+			//view.setBackgroundColor(Color.WHITE);
+			//view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
 			adview.callForAd();
 		} catch (Exception e) {
+			DownloadError(e.getMessage());
 		}
 	}
 	

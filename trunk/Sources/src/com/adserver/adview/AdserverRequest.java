@@ -726,16 +726,17 @@ public class AdserverRequest {
 
 	public synchronized String toString() {
 		StringBuilder builderToString = new StringBuilder();
-		String adserverURL = this.adserverURL+"?";//+ "?1=1";		
+		String adserverURL = this.adserverURL+"?key=1";		
 		builderToString.append(adserverURL);
 		appendParameters(builderToString, parameters);
 		appendParameters(builderToString, customParameters);
-		return builderToString.toString().equals(adserverURL) ?  this.adserverURL : builderToString.toString();
+		return  builderToString.toString();//builderToString.toString().equals(adserverURL) ?  this.adserverURL : builderToString.toString();
 	}
 
 	private void appendParameters(StringBuilder builderToString, Map<String, String> parameters) {
 		if(parameters != null) {
 			Set<String> keySet = parameters.keySet();
+			
 			for (Iterator<String> parameterNames = keySet.iterator(); parameterNames.hasNext();) {
 				String param = parameterNames.next();
 				String value = parameters.get(param);

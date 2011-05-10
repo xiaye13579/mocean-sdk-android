@@ -5,10 +5,13 @@ import java.io.IOException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import com.adserver.adview.AdLog;
 import com.adserver.adview.AdServerViewCore.OnAdClickListener;
 import com.adserver.adview.AdServerViewCore.OnAdDownload;
 
 import android.content.Context;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.webkit.WebView;
 
 public abstract class AdBridgeAbstract implements Runnable{
@@ -44,7 +47,7 @@ public abstract class AdBridgeAbstract implements Runnable{
 		void DownloadEnd()
 		{
 			if(!IsDownloadEnd)
-			{
+			{	
 				IsDownloadEnd =true;
 				if(onAdDownload !=null) onAdDownload.end();
 			}
@@ -54,6 +57,7 @@ public abstract class AdBridgeAbstract implements Runnable{
 		{
 			if(!IsDownloadError)
 			{
+				AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_ERROR, "3rd Party Download Error", error);
 				IsDownloadError =true;
 				if(onAdDownload !=null) onAdDownload.error(error);
 			}
@@ -83,5 +87,17 @@ public abstract class AdBridgeAbstract implements Runnable{
 			DefaultHttpClient client = new DefaultHttpClient();
 			HttpGet get = new HttpGet(url);
 			client.execute(get);
+		}
+		
+		void SetOnBeginVisible(View v)
+		{
+			v.setLayoutParams(view.getLayoutParams());
+			//v.setVisibility(View.GONE);
+			
+		}
+		
+		void SetOnEndVisible(View v)
+		{
+			
 		}
 }

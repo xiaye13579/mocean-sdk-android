@@ -250,6 +250,7 @@ public class OrmmaAssetController extends OrmmaController {
 		out.flush();
 		out.close();
 		return writeFile.getAbsolutePath();
+//		return "";
 	}
 	
 	public FileOutputStream getAssetOutputString(String asset) throws IOException {

@@ -18,20 +18,21 @@
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 
     <application android:icon="@drawable/icon" android:label="@string/app_name">
+		<activity android:name="com.google.ads.AdActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
+		
 		<provider android:name="com.greystripe.android.sdk.AdContentProvider"
 			android:authorities="checkpoint.forms.AdContentProvider"
 			android:multiprocess="true"
 			android:exported="false" 
 		/>
-		
-		<activity android:name="com.google.ads.AdActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
-		
-        <activity android:name="com.greystripe.android.sdk.AdView" 
+		<activity android:name="com.greystripe.android.sdk.AdView" 
                   android:configChanges="keyboard|keyboardHidden|orientation" > 
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        
         <activity android:name="com.admob.android.ads.AdMobActivity" 
               android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
               android:configChanges="orientation|keyboard|keyboardHidden"
