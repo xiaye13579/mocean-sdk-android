@@ -33,9 +33,10 @@ public class AdBridgeMedialets extends AdBridgeAbstract implements AdManager.Ser
 		    //mBanner.setSlotName("ViewOneBottom");
 			mBanner.setSlotName("ViewOneBottom");
 			view.addView(mBanner);
-			view.setBackgroundColor(Color.WHITE);
-			view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
+			//view.setBackgroundColor(Color.WHITE);
+			//view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
 		} catch (Exception e) {
+			DownloadError(e.getMessage());
 		}
 	}
 

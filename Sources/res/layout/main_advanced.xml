@@ -26,17 +26,13 @@
 	    	android:layout_height="wrap_content"
     	/>
 
-		 <!--
-	   	<com.adserver.adview.AdServerView 
-	    	android:id="@+id/adViewer1" 
+		<!--<com.adserver.adview.AdServerView 
 	    	android:layout_width="fill_parent" 
 	    	android:layout_height="50dip"
-			site="5441" 
-			zone="6365" 
-			isTestModeEnabled="false" 
-			defaultImage="@drawable/test_banner"
-	   	/>
+			
+	   	/>-->
 
+	   	<!--
 	   	<com.adserver.adview.AdServerView 
 	    	android:id="@+id/adViewer2" 
 	    	android:layout_width="fill_parent" 

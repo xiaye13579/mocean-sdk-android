@@ -16,6 +16,7 @@
 		<!--<antcall target="source.mocean"/>-->
 		<antcall target="sample"/>
 		<antcall target="javadoc.mocean"/>
+		<antcall target="zip.3rdparty"/>
         <delete dir="${temp.dir}"/>
 	</target>
 	
@@ -23,6 +24,8 @@
 			<antcall target="release.build.mocean"/>
 		<!--<antcall target="source.mocean"/>-->
 			<antcall target="javadoc.mocean"/>
+			<antcall target="sample"/>
+		    <antcall target="zip.mOcean"/>
 	        <delete dir="${temp.dir}"/>
 		</target>
 	
@@ -86,6 +89,31 @@
         <delete dir="${release.dir}"/>
     </target>
 	
+	<target name="zip.3rdparty">
+		<zip destfile="${sample.mocean.dir}/mOcean_with3rdparty_Android_SDK_2_x_x.zip"
+			 	    	basedir="${sample.mocean.dir}"
+					/>
+			    	<delete includeemptydirs="true">
+						<fileset 
+							dir="${sample.mocean.dir}" 
+							includes="**/*" 
+							excludes="**/mOcean_with3rdparty_Android_SDK_2_x_x.zip"
+						/>
+					</delete>
+	</target>
+	<target name="zip.mOcean">
+			<zip destfile="${sample.mocean.dir}/mOcean_Android_SDK_2_x_x.zip"
+				 	    	basedir="${sample.mocean.dir}"
+						/>
+				    	<delete includeemptydirs="true">
+							<fileset 
+								dir="${sample.mocean.dir}" 
+								includes="**/*" 
+								excludes="**/mOcean_Android_SDK_2_x_x.zip"
+							/>
+						</delete>
+		</target>
+	
 	<target name="sample">
 			<copy todir="${sample.mocean.dir}/Samples">
 	    	    <fileset 
@@ -108,7 +136,7 @@
 					    	    	casesensitive="false"
 					    	    />				
 							</copy>
-	    	<zip destfile="${sample.mocean.dir}/mOcean_with3rdparty_Android_SDK_2_x_x.zip"
+	    	<!--<zip destfile="${sample.mocean.dir}/mOcean_with3rdparty_Android_SDK_2_x_x.zip"
 	 	    	basedir="${sample.mocean.dir}"
 			/>
 	    	<delete includeemptydirs="true">
@@ -117,7 +145,7 @@
 					includes="**/*" 
 					excludes="**/mOcean_with3rdparty_Android_SDK_2_x_x.zip"
 				/>
-			</delete>
+			</delete>-->
 	</target>
 	<!--<target name="source.mocean">
 		<copy todir="${source.mocean.dir}">

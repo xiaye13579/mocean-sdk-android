@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.adserver.adview.AdLog;
+
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
@@ -23,6 +25,8 @@ public class ApiDemos extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        AdLog.SetLogLevel(AdLog.LOG_LEVEL_3);
         
         Intent intent = getIntent();
         String path = intent.getStringExtra("com.adserver.adview.sample.Path");

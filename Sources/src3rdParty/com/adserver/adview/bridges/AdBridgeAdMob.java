@@ -52,8 +52,8 @@ public class AdBridgeAdMob extends AdBridgeAbstract {
 			adView.loadAd(adReq);
 			
 			view.addView(adView);
-			view.setBackgroundColor(Color.WHITE);
-			view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
+			//view.setBackgroundColor(Color.WHITE);
+			//view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
 			
 			/*//AdManager.setTestDevices( new String[] { "085435FDBACAAE775764A9E27F40E0FB" } );
 			AdManager.setPublisherId(publisherID);			
@@ -80,6 +80,7 @@ public class AdBridgeAdMob extends AdBridgeAbstract {
 			view.setBackgroundColor(Color.WHITE);
 			view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);	*/		
 		} catch (Exception e) {
+			DownloadError(e.getMessage());
 		}
 	}
 	

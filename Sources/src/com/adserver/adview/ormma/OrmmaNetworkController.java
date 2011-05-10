@@ -58,22 +58,37 @@ public class OrmmaNetworkController extends OrmmaController {
 		}
 	}
 	
-	public void startNetworkListener() {
+	public void startNetworkListener() {		
 		if(mNetworkListenerCount == 0) {
 			mBroadCastReceiver = new OrmmaNetworkBroadcastReceiver(this);
 			mFilter = new IntentFilter();
 			mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 		}
 		mNetworkListenerCount++;
-		mContext.registerReceiver(mBroadCastReceiver, mFilter);
+		//mContext.registerReceiver(mBroadCastReceiver, mFilter);
+		try
+		{
+			mContext.registerReceiver(mBroadCastReceiver, mFilter);
+		}catch(Exception e)
+		{
+			//mContext.unregisterReceiver(mBroadCastReceiver);
+			//mContext.registerReceiver(mBroadCastReceiver, mFilter);
+			//mNetworkListenerCount--;
+		}
 	}
 
 	public void stopNetworkListener() {
 		if(mNetworkListenerCount > 0) {			
 			mNetworkListenerCount--;
 			
-			if(mNetworkListenerCount == 0) {			
-				mContext.unregisterReceiver(mBroadCastReceiver);
+			if(mNetworkListenerCount == 0) {	
+				try
+				{
+					mContext.unregisterReceiver(mBroadCastReceiver);
+				}catch(Exception e)
+				{
+					
+				}
 				mBroadCastReceiver = null;
 				mFilter = null;
 			}
