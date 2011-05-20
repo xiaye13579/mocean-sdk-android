@@ -1,5 +1,6 @@
 package com.adserver.adview.bridges;
 
+import com.adserver.adview.AdLog;
 import com.adserver.adview.Utils;
 import com.google.ads.Ad;
 import com.google.ads.AdListener;
@@ -18,9 +19,9 @@ import android.webkit.WebView;
 
 public class AdBridgeAdMob extends AdBridgeAbstract {
 
-	public AdBridgeAdMob(Context context, WebView view, String campaignId,
+	public AdBridgeAdMob(Context context, WebView view,AdLog AdLog, String campaignId,
 			String externalParams, String trackUrl) {
-		super(context, view, campaignId, externalParams, trackUrl);
+		super(context, view, AdLog, campaignId, externalParams, trackUrl);
 	}
 
 	@Override
@@ -35,6 +36,7 @@ public class AdBridgeAdMob extends AdBridgeAbstract {
 			
 			//AdSize adSize = new AdSize(view.getWidth(), view.getHeight());
 			AdSize adSize = new AdSize(320,50);
+			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "AdMob", "adUnitId="+adUnitId);
 			AdView adView = new AdView((Activity)context, adSize, adUnitId);
 			
 			
@@ -48,7 +50,9 @@ public class AdBridgeAdMob extends AdBridgeAbstract {
 			
 			
 			AdRequest adReq = new AdRequest();			
-			//adReq.setTesting(true);
+			adReq.setTesting(true);
+			adReq.addTestDevice("085435FDBACAAE775764A9E27F40E0FB");
+
 			adView.loadAd(adReq);
 			
 			view.addView(adView);

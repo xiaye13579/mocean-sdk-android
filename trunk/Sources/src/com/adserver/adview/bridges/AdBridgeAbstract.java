@@ -20,18 +20,20 @@ public abstract class AdBridgeAbstract implements Runnable{
 		String campaignId;
 		String externalParams;
 		String trackUrl;
+		AdLog AdLog;
 		private OnAdDownload onAdDownload;
 		private OnAdClickListener onAdClickListener;
 		private boolean IsDownloadEnd = false;
 		private boolean IsDownloadError = false;
 	
-		public AdBridgeAbstract(Context context, WebView view, String campaignId, String externalParams,String trackUrl)
+		public AdBridgeAbstract(Context context, WebView view, AdLog AdLog, String campaignId, String externalParams,String trackUrl)
 		{
 			this.context=context;
 			this.view=view;
 			this.campaignId=campaignId;
 			this.externalParams=externalParams;		
 			this.trackUrl = trackUrl;
+			this.AdLog=AdLog;
 		}	
 		
 		public void OnAdDownload(OnAdDownload adDownload)
@@ -57,7 +59,7 @@ public abstract class AdBridgeAbstract implements Runnable{
 		{
 			if(!IsDownloadError)
 			{
-				AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_ERROR, "3rd Party Download Error", error);
+				AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_ERROR, "DownloadError", error);
 				IsDownloadError =true;
 				if(onAdDownload !=null) onAdDownload.error(error);
 			}
@@ -65,10 +67,12 @@ public abstract class AdBridgeAbstract implements Runnable{
 		
 		void Click()
 		{
+			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "Click", trackUrl);
 			if((trackUrl != null) && (trackUrl.length() > 0)) {
 				try {
 					sendGetRequest(trackUrl);
 				} catch (IOException e) {
+					AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "Click", e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -76,11 +80,6 @@ public abstract class AdBridgeAbstract implements Runnable{
 			{
 				onAdClickListener.click(trackUrl);
 			}
-		}
-		
-		void Failed()
-		{
-			
 		}
 		
 		private static void sendGetRequest(String url) throws IOException {

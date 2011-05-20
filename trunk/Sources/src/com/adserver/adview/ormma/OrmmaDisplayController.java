@@ -182,14 +182,23 @@ public class OrmmaDisplayController extends OrmmaController {
 		if(mOrientationListenerCount > 0) {			
 			mOrientationListenerCount--;
 
-			if(mOrientationListenerCount == 0) {			
-				mContext.unregisterReceiver(mConfigurationBroadCastReceiver);
-				mConfigurationBroadCastReceiver = null;
-				mConfigurationFilter = null;
+			if(mOrientationListenerCount == 0) {
+				stopAllOrientationListeners();
 			}
 		}
 	}
 
+	public void stopAllOrientationListeners() {
+		try
+		{
+			mContext.unregisterReceiver(mConfigurationBroadCastReceiver);
+		}catch(Exception e)
+		{
+		}
+		mConfigurationBroadCastReceiver = null;
+		mConfigurationFilter = null;
+	}
+	
 	public void onOrientationChanged(int orientation) {
 		mOrmmaView.injectJavaScript("Ormma.gotOrientationChange(" + orientation + ")");
 	}

@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.adserver.adview.AdServerView;
+import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
 public class mOceanDefault extends Activity {
@@ -26,7 +27,7 @@ public class mOceanDefault extends Activity {
         AdServerView adserverView = new AdServerView(this,"8061","20249");
         
         adserverView.setId(1);
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 56));
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
         linearLayout.addView(adserverView);
     }
 }

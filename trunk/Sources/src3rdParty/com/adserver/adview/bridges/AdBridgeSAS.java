@@ -1,5 +1,6 @@
 package com.adserver.adview.bridges;
 
+import com.adserver.adview.AdLog;
 import com.adserver.adview.Utils;
 import com.smartadserver.library.SmartAdServerAd;
 import com.smartadserver.library.SmartAdServerAdBannerView;
@@ -14,9 +15,9 @@ import android.webkit.WebView;
 
 public class AdBridgeSAS extends AdBridgeAbstract implements SmartAdServerAdViewDelegate, SmartAdServerAdBannerViewDelegate {
 
-	public AdBridgeSAS(Context context, WebView view, String campaignId,
+	public AdBridgeSAS(Context context, WebView view,AdLog AdLog, String campaignId,
 			String externalParams, String trackUrl) {
-		super(context, view, campaignId, externalParams, trackUrl);
+		super(context, view, AdLog, campaignId, externalParams, trackUrl);
 	}
 
 	public void run() {
@@ -27,9 +28,9 @@ public class AdBridgeSAS extends AdBridgeAbstract implements SmartAdServerAdView
 		}
 		try
 		{
-			String siteid = /*"19369";//*/Utils.scrape(externalParams, "<param name=\"siteid\">", "</param>");
-			String pageid = /*"136527";//*/Utils.scrape(externalParams, "<param name=\"pageid\">", "</param>");
-			String formatid = /*"5919";//*/Utils.scrape(externalParams, "<param name=\"formatid\">", "</param>");
+			String siteid = /*"19369";//*/Utils.scrape(externalParams, "<param name=\"siteID\">", "</param>");
+			String pageid = /*"136527";//*/Utils.scrape(externalParams, "<param name=\"pageID\">", "</param>");
+			String formatid = /*"5919";//*/Utils.scrape(externalParams, "<param name=\"formatID\">", "</param>");
 					
 			SmartAdServerAd mAdBanner = new SmartAdServerAd();
 			SmartAdServerAdBannerView mAdBannerView = new SmartAdServerAdBannerView(context);
@@ -61,8 +62,8 @@ public class AdBridgeSAS extends AdBridgeAbstract implements SmartAdServerAdView
 	}
 
 	@Override
-	public void onAdImageDownloadFailed(SmartAdServerAdView arg0, boolean arg1) {
-		//DownloadError("");		
+	public void onAdImageDownloadFailed(SmartAdServerAdView arg0, boolean arg1) {		
+		AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "AdBridgeSAS", "onAdImageDownloadFailed");		
 	}
 
 	@Override

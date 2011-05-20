@@ -54,12 +54,12 @@
 		    	basedir="${temp.classes.dir}"
 				manifest="MANIFEST.MF">
 				<fileset dir="js"/>
-				<zipfileset includes="**/*.class" src="lib/iVdopia_Android_SDK_v1.4.7.jar"/>
-				<zipfileset includes="**/*.class" src="lib/gssdk_1.5.0.jar"/>
-				<zipfileset includes="**/*.class" src="lib/GoogleAdMobAdsSdk-4.0.4.jar"/>
-				<zipfileset includes="**/*.class" src="lib/MMAdView.jar"/>	
-				<zipfileset includes="**/*.class" src="lib/MedialetsUniversalSDK-Android.jar"/>
-				<zipfileset includes="**/*.class" src="lib/SmartAdServer.jar"/>
+				<zipfileset includes="**/*" excludes="*META_INF/*" src="lib/iVdopia_Android_SDK_v1.4.7.jar"/>
+				<zipfileset includes="**/*" excludes="*META_INF/*" src="lib/gssdk_1.5.0.jar"/>
+				<zipfileset includes="**/*" excludes="*META_INF/*" src="lib/GoogleAdMobAdsSdk-4.1.0.jar"/>
+				<zipfileset includes="**/*" excludes="*META_INF/*" src="lib/MMAdView.jar"/>	
+				<zipfileset includes="**/*" excludes="*META_INF/*" src="lib/MedialetsUniversalSDK-Android.jar"/>
+				<zipfileset includes="**/*" excludes="*META_INF/*" src="lib/SmartAdServer.jar"/>
 			</jar>
 		</target>
 	

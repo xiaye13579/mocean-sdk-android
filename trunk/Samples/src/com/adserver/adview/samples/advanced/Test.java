@@ -1,6 +1,7 @@
 package com.adserver.adview.samples.advanced;
 
 import com.adserver.adview.AdServerView;
+import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
 import android.app.Activity;
@@ -27,7 +28,7 @@ public class Test extends Activity {
 	    adserverView.setMaxSizeY(50);
         adserverView.setTest(true);
         adserverView.setId(1);
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
 		linearLayout.addView(adserverView);
     }
 }

@@ -82,19 +82,22 @@ public class OrmmaNetworkController extends OrmmaController {
 			mNetworkListenerCount--;
 			
 			if(mNetworkListenerCount == 0) {	
-				try
-				{
-					mContext.unregisterReceiver(mBroadCastReceiver);
-				}catch(Exception e)
-				{
-					
-				}
-				mBroadCastReceiver = null;
-				mFilter = null;
+				stopAllNetworkListeners();
 			}
 		}
 	}
 
+	public void stopAllNetworkListeners() {
+		try
+		{
+			mContext.unregisterReceiver(mBroadCastReceiver);
+		}catch(Exception e)
+		{
+		}
+		mBroadCastReceiver = null;
+		mFilter = null;
+	}
+	
 	public void onConnectionChanged() {
 		String ret = "{\"online\": " + isOnline() + ", " + "\"connection\": \"" + getNetwork() + "\"}";
 		mOrmmaView.injectJavaScript("Ormma.gotNetworkChange(" + ret + ")");
