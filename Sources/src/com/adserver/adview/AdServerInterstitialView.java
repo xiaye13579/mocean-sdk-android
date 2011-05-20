@@ -18,7 +18,7 @@ public class AdServerInterstitialView extends AdServerView {
 	private Integer showCloseButtonTime; 
 	private Integer autoCloseInterstitialTime;
 	private Boolean isShowPhoneStatusBar;
-	private Button closeButton;
+	private Button closeButton;	
 	
 	/**
 	 * @deprecated
@@ -124,6 +124,8 @@ public class AdServerInterstitialView extends AdServerView {
 			dialog = new Dialog(context, android.R.style.Theme_NoTitleBar_Fullscreen);
 		}
 		
+		((AdServerInterstitialView)adServerView).dialog = dialog;
+		
 		dialog.setCancelable(false);
 		
 		if (adServerView.getParent() != null) {
@@ -172,7 +174,18 @@ public class AdServerInterstitialView extends AdServerView {
 		dialog.setContentView(mainLayout);
 		dialog.show();
 	}
-
+	
+	@Override
+	void InterstitialClose() {
+		handler.post(new Runnable() {
+			public void run() {
+				if(dialog != null) {
+					dialog.dismiss();
+				}
+			}
+		});		
+	}
+	
 	/**
 	 * Get show close button after delay.
 	 * @return

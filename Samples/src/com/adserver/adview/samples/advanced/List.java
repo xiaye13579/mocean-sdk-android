@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.adserver.adview.AdServerView;
+import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
 public class List extends Activity {
@@ -44,7 +45,7 @@ public class List extends Activity {
         {
         	AdServerView adserverView = new AdServerView(this,"8061",baners[x]);
         	adserverView.setUpdateTime(3000);
-            adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 56));
+            adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
             linearLayout.addView(adserverView);
         }
         

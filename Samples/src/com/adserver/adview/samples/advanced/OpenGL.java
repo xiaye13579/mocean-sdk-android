@@ -10,6 +10,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.adserver.adview.AdServerView;
+import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
 public class OpenGL extends Activity {
@@ -34,7 +35,7 @@ LinearLayout base = new LinearLayout(this);
 	    adserverView.setMaxSizeX(320);
 	    adserverView.setMaxSizeY(50);
         adserverView.setId(1);
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
         frame.addView(adserverView);
         
         base.addView(frame);

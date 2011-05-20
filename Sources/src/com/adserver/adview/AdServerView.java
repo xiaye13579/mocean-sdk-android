@@ -139,16 +139,17 @@ public class AdServerView extends AdServerViewCore {
 	@Override
 	
 	protected void onAttachedToWindow() {
+		AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_INFO, "AttachedToWindow", "");
 		if((autoDetectParametersThread != null) 
 				&& (autoDetectParametersThread.getState().equals(Thread.State.NEW))) { 
 			autoDetectParametersThread.start();
 		}
-		
 		super.onAttachedToWindow();
 	}
 
 	@Override
 	protected void onDetachedFromWindow() {
+		AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_INFO, "DetachedFromWindow", "");
 		if((locationManager != null) && (listener != null)) {
 			locationManager.removeUpdates(listener);
 		}
@@ -189,10 +190,13 @@ public class AdServerView extends AdServerViewCore {
 								adserverRequest.setVersion(version);
 								autoDetectParameters.setVersion(version);
 							}
+							AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_INFO, "AutoDetectParameters.SDK_VERSION", version);
 						} catch (Exception e) {
+							AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "SDK_VERSION", e.getMessage());
 						}
 					} else {
 						adserverRequest.setVersion(autoDetectParameters.getVersion());
+						AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_INFO, "AutoDetectParameters.SDK_VERSION", autoDetectParameters.getVersion());
 					}
 				}
 				
@@ -207,11 +211,15 @@ public class AdServerView extends AdServerViewCore {
 							if(isGpsEnabled) {
 								listener = new WhereamiLocationListener(locationManager, autoDetectParameters); 
 								locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener, Looper.getMainLooper());
+							}else
+							{
+								AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps", "not avalable");
 							}
-				    	}
+				    	}else AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps", "no permission ACCESS_FINE_LOCATION");
 					} else {
 						adserverRequest.setLatitude(autoDetectParameters.getLatitude());
 						adserverRequest.setLongitude(autoDetectParameters.getLongitude());
+						AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps=", "("+autoDetectParameters.getLatitude()+";"+autoDetectParameters.getLongitude()+")");
 					}
 				}
 
@@ -314,11 +322,16 @@ public class AdServerView extends AdServerViewCore {
 			try {
 				double latitude = location.getLatitude();
 				double longitude = location.getLongitude();
+				
+				
 				adserverRequest.setLatitude(Double.toString(latitude));
 				adserverRequest.setLongitude(Double.toString(longitude));
 				autoDetectParameters.setLatitude(Double.toString(latitude));
 				autoDetectParameters.setLongitude(Double.toString(longitude));
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "GPSLocationChanged=", "("+autoDetectParameters.getLatitude()+";"+autoDetectParameters.getLongitude()+")");
+				
     		} catch (Exception e) {
+    			AdLog.log(AdLog.LOG_LEVEL_2,AdLog.LOG_TYPE_ERROR,"GPSLocationChanged",e.getMessage());
     		}
 	    }
 

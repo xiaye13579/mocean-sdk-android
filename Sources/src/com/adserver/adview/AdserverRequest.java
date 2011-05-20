@@ -1,12 +1,17 @@
 /*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
 package com.adserver.adview;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -47,35 +52,62 @@ public class AdserverRequest {
 	private String adserverURL = "http://ads.mocean.mobi/ad";
 	private Hashtable<String, String> customParameters;
 	
-	public AdserverRequest() {		
+	AdLog AdLog;
+	
+	public AdserverRequest(AdLog AdLog) {
+		this.AdLog = AdLog;
 	}
 
 	public AdserverRequest(String site, String zone) {
 		setSite(site);
 		setZone(zone);		
 	}
-
+	
+    private static String sID = null;
+    private static final String INSTALLATION = "INSTALLATION";
+    public synchronized static String id(Context context) {
+    	if (sID == null) {
+    		File installation = new File(context.getFilesDir(), INSTALLATION);
+    		try {                
+    			if (!installation.exists())
+    				writeInstallationFile(installation);
+    			sID = readInstallationFile(installation);
+    			} catch (Exception e) {
+    				//throw new RuntimeException(e);
+    				sID="1234567890";
+    				}
+    			}
+    	return sID;
+    }
+    private static String readInstallationFile(File installation) throws IOException {
+    	RandomAccessFile f = new RandomAccessFile(installation, "r");
+    	byte[] bytes = new byte[(int) f.length()];
+    	f.readFully(bytes);
+    	f.close();
+    	return new String(bytes);
+    }
+    private static void writeInstallationFile(File installation) throws IOException {
+    	FileOutputStream out = new FileOutputStream(installation);
+    	String id = UUID.randomUUID().toString();
+    	out.write(id.getBytes());
+    	out.close();
+    }
+	
 	void InitDefaultParameters(Context context)
 	{
 		TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
 		String deviceId = tm.getDeviceId();
+		if(deviceId==null)
+		{
+			AdLog.log(AdLog.LOG_LEVEL_2,AdLog.LOG_TYPE_WARNING,"getDeviceId","not avalable");
+			deviceId = id(context);
+		}
 		String deviceIdMD5 = Utils.md5(deviceId);
+		AdLog.log(AdLog.LOG_LEVEL_2,AdLog.LOG_TYPE_INFO,"deviceIdMD5",deviceIdMD5);
 		
 		if((deviceIdMD5 != null) && (deviceIdMD5.length() > 0)) {
-			parameters.put(parameter_device_id, deviceIdMD5);
-			/*StringBuilder url = new StringBuilder(FIRST_APP_LAUNCH_URL);
-			url.append("?advertiser_id=" + URLEncoder.encode(advertiserId));
-			url.append("&group_code=" + URLEncoder.encode(groupCode));
-			url.append("&deviceid=" + URLEncoder.encode(deviceIdMD5));
-			
-			sendGetRequest(url.toString());
-			
-			SharedPreferences.Editor editor = settings.edit();
-			editor.putBoolean(PREF_IS_FIRST_APP_LAUNCH, false);
-			editor.commit();*/
+			parameters.put(parameter_device_id, deviceIdMD5);			
 		}
-		
-		
 	}
 	/**
 	 * Get URL of ad server.
@@ -399,7 +431,7 @@ public class AdserverRequest {
 	 * @return
 	 */
 	public AdserverRequest setMinSizeX(Integer minSizeX) {
-		if(minSizeX != null) {
+		if((minSizeX != null)&&(minSizeX>0)) {
 			synchronized(parameters) {
 				parameters.put(parameter_min_size_x, String.valueOf(minSizeX));
 			}
@@ -414,7 +446,7 @@ public class AdserverRequest {
 	 * @return
 	 */
 	public AdserverRequest setMinSizeY(Integer minSizeY) {
-		if(minSizeY != null) {
+		if((minSizeY != null)&&(minSizeY>0)) {
 			synchronized(parameters) {
 				parameters.put(parameter_min_size_y, String.valueOf(minSizeY));
 			}
@@ -429,7 +461,7 @@ public class AdserverRequest {
 	 * @return
 	 */
 	public AdserverRequest setSizeX(Integer sizeX) {
-		if(sizeX != null) {
+		if((sizeX != null)&&(sizeX>0)) {
 			synchronized(parameters) {
 				parameters.put(parameter_size_x, String.valueOf(sizeX));
 			}
@@ -444,7 +476,7 @@ public class AdserverRequest {
 	 * @return
 	 */
 	public AdserverRequest setSizeY(Integer sizeY) {
-		if(sizeY != null) {
+		if((sizeY != null)&&(sizeY>0)) {
 			synchronized(parameters) {
 				parameters.put(parameter_size_y, String.valueOf(sizeY));
 			}

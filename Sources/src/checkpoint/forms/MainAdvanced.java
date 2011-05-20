@@ -2,6 +2,8 @@
 package checkpoint.forms;
 
 import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import android.app.Activity;
 import android.content.Context;
@@ -18,8 +20,9 @@ import com.adserver.adview.AdServerInterstitialView;
 import com.adserver.adview.AdServerView;
 import com.adserver.adview.AdServerViewCore.OnAdClickListener;
 import com.adserver.adview.AdServerViewCore.OnAdDownload;
+import com.medialets.advertising.AdActivity;
 
-public class MainAdvanced extends Activity {
+public class MainAdvanced extends AdActivity {
     /** Called when the activity is first created. */
 	private Context context;
 	private LinearLayout linearLayout;
@@ -45,12 +48,17 @@ public class MainAdvanced extends Activity {
 //        		null, null, null, null, false, null, null, null, 
 //        		null, null, null, null, null, null, null, null);
 				
-				AdServerInterstitialView interstitialView = 
+				adserverView.setVisibility(adserverView.getVisibility() == View.VISIBLE ? View.INVISIBLE :View.VISIBLE);
+				
+				/*AdServerInterstitialView interstitialView = 
 					new AdServerInterstitialView(context, "6235", "9312");
+					//new AdServerInterstitialView(context, "10359", "21505");
+				interstitialView.SetLogLevel(AdLog.LOG_LEVEL_3);
 				interstitialView.setShowCloseButtonTime(3);
 				interstitialView.setAutoCloseInterstitialTime(20);
 				interstitialView.setIsShowPhoneStatusBar(true);
-				interstitialView.show();				
+				interstitialView.show();*/
+				//adserverView.setUpdateTime(adserverView.getUpdateTime() == 0 ? 1 : 0);
 			}
         });
         
@@ -75,24 +83,39 @@ public class MainAdvanced extends Activity {
 //        Site: 10359
 //        Zone: 21505, 21506, 21507
 
-//        adserverView = new AdServerView(this, "10359", "21507");
+//        adserverView = new AdServerView(this, "10113", "20992");
+//        adserverView.setAdvertiserId("10085");
         
- AdLog.SetLogLevel(AdLog.LOG_LEVEL_3);       
+// AdLog.SetLogLevel(AdLog.LOG_LEVEL_3);       
+  
+//        AdLogManager.SetFileLog("sss", context);
         
-//        adserverView = new AdServerView(this, "8061", "20249");//Default mOcean ad
+        AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);
+        //AdLog.SetFileLog(context.getFilesDir().getAbsolutePath()+"/logfile.log");
+        AdLog.setFileLog("sdcard/log.txt");
+  
+//        adserverView = new AdServerView(this,"8061", "20249");
+//        adserverView.setAdserverURL("http://192.168.1.153/mocean/ad.php");
+//        adserverView.setZone("19");
+
+//        adserverView = new AdServerView(this, "8061", "202490");
+
+//adserverView = new AdServerView(this, "8061", "20249");//Default mOcean ad
 //        adserverView = new AdServerView(this, "8061", "18165");//iVdopia
 //        adserverView = new AdServerView(this,"8061","17489");//ORMMA3
 //        adserverView = new AdServerView(this,"8061","17487");//ORMMA1
 //        adserverView = new AdServerView(this, "8061", "16111");//Greystripe
 //        adserverView = new AdServerView(this, "8061", "16139");//Greystripe excomp
 //        adserverView = new AdServerView(this, "8061", "16685");//Medialets
-        adserverView = new AdServerView(this, "8061", "21676");//SAS/YOC
+//        adserverView = new AdServerView(this, "8061", "21676");//SAS/YOC
 //        adserverView = new AdServerView(this, "8061", "21637");//AdMob
 //        adserverView = new AdServerView(this, "8061", "16938");//Millennial
-//      adserverView = new AdServerView(this, "8061", "16685");//Medialets
+        adserverView = new AdServerView(this, "8061", "16685");//Medialets
+//        adserverView = new AdServerView(this, "8061", "16686");//Medialets
 //        adserverView = new AdServerView(this, "10113", "20991");
 //        adserverView = new AdServerView(this, "8061", "14");
 //        adserverView.setAdserverURL("http://192.168.1.153/mocean/ad/");
+        //adserverView.SetLogLevel(AdLog.LOG_LEVEL_3);
         
 //        adserverView.setCustomParameters(customParameters);
 
@@ -102,11 +125,14 @@ public class MainAdvanced extends Activity {
 //
 //        adserverView.setZone("9312");
 //        adserverView.getZone();
-        adserverView.setBackgroundColor("33CCFF");
-        adserverView.setId(1);
+		adserverView.setBackgroundColor("33CCFF");
+        adserverView.setId(1);        
         //adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 150));
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 150));
-		adserverView.setUpdateTime(10);
+		adserverView.setUpdateTime(5);
+		
+		//adserverView.setDefaultImage(R.drawable.test_banner);
+		
 /*		adserverView.setTest(false);
 		adserverView.getTest();
 		
@@ -115,7 +141,7 @@ public class MainAdvanced extends Activity {
 		
 		adserverView.setKeywords("test");
 		adserverView.getKeywords();
-		
+*/		
 		adserverView.setMinSizeX(200);
 		adserverView.getMinSizeX();
 		
@@ -128,7 +154,7 @@ public class MainAdvanced extends Activity {
 		adserverView.setMaxSizeY(50);
 		adserverView.getMaxSizeY();
 		
-		//adserverView.setDefaultImage(R.drawable.test_banner);
+/*		//adserverView.setDefaultImage(R.drawable.test_banner);
 		
 		
 		//adserverView.setBackgroundColor("33CCFF");
@@ -216,6 +242,7 @@ public class MainAdvanced extends Activity {
         
        
         
+		//adserverView.setVisibility(View.INVISIBLE);
 		linearLayout.addView(adserverView);
 		
 		//linearLayout.removeAllViews();

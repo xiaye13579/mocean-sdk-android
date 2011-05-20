@@ -22,13 +22,15 @@ import android.widget.SimpleAdapter;
 
 public class ApiDemos extends ListActivity {
 
+	public static final int BANNER_HEIGHT = 100;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        AdLog.SetLogLevel(AdLog.LOG_LEVEL_3);
-        
         Intent intent = getIntent();
+        
+        AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);
         String path = intent.getStringExtra("com.adserver.adview.sample.Path");
         
         if (path == null) {

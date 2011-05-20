@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.adserver.adview.AdServerView;
+import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
 public class Debug extends Activity {
@@ -31,7 +32,7 @@ public class Debug extends Activity {
         //AdServerView sa= new AdServerView()
         adserverView.setCustomParameters(customParameters);
         adserverView.setId(1);
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));        
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,ApiDemos.BANNER_HEIGHT));        
 		linearLayout.addView(adserverView);
     }
 }

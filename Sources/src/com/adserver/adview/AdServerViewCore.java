@@ -21,6 +21,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,10 +32,12 @@ import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.Contacts.Extensions;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -74,7 +77,7 @@ import com.vdopia.client.android.VDOView;
  * Viewer of advertising.
  */
 public abstract class AdServerViewCore extends WebView {
-    /**
+	/**
      * @deprecated
 	 * The first-load ads counter is sent only. Ads is not shown.
 	 */
@@ -170,7 +173,7 @@ public abstract class AdServerViewCore extends WebView {
 	private static final String FIRST_APP_LAUNCH_URL = "http://www.moceanmobile.com/appconversion.php";
 	private static final long AD_RELOAD_PERIOD = 120000; //in milliseconds
 	private static final long AD_STOP_CHECK_PERIOD = 10000; //in milliseconds
-	private Handler handler = new Handler(Looper.getMainLooper());
+	Handler handler = new Handler(Looper.getMainLooper());
 	private Integer defaultImageResource;
 	private ContentThread contentThread;
 	private Timer reloadTimer;
@@ -209,6 +212,9 @@ public abstract class AdServerViewCore extends WebView {
 	private static String mScriptPath = null;
 	private String mContent;
 	private HashSet<String> excampaigns = new HashSet<String>();
+	
+	AdLog AdLog = new AdLog(this);
+	Dialog dialog;
 	
 	/**
 	 * Creation of viewer of advertising.
@@ -504,7 +510,7 @@ public abstract class AdServerViewCore extends WebView {
 			String region, 
 			String paramBG, String paramLINK, String carrier, 
 			Hashtable<String, String> customParameters) {
-		adserverRequest = new AdserverRequest();
+		adserverRequest = new AdserverRequest(AdLog);
 		adserverRequest.InitDefaultParameters(context);
 		adserverRequest.setSite(site)
 		.setUa(ua)
@@ -588,6 +594,7 @@ public abstract class AdServerViewCore extends WebView {
 				reloadTimer.cancel();
 				reloadTimer = null;
 			} catch (Exception e) {
+				AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "onDetachedFromWindow", e.getMessage());				
 			}
 		}
 		
@@ -595,9 +602,18 @@ public abstract class AdServerViewCore extends WebView {
 			try {
 				contentThread.interrupt();
 			} catch (Exception e) {
+				AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "onDetachedFromWindow", e.getMessage());
 			}
 		}
 
+		if(mNetworkController != null) {
+			mNetworkController.stopAllNetworkListeners();
+		}
+		
+		if(mDisplayController != null) {
+			mDisplayController.stopAllOrientationListeners();
+		}
+		
 		super.onDetachedFromWindow();
 	}
 
@@ -607,7 +623,7 @@ public abstract class AdServerViewCore extends WebView {
 	public void update() {
 		if(isShown()) {
 			ContentThread updateContentThread = new ContentThread(getContext(), this, false, false);
-			updateContentThread.start();
+			updateContentThread.start();			
 		}
 	}
 	
@@ -652,6 +668,7 @@ public abstract class AdServerViewCore extends WebView {
 					}
 				}
 			} catch (Exception e) {
+				AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "InstallNotificationThread", e.getMessage());
 			}
 		}
 	}
@@ -688,7 +705,7 @@ public abstract class AdServerViewCore extends WebView {
 		boolean isShownView = view.isShown();
 		
 		if(visibleMode == null) {
-			visibleMode = VISIBLE_MODE_CASE1;
+			visibleMode = VISIBLE_MODE_CASE2;
 		}
 		
     	switch (visibleMode) {
@@ -714,6 +731,7 @@ public abstract class AdServerViewCore extends WebView {
 			if(isRepeat) {
 				isRequestAd = false;
 				isRefreshAd = false;
+				StartTimer(context,view,isFirstTime,isRepeat);
 			}
 		}
     	
@@ -724,13 +742,14 @@ public abstract class AdServerViewCore extends WebView {
 				try {
 					handler.post(new SetBackgroundResourceAction(view, defaultImageResource));
 				} catch (Exception e) {
+					AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "contentThreadAction", e.getMessage());
 				}
 			}
 		}
 		
 		InterceptOnAdDownload interceptOnAdDownload = new InterceptOnAdDownload(context,view,isFirstTime,isRepeat);
 		
-		if(isRequestAd) {
+		if(isRequestAd || isFirstTime) {
 			try {
 				if(mViewState != ViewState.EXPANDED) {
 					if(adserverRequest != null) {
@@ -741,18 +760,24 @@ public abstract class AdServerViewCore extends WebView {
 					}
 				}
 			} catch (Exception e) {
+				AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "contentThreadAction.requestGet", e.getMessage());
 				interceptOnAdDownload.error(e.getMessage());				
 			}
 		}
 		
 		try {
 			if((data != null) && (data.length() > 0)) {
+				if (data.contains("invalid params"))
+				{	
+					InterstitialClose();
+					StartTimer(context,view,isFirstTime,isRepeat);
+				}else
 				/*if(data.startsWith("<!--") && data.endsWith("-->")) {
 					if(adDownload != null) {
 						adDownload.error(Utils.scrape(data, "<!--", "-->"));
 					}
 				} else*/ {
-					if(isRefreshAd) {
+					if(isRefreshAd || isFirstTime) {
 						//handler.post(new RemoveAllChildViews(view));
 						String externalCampaignData = Utils.scrape(data, "<external_campaign", "</external_campaign>");
 	
@@ -763,7 +788,7 @@ public abstract class AdServerViewCore extends WebView {
 							String externalParams = Utils.scrape(externalCampaignData, "<external_params>", "</external_params>");
 							interceptOnAdDownload.SetCampaingId(campaignId);
 							
-							AdBridgeAbstract currentBrige = AdBridgeFactory.CreateBridge(context,view,campaignId,type, externalParams,trackUrl);
+							AdBridgeAbstract currentBrige = AdBridgeFactory.CreateBridge(context,view,AdLog,campaignId,type, externalParams,trackUrl);
 							if(currentBrige != null)
 							{		
 								currentBrige.OnAdDownload(interceptOnAdDownload);
@@ -785,8 +810,12 @@ public abstract class AdServerViewCore extends WebView {
 								if(isRepeat) StartTimer(context,view,isFirstTime,isRepeat);
 							} else {
 								
-								data = "<html><body style=\"background-color:#"+getBackgroundColor()+";margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
-
+								data = "<html><head>" +
+								"<style>*{margin:0;padding:0}</style>"+
+								"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
+								"</head>" +
+								"<body style=\"background-color:#"+getBackgroundColor()+";margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
+								
 								/*data =  "<html><head>" +
 								"<style>* {margin:0;padding:0}</style>"+
 								"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
@@ -794,6 +823,7 @@ public abstract class AdServerViewCore extends WebView {
 								"<body>" +
 								data + 
 								"</body></html>";*/
+								
 								mContent = data;
 								view.setBackgroundColor(Color.WHITE);
 								view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
@@ -802,8 +832,13 @@ public abstract class AdServerViewCore extends WebView {
 						}
 					}
 				}
+			}else
+			{
+				InterstitialClose();
+				StartTimer(context,view,isFirstTime,isRepeat);
 			}
 		} catch (Exception e) {
+			AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "contentThreadAction", e.getMessage());
 			StartTimer(context,view,isFirstTime,isRepeat);
 		}
 
@@ -815,7 +850,12 @@ public abstract class AdServerViewCore extends WebView {
 		
 		//StartTimer(context, view, false, isRepeat);
 	}
-
+	
+	void InterstitialClose()
+	{
+		
+	}
+	
 	private void RestartExcampaings(String campaignId,Context context, WebView view, boolean isFirstTime,
 			boolean isRepeat)
 	{
@@ -833,7 +873,7 @@ public abstract class AdServerViewCore extends WebView {
 	private void StartTimer(Context context, WebView view, boolean isFirstTime,
 			boolean isRepeat)
 	{
-		{			
+		{	
 			if(reloadTimer== null) return;
 			ReloadTask reloadTask = new ReloadTask(context, view, false, isRepeat);
 			
@@ -940,6 +980,7 @@ public abstract class AdServerViewCore extends WebView {
 				}
 				
 			} catch (Exception e) {
+				AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "RemoveChildsView", e.getMessage());
 			}
 		}
 	}	
@@ -956,6 +997,7 @@ public abstract class AdServerViewCore extends WebView {
 			try {
 				view.removeAllViews();
 			} catch (Exception e) {
+				AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "RemoveAllChildViews", e.getMessage());
 			}
 		}
 	}	
@@ -971,7 +1013,7 @@ public abstract class AdServerViewCore extends WebView {
 			this.context = context;
 			this.view = view;
 			this.url = url;
-			this.clickUrl = clickUrl;
+			this.clickUrl = clickUrl;			
 		}
 
 		@Override
@@ -991,8 +1033,19 @@ public abstract class AdServerViewCore extends WebView {
 	                        	mp.seekTo(0);
 	                        	mp.start();
 	                        } catch(Exception e){
+	                        	AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "SetupVideoAction", e.getMessage());
 	                        }
 		                }
+					});
+					
+					videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+						
+						@Override
+						public boolean onError(MediaPlayer mp, int what, int extra) {							
+							AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "Play video",
+									"what="+String.valueOf(what)+";extra="+String.valueOf(extra) );
+							return true;
+						}
 					});
 					
 					if((clickUrl != null) && (clickUrl.length() > 0)) {
@@ -1035,6 +1088,7 @@ public abstract class AdServerViewCore extends WebView {
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			try
 			{
+				AdLog.log(AdLog.LOG_LEVEL_2,AdLog.LOG_TYPE_INFO,"OverrideUrlLoading",url);
 				if(adClickListener != null) {
 						adClickListener.click(url);
 				}else {
@@ -1051,7 +1105,7 @@ public abstract class AdServerViewCore extends WebView {
 			    	}
 				}
 			}catch(Exception e){
-				
+				AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "shouldOverrideUrlLoading", e.getMessage());
 			}
 			
 			return true;
@@ -1129,6 +1183,7 @@ public abstract class AdServerViewCore extends WebView {
 					view.setBackgroundColor(0); 
 				}
 			} catch (Exception e) {
+				AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "SetBackgroundResourceAction", e.getMessage());
 			}
 		}
 	}	
@@ -1139,6 +1194,7 @@ public abstract class AdServerViewCore extends WebView {
 			Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 			context.startActivity(intent);
 		}catch (Exception e) {
+			AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "openUrlInExternalBrowser", e.getMessage());
 		}		
 	}
 	
@@ -1184,6 +1240,7 @@ public abstract class AdServerViewCore extends WebView {
 	        		imageEncodeData = new String(chars);
 				} catch (Exception e) {
 					imageEncodeData = "";
+					AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "replaceImages", e.getMessage());
 				}
 				
         		srcMatcher.appendReplacement(newSrc, " src=\"data:image/*;base64," + imageEncodeData + "\" ");
@@ -1228,7 +1285,7 @@ public abstract class AdServerViewCore extends WebView {
 	
 	static int RequestCounter = 0;
 	
-	private static String requestGet(String url) throws IOException {
+	private String requestGet(String url) throws IOException {
 		RequestCounter++;
 		int rcounterLocal = RequestCounter;
 		
@@ -1359,7 +1416,7 @@ public abstract class AdServerViewCore extends WebView {
 		mHandler.sendEmptyMessage(MESSAGE_CLOSE);
 	}
 
-	public void hide() {
+	public void hide() { 
 		mHandler.sendEmptyMessage(MESSAGE_HIDE);
 	}
 
@@ -1436,6 +1493,7 @@ public abstract class AdServerViewCore extends WebView {
 				return;
 			} catch (Exception e) {
 				e.printStackTrace();
+				AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "loadUrl", e.getMessage());
 				return;
 			}
 		} else {
@@ -1590,7 +1648,7 @@ public abstract class AdServerViewCore extends WebView {
 	 * @param minSizeX
 	 */
 	public void setMinSizeX(Integer minSizeX) {
-		if(adserverRequest != null) {
+		if((adserverRequest != null)) {
 			adserverRequest.setMinSizeX(minSizeX);
 		}
 	}
@@ -1613,7 +1671,7 @@ public abstract class AdServerViewCore extends WebView {
 	 * @param minSizeY
 	 */
 	public void setMinSizeY(Integer minSizeY) {
-		if(adserverRequest != null) {
+		if((adserverRequest != null)) {
 			adserverRequest.setMinSizeY(minSizeY);
 		}
 	}
@@ -1636,7 +1694,7 @@ public abstract class AdServerViewCore extends WebView {
 	 * @param maxSizeX
 	 */
 	public void setMaxSizeX(Integer maxSizeX) {
-		if(adserverRequest != null) {
+		if((adserverRequest != null)) {
 			adserverRequest.setSizeX(maxSizeX);
 		}
 	}
@@ -1659,7 +1717,7 @@ public abstract class AdServerViewCore extends WebView {
 	 * @param maxSizeY
 	 */
 	public void setMaxSizeY(Integer maxSizeY) {
-		if(adserverRequest != null) {
+		if((adserverRequest != null) ) {
 			adserverRequest.setSizeY(maxSizeY);
 		}
 	}
@@ -1683,8 +1741,16 @@ public abstract class AdServerViewCore extends WebView {
 	 */
 	public void setBackgroundColor(String backgroundColor) {
 		if(adserverRequest != null) {
-			adserverRequest.setParamBG(backgroundColor);
-		}
+			try
+			{
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "setBackgroundColor", "#"+backgroundColor);
+				adserverRequest.setParamBG(backgroundColor);
+				super.setBackgroundColor(Integer.decode("#"+backgroundColor));
+			}catch(Exception e)
+			{
+				AdLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "AdServerViewCore.setBackgroundColor", e.getMessage());
+			}
+		}	
 	}
 
 	/**
@@ -1974,6 +2040,11 @@ public abstract class AdServerViewCore extends WebView {
 
 	public int getAdsType() {
 		return AdsType;
+	}
+	
+	public void SetLogLevel(int logLevel)
+	{
+		AdLog.setLogLevel(logLevel);
 	}
 	
 }

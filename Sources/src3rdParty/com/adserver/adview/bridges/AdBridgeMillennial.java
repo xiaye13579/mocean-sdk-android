@@ -1,5 +1,6 @@
 package com.adserver.adview.bridges;
 
+import com.adserver.adview.AdLog;
 import com.adserver.adview.Utils;
 import com.millennialmedia.android.MMAdView;
 import com.millennialmedia.android.MMAdView.MMAdListener;
@@ -12,10 +13,10 @@ import android.webkit.WebView;
 
 public class AdBridgeMillennial extends AdBridgeAbstract {
 
-	public AdBridgeMillennial(Context context, WebView view, String campaignId,
+	public AdBridgeMillennial(Context context, WebView view,AdLog AdLog, String campaignId,
 			String externalParams,String trackUrl) 
 	{
-		super(context, view, campaignId, externalParams, trackUrl);
+		super(context, view, AdLog, campaignId, externalParams, trackUrl);
 	}
 
 	public void run() {
