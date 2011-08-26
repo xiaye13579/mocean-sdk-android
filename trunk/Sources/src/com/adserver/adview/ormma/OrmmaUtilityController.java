@@ -1,4 +1,4 @@
-/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
+
 package com.adserver.adview.ormma;
 
 import java.lang.reflect.Method;
@@ -63,6 +63,11 @@ public class OrmmaUtilityController extends OrmmaController {
 
 			p = mContext.checkCallingOrSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
 			mFeatureMap.put("camera", p);
+			
+			//additional features : playVideo, playAudio, openMap
+			mFeatureMap.put("video", true);
+			mFeatureMap.put("audio", true);
+			mFeatureMap.put("map", 	 true);
 		}
 	}
 

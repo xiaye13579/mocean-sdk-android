@@ -3,6 +3,8 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="@drawable/test_banner"
+    android:id="@+id/main"
 >
 
 	<TextView  
@@ -11,34 +13,46 @@
 	    android:layout_height="wrap_content" 
 	    android:text="@string/hello"
     />
+	<Button android:layout_width="wrap_content" android:id="@+id/interstitialAd" android:layout_height="wrap_content" android:text="Interstitial Ad" android:width="200dip" android:height="100dip"></Button>
 
 	<LinearLayout
 		android:id="@+id/frameAdContent" 
 	    android:orientation="vertical"
 	    android:layout_height="fill_parent"
+	    android:layout_width="fill_parent">
+	    <!-- <WebView         android:id="@+id/webview"        android:layout_width="fill_parent"        android:layout_height="fill_parent"    />
+	    -->
+	    
+	   <!--<com.adserver.adview.AdServerView 
 	    android:layout_width="fill_parent" 
-	    android:background="#00ff00"
-    >
-    	<Button 
-	    	android:id="@+id/interstitialAd" 
-	    	android:text="Interstitial Ad" 
-	    	android:layout_width="wrap_content" 
-	    	android:layout_height="wrap_content"
-    	/>
-
-		<!--<com.adserver.adview.AdServerView 
+	    android:layout_height="450dip"
+		site="8061" 
+		zone="20249" 
+		/>-->
+	    
+	    <!--<com.adserver.adview.AdServerView 
+		
 	    	android:layout_width="fill_parent" 
 	    	android:layout_height="50dip"
-			
-	   	/>-->
+			site="8061" 
+			zone="20249"
+			backgroundColor="0"
+			textColor="#0000ff"
+			updateTime="0"
+			adsType="2"
+			logLevel="3"
+			city="New York"
+			area="12"
+			metro="789"
+			zip="687456"							
+	   	/> -->
 
-	   	<!--
-	   	<com.adserver.adview.AdServerView 
+	   	<!--<com.adserver.adview.AdServerView 
 	    	android:id="@+id/adViewer2" 
 	    	android:layout_width="fill_parent" 
 	    	android:layout_height="50dip"
-			site="5441" 
-			zone="6365" 
+			site="8061" 
+			zone="20249" 
 			keywords="music" 
 			latitude="0.5" 
 			longitude="0.5"
@@ -55,8 +69,7 @@
 			minSizeY="10" 
 			sizeX="320" 
 			sizeY="100" 
-	   	/>
-		-->
+	   	/>-->		
 </LinearLayout>
  
 </LinearLayout>

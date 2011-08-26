@@ -1,4 +1,3 @@
-/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
 package com.adserver.adview.samples.advanced;
 
 import android.app.Activity;
@@ -29,7 +28,7 @@ LinearLayout base = new LinearLayout(this);
         mGLView.setRenderer(new TriangleRenderer(this));
         frame.addView(mGLView);
         
-        AdServerView adserverView = new AdServerView(this,"8061","20249");
+        AdServerView adserverView = new AdServerView(this,8061,20249);
         adserverView.setMinSizeX(320);
 	    adserverView.setMinSizeY(50);
 	    adserverView.setMaxSizeX(320);

@@ -1,4 +1,3 @@
-/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
 package com.adserver.adview.samples.advanced;
 
 import android.app.Activity;
@@ -31,7 +30,7 @@ public class Callback extends Activity {
         context = this;
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         
-        AdServerView adserverView = new AdServerView(this,"8061","20249");
+        AdServerView adserverView = new AdServerView(this,8061,20249);
         adserverView.setOnAdDownload(new UserAdDownload());
         adserverView.setDefaultImage(R.drawable.robot2);
         adserverView.setMinSizeX(320);

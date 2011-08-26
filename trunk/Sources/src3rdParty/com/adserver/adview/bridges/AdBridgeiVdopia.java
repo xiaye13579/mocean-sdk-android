@@ -22,9 +22,14 @@ public class AdBridgeiVdopia extends AdBridgeAbstract {
 		super(context, view, AdLog, campaignId, externalParams, trackUrl);
 	}
 
+	public static boolean IsAvailable()
+	{
+		return  IsClassExist("com.vdopia.client.android.VDOView");
+	}
+	
 	public void run() {
 		try {
-			String applicationKey = Utils.scrape(externalParams, "<param name=\"applicationKey\">", "</param>");
+			String applicationKey = Utils.scrapeIgnoreCase(externalParams, "<param name=\"applicationKey\">", "</param>");
 			iVdopiaView = new VDOView(context);
 			//iVdopiaView.setLayoutParams(view.getLayoutParams());
 	        VDO.initialize(applicationKey, context);
@@ -42,7 +47,6 @@ public class AdBridgeiVdopia extends AdBridgeAbstract {
 			);
 	        
 	        view.addView(iVdopiaView);	       
-			//view.setBackgroundColor(Color.WHITE);
 			//view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);			
 		} catch (Exception e) {
 			DownloadError(e.getMessage());

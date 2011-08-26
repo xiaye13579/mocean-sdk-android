@@ -10,38 +10,50 @@ import com.smartadserver.library.SmartAdServerAdView.SmartAdServerAdViewDelegate
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.Build;
 import android.webkit.WebView;
 
 public class AdBridgeSAS extends AdBridgeAbstract implements SmartAdServerAdViewDelegate, SmartAdServerAdBannerViewDelegate {
 
+	static SmartAdServerAd mAdBanner;
+	SmartAdServerAdBannerView mAdBannerView;
 	public AdBridgeSAS(Context context, WebView view,AdLog AdLog, String campaignId,
 			String externalParams, String trackUrl) {
 		super(context, view, AdLog, campaignId, externalParams, trackUrl);
 	}
+	
+	public static boolean IsAvailable()
+	{
+		return  IsClassExist("com.smartadserver.library.SmartAdServerAd");
+	}
 
 	public void run() {
-		if (Build.VERSION.SDK_INT<8)
-		{
-			DownloadError("[ERROR]AdBridgeSAS: SDK version < 8");
-			return;
-		}
+//		if (Build.VERSION.SDK_INT<8)
+//		{
+//			DownloadError("[ERROR]AdBridgeSAS: SDK version < 8");
+//			return;
+//		}
 		try
 		{
-			String siteid = /*"19369";//*/Utils.scrape(externalParams, "<param name=\"siteID\">", "</param>");
-			String pageid = /*"136527";//*/Utils.scrape(externalParams, "<param name=\"pageID\">", "</param>");
-			String formatid = /*"5919";//*/Utils.scrape(externalParams, "<param name=\"formatID\">", "</param>");
+			if(mAdBanner==null) 
+				mAdBanner = new SmartAdServerAd();
+			String siteid = /*"19369";//*/Utils.scrapeIgnoreCase(externalParams, "<param name=\"siteID\">", "</param>");
+			String pageid = /*"136527";//*/Utils.scrapeIgnoreCase(externalParams, "<param name=\"pageID\">", "</param>");
+			String formatid = /*"5919";//*/Utils.scrapeIgnoreCase(externalParams, "<param name=\"formatID\">", "</param>");
 					
-			SmartAdServerAd mAdBanner = new SmartAdServerAd();
-			SmartAdServerAdBannerView mAdBannerView = new SmartAdServerAdBannerView(context);
+			mAdBannerView = new SmartAdServerAdBannerView(context);
 			
 			mAdBannerView.setDelegate(this);		
 			mAdBannerView.setBannerDelegate(this);
 			
 			mAdBanner.init(mAdBannerView, (Activity)context, siteid, pageid, formatid, "M", "null", null);
+//			mAdBanner.init(mAdBannerView, (Activity)context, "19369", "136527", "5919", "M", "null", null);
 			
 			mAdBannerView.setLayoutParams(view.getLayoutParams());
 			view.addView(mAdBannerView);
+			//view.removeAllViews();
+			//view.addView(mAdBannerView);
+					
+			
 		} catch (Exception e) {
 			DownloadError(e.getMessage());
 		}
@@ -59,6 +71,7 @@ public class AdBridgeSAS extends AdBridgeAbstract implements SmartAdServerAdView
 
 	@Override
 	public void onAdImageDownloadComplete(SmartAdServerAdView arg0, boolean arg1) {		
+//		Log.d("SAS","onAdImageDownloadComplete");
 	}
 
 	@Override
@@ -73,12 +86,12 @@ public class AdBridgeSAS extends AdBridgeAbstract implements SmartAdServerAdView
 
 	@Override
 	public void onExpand(SmartAdServerAdBannerView arg0) {
-		
+//		Log.d("SAS","onExpand");
 	}
 
 	@Override
 	public void onUnexpand(SmartAdServerAdBannerView arg0) {
-		
+//		Log.d("SAS","onUnexpand");
 	}
 
 }

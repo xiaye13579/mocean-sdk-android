@@ -8,6 +8,5 @@
     <string name="admob_download_error">AdMob Ad View Failed</string>
     
     <string name="app_id">764f0842b9025416f78b6b99891cb70302bd8c50</string>
-    <string name="use_test_servers">true</string>
-    
+    <string name="use_test_servers">true</string>  
 </resources>

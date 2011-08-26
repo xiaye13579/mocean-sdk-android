@@ -1,4 +1,3 @@
-/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
 package com.adserver.adview.samples.advanced;
 
 import java.util.Hashtable;
@@ -28,7 +27,7 @@ public class Debug extends Activity {
         Hashtable<String, String> customParameters = new Hashtable<String, String>();
         customParameters.put("debug", "1");
                 
-        AdServerView adserverView = new AdServerView(this,"8061","20249");
+        AdServerView adserverView = new AdServerView(this,8061,20249);
         //AdServerView sa= new AdServerView()
         adserverView.setCustomParameters(customParameters);
         adserverView.setId(1);

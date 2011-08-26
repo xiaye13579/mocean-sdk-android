@@ -1,4 +1,3 @@
-/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
 package com.adserver.adview.samples.simple.ORRMA;
 
 import android.app.Activity;
@@ -23,7 +22,7 @@ public class ORRMAlevel2 extends Activity {
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         
          
-        AdServerView adserverView = new AdServerView(this,"8061","17488");
+        AdServerView adserverView = new AdServerView(this,8061,17488);
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 200));
 		linearLayout.addView(adserverView);

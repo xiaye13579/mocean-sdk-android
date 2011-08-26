@@ -1,28 +1,35 @@
-/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
-package checkpoint.forms;
+﻿package checkpoint.forms;
 
 import java.util.Hashtable;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
 import com.adserver.adview.AdLog;
 import com.adserver.adview.AdServerInterstitialView;
 import com.adserver.adview.AdServerView;
+import com.adserver.adview.InternelBrowser;
 import com.adserver.adview.AdServerViewCore.OnAdClickListener;
 import com.adserver.adview.AdServerViewCore.OnAdDownload;
-import com.medialets.advertising.AdActivity;
 
-public class MainAdvanced extends AdActivity {
+public class MainAdvanced extends Activity {
     /** Called when the activity is first created. */
 	private Context context;
 	private LinearLayout linearLayout;
@@ -31,9 +38,12 @@ public class MainAdvanced extends AdActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);   
         setContentView(R.layout.main_advanced);
         context = this;
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
+        
+        //new InternelBrowser(context).show();
         
         Button interstitialAd = (Button) findViewById(R.id.interstitialAd);
         interstitialAd.setOnClickListener(new View.OnClickListener() {
@@ -48,17 +58,49 @@ public class MainAdvanced extends AdActivity {
 //        		null, null, null, null, false, null, null, null, 
 //        		null, null, null, null, null, null, null, null);
 				
-				adserverView.setVisibility(adserverView.getVisibility() == View.VISIBLE ? View.INVISIBLE :View.VISIBLE);
+				//linearLayout.addView(adserverView);
 				
+				//adserverView.setVisibility(adserverView.getVisibility() == View.VISIBLE ? View.INVISIBLE :View.VISIBLE);
+				//adserverView.setUpdateTime(0);
+				//adserverView.update();
 				/*AdServerInterstitialView interstitialView = 
-					new AdServerInterstitialView(context, "6235", "9312");
+					new AdServerInterstitialView(context, 8061, 16112);
 					//new AdServerInterstitialView(context, "10359", "21505");
-				interstitialView.SetLogLevel(AdLog.LOG_LEVEL_3);
+				interstitialView.setLogLevel(AdLog.LOG_LEVEL_3);
 				interstitialView.setShowCloseButtonTime(3);
 				interstitialView.setAutoCloseInterstitialTime(20);
 				interstitialView.setIsShowPhoneStatusBar(true);
 				interstitialView.show();*/
 				//adserverView.setUpdateTime(adserverView.getUpdateTime() == 0 ? 1 : 0);
+				//((FrameLayout)findViewById(R.id.main)).refreshDrawableState();
+				
+				//new InternelBrowser(context,"www.google.com").show();
+				adserverView.update();
+				
+				/*AlertDialog.Builder alertbox = new AlertDialog.Builder(context);				
+				
+				/*LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				
+				LinearLayout mailLayout = new LinearLayout(context);
+				mailLayout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
+				
+				WebView webView = new WebView(context);
+				webView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT,1f));
+				mailLayout.addView(webView);
+				webView.loadUrl("http://www.goole.com");
+				
+				
+				alertbox.setView(mailLayout);*/
+				
+				/*LayoutInflater inflater = (LayoutInflater)context.getSystemService      (Context.LAYOUT_INFLATER_SERVICE);
+				alertbox.setView(inflater.inflate(R.layout.externel_browser, null));
+				alertbox.create().show();
+				
+				
+				/*alertbox.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
+		            public void onClick(DialogInterface arg0, int arg1) {
+		            	OnAllertDialogOk();*/
+				
 			}
         });
         
@@ -86,35 +128,55 @@ public class MainAdvanced extends AdActivity {
 //        adserverView = new AdServerView(this, "10113", "20992");
 //        adserverView.setAdvertiserId("10085");
         
-// AdLog.SetLogLevel(AdLog.LOG_LEVEL_3);       
+        
+        //WebView webview = (WebView) findViewById(R.id.webview);
+        //webview.setBackgroundColor(0);
+        //webview.getSettings().setJavaScriptEnabled(true);webview.loadUrl("http://192.168.1.153/mocean/ad.php?key=1&site=8061&min_size_y=40&count=1&adstype=3&premium=2&size_required=0&paramBG=000000&size_x=320&size_y=50&udid=bffada5f692dab2a4f2135b426422155&min_size_x=200&version=2.5&ua=Mozilla%2F5.0+%28Linux%3B+U%3B+Android+3.1%3B+en-us%3B+Xoom+Build%2FHMJ37%29+AppleWebKit%2F534.13+%28KHTML%2C+like+Gecko%29+Version%2F4.0+Safari%2F534.13&zone=2");
+    	    
+        
+    
   
 //        AdLogManager.SetFileLog("sss", context);
         
-        AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);
+        //AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);
         //AdLog.SetFileLog(context.getFilesDir().getAbsolutePath()+"/logfile.log");
-        AdLog.setFileLog("sdcard/log.txt");
+        //AdLog.setFileLog("sdcard/log.txt");
   
-//        adserverView = new AdServerView(this,"8061", "20249");
-//        adserverView.setAdserverURL("http://192.168.1.153/mocean/ad.php");
-//        adserverView.setZone("19");
+//		Basic ad
 
 //        adserverView = new AdServerView(this, "8061", "202490");
 
-//adserverView = new AdServerView(this, "8061", "20249");//Default mOcean ad
+        
+        adserverView = new AdServerView(this);//*/,8061,20249);
+       adserverView.setSite(8061);
+        adserverView.setZone(20249);
+//        adserverView.setAdserverURL("http://192.168.1.153/test_mocean/request.php");
+//        adserverView.setAdserverURL("http://192.168.1.153/mocean/ad.php");
+//        adserverView.setZone(90);
+        //adserverView.setLocationDetection(true);
+        //adserverView.setZone(14);
+        adserverView.setInternalBrowser(true);
+        
+//adserverView = new AdServerView(this, 8061, 20249);//Default mOcean ad
+//adserverView.setBackgroundResource(R.drawable.icon);
+//      adserverView = new AdServerView(this, 8061, 2);
+//      adserverView.setBackgroundColor(0);
 //        adserverView = new AdServerView(this, "8061", "18165");//iVdopia
 //        adserverView = new AdServerView(this,"8061","17489");//ORMMA3
 //        adserverView = new AdServerView(this,"8061","17487");//ORMMA1
 //        adserverView = new AdServerView(this, "8061", "16111");//Greystripe
 //        adserverView = new AdServerView(this, "8061", "16139");//Greystripe excomp
 //        adserverView = new AdServerView(this, "8061", "16685");//Medialets
-//        adserverView = new AdServerView(this, "8061", "21676");//SAS/YOC
-//        adserverView = new AdServerView(this, "8061", "21637");//AdMob
+//        adserverView = new AdServerView(this, 8061, 21676);//SAS/YOC
+//        adserverView = new AdServerView(this, 8061, 21637);//AdMob
 //        adserverView = new AdServerView(this, "8061", "16938");//Millennial
-        adserverView = new AdServerView(this, "8061", "16685");//Medialets
+        
+//        adserverView = new AdServerView(this, "8061", "16685");//Medialets
+        
 //        adserverView = new AdServerView(this, "8061", "16686");//Medialets
 //        adserverView = new AdServerView(this, "10113", "20991");
 //        adserverView = new AdServerView(this, "8061", "14");
-//        adserverView.setAdserverURL("http://192.168.1.153/mocean/ad/");
+        //adserverView.setAdserverURL("http://192.168.1.153/mocean/ad.php");
         //adserverView.SetLogLevel(AdLog.LOG_LEVEL_3);
         
 //        adserverView.setCustomParameters(customParameters);
@@ -125,23 +187,22 @@ public class MainAdvanced extends AdActivity {
 //
 //        adserverView.setZone("9312");
 //        adserverView.getZone();
-		adserverView.setBackgroundColor("33CCFF");
+
         adserverView.setId(1);        
         //adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 150));
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 150));
-		adserverView.setUpdateTime(5);
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 450));
+		//adserverView.setUpdateTime(5);
+		//adserverView.setVisibility(View.GONE);
+		
+		//adserverView.setOnAdClickListener(new OnAdClickListener() {
+		//   @Override
+		//	public void click(String url) {
+		//	   finish();
+		//	}
+		//});
 		
 		//adserverView.setDefaultImage(R.drawable.test_banner);
 		
-/*		adserverView.setTest(false);
-		adserverView.getTest();
-		
-		adserverView.setPremium(AdServerView.PREMIUM_STATUS_PREMIUM);
-		adserverView.getPremium();
-		
-		adserverView.setKeywords("test");
-		adserverView.getKeywords();
-*/		
 		adserverView.setMinSizeX(200);
 		adserverView.getMinSizeX();
 		
@@ -154,10 +215,14 @@ public class MainAdvanced extends AdActivity {
 		adserverView.setMaxSizeY(50);
 		adserverView.getMaxSizeY();
 		
+		//adserverView.setLongitude("dsdsdsdsd");
+		
+		//adserverView.setBackgroundColor(0xFF0000f0);
+		
+		
 /*		//adserverView.setDefaultImage(R.drawable.test_banner);
 		
 		
-		//adserverView.setBackgroundColor("33CCFF");
 		//adserverView.getBackgroundColor();
 		
 		adserverView.setTextColor("11CC22");
@@ -240,11 +305,13 @@ public class MainAdvanced extends AdActivity {
 		adserverView.getOnAdDownload();
 		*/
         
-       
-        
 		//adserverView.setVisibility(View.INVISIBLE);
 		linearLayout.addView(adserverView);
-		
+			
+       /* adserverView = new AdServerView(this, "8061", "16685");//Medialets
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 150));
+		adserverView.setUpdateTime(5);
+		linearLayout.addView(adserverView);*/
 		//linearLayout.removeAllViews();
 		
     }

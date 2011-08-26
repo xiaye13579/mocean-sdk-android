@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+>
+
+	<LinearLayout
+		android:id="@+id/frameAdContent" 
+	    android:orientation="vertical"
+	    android:layout_height="fill_parent"
+	    android:layout_width="fill_parent"
+	    
+    >
+    
+    <com.adserver.adview.AdServerView 
+    	site="8061" 
+		zone="20249"
+    	android:id="@+id/adServerView" 
+	    android:layout_width="fill_parent" android:layout_height="50dip"/>
+    <LinearLayout android:layout_width="fill_parent" android:id="@+id/linearLayout1" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:text="Site" android:id="@+id/textView1" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+        <EditText android:layout_height="wrap_content" android:id="@+id/etSite" android:layout_width="fill_parent" android:inputType="numberDecimal" android:text="8061">
+            <requestFocus></requestFocus>
+        </EditText>
+    </LinearLayout>
+	<LinearLayout android:layout_width="fill_parent" android:id="@+id/linearLayout1" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:text="Zone" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+        <EditText android:layout_height="wrap_content" android:id="@+id/etZone" android:layout_width="fill_parent" android:inputType="numberDecimal" android:text="20249">
+            <requestFocus></requestFocus>
+        </EditText>
+    </LinearLayout>
+	<LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout3" android:layout_width="fill_parent" android:orientation="horizontal">
+		<Button android:layout_height="wrap_content" android:id="@+id/btnUpdate" android:layout_gravity="center" android:layout_width="wrap_content" android:text="Update"></Button>
+	</LinearLayout>
+	<ScrollView android:layout_width="fill_parent" android:id="@+id/scrollView1" android:layout_height="fill_parent">
+		<LinearLayout android:id="@+id/linearLayout2" android:layout_width="fill_parent" 
+		android:background="#000000"
+		android:layout_height="fill_parent" android:orientation="vertical">
+			<TextView android:id="@+id/txtToServer" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:layout_width="fill_parent"></TextView>
+			<TextView android:id="@+id/txtFromServer" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:layout_marginTop="10dip" android:layout_width="fill_parent"></TextView>
+		</LinearLayout>
+	</ScrollView>
+    </LinearLayout>
+ 
+</LinearLayout>
