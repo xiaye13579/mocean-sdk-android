@@ -24,7 +24,7 @@ public class Orientation extends Activity {
         
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         
-        adserverView = new AdServerView(this,"8061","20249");
+        adserverView = new AdServerView(this,8061,20249);
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
 		linearLayout.addView(adserverView);
@@ -35,15 +35,15 @@ public class Orientation extends Activity {
 	{
 		adserverView.update();
 		if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-			adserverView.setSite("8061");
-		    adserverView.setZone("20249");
+			adserverView.setSite(8061);
+		    adserverView.setZone(20249);
 		    adserverView.setMinSizeX(320);
 		    adserverView.setMinSizeY(50);
 		    adserverView.setMaxSizeX(320);
 		    adserverView.setMaxSizeY(50);		     
 		} else {
-			adserverView.setSite("8061");
-		    adserverView.setZone("16741");
+			adserverView.setSite(8061);
+		    adserverView.setZone(16741);
 		    adserverView.setMinSizeX(468);
 		    adserverView.setMinSizeY(60);
 		    adserverView.setMaxSizeX(468);

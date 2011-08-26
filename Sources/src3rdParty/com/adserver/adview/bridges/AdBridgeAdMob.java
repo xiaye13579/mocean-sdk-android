@@ -23,11 +23,16 @@ public class AdBridgeAdMob extends AdBridgeAbstract {
 			String externalParams, String trackUrl) {
 		super(context, view, AdLog, campaignId, externalParams, trackUrl);
 	}
+	
+	public static boolean IsAvailable()
+	{
+		return  IsClassExist("com.google.ads.AdView");
+	}
 
 	@Override
 	public void run() {
 		try {
-			String adUnitId = Utils.scrape(externalParams, "<param name=\"publisherid\">", "</param>");
+			String adUnitId = Utils.scrapeIgnoreCase(externalParams, "<param name=\"publisherid\">", "</param>");
 			/*String size = Utils.scrape(externalParams, "<param name=\"size\">", "</param>");
 			String backgroundColor = Utils.scrape(externalParams, "<param name=\"backgroundColor\">", "</param>");
 			String primaryTextColor = Utils.scrape(externalParams, "<param name=\"primaryTextColor\">", "</param>");
@@ -54,6 +59,15 @@ public class AdBridgeAdMob extends AdBridgeAbstract {
 			adReq.addTestDevice("085435FDBACAAE775764A9E27F40E0FB");
 
 			adView.loadAd(adReq);
+			
+			/*if(view.getChildCount()>0)
+			{
+				for(int x=0;x<view.getChildCount();x++)
+					if(view.getChildAt(x).getClass().getName().equals("com.google.ads.AdView"))
+					{
+						((AdView)view.getChildAt(x)).destroy();
+					}
+			}*/
 			
 			view.addView(adView);
 			//view.setBackgroundColor(Color.WHITE);

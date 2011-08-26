@@ -18,23 +18,19 @@
 
     <application android:icon="@drawable/icon" android:label="@string/app_name">
     
+        <activity android:name="com.google.ads.AdActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
     	<provider android:name="com.greystripe.android.sdk.AdContentProvider"
-			android:authorities="checkpoint.forms.AdContentProvider"
+			android:authorities="com.adserver.adview.samples.AdContentProvider"
 			android:multiprocess="true"
 			android:exported="false" 
 		/>
-		<service android:name="com.medialets.advertising.AdManagerService" />
 		<activity android:name="com.greystripe.android.sdk.AdView" 
                   android:configChanges="keyboard|keyboardHidden|orientation" > 
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>    
-    	<activity android:name="com.admob.android.ads.AdMobActivity" 
-              android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-              android:configChanges="orientation|keyboard|keyboardHidden"
-              />
-        <activity android:name="com.millennialmedia.android.MMAdViewOverlayActivity" 
+    	<activity android:name="com.millennialmedia.android.MMAdViewOverlayActivity" 
                     android:theme="@android:style/Theme.Translucent.NoTitleBar">
         </activity>        
         <activity android:name="com.millennialmedia.android.VideoPlayer" 
@@ -49,18 +45,6 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>   
-        <activity android:label="3d party/Medialets/Ad" android:name=".simple.Medialets.MedialetsAd">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>
-                <category android:name="android.intent.category.SAMPLE_CODE"></category>
-            </intent-filter>
-        </activity>
-        <activity android:label="3d party/Medialets/mOceanBackfill" android:name=".simple.Medialets.MedialetsmOceanBackfill">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>
-                <category android:name="android.intent.category.SAMPLE_CODE"></category>
-            </intent-filter>
         </activity> 
         <activity android:name=".simple.SAS.SASAd" android:label="3d party/SmartAdServer/Ad">
             <intent-filter>
@@ -68,7 +52,7 @@
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:name=".simple.SAS.SASmOceanBackfill" android:label="3d party/SmartAdServer/mOceanBackfill">
+        <activity android:name=".simple.SAS.SASBackfill" android:label="3d party/SmartAdServer/Backfill">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
@@ -80,7 +64,7 @@
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:name=".simple.GreyStripe.GreyStripemOceanBackfill" android:label="3d party/GreyStripe/mOceanBackfill">
+        <activity android:name=".simple.GreyStripe.GreyStripeBackfill" android:label="3d party/GreyStripe/Backfill">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
@@ -92,20 +76,22 @@
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="3d party/Millennial/mOceanBackfill" android:name=".simple.Millennial.MillennialmOceanBackfill">
+        <activity android:label="3d party/Millennial/Backfill" android:name=".simple.Millennial.MillennialBackfill">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>    
-        <activity android:name=".simple.AdMob.AdMobAd" android:label="3d party/AdMob">
+        <activity android:name=".simple.AdMob.AdMobAd" android:label="3d party/AdMob/Ad">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>                
+                <action android:name="android.intent.action.MAIN"></action>  
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>              
             </intent-filter>
         </activity>
-        <activity android:label="Simple/AdMob/mOceanBackfill" android:name=".simple.AdMob.AdMobBackfill">
+        <activity android:label="3d party/AdMob/Backfill" android:name=".simple.AdMob.AdMobBackfill">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
         <activity android:name=".simple.iVdopia.iVdopiaAd" android:label="3d party/iVdopia/Ad">
@@ -114,55 +100,55 @@
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>        
-        <activity android:label="3d party/iVdopia/mOceanBackfill" android:name=".simple.iVdopia.iVdopiamOceanBackfill">
+        <activity android:label="3d party/iVdopia/Backfill" android:name=".simple.iVdopia.iVdopiaBackfill">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:name=".simple.mOcean.mOceanDefault" android:label="Simple/mOcean/Default">
+        <activity android:label="Simple/Default" android:name=".simple.Default">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:name=".simple.mOcean.mOceanInterstitial" android:label="Simple/mOcean/Interstitial">
+        <activity android:label="Simple/Interstitial" android:name=".simple.Interstitial">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:name=".simple.mOcean.mOceanLayout" android:label="Simple/mOcean/Layout">
+        <activity android:label="Simple/Layout" android:name=".simple.Layout">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:name=".simple.mOcean.mOceanVideo" android:label="Simple/mOcean/Video">
+        <activity android:label="Simple/Video" android:name=".simple.Video">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Simple/ORRMA/Banner" android:name=".simple.ORRMA.ORRMABanner">
+        <activity android:label="Advanced/ORRMA/Banner" android:name=".simple.ORRMA.ORRMABanner">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Simple/ORRMA/level1" android:name=".simple.ORRMA.ORRMAlevel1">
+        <activity android:label="Advanced/ORRMA/level1" android:name=".simple.ORRMA.ORRMAlevel1">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Simple/ORRMA/level2" android:name=".simple.ORRMA.ORRMAlevel2">
+        <activity android:label="Advanced/ORRMA/level2" android:name=".simple.ORRMA.ORRMAlevel2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Simple/ORRMA/level3" android:name=".simple.ORRMA.ORRMAlevel3">
+        <activity android:label="Advanced/ORRMA/level3" android:name=".simple.ORRMA.ORRMAlevel3">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
@@ -198,6 +184,29 @@
             </intent-filter>
         </activity>
         <activity android:label="Advanced/List" android:name=".advanced.List">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
+         <activity android:label="Advanced/Custom site,zone" android:name=".advanced.CustomParameters" android:configChanges="keyboardHidden|orientation" android:screenOrientation="sensor">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
+         <activity android:label="Advanced/Transparent" android:name=".advanced.Transparent">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>               
+            </intent-filter>
+        </activity>
+         <activity android:label="Advanced/AnimatedAd" android:name=".advanced.AnimAd">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
+        <activity android:label="Advanced/AnimatedAdXML" android:name=".advanced.AnimAdXML">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>

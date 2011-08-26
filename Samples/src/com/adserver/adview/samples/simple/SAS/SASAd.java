@@ -1,4 +1,3 @@
-/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
 package com.adserver.adview.samples.simple.SAS;
 
 import android.app.Activity;
@@ -24,7 +23,7 @@ public class SASAd extends Activity {
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         
          
-        AdServerView adserverView = new AdServerView(this,"8061","21675");
+        AdServerView adserverView = new AdServerView(this,8061,21675);
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
 		linearLayout.addView(adserverView);

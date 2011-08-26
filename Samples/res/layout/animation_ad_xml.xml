@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+>
+
+	<LinearLayout
+		android:id="@+id/frameAdContent" 
+	    android:orientation="vertical"
+	    android:layout_height="fill_parent"
+	    android:layout_width="fill_parent" 
+	    android:background="@drawable/mocean_blackbkg_xsml"
+    >
+	<com.adserver.adview.AdServerView
+		android:id="@+id/adServerView"  
+	    android:layout_width="fill_parent" 
+	    android:layout_height="50dip"
+		site="8061" 
+		zone="20249" 	
+	   	/>
+    </LinearLayout>
+ 
+</LinearLayout>

@@ -20,9 +20,14 @@ public class AdBridgeGreyStripe extends AdBridgeAbstract {
 		super(context, view, AdLog, campaignId, externalParams, trackUrl);
 	}
 
+	public static boolean IsAvailable()
+	{
+		return  IsClassExist("com.greystripe.android.sdk.BannerView");
+	}
+	
 	public void run() {
 		try {
-			String applicationId = Utils.scrape(externalParams, "<param name=\"id\">", "</param>");			
+			String applicationId = Utils.scrapeIgnoreCase(externalParams, "<param name=\"id\">", "</param>");			
 		    GSSDK.initialize(context, applicationId);
 		    
 		    BannerView myBanner = new BannerView(context);		    

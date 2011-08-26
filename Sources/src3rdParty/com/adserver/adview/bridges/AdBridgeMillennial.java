@@ -1,8 +1,11 @@
 package com.adserver.adview.bridges;
 
+import java.util.Hashtable;
+
 import com.adserver.adview.AdLog;
 import com.adserver.adview.Utils;
 import com.millennialmedia.android.MMAdView;
+import com.millennialmedia.android.MMAdViewSDK;
 import com.millennialmedia.android.MMAdView.MMAdListener;
 
 import android.app.Activity;
@@ -19,19 +22,32 @@ public class AdBridgeMillennial extends AdBridgeAbstract {
 		super(context, view, AdLog, campaignId, externalParams, trackUrl);
 	}
 
+	public static boolean IsAvailable()
+	{
+		return  IsClassExist("com.millennialmedia.android.MMAdView");
+	}
+	
 	public void run() {
 		try {
-			String applicationId = Utils.scrape(externalParams, "<param name=\"id\">", "</param>");
-			String adType = Utils.scrape(externalParams, "<param name=\"adType\">", "</param>");
+			String applicationId =Utils.scrapeIgnoreCase(externalParams, "<param name=\"id\">", "</param>");
+			String adType = Utils.scrapeIgnoreCase(externalParams, "<param name=\"adType\">", "</param>");
+			
 			//String zip = Utils.scrape(externalParams, "<param name=\"zip\">", "</param>");
 			//String longet = Utils.scrape(externalParams, "<param name=\"long\">", "</param>");
 			//String lat = Utils.scrape(externalParams, "<param name=\"lat\">", "</param>");
 	
-			MMAdView adview = new MMAdView((Activity)context, applicationId, adType, MMAdView.REFRESH_INTERVAL_OFF);
+			MMAdView adview = new MMAdView((Activity)context, applicationId, adType, MMAdView.REFRESH_INTERVAL_OFF);			
+			adview.setId(MMAdViewSDK.DEFAULT_VIEWID);
 			adview.setLayoutParams(view.getLayoutParams());
 			adview.setListener(new MillennialListener());
+			
+			// (Optional/Recommended) Set meta data (will be applied to subsequent ad requests)
+			Hashtable<String, String> metaData = new Hashtable<String, String>();
+			metaData.put("height", "53");
+			metaData.put("width", "320");
+			adview.setMetaValues(metaData);
+			
 			view.addView(adview);
-			//view.setBackgroundColor(Color.WHITE);
 			//view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
 			adview.callForAd();
 		} catch (Exception e) {
@@ -69,6 +85,10 @@ public class AdBridgeMillennial extends AdBridgeAbstract {
 		public void MMAdOverlayLaunched(MMAdView adview)
 		{
 			//Log.i("SampleApp", "Millennial Ad Overlay Launched" );
+		}
+
+		public void MMAdRequestIsCaching(MMAdView arg0) {
+			
 		}		
 	}
 

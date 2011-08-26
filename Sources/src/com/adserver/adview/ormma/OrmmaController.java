@@ -1,4 +1,4 @@
-/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
+
 package com.adserver.adview.ormma;
 
 import java.lang.reflect.Field;
@@ -25,6 +25,10 @@ public class OrmmaController {
 	private static final String FLOAT_TYPE = "float";
 	private static final String NAVIGATION_TYPE = "class com.ormma.NavigationStringEnum";
 	private static final String TRANSITION_TYPE = "class com.ormma.TransitionStringEnum";
+
+	public static final String EXIT = "exit";
+	public static final String FULL_SCREEN = "fullscreen";
+	public static final String STYLE_NORMAL = "normal";	
 
 	protected Context mContext;
 
@@ -140,26 +144,43 @@ public class OrmmaController {
 		return obj;
 	}
 
+	/**
+	 * The Class ReflectedParcelable.
+	 */
 	public static class ReflectedParcelable implements Parcelable {
 
+		/**
+		 * Instantiates a new reflected parcelable.
+		 */
 		public ReflectedParcelable() {
 
 		}
 
+		/* (non-Javadoc)
+		 * @see android.os.Parcelable#describeContents()
+		 */
 		@Override
 		public int describeContents() {
 			return 0;
 		}
 
+		/**
+		 * Instantiates a new reflected parcelable.
+		 *
+		 * @param in the in
+		 */
 		protected ReflectedParcelable(Parcel in) {
 			Field[] fields = null;
 			Class<?> c = this.getClass();
-			fields = c.getFields();
+			fields = c.getDeclaredFields();
 			try {
-				Object obj = c.newInstance();
+				//Object obj = c.newInstance();
+				Object obj = this;
 				for (int i = 0; i < fields.length; i++) {
 					Field f = fields[i];
+					
 					Class<?> type = f.getType();
+					
 					if (type.isEnum()) {
 						String typeStr = type.toString();
 						if (typeStr.equals(NAVIGATION_TYPE)) {
@@ -167,31 +188,37 @@ public class OrmmaController {
 						} else if (typeStr.equals(TRANSITION_TYPE)) {
 							f.set(obj, TransitionStringEnum.fromString(in.readString()));
 						}
-					} else
-						f.set(obj, in.readValue(null));
+					} else {
+						Object dt = f.get(this);
+						if( !(dt instanceof Parcelable.Creator<?>)) {
+							f.set(obj, in.readValue(null));							
+						}
+					}
 				}
+				
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 
 		}
 
+		/* (non-Javadoc)
+		 * @see android.os.Parcelable#writeToParcel(android.os.Parcel, int)
+		 */
 		@Override
-		public void writeToParcel(Parcel out, int flags) {
+		public void writeToParcel(Parcel out, int flags1) {
 			Field[] fields = null;
 			Class<?> c = this.getClass();
-			fields = c.getFields();
+			fields = c.getDeclaredFields();
 			try {
 				for (int i = 0; i < fields.length; i++) {
 					Field f = fields[i];
 					Class<?> type = f.getType();
+										
 					if (type.isEnum()) {
 						String typeStr = type.toString();
 						if (typeStr.equals(NAVIGATION_TYPE)) {
@@ -199,8 +226,12 @@ public class OrmmaController {
 						} else if (typeStr.equals(TRANSITION_TYPE)) {
 							out.writeString(((TransitionStringEnum) f.get(this)).getText());
 						}
-					} else
-						out.writeValue(f.get(this));
+					} else {
+						Object dt = f.get(this);
+						if( !(dt instanceof Parcelable.Creator<?>)) 
+								out.writeValue(dt);				
+						
+					}
 				}
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
@@ -213,4 +244,119 @@ public class OrmmaController {
 		}
 	}
 
+
+	/**
+	 * 
+	 * Contains audio and video properties
+	 *
+	 */
+	public static class PlayerProperties extends ReflectedParcelable {
+			
+		
+		public PlayerProperties() {
+			autoPlay = showControl = true;
+			doLoop = audioMuted = false;
+			startStyle = stopStyle = STYLE_NORMAL;
+			inline = false;			
+		}
+		
+		/**
+		 * The Constant CREATOR.
+		 */
+		public static final Parcelable.Creator<PlayerProperties> CREATOR = new Parcelable.Creator<PlayerProperties>() {
+			public PlayerProperties createFromParcel(Parcel in) {
+				return new PlayerProperties(in);
+			}
+
+			public PlayerProperties[] newArray(int size) {
+				return new PlayerProperties[size];
+			}
+		};		
+		
+		public PlayerProperties(Parcel in) {
+			super(in);
+		}
+
+		/**
+		 * Set stop style
+		 * @param style - stop style (normal/full screen)
+		 */
+		public void setStopStyle(String style){
+			stopStyle = style;
+		}
+		
+
+		/**
+		 * Set Player properties
+		 * @param autoPlay - true if player should start immediately
+		 * @param controls - true if player should show controls
+		 * @param loop - true if player should start again after finishing
+		 */
+		public void setProperties(boolean audioMuted, boolean autoPlay, boolean controls, boolean inline,boolean loop, String startStyle, String stopStyle){
+			this.autoPlay = autoPlay;
+			this.showControl = controls;
+			this.doLoop = loop;
+			this.audioMuted = audioMuted;
+			this.startStyle = startStyle;
+			this.stopStyle = stopStyle;
+			this.inline = inline;			
+
+		}
+		
+		/**
+		 * Mute Audio
+		 */
+		public void muteAudio(){
+			audioMuted = true;
+		}
+		
+		/**
+		 * Get autoPlay
+		 * 
+		 */
+		public boolean isAutoPlay(){
+			return (autoPlay == true);
+		}
+		
+		/**
+		 * Get show control
+		 */
+		public boolean showControl(){
+			return showControl;
+		}
+		
+		/**
+		 * 
+		 * Get looping option
+		 */
+		public boolean doLoop(){
+			return doLoop;
+		}
+		
+		/**
+		 * Get mute status
+		 */
+		public boolean doMute(){
+			return audioMuted;
+		}
+		
+		/**
+		 * 
+		 * Get stop style
+		 */
+		public boolean exitOnComplete(){
+			return stopStyle.equalsIgnoreCase(EXIT);
+		}
+		
+		/**
+		 * 
+		 * Get start style
+		 */
+		public boolean isFullScreen(){
+			return startStyle.equalsIgnoreCase(FULL_SCREEN);
+		}		
+		
+		public boolean autoPlay, showControl, doLoop, audioMuted,inline;
+		public String stopStyle, startStyle;
+	}
 }

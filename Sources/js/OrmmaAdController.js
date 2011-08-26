@@ -1,4 +1,4 @@
-/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
+/*ï¿½ 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
 /*
  * Anonymous function to encapsulate the OrmmaAdController methods
  */
@@ -29,7 +29,7 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
     /**
      * The main ad controller object
      */
-    window.Ormma = {
+    Ormma = {
 
         /**
          * The object that holds all types of OrmmaAdController events and associated listeners
@@ -410,6 +410,17 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		
 		request: function(uri, display){
 			_request(uri, display);
+		},
+		
+		playVideo: function (URL, properties) {
+			_playVideo(URL, properties);
+		}, 
+		
+		playAudio: function (URL, properties) {
+			_playAudio(URL, properties);
+		}, 
+		openMap: function (POI, fullscreen) {
+			_openMap(POI, fullscreen);
 		}
 		
 	};
@@ -726,5 +737,143 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
  
 		return string;
 	}
- 	
+	
+	function _playVideo(URL, properties) {
+		var audioMuted = false, autoPlay = false, controls = false, loop = false, position = [-1, -1, -1, -1], startStyle = 'normal', stopStyle = 'normal';
+		if ( properties != null ) {
+
+			if ( ( typeof properties.audio != "undefined" ) && ( properties.audio != null ) ) {
+				 audioMuted = true;
+			 }
+			 
+			 if ( ( typeof properties.autoplay != "undefined" ) && ( properties.autoplay != null ) ) {
+				 autoPlay = true;
+			 }
+			
+			 if ( ( typeof properties.controls != "undefined" ) && ( properties.controls != null ) ) {
+				controls = true;
+			 }
+			 
+			 if ( ( typeof properties.loop != "undefined" ) && ( properties.loop != null ) ) {
+				loop = true;
+			 }
+			 
+			 if ( ( typeof properties.position != "undefined" ) && ( properties.position != null ) ) {
+				 position = new Array(4);
+				 
+				 position[0] = properties.position.top;
+				 position[1] = properties.position.left;
+				 
+				 if ( ( typeof properties.width != "undefined" ) && ( properties.width != null ) ) {
+					 position[2] =  properties.width;
+				 }
+				 else{
+					 //TODO ERROR
+				 }
+				 
+				 if ( ( typeof properties.height != "undefined" ) && ( properties.height != null ) ) {
+					 position[3] =  properties.height;
+				 }
+				 else{
+					 //TODO ERROR
+				 }
+			 }
+		   
+
+			 if ( ( typeof properties.startStyle != "undefined" ) && ( properties.startStyle != null ) ) {
+				 startStyle = properties.startStyle;
+			 }
+			
+			 if ( ( typeof properties.stopStyle != "undefined" ) && ( properties.stopStyle != null ) ) {
+				stopStyle = properties.stopStyle;
+			 }  
+			 
+			if (loop) {
+				stopStyle = 'normal';
+				controls = true;
+			}
+
+			if (!autoPlay)
+				controls = true;
+					
+			if (!controls) {
+				stopStyle = 'exit';
+			} 
+			if(position[0]== -1 || position[1] == -1)   {
+				startStyle = "fullscreen";
+			} 
+		 }    
+		 
+		 try{
+			  ORMMADisplayControllerBridge.playVideo(URL, audioMuted, autoPlay, controls, loop, position, startStyle, stopStyle);
+		   } 
+		   catch ( e ) {
+		}     
+	}
+	
+	function _playAudio(URL, properties) {
+		var autoPlay = false, controls = false, loop = false, position = false, startStyle = 'normal', stopStyle = 'normal';
+	    if ( properties != null ) {
+	    	if ( ( typeof properties.autoplay != "undefined" ) && ( properties.autoplay != null ) ) {
+            	autoPlay = true;
+        	}
+       
+        	if ( ( typeof properties.controls != "undefined" ) && ( properties.controls != null ) ) {
+        		controls = true;
+        	}
+        
+        	if ( ( typeof properties.loop != "undefined" ) && ( properties.loop != null ) ) {
+        		loop = true;
+        	}
+        
+	        if ( ( typeof properties.position != "undefined" ) && ( properties.position != null ) ) {
+    	    	position = true;
+        	}
+        
+        	if ( ( typeof properties.startStyle != "undefined" ) && ( properties.startStyle != null ) ) {
+	             startStyle = properties.startStyle;
+    	    }
+        
+        	if ( ( typeof properties.stopStyle != "undefined" ) && ( properties.stopStyle != null ) ) {
+            	stopStyle = properties.stopStyle;
+        	}  
+        
+        	if(startStyle =='normal') {
+        		position = true;
+        	}
+        
+	 	/*	 if(position) {
+    	   		autoPlay = true;
+       			controls = false;
+       			loop = false;
+       			stopStyle = 'exit';
+       		}
+		*/
+       		if(loop) {
+           		stopStyle = 'normal'; 
+           		controls = true;
+        	}
+        
+        	if(!autoPlay) {
+        		controls = true;
+        	}
+               	
+       		if (!controls) {
+				stopStyle = 'exit';
+       		}
+		}
+		
+	    try{
+  	    	ORMMADisplayControllerBridge.playAudio(URL, autoPlay, controls, loop, position, startStyle, stopStyle);
+	    } catch ( e ) {
+	    }     
+	}
+	
+	function _openMap (POI, fullscreen) {
+		try{
+			ORMMADisplayControllerBridge.openMap(POI, fullscreen);
+		} catch (e) {
+		}
+	}
+	
 })();

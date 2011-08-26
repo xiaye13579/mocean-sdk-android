@@ -76,10 +76,10 @@ public abstract class AdBridgeAbstract implements Runnable{
 					e.printStackTrace();
 				}
 			}
-			if (onAdClickListener != null)
+			/*if (onAdClickListener != null)
 			{
 				onAdClickListener.click(trackUrl);
-			}
+			}*/
 		}
 		
 		private static void sendGetRequest(String url) throws IOException {
@@ -98,5 +98,21 @@ public abstract class AdBridgeAbstract implements Runnable{
 		void SetOnEndVisible(View v)
 		{
 			
+		}
+		
+		public static boolean IsAvailable()
+		{
+			return  false;
+		}
+		
+		static boolean IsClassExist(String className)
+		{
+			Class obj;
+			try {
+				obj = Class.forName(className);
+			} catch (ClassNotFoundException e) {
+				return false;
+			}
+			return obj!=null;
 		}
 }

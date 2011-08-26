@@ -1,4 +1,4 @@
-/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
+
 package com.adserver.adview.ormma;
 
 import org.json.JSONException;
@@ -10,9 +10,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.URLUtil;
+
 
 import com.adserver.adview.AdServerViewCore;
 import com.adserver.adview.ormma.util.OrmmaConfigurationBroadcastReceiver;
@@ -24,6 +27,7 @@ public class OrmmaDisplayController extends OrmmaController {
 	private int mOrientationListenerCount = 0;
 	private float mDensity;
 	private Dimensions defaultPosition;
+	private static final String LOG_TAG = "OrmmaDisplayController";
 
 	public OrmmaDisplayController(AdServerViewCore adView, Context c) {
 		super(adView, c);
@@ -203,4 +207,88 @@ public class OrmmaDisplayController extends OrmmaController {
 		mOrmmaView.injectJavaScript("Ormma.gotOrientationChange(" + orientation + ")");
 	}
 	
+	/**
+	 * Play video
+	 * @param url - video url to be played
+	 * @param audioMuted - should audio be muted
+	 * @param autoPlay - should video play immediately
+	 * @param controls  - should native player controls be visible
+	 * @param loop - should video start over again after finishing
+	 * @param position - top and left coordinates of video in pixels if video should play inline
+	 * @param startStyle - normal/fullscreen (if video should play in native full screen mode)
+	 * @param stopStyle - normal/exit (exit if player should exit after video stops)
+	 */
+	public void playVideo(String url, boolean audioMuted, boolean autoPlay, boolean controls, boolean loop, int[] position, String startStyle, String stopStyle) {
+		Log.d("OrmmaDisplayController", "playVideo: url: " + url + " audioMuted: " + audioMuted + " autoPlay: " + autoPlay + " controls: " + controls + " loop: " + loop + " x: " + position[0] + 
+				" y: " + position[1] + " width: " + position[2] + " height: " + position[3] + " startStyle: " + startStyle + " stopStyle: " + stopStyle);
+		Dimensions d = null;
+		if(position[0] != -1) {
+			d = new Dimensions();
+			d.x = position[0];
+			d.y = position[1];
+			d.width = position[2];
+			d.height = position[3];
+//			d = getDeviceDimensions(d);
+		}		
+		if(!URLUtil.isValidUrl(url)){
+			Log.d(LOG_TAG, "invalid url: " + url);
+//			mOrmmaView.raiseError("Invalid url", "playVideo");
+		}else{
+			mOrmmaView.playVideo(url, audioMuted, autoPlay, controls, loop, d, startStyle, stopStyle);
+		}
+	}
+	
+	/**
+	 * Play audio
+	 * @param url - audio url to be played
+	 * @param autoPlay - if audio should play immediately
+	 * @param controls - should native player controls be visible
+	 * @param loop - should video start over again after finishing
+	 * @param position - should audio be included with ad content
+	 * @param startStyle - normal/full screen (if audio should play in native full screen mode)
+	 * @param stopStyle - normal/exit (exit if player should exit after audio stops)
+	 */
+	public void playAudio(String url, boolean autoPlay, boolean controls, boolean loop, boolean position, String startStyle, String stopStyle) {
+		Log.d(LOG_TAG, "playAudio: url: " + url + " autoPlay: " + autoPlay + " controls: " + controls + " loop: " + loop + " position: " + position + " startStyle: " + startStyle + " stopStyle: "+stopStyle);
+		if(!URLUtil.isValidUrl(url)){
+//			mOrmmaView.raiseError("Invalid url", "playAudio");
+		}else{
+			mOrmmaView.playAudio(url, autoPlay, controls, loop, position, startStyle, stopStyle);
+		}
+		
+	}
+	/**Open map
+	 * @param url - map url
+	 * @param fullscreen - boolean indicating whether map to be launched in full screen
+	 */
+	public void openMap(String url, boolean fullscreen) {
+		Log.d(LOG_TAG, "openMap: url: " + url);
+		mOrmmaView.openMap(url, fullscreen);
+	}
+
+	
+	/**
+	 * Get Device dimensions
+	 * @param d - dimensions received from java script
+	 * @return
+	 */
+	private Dimensions getDeviceDimensions(Dimensions d){
+		d.width *= mDensity;
+		d.height *= mDensity;
+		d.x *= mDensity;
+		d.y *= mDensity;
+		if (d.height < 0)
+			d.height = mOrmmaView.getHeight();
+		if (d.width < 0)
+			d.width = mOrmmaView.getWidth();
+		int loc[] = new int[2];
+		mOrmmaView.getLocationInWindow(loc);
+		if (d.x < 0)
+			d.x = loc[0];
+		if (d.y < 0) {
+			int topStuff = 0;// ((Activity)mContext).findViewById(Window.ID_ANDROID_CONTENT).getTop();
+			d.y = loc[1] - topStuff;
+		}
+		return d;
+	}
 }

@@ -1,4 +1,3 @@
-/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
 package com.adserver.adview;
 
 import java.security.MessageDigest;
@@ -11,6 +10,19 @@ public class Utils {
 		if((offset = resp.indexOf(start)) < 0)
 			return "";
 		if((len = resp.indexOf(stop, offset + start.length())) < 0)
+			return "";
+		return resp.substring(offset + start.length(), len);
+	}
+
+	public static String scrapeIgnoreCase(String resp, String start, String stop) {
+		int offset, len;
+		String temp = resp.toLowerCase();
+		start = start.toLowerCase();
+		stop = stop.toLowerCase();
+		
+		if((offset = temp.indexOf(start)) < 0)
+			return "";
+		if((len = temp.indexOf(stop, offset + start.length())) < 0)
 			return "";
 		return resp.substring(offset + start.length(), len);
 	}

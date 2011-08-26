@@ -21,7 +21,7 @@ public class Test extends Activity {
         context = this;
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
          
-        AdServerView adserverView = new AdServerView(this,"8061","20249");
+        AdServerView adserverView = new AdServerView(this,8061,20249);
         adserverView.setMinSizeX(320);
 	    adserverView.setMinSizeY(50);
 	    adserverView.setMaxSizeX(320);

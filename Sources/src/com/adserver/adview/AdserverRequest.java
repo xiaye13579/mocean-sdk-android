@@ -1,4 +1,3 @@
-/*© 2010-2011 mOcean Mobile. A subsidiary of Mojiva, Inc. All Rights Reserved.*/
 package com.adserver.adview;
 
 import java.io.File;
@@ -15,9 +14,14 @@ import java.util.UUID;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 
 public class AdserverRequest {
+	
+	public static String INVALID_PARAM_TITLE = "invalid param";
+	
+	
 	private Map<String, String> parameters = new HashMap<String, String>();
 	private final String parameter_site = "site";
 	private final String parameter_zone = "zone";
@@ -49,19 +53,21 @@ public class AdserverRequest {
 	//private final String parameter_debug = "debug";
 	public final static String parameter_device_id = "udid";
 	
-	private String adserverURL = "http://ads.mocean.mobi/ad";
+	private String adserverURL = "http://ads.mocean.mobi/ad"; 
+	
 	private Hashtable<String, String> customParameters;
 	
 	AdLog AdLog;
 	
 	public AdserverRequest(AdLog AdLog) {
 		this.AdLog = AdLog;
+		setPremium(AdServerViewCore.PREMIUM_STATUS_BOTH);
 	}
 
-	public AdserverRequest(String site, String zone) {
+	/*public AdserverRequest(Integer site, Integer zone) {
 		setSite(site);
 		setZone(zone);		
-	}
+	}*/
 	
     private static String sID = null;
     private static final String INSTALLATION = "INSTALLATION";
@@ -95,8 +101,17 @@ public class AdserverRequest {
 	
 	void InitDefaultParameters(Context context)
 	{
+		String deviceId;
+		
 		TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-		String deviceId = tm.getDeviceId();
+		String temp = tm.getDeviceId();
+		if (null !=  temp) deviceId = temp;
+		else {
+			temp = Secure.getString(context.getContentResolver(),Secure.ANDROID_ID); ;
+			if (null != temp) deviceId = temp;
+			else deviceId = "";
+		}
+		
 		if(deviceId==null)
 		{
 			AdLog.log(AdLog.LOG_LEVEL_2,AdLog.LOG_TYPE_WARNING,"getDeviceId","not avalable");
@@ -124,7 +139,7 @@ public class AdserverRequest {
 	public synchronized void setAdserverURL(String adserverURL) {
 		if((adserverURL != null) && (adserverURL.length() > 0)) {
 			this.adserverURL = adserverURL;
-		}
+		}// else AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_ERROR, "setAdserverURL", "adserverURL=null");
 	}
 
 	/**
@@ -134,11 +149,14 @@ public class AdserverRequest {
 	 *            Id of the site assigned by Adserver
 	 * @return
 	 */
-	public AdserverRequest setSite(String site) {
-		if(site != null) {
+	public AdserverRequest setSite(Integer site) {
+		if((site != null)&&(site>0)) {
 			synchronized(parameters) {
-				parameters.put(parameter_site, site);
+				parameters.put(parameter_site, site.toString());
 			}
+		}else if((site != null)&&(site<1))
+		{
+			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"site="+site.toString()+" valid>0");
 		}
 		return this;
 	}
@@ -183,9 +201,18 @@ public class AdserverRequest {
 	 */
 	public AdserverRequest setPremium(Integer premium) {
 		if(premium != null) {
-			synchronized(parameters) {
-				parameters.put(parameter_premium, String.valueOf(premium));
-			}
+			switch(premium)
+			{
+			case 0: case 1: case 2:
+				synchronized(parameters) {
+					parameters.put(parameter_premium, String.valueOf(premium));
+				}
+				break;
+				default:
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"premium="+premium.toString()+" valid=0;1;2");
+			};
+			
+			
 		}
 		return this;	
 	}
@@ -196,11 +223,14 @@ public class AdserverRequest {
 	 * @param zone
 	 * @return
 	 */
-	public AdserverRequest setZone(String zone) {
-		if(zone != null) {
+	public AdserverRequest setZone(Integer zone) {
+		if((zone != null)&&(zone>0)) {
 			synchronized(parameters) {
-				parameters.put(parameter_zone, zone);
+				parameters.put(parameter_zone, zone.toString());
 			}
+		}else if((zone != null)&&(zone<1))
+		{
+			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"zone="+zone.toString()+" valid>0");
 		}
 		return this;
 	}
@@ -342,8 +372,15 @@ public class AdserverRequest {
 	 */
 	public AdserverRequest setAdstype(Integer adstype) {
 		if(adstype != null) {
+			switch(adstype)
+			{
+			case 1:case 2:case 3:case 6:
 			synchronized(parameters) {
 				parameters.put(parameter_adstype, String.valueOf(adstype));
+			}
+			break;
+			default:
+			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"adstype="+adstype.toString()+" valid=1;2;3;6");
 			}
 		}
 		return this;
@@ -357,10 +394,27 @@ public class AdserverRequest {
 	 */
 	public AdserverRequest setLatitude(String latitude) {
 		if(latitude != null) {
+			double lon = -1000;
+			try
+			{
+				lon = Double.parseDouble(latitude);
+			}catch(Exception e)
+			{
+				
+			}
+			
+			if((lon>=-90)&&(lon<=90))
+				synchronized(parameters) {
+					parameters.put(parameter_latitude, latitude);
+				}
+			else
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"latitude="+latitude+" -90<=valid<=90");	
+		}
+		/*if(latitude != null) {
 			synchronized(parameters) {
 				parameters.put(parameter_latitude, latitude);
 			}
-		}
+		}*/
 		return this;
 	}
 
@@ -372,10 +426,31 @@ public class AdserverRequest {
 	 */
 	public AdserverRequest setLongitude(String longitude) {
 		if(longitude != null) {
-			synchronized(parameters) {
-				parameters.put(parameter_longitude, longitude);
+			double lon = -1000;
+			try
+			{
+				lon = Double.parseDouble(longitude);
+			}catch(Exception e)
+			{
+				
 			}
+			
+			if((lon>=-180)&&(lon<=180))
+				synchronized(parameters) {
+					parameters.put(parameter_longitude, longitude);
+				}
+			else
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"longitude="+longitude+" -180<=valid<=180");	
 		}
+		/*if((minSizeY != null)) {
+			if((minSizeY>0))
+			synchronized(parameters) {
+				parameters.put(parameter_min_size_y, String.valueOf(minSizeY));
+			}
+			else
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"minSizeY="+minSizeY.toString()+" valid>0");			
+			
+		}*/
 		return this;
 	}
 	
@@ -385,10 +460,13 @@ public class AdserverRequest {
 	 * @param paramBG
 	 * @return
 	 */
-	public AdserverRequest setParamBG(String paramBG) {
+	public AdserverRequest setParamBG(Integer paramBG) {
 		if(paramBG != null) {
 			synchronized(parameters) {
-				parameters.put(parameter_background, paramBG);
+				paramBG= paramBG&0xFFFFFF;
+				String str = Integer.toHexString(paramBG);
+				while(str.length()<6) str="0"+str;
+				parameters.put(parameter_background, str);
 			}
 		}
 		return this;
@@ -400,10 +478,13 @@ public class AdserverRequest {
 	 * @param paramLINK
 	 * @return
 	 */
-	public AdserverRequest setParamLINK(String paramLINK) {
+	public AdserverRequest setParamLINK(Integer paramLINK) {
 		if(paramLINK != null) {
 			synchronized(parameters) {
-				parameters.put(parameter_link, paramLINK);
+				paramLINK= paramLINK&0xFFFFFF;
+				String str = Integer.toHexString(paramLINK);				
+				while(str.length()<6) str="0"+str;
+				parameters.put(parameter_link, str);
 			}
 		}
 		return this;
@@ -431,10 +512,13 @@ public class AdserverRequest {
 	 * @return
 	 */
 	public AdserverRequest setMinSizeX(Integer minSizeX) {
-		if((minSizeX != null)&&(minSizeX>0)) {
+		if(minSizeX != null) {
+			if(minSizeX>0)
 			synchronized(parameters) {
 				parameters.put(parameter_min_size_x, String.valueOf(minSizeX));
 			}
+			else
+			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"minSizeX="+minSizeX.toString()+" valid>0");			
 		}
 		return this;	
 	}
@@ -446,10 +530,14 @@ public class AdserverRequest {
 	 * @return
 	 */
 	public AdserverRequest setMinSizeY(Integer minSizeY) {
-		if((minSizeY != null)&&(minSizeY>0)) {
+		if((minSizeY != null)) {
+			if((minSizeY>0))
 			synchronized(parameters) {
 				parameters.put(parameter_min_size_y, String.valueOf(minSizeY));
 			}
+			else
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"minSizeY="+minSizeY.toString()+" valid>0");			
+			
 		}
 		return this;	
 	}
@@ -461,10 +549,13 @@ public class AdserverRequest {
 	 * @return
 	 */
 	public AdserverRequest setSizeX(Integer sizeX) {
-		if((sizeX != null)&&(sizeX>0)) {
+		if(sizeX != null) {
+			if(sizeX>0)
 			synchronized(parameters) {
 				parameters.put(parameter_size_x, String.valueOf(sizeX));
 			}
+			else
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"maxSizeX="+sizeX.toString()+" valid>0");
 		}
 		return this;	
 	}
@@ -476,10 +567,13 @@ public class AdserverRequest {
 	 * @return
 	 */
 	public AdserverRequest setSizeY(Integer sizeY) {
-		if((sizeY != null)&&(sizeY>0)) {
+		if(sizeY != null) {
+			if(sizeY>0)
 			synchronized(parameters) {
 				parameters.put(parameter_size_y, String.valueOf(sizeY));
 			}
+			else
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"maxSizeY="+sizeY.toString()+" valid>0");
 		}
 		return this;	
 	}
@@ -544,9 +638,9 @@ public class AdserverRequest {
 		return this;
 	}
 	
-	public String getSite() {
+	public Integer getSite() {
 		synchronized(parameters) {
-			return parameters.get(parameter_site);
+			return getIntParameter(parameters.get(parameter_site),0);
 		}
 	}
 
@@ -565,13 +659,13 @@ public class AdserverRequest {
 	public Integer getPremium() {
 		synchronized(parameters) {
 			String premium = parameters.get(parameter_premium);
-			return getIntParameter(premium);
+			return getIntParameter(premium,AdServerViewCore.PREMIUM_STATUS_BOTH);
 		}
 	}
 
-	public String getZone() {
+	public Integer getZone() {
 		synchronized(parameters) {
-			return parameters.get(parameter_zone);
+			return getIntParameter(parameters.get(parameter_zone),0);
 		}
 	}
 	
@@ -593,7 +687,7 @@ public class AdserverRequest {
 	public Integer getCount() {
 		synchronized(parameters) {
 			String count = parameters.get(parameter_count);
-			return getIntParameter(count);
+			return getIntParameter(count,0);
 		}
 	}
 
@@ -634,10 +728,14 @@ public class AdserverRequest {
 	}
 	
 	public Integer getAdstype() {
-		synchronized(parameters) {
-			String adstype = parameters.get(parameter_adstype);
-			return getIntParameter(adstype);
-		}
+		if((parameters!=null) && (parameters.get(parameter_adstype)!=null))
+		{
+			synchronized(parameters) {
+				String adstype = parameters.get(parameter_adstype);
+				return getIntParameter(adstype,AdServerViewCore.ADS_TYPE_TEXT_AND_IMAGES);
+			}
+		}else return new Integer(AdServerViewCore.ADS_TYPE_TEXT_AND_IMAGES);
+			
 	}
 	
 	public String getLatitude() {
@@ -652,15 +750,21 @@ public class AdserverRequest {
 		}
 	}
 
-	public String getParamBG() {
+	public int getParamBG() {
 		synchronized(parameters) {
-			return parameters.get(parameter_background);
+			if(parameters.get(parameter_background)==null)
+				return	Constants.DEFAULT_COLOR;
+			else
+				return Integer.decode("#"+parameters.get(parameter_background));
 		}
 	}
 
-	public String getParamLINK() {
+	public Integer getParamLINK() {
 		synchronized(parameters) {
-			return parameters.get(parameter_link);
+			if(parameters.get(parameter_link)==null)
+				return	Constants.DEFAULT_COLOR;
+			else
+			return Integer.decode("#"+parameters.get(parameter_link));
 		}
 	}
 	
@@ -673,28 +777,28 @@ public class AdserverRequest {
 	public Integer getMinSizeX() {
 		synchronized(parameters) {
 			String minSizeX = parameters.get(parameter_min_size_x);
-			return getIntParameter(minSizeX);
+			return getIntParameter(minSizeX,0);
 		}
 	}
 
 	public Integer getMinSizeY() {
 		synchronized(parameters) {
 			String minSizeY = parameters.get(parameter_min_size_y);
-			return getIntParameter(minSizeY);
+			return getIntParameter(minSizeY,0);
 		}
 	}
 
 	public Integer getSizeX() {
 		synchronized(parameters) {
 			String sizeX = parameters.get(parameter_size_x);
-			return getIntParameter(sizeX);
+			return getIntParameter(sizeX,0);
 		}
 	}
 
 	public Integer getSizeY() {
 		synchronized(parameters) {
 			String sizeY = parameters.get(parameter_size_y);
-			return getIntParameter(sizeY);
+			return getIntParameter(sizeY,0);
 		}
 	}
 	
@@ -713,14 +817,14 @@ public class AdserverRequest {
 	public Integer getConnectionSpeed() {
 		synchronized(parameters) {
 			String connectionSpeed = parameters.get(parameter_connection_speed);
-			return getIntParameter(connectionSpeed);
+			return getIntParameter(connectionSpeed,null);
 		}
 	}
 
 	public Integer getSizeRequired() {
 		synchronized(parameters) {
 			String sizeRequired = parameters.get(parameter_size_required);
-			return getIntParameter(sizeRequired);
+			return getIntParameter(sizeRequired,0);
 		}
 	}
 	
@@ -738,11 +842,11 @@ public class AdserverRequest {
 		return customParameters;
 	}
 
-	private Integer getIntParameter(String stringValue) {
+	private Integer getIntParameter(String stringValue, Integer defValue) {
 		if(stringValue != null) {
 			return Integer.parseInt(stringValue);
 		} else {
-			return null;
+			return defValue;
 		}
 	}
 
