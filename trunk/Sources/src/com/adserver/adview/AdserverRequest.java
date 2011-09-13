@@ -35,8 +35,8 @@ public class AdserverRequest {
 	private final String parameter_city = "city";
 	private final String parameter_area = "area";
 	private final String parameter_metro = "metro";
-	private final String parameter_zip = "ZIP";
-	private final String parameter_adstype = "adstype";
+	private final String parameter_zip = "zip";
+	//private final String parameter_adstype = "adstype";
 	private final String parameter_latitude = "lat";
 	private final String parameter_longitude = "long";
 	private final String parameter_background = "paramBG";
@@ -50,6 +50,9 @@ public class AdserverRequest {
 	private final String parameter_version = "version";
 	private final String parameter_connection_speed = "connection_speed";
 	private final String parameter_size_required = "size_required";
+	private final String parameter_mcc = "mcc";
+	private final String parameter_mnc = "mnc";
+	private final String parameter_type = "type";
 	//private final String parameter_debug = "debug";
 	public final static String parameter_device_id = "udid";
 	
@@ -156,7 +159,7 @@ public class AdserverRequest {
 			}
 		}else if((site != null)&&(site<1))
 		{
-			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"site="+site.toString()+" valid>0");
+			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"site="+site.toString()+" (valid: int>0)");
 		}
 		return this;
 	}
@@ -209,7 +212,7 @@ public class AdserverRequest {
 				}
 				break;
 				default:
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"premium="+premium.toString()+" valid=0;1;2");
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"premium="+premium.toString()+"  (valid: 0 - non-premium, 1 - premium only, 2 - both)");
 			};
 			
 			
@@ -230,7 +233,7 @@ public class AdserverRequest {
 			}
 		}else if((zone != null)&&(zone<1))
 		{
-			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"zone="+zone.toString()+" valid>0");
+			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"zone="+zone.toString()+" (valid: int>0)");
 		}
 		return this;
 	}
@@ -346,6 +349,24 @@ public class AdserverRequest {
 		}
 		return this;
 	}
+	
+	public AdserverRequest setMCC(String mcc) {
+		if(mcc != null) {
+			synchronized(parameters) {
+				parameters.put(parameter_mcc, mcc);
+			}
+		}
+		return this;
+	}
+	
+	public AdserverRequest setMNC(String mnc) {
+		if(mnc != null) {
+			synchronized(parameters) {
+				parameters.put(parameter_mnc, mnc);
+			}
+		}
+		return this;
+	}
 
 	/**
 	 * Optional.
@@ -370,7 +391,7 @@ public class AdserverRequest {
 	 * @param adstype
 	 * @return
 	 */
-	public AdserverRequest setAdstype(Integer adstype) {
+	/*public AdserverRequest setAdstype(Integer adstype) {
 		if(adstype != null) {
 			switch(adstype)
 			{
@@ -380,11 +401,11 @@ public class AdserverRequest {
 			}
 			break;
 			default:
-			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"adstype="+adstype.toString()+" valid=1;2;3;6");
+			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"adstype="+adstype.toString()+" (valid: 1;2;3;6)");
 			}
 		}
 		return this;
-	}
+	}*/
 	
 	/**
 	 * Optional.
@@ -408,7 +429,7 @@ public class AdserverRequest {
 					parameters.put(parameter_latitude, latitude);
 				}
 			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"latitude="+latitude+" -90<=valid<=90");	
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"latitude="+latitude+"  (valid: -90<=double<=90)");	
 		}
 		/*if(latitude != null) {
 			synchronized(parameters) {
@@ -440,7 +461,7 @@ public class AdserverRequest {
 					parameters.put(parameter_longitude, longitude);
 				}
 			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"longitude="+longitude+" -180<=valid<=180");	
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"longitude="+longitude+" (valid: -180<=double<=180)");	
 		}
 		/*if((minSizeY != null)) {
 			if((minSizeY>0))
@@ -453,6 +474,8 @@ public class AdserverRequest {
 		}*/
 		return this;
 	}
+	
+	
 	
 	/**
 	 * Optional.
@@ -536,12 +559,24 @@ public class AdserverRequest {
 				parameters.put(parameter_min_size_y, String.valueOf(minSizeY));
 			}
 			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"minSizeY="+minSizeY.toString()+" valid>0");			
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"minSizeY="+minSizeY.toString()+" valid>0");			
 			
 		}
 		return this;	
 	}
 
+	public AdserverRequest setType(Integer type) {
+		if(type != null) {
+			if((type>0)&&(type<8))
+			synchronized(parameters) {
+				parameters.put(parameter_type, String.valueOf(type));
+			}
+			else
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"type="+type.toString()+" (valid: 1<=int<=7, 1 - text, 2 - image, 4 - richmedia ad, set combinations as sum of this values)");
+		}
+		return this;	
+	}
+	
 	/**
 	 * Optional.
 	 * Set maximum width of advertising. 
@@ -555,7 +590,7 @@ public class AdserverRequest {
 				parameters.put(parameter_size_x, String.valueOf(sizeX));
 			}
 			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"maxSizeX="+sizeX.toString()+" valid>0");
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"maxSizeX="+sizeX.toString()+" valid>0");
 		}
 		return this;	
 	}
@@ -573,7 +608,7 @@ public class AdserverRequest {
 				parameters.put(parameter_size_y, String.valueOf(sizeY));
 			}
 			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"maxSizeY="+sizeY.toString()+" valid>0");
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"maxSizeY="+sizeY.toString()+" valid>0");
 		}
 		return this;	
 	}
@@ -727,7 +762,7 @@ public class AdserverRequest {
 		}
 	}
 	
-	public Integer getAdstype() {
+	/*public Integer getAdstype() {
 		if((parameters!=null) && (parameters.get(parameter_adstype)!=null))
 		{
 			synchronized(parameters) {
@@ -736,7 +771,7 @@ public class AdserverRequest {
 			}
 		}else return new Integer(AdServerViewCore.ADS_TYPE_TEXT_AND_IMAGES);
 			
-	}
+	}*/
 	
 	public String getLatitude() {
 		synchronized(parameters) {
@@ -785,6 +820,13 @@ public class AdserverRequest {
 		synchronized(parameters) {
 			String minSizeY = parameters.get(parameter_min_size_y);
 			return getIntParameter(minSizeY,0);
+		}
+	}
+	
+	public Integer getType() {
+		synchronized(parameters) {
+			String type = parameters.get(parameter_type);
+			return getIntParameter(type,3);
 		}
 	}
 
@@ -878,7 +920,12 @@ public class AdserverRequest {
 				String value = parameters.get(param);
 	
 				if(value != null) {
-					builderToString.append("&" + URLEncoder.encode(param) + "=" + URLEncoder.encode(value));
+					builderToString.append("&" + URLEncoder.encode(param) + "=");// + URLEncoder.encode(value));
+					if (param.equals(parameter_background)||param.equals(parameter_link))
+						builderToString.append("%23"+  URLEncoder.encode(value.toUpperCase()));
+					else
+						builderToString.append(URLEncoder.encode(value));
+							
 				}
 			}
 		}

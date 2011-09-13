@@ -111,6 +111,13 @@ public class AdServerView extends AdServerViewCore {
 			}
 		}*/
 
+		if (image!=null)
+		{
+			image.recycle();
+			image = null;
+		}
+		
+		
 		super.onDetachedFromWindow();
 	}
 	
@@ -137,6 +144,21 @@ public class AdServerView extends AdServerViewCore {
 		AdServerViewCore adserverView = this;
 		if(adserverRequest != null) {
 			AutoDetectParameters autoDetectParameters = AutoDetectParameters.getInstance();
+			
+			TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+			if (tm!=null) 
+			{
+				String networkOperator = tm.getNetworkOperator();      
+				if ((networkOperator != null) && (networkOperator.length()>3)) 
+				{         
+					String mcc = networkOperator.substring(0, 3);   
+					String mnc = networkOperator.substring(3);  
+					adserverRequest.setMCC(mcc);
+					adserverRequest.setMNC(mnc);
+				} 
+				//adserverRequest.setMCC(tm.getNetworkCountryIso());
+				//tm.getNetworkOperator()
+			}
 			
 			if(adserverRequest.getVersion() == null) {
 				if(autoDetectParameters.getVersion() == null) {
@@ -312,40 +334,51 @@ public class AdServerView extends AdServerViewCore {
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
-		
-		if((getBackgroundColor()==0) &&(image!=null) &&
-				(ev.getX()>=0) && (ev.getX()<image.getWidth()) &&
-				(ev.getY()>=0) && (ev.getY()<image.getHeight())) 
+		try
 		{
-			int  color = image.getPixel((int)ev.getX(), (int)ev.getY());
-			if (Color.alpha(color)>0)
+			if((getBackgroundColor()==0) &&(image!=null) && (ev!=null)&&
+					(ev.getX()>=0) && (ev.getX()<image.getWidth()) &&
+					(ev.getY()>=0) && (ev.getY()<image.getHeight())) 
 			{
-				return super.onTouchEvent(ev);
-			} return false;
-		}else return super.onTouchEvent(ev);
+				int  color = image.getPixel((int)ev.getX(), (int)ev.getY());
+				if (Color.alpha(color)>0)
+				{
+					return super.onTouchEvent(ev);
+				} return false;
+			}else return super.onTouchEvent(ev);
+		}catch (Exception e) {
+			adLog.log(AdLog.LOG_LEVEL_1,AdLog.LOG_TYPE_ERROR,"onTouchEvent",e.getMessage());
+			return true;
+		}
 	}
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
-		
-		if((getBackgroundColor()==0)&&(getWidth()>0)&&(getHeight()>0))
+		try
 		{
-			if((image==null)||(image.getWidth() != getWidth())||(image.getHeight() != getHeight())) 
+			if((getBackgroundColor()==0)&&(getWidth()>0)&&(getHeight()>0))
 			{
-				image = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-				c = new Canvas(image);
-				paint = new Paint();						
-				matrix = new Matrix();
+				if((image==null)||(image.getWidth() != getWidth())||(image.getHeight() != getHeight())) 
+				{
+					if (image!=null) image.recycle();
+					image = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+					c = new Canvas(image);
+					paint = new Paint();						
+					matrix = new Matrix();
+					
+					clear = new Paint();
+			        clear.setColor(Color.TRANSPARENT);
+			        clear.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
+				}
 				
-				clear = new Paint();
-		        clear.setColor(Color.TRANSPARENT);
-		        clear.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
-			}
-			
-	        c.drawPaint(clear);
-
-			super.onDraw(c);
-			canvas.drawBitmap(image, matrix, paint);
-		} else super.onDraw(canvas);		
+		        c.drawPaint(clear);
+	
+				super.onDraw(c);
+				canvas.drawBitmap(image, matrix, paint);
+			} else super.onDraw(canvas);
+		}catch (Exception e) {
+			image=null;
+			super.onDraw(canvas);
+		}
 	}
 }
