@@ -9,7 +9,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.BitmapFactory.Options;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -42,6 +44,7 @@ public class MainAdvanced extends Activity {
         setContentView(R.layout.main_advanced);
         context = this;
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
+        
         
         //new InternelBrowser(context).show();
         
@@ -146,8 +149,10 @@ public class MainAdvanced extends Activity {
 
 //        adserverView = new AdServerView(this, "8061", "202490");
 
+        if(true) return;
         
-        adserverView = new AdServerView(this);//*/,8061,20249);
+        adserverView = new AdServerView(this);//,8061,20249);
+      //  adserverView.setType(1);
        adserverView.setSite(8061);
         adserverView.setZone(20249);
 //        adserverView.setAdserverURL("http://192.168.1.153/test_mocean/request.php");
@@ -187,7 +192,6 @@ public class MainAdvanced extends Activity {
 //
 //        adserverView.setZone("9312");
 //        adserverView.getZone();
-
         adserverView.setId(1);        
         //adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 150));
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 450));
@@ -201,7 +205,7 @@ public class MainAdvanced extends Activity {
 		//	}
 		//});
 		
-		//adserverView.setDefaultImage(R.drawable.test_banner);
+		adserverView.setDefaultImage(R.drawable.test_banner);
 		
 		adserverView.setMinSizeX(200);
 		adserverView.getMinSizeX();
@@ -218,7 +222,7 @@ public class MainAdvanced extends Activity {
 		//adserverView.setLongitude("dsdsdsdsd");
 		
 		//adserverView.setBackgroundColor(0xFF0000f0);
-		
+		//adserverView.setTextColor(0xFF11CC22);
 		
 /*		//adserverView.setDefaultImage(R.drawable.test_banner);
 		

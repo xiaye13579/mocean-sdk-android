@@ -29,6 +29,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Picture;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -76,22 +77,11 @@ import com.adserver.adview.ormma.util.OrmmaUtils;
  * Viewer of advertising.
  */
 public abstract class AdServerViewCore extends WebView {
-    /**
-     * Type of advertisement: text only.
-	 */
-	public static final int ADS_TYPE_TEXT_ONLY = 1;
-	/**
-     * Type of advertisement: image only.
-	 */
-	public static final int ADS_TYPE_IMAGES_ONLY = 2;
-	/**
-     * Type of advertisement: image and text.
-	 */
-	public static final int ADS_TYPE_TEXT_AND_IMAGES = 3;
-	/**
-     * Type of advertisement: SMS ad. SMS will be returned in XML.
-	 */
-	public static final int ADS_TYPE_SMS = 6;
+	
+	public static final int TYPE_TEXT = 1;
+	public static final int TYPE_IMAGES = 2;
+	public static final int TYPE_RICHMEDIA = 4;
+	
 	/**
 	 * Premium type: premium and non-premium.
 	 */
@@ -341,6 +331,12 @@ public abstract class AdServerViewCore extends WebView {
 		return defaultImageResource==null ? 0 : defaultImageResource;
 	}
 	
+	public Integer getType() {
+		if(adserverRequest != null) {
+			return adserverRequest.getType();
+		}else return null;
+	}
+	
 	/**
 	 * Optional.
 	 * Set image resource which will be shown during advertising loading if there is no advertising in a cache.
@@ -377,7 +373,7 @@ public abstract class AdServerViewCore extends WebView {
 			if(advertiserId>0)
 				this.advertiserId = advertiserId;
 			else
-				adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, AdserverRequest.INVALID_PARAM_TITLE,"advertiserId="+advertiserId.toString()+" valid>0");
+				adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, AdserverRequest.INVALID_PARAM_TITLE,"advertiserId="+advertiserId.toString()+" (valid: int>0)");
 		}
 	}
 
@@ -432,12 +428,13 @@ public abstract class AdServerViewCore extends WebView {
 			Boolean isTestModeEnabled = getBooleanParameter(attrs.getAttributeValue(null, "test"));
 			Integer premium = attrs.getAttributeIntValue(null, "premium",PREMIUM_STATUS_BOTH); 
 			String keywords = attrs.getAttributeValue(null, "keywords");
-			Integer adsType = attrs.getAttributeIntValue(null, "adsType",ADS_TYPE_TEXT_AND_IMAGES);
+			//Integer adsType = attrs.getAttributeIntValue(null, "adsType",ADS_TYPE_TEXT_AND_IMAGES);
 			Integer minSizeX = getIntParameter(attrs.getAttributeValue(null, "minSizeX"));
 			Integer minSizeY = getIntParameter(attrs.getAttributeValue(null, "minSizeY"));
 			Integer maxSizeX = getIntParameter(attrs.getAttributeValue(null, "maxSizeX"));
 			Integer maxSizeY = getIntParameter(attrs.getAttributeValue(null, "maxSizeY"));
 			Integer paramBG = GetColor(attrs.getAttributeValue(null, "backgroundColor"));
+			Integer type = getIntParameter(attrs.getAttributeValue(null, "type"));
 			
 			Boolean locationDetection= getBooleanParameter(attrs.getAttributeValue(null, "locationDetection"));
 			Boolean internelBr = getBooleanParameter(attrs.getAttributeValue(null, "internalBrowser")); 
@@ -466,20 +463,32 @@ public abstract class AdServerViewCore extends WebView {
 			String carrier = attrs.getAttributeValue(null, "carrier");
 			//String customParameters = attrs.getAttributeValue(null, "customParameters");
 			
-			
-			
 			String ua = attrs.getAttributeValue(null, "ua");
 			//Integer defaultImage = attrs.getAttributeResourceValue(null, "defaultImage", -1); 
 			//Integer sizeX = getIntParameter(attrs.getAttributeValue(null, "sizeX"));
 			//Integer sizeY = getIntParameter(attrs.getAttributeValue(null, "sizeY"));
 			Integer visibleMode = getIntParameter(attrs.getAttributeValue(null, "visibleMode"));
 			
+			String customParameters = attrs.getAttributeValue(null, "customParameters");
+			Hashtable<String, String> cp= null;
+			if(customParameters != null)
+			{
+				cp = new Hashtable<String, String>();
+				String str[] = customParameters.split(",");
+				for(int x=0;x<str.length/2;x++)
+				{
+					cp.put(str[x*2], str[x*2+1]);
+				}
+				
+				//setCustomParameters(cp);
+			}
+			
 			if(visibleMode != null) {
 				this.visibleMode = visibleMode;
 			}
 			
 			if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog);
-			if(adsType!=null) setAdsType(adsType);			
+			//if(adsType!=null) setAdsType(adsType);			
 			//if(textColor!=null) setTextColor(textColor);
 			if(adserverURL!=null) setAdserverURL(adserverURL);
 			if(city!=null)setCity(city);
@@ -488,6 +497,7 @@ public abstract class AdServerViewCore extends WebView {
 			if(zip!=null)setZip(zip);
 			if(locationDetection!=null) setLocationDetection(locationDetection);
 			if(internelBr != null) setInternalBrowser(internelBr);
+			if(type != null) setType(type);
 			
 			loadContent(context, 
 					minSizeX, minSizeY, maxSizeX, maxSizeY, 
@@ -495,7 +505,7 @@ public abstract class AdServerViewCore extends WebView {
 					site, zone, keywords, latitude,
 					longitude, ua, premium, isTestModeEnabled, country,
 					region, paramBG, textColor, carrier,
-					null);
+					cp);
 			
 			
 			
@@ -561,7 +571,7 @@ public abstract class AdServerViewCore extends WebView {
 		setTest(isTestModeEnabled);
 		setCountry(country);
 		setRegion(region);
-		setAdsType(getAdsType());
+		//setAdsType(getAdsType());
 		setLatitude(latitude);
 		setLongitude(longitude);
 		if(paramBG!=null)setBackgroundColor(paramBG);
@@ -581,7 +591,8 @@ public abstract class AdServerViewCore extends WebView {
 		webSettings.setJavaScriptEnabled(true);
 		webSettings.setSupportZoom(false);
 		webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-		
+		//webSettings.setLoadsImagesAutomatically(false);
+				
 		mAssetController = new OrmmaAssetController(this, context);
 		mDisplayController = new OrmmaDisplayController(this, context);
 		mUtilityController = new OrmmaUtilityController(this, context);
@@ -875,7 +886,16 @@ public abstract class AdServerViewCore extends WebView {
     	
 		String data = "";
 		
-		if(isRefreshAd) {
+		if ((defaultImageResource!=null) && (getBackground()==null))
+		{
+			try {
+				handler.post(new SetBackgroundResourceAction(view, defaultImageResource));
+			} catch (Exception e) {
+				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "contentThreadAction", e.getMessage());
+			}
+		}
+		
+		/*if(isRefreshAd) {
 			if(isFirstTime) {
 				try {
 					handler.post(new SetBackgroundResourceAction(view, defaultImageResource));
@@ -883,7 +903,7 @@ public abstract class AdServerViewCore extends WebView {
 					adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "contentThreadAction", e.getMessage());
 				}
 			}
-		}
+		}*/
 		
 		InterceptOnAdDownload interceptOnAdDownload = new InterceptOnAdDownload(context,view);
 		
@@ -966,6 +986,8 @@ public abstract class AdServerViewCore extends WebView {
 			}else
 			{
 				adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_WARNING, "contentThreadAction", "data = null isShownView="+Boolean.toString(isShownView));
+				
+				if(adDownload!= null) adDownload.error("empty server respons");
 				
 				if(isShownView) InterstitialClose();
 				StartTimer(context,view);
@@ -1191,7 +1213,7 @@ public abstract class AdServerViewCore extends WebView {
 		public AdWebViewClient(Context context) {
 			this.context = context;
 		}
-
+		
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			try
@@ -1284,7 +1306,7 @@ public abstract class AdServerViewCore extends WebView {
 			try {
 				if(backgroundResource != null) {
 					view.setBackgroundResource(backgroundResource);
-					view.setBackgroundColor(0); 
+					view.setBackgroundColor(0);					
 				}
 			} catch (Exception e) {
 				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "SetBackgroundResourceAction", e.getMessage());
@@ -2101,6 +2123,19 @@ public abstract class AdServerViewCore extends WebView {
 			adserverRequest.setCity(city);
 		}
 	}
+	
+	/**
+	 * Optional.
+	 * Type of ads to be returned (1 - text, 2 - image, 4 - richmedia ad). 
+	 * You can set different combinations with these values. 
+	 * For example, 3 = 1 + 2 (text + image), 7 = 1 + 2 + 4 (text + image + richmedia)  
+	 * @param type
+	 */
+	public void setType(Integer type) {
+		if(adserverRequest != null) {
+			adserverRequest.setType(type);
+		}
+	}
 
 	/**
 	 * Optional.
@@ -2206,7 +2241,7 @@ public abstract class AdServerViewCore extends WebView {
 		}
 	}
 
-	public void setAdsType(int adsType) {
+	/*public void setAdsType(int adsType) {
 		if(adserverRequest != null) {
 			adserverRequest.setAdstype(adsType);
 		}
@@ -2218,7 +2253,7 @@ public abstract class AdServerViewCore extends WebView {
 		} else {
 			return 3;
 		}
-	}
+	}*/
 	
 	public void setLogLevel(int logLevel)
 	{
