@@ -7,30 +7,25 @@
     android:id="@+id/main"
 >
 
-	<TextView  
-		android:id="@+id/lblAdContent" 
-	    android:layout_width="fill_parent" 
-	    android:layout_height="wrap_content" 
-	    android:text="@string/hello"
-    />
-	<Button android:layout_width="wrap_content" android:id="@+id/interstitialAd" android:layout_height="wrap_content" android:text="Interstitial Ad" android:width="200dip" android:height="100dip"></Button>
+	
+	<Button android:layout_width="wrap_content" android:id="@+id/interstitialAd" 
+	android:layout_height="wrap_content" android:text="Interstitial Ad" android:width="200dip" android:height="100dip"></Button>
 
 	<LinearLayout
 		android:id="@+id/frameAdContent" 
 	    android:orientation="vertical"
-	    android:layout_height="fill_parent"
+	    android:layout_height="wrap_content"
 	    android:layout_width="fill_parent">
 	    <!-- <WebView         android:id="@+id/webview"        android:layout_width="fill_parent"        android:layout_height="fill_parent"    />
 	    -->
 	    
-	   <com.adserver.adview.AdServerView 
+	   <!-- <com.adserver.adview.AdServerView 
+	   android:id="@+id/AdServerView" 
 	    android:layout_width="fill_parent" 
 	    android:layout_height="450dip"
 		site="8061" 
 		zone="20249" 
-		customParameters="param1,1,param2,2"
-		type="1"
-		/> 
+		/> -->
 	    
 	    <!--<com.adserver.adview.AdServerView 
 		
@@ -73,5 +68,9 @@
 			sizeY="100" 
 	   	/>-->		
 </LinearLayout>
+<Button android:layout_width="wrap_content" 
+	android:layout_height="wrap_content" android:text="Interstitial Ad" android:width="200dip" android:height="100dip"></Button>
+
+	
  
 </LinearLayout>

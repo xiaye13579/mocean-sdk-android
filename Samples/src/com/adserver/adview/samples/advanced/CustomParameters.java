@@ -41,19 +41,19 @@ public class CustomParameters  extends Activity{
         adServerView.setOnAdDownload(new OnAdDownload() {
 			
 			@Override
-			public void error(String arg0) {
+			public void error(AdServerView sender,String arg0) {
 				activityHandler.post(updateUI);
 				
 			}
 			
 			@Override
-			public void end() {
+			public void end(AdServerView sender) {
 				activityHandler.post(updateUI);
 				
 			}
 			
 			@Override
-			public void begin() {
+			public void begin(AdServerView sender) {
 				//activityHandler.post(updateUI);				
 			}
 		});

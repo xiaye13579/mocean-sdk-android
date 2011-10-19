@@ -54,6 +54,7 @@ public class OrmmaAssetController extends OrmmaController {
 
 	public void addAsset(String url, String alias) {
 		try {
+			mOrmmaView.ormmaEvent("addasset", "url="+url+";alias="+alias);
 			if(url.startsWith("ormma://screenshot")) {
 				Activity parent = (Activity)mContext;
 		        Window window = parent.getWindow();
@@ -261,6 +262,7 @@ public class OrmmaAssetController extends OrmmaController {
 	}
 
 	public void removeAsset(String alias) {
+		mOrmmaView.ormmaEvent("removeasset", "alias="+alias);
 		File dir = getAssetDir(getAssetPath(alias));
 		File file = new File(dir, getAssetName(alias));
 		
@@ -273,6 +275,7 @@ public class OrmmaAssetController extends OrmmaController {
 	}
 
 	public void removeAllAssets() {
+		mOrmmaView.ormmaEvent("removeallassets", "");
 		try {
 			File dir = getAssetDir("");
 			removeAssetsFolder(dir);

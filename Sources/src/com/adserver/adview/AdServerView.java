@@ -81,6 +81,8 @@ public class AdServerView extends AdServerViewCore {
 	 */
 	public AdServerView(Context context) {
 		super(context);
+		AutoDetectParameters(context);
+		isFirstTime =true;
 		//DetectParameters(context);
 		//initialize(context);
 	}
@@ -89,6 +91,10 @@ public class AdServerView extends AdServerViewCore {
 		autoDetectParametersThread = new AutoDetectParametersThread(context, this, adserverRequest);
 	}*/
 	
+	protected AdServerView(Context context, boolean expanded) {
+		super(context,expanded);
+	}
+
 	@Override	
 	protected void onAttachedToWindow() {
 		adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_INFO, "AttachedToWindow", "");

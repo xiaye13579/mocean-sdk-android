@@ -3,11 +3,14 @@ package com.adserver.adview;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -18,6 +21,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.xmlpull.v1.XmlPullParser;
 
 import android.Manifest;
 import android.app.Activity;
@@ -43,7 +47,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils.StringSplitter;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.Xml;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -117,11 +124,13 @@ public abstract class AdServerViewCore extends WebView {
 	private Integer defaultImageResource;
 	protected AdserverRequest adserverRequest;
 	private OnAdClickListener adClickListener;
+	private OnAdDownload adDownload;
+	private OnOrmmaListener ormmaListener;
+	private OnThirdPartyRequest onThirdPartyRequest;
 	private Long adReloadPeriod;
 	private Integer visibleMode;
 	private Integer advertiserId; 
 	private String groupCode;
-	private OnAdDownload adDownload;
 	
 	protected Context _context;
 	private LocationManager locationManager;
@@ -163,20 +172,21 @@ public abstract class AdServerViewCore extends WebView {
 	private OrmmaSensorController mSensorController;
 	private ViewState mViewState = ViewState.DEFAULT;
 	private AdServerViewCore mParentAd = null;
-	private ViewGroup mExpandedFrame;
+	private static ViewGroup mExpandedFrame;
 	public String mDataToInject = null;
 	private static String mScriptPath = null;
 	private String mContent;
 	private HashSet<String> excampaigns = new HashSet<String>();
-	
+		
 	AdLog adLog = new AdLog(this);
 	Dialog dialog;
 	private static OrmmaPlayer player;
 	private WebView view;
 
-	private boolean isFirstTime;
+	protected boolean isFirstTime;
 	ReloadTask reloadTask;
 	private ContentThread contentThread;
+	private OpenUrlThread openUrlThread;
 	private Timer reloadTimer;
 	private boolean IsManualUpdate = false;
 	
@@ -184,7 +194,12 @@ public abstract class AdServerViewCore extends WebView {
 	private String lastResponse;
 
 	private boolean internalBrowser = false;
-
+	private boolean isExpanded = false;
+	
+	public AdLog getLog()
+	{
+		return adLog;
+	}
 		
 	/**
 	 * Creation of viewer of advertising.
@@ -237,6 +252,14 @@ public abstract class AdServerViewCore extends WebView {
 		initialize(context, null);
 	}
 	
+	public AdServerViewCore(Context context, boolean expanded) {
+		super(context);
+		isExpanded =expanded; 
+		AutoDetectParameters(context);
+		initialize(context, null);
+		mViewState = ViewState.EXPANDED;
+	}
+	
 	
 	void AutoDetectParameters(Context context)
 	{
@@ -244,11 +267,23 @@ public abstract class AdServerViewCore extends WebView {
 		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog);
 	}
 	
+	public OnThirdPartyRequest getOnThirdPartyRequest() {
+		return onThirdPartyRequest;
+	}
+	
+	public void setOnThirdPartyRequest(OnThirdPartyRequest onThirdPartyRequest) {
+		this.onThirdPartyRequest = onThirdPartyRequest;
+	}
+	
 		/**
 	 * Get interface for advertising opening.
 	 */
 	public OnAdClickListener getOnAdClickListener() {
 		return adClickListener;
+	}
+	
+	public OnOrmmaListener getOnOrmmaListener() {
+		return ormmaListener;
 	}
 
 	/**
@@ -263,7 +298,15 @@ public abstract class AdServerViewCore extends WebView {
 	 * The interface for advertising opening in an internal browser.
 	 */
 	public interface OnAdClickListener {
-		public void click(String url);
+		public void click(AdServerView sender, String url);
+	}
+	
+	public interface OnOrmmaListener {
+		public void event(AdServerView sender, String name, String params);
+	}
+	
+	public interface OnThirdPartyRequest {
+		public void event(AdServerView sender, HashMap<String,String> params);
 	}
 
 	/**
@@ -273,15 +316,15 @@ public abstract class AdServerViewCore extends WebView {
 		/**
 		 * This event is fired before banner download begins. 
 		 */
-		public void begin();
+		public void begin(AdServerView sender);
 		/**
 		 * This event is fired after banner content fully downloaded. 
 		 */
-		public void end();
+		public void end(AdServerView sender);
 		/**
 		 * This event is fired after fail to download content. 
 		 */
-		public void error(String error);
+		public void error(AdServerView sender, String error);
 	}
 	
 	/**
@@ -297,6 +340,10 @@ public abstract class AdServerViewCore extends WebView {
 	 */
 	public void setOnAdDownload(OnAdDownload adDownload) {
 		this.adDownload = adDownload;
+	}
+	
+	public void setOnOrmmaListener(OnOrmmaListener ormmaListener) {
+		this.ormmaListener = ormmaListener;
 	}
 
 	/**
@@ -764,14 +811,19 @@ public abstract class AdServerViewCore extends WebView {
 	
 	void StartLoadContent(Context context, WebView view)
 	{
-		if((contentThread==null) || (contentThread.getState().equals(Thread.State.TERMINATED)))
+		try
 		{
-			contentThread = new ContentThread(getContext(), this);
-			contentThread.start();
-		} else if(contentThread.getState().equals(Thread.State.NEW))
-			contentThread.start();
-		else
-			StartTimer(context, view);
+			if((contentThread==null) || (contentThread.getState().equals(Thread.State.TERMINATED)))
+			{
+				contentThread = new ContentThread(getContext(), this);
+				contentThread.start();
+			} else if(contentThread.getState().equals(Thread.State.NEW))
+				contentThread.start();
+			else
+				StartTimer(context, view);
+		}catch (Exception e) {
+			adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
+		}
 	}
 	
 	private void StartTimer(Context context, WebView view)
@@ -833,6 +885,7 @@ public abstract class AdServerViewCore extends WebView {
 	}
 		
 	private void _contentThreadAction(Context context, WebView view) {
+		if (isExpanded) return;
 		InstallNotificationThread installNotificationThread = 
 			new InstallNotificationThread(context, advertiserId, groupCode);
 		installNotificationThread.start();
@@ -911,7 +964,7 @@ public abstract class AdServerViewCore extends WebView {
 			try {
 				if(mViewState != ViewState.EXPANDED) {
 					if(adserverRequest != null) {
-						interceptOnAdDownload.begin();
+						interceptOnAdDownload.begin((AdServerView)this);
 						
 						adserverRequest.setExcampaigns(getExcampaignsString());
 						data = requestGet(adserverRequest.createURL());						
@@ -919,18 +972,18 @@ public abstract class AdServerViewCore extends WebView {
 				}
 			} catch (Exception e) {
 				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "contentThreadAction.requestGet", e.getMessage());
-				interceptOnAdDownload.error(e.getMessage());				
+				interceptOnAdDownload.error((AdServerView)this,e.getMessage());				
 			}
 		}
 		
 		try {
 			if((data != null) && (data.length() > 0)) {
 				String dataToLowercase = data.toLowerCase();
-				if (dataToLowercase.contains("invalid params"))
+				if ((dataToLowercase.contains("invalid params")) || (dataToLowercase.contains("error: -1")))
 				{	
 					InterstitialClose();
 					StartTimer(context,view);
-					if(adDownload!= null) adDownload.error("invalid params");
+					if(adDownload!= null) adDownload.error((AdServerView)this, "invalid params");
 				}else
 				/*if(data.startsWith("<!--") && data.endsWith("-->")) {
 					if(adDownload != null) {
@@ -956,7 +1009,31 @@ public abstract class AdServerViewCore extends WebView {
 								handler.post(currentBrige);
 							} else
 							{
-								RestartExcampaings(campaignId,context,view);
+								if(onThirdPartyRequest!=null)
+								{
+									try
+									{
+									HashMap<String, String> params = new HashMap<String, String>();
+									params.put("type", type);
+									params.put("campaignId", campaignId);
+									params.put("trackUrl", trackUrl);
+									//params.put("externalParams", externalParams);
+									//<param name="publisherid">a14d5d3001ef3a1</param><param name="size"></param><param name="backgroundColor"></param><param name="primaryTextColor"></param><param name="secondaryTextColor"></param><param name="zip">null</param><param name="long">47.871094</param><param name="lat">56.6369</param>
+									String[] args = externalParams.split("</param>");
+									for(int x=0;x<args.length;x++)
+									{
+										String[] vals = args[x].split("\">");
+										String val = vals.length>1 ? vals[1] : "";
+										String arg = vals[0].split("\"")[1];
+										params.put(arg, val);
+									}
+									
+									onThirdPartyRequest.event((AdServerView) this, params);
+									}catch (Exception e) {
+										adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "onThirdPartyRequest", e.getMessage());										
+									}
+									StartTimer(context, view);
+								} else RestartExcampaings(campaignId,context,view);
 							}
 						} else {
 							handler.post(new RemoveAllChildViews(view));
@@ -987,7 +1064,7 @@ public abstract class AdServerViewCore extends WebView {
 			{
 				adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_WARNING, "contentThreadAction", "data = null isShownView="+Boolean.toString(isShownView));
 				
-				if(adDownload!= null) adDownload.error("empty server respons");
+				if(adDownload!= null) adDownload.error((AdServerView)this,"empty server respons");
 				
 				if(isShownView) InterstitialClose();
 				StartTimer(context,view);
@@ -1044,26 +1121,26 @@ public abstract class AdServerViewCore extends WebView {
 		
 		
 		@Override
-		public void begin() {
-			if(adDownload!= null) adDownload.begin();			
+		public void begin(AdServerView sender) {
+			if(adDownload!= null) adDownload.begin(sender);			
 		}
 
 		@Override
-		public void end() {
+		public void end(AdServerView sender) {
 			view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
 			handler.post(new RemoveChildsView(view,childCount,true));
 			StartTimer(context, view);			
-			if(adDownload!= null) adDownload.end();
+			if(adDownload!= null) adDownload.end(sender);
 		}
 
 		@Override
-		public void error(String error) {
+		public void error(AdServerView sender, String error) {
 			handler.post(new RemoveChildsView(view,childCount,false));
 			
 			if(campaignId != null)
 				RestartExcampaings(campaignId,context, view);
 			else StartTimer(context, view);
-			if(adDownload!= null) adDownload.error(error);			
+			if(adDownload!= null) adDownload.error(sender,error);			
 		}
 		
 	}
@@ -1220,7 +1297,7 @@ public abstract class AdServerViewCore extends WebView {
 			{
 				adLog.log(AdLog.LOG_LEVEL_2,AdLog.LOG_TYPE_INFO,"OverrideUrlLoading",url);
 				if(adClickListener != null) {
-						adClickListener.click(url);
+						adClickListener.click((AdServerView)view, url);
 				}else {
 			    	int isAccessNetworkState = context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE);
 			    	
@@ -1255,7 +1332,7 @@ public abstract class AdServerViewCore extends WebView {
 			((AdServerViewCore) view).onPageFinished();
 			
 			if(adDownload != null) {
-				adDownload.end();
+				adDownload.end((AdServerView)view);
 			}
 		}
 
@@ -1264,7 +1341,7 @@ public abstract class AdServerViewCore extends WebView {
 				String description, String failingUrl) {
 			super.onReceivedError(view, errorCode, description, failingUrl);
 			if(adDownload != null) {
-				adDownload.error(description);
+				adDownload.error((AdServerView)view, description);
 			}
 		}
 	}
@@ -1313,10 +1390,36 @@ public abstract class AdServerViewCore extends WebView {
 			}
 		}
 	}	
+	
+	private class OpenUrlThread extends Thread {
+		AdServerViewCore ad;
+		Context context;
+		String url;
+		
+		public OpenUrlThread(Context context,AdServerViewCore ad, String url) {
+			this.ad = ad;
+			this.context =context;
+			this.url = url;
+		}
+
+		@Override
+		public void run() {
+			ad._openUrlInExternalBrowser(context, url);
+		}
+	}
 
 	private void openUrlInExternalBrowser(Context context, String url) {
-		
 		if(url==null) return;
+		if((openUrlThread==null) || (openUrlThread.getState().equals(Thread.State.TERMINATED)))
+		{
+			openUrlThread = new OpenUrlThread(getContext(), this,url);
+			openUrlThread.start();
+		} else if(openUrlThread.getState().equals(Thread.State.NEW))
+			openUrlThread.start();
+	}
+		
+	
+	private void _openUrlInExternalBrowser(Context context, String url) {
 			String lastUrl = null;
 			String newUrl =  url;
 			URL connectURL;
@@ -1507,7 +1610,12 @@ public abstract class AdServerViewCore extends WebView {
 	}
 
 	public void injectJavaScript(String str) {
-		super.loadUrl("javascript:" + str);
+		try
+		{
+			super.loadUrl("javascript:" + str);
+		}catch (Exception e) {
+			//Log.e("injectJavaScript", e.getMessage()+" "+str);
+		}
 	}
 
 	public String getState(){
@@ -1529,20 +1637,26 @@ public abstract class AdServerViewCore extends WebView {
 					mOldWidth = lp.width;
 					lp.height = data.getInt(RESIZE_HEIGHT, lp.height);
 					lp.width = data.getInt(RESIZE_WIDTH, lp.width);
+					
+					ormmaEvent("resize", "mOldWidth="+String.valueOf(mOldWidth)+";OldHeight="+String.valueOf(mOldWidth)+
+							   ";width="+String.valueOf(lp.width)+";height="+String.valueOf(lp.height));
+					
 					requestLayout();
 					break;
 				}
 				case MESSAGE_CLOSE: {
 					switch (mViewState) {
 					case RESIZED:
+						ormmaEvent("close","viewState=resized");
 						ViewGroup.LayoutParams lp = getLayoutParams();
 						lp.height = mOldHeight;
-						lp.width = mOldWidth;
+						lp.width = mOldWidth;						
 						requestLayout();
 						mViewState = ViewState.DEFAULT;
 						break;
 					case EXPANDED:
 						if(mExpandedFrame != null) {
+							ormmaEvent("close","viewState=expanded");
 							closeExpanded(mExpandedFrame);
 							mViewState = ViewState.DEFAULT;
 						}
@@ -1551,14 +1665,17 @@ public abstract class AdServerViewCore extends WebView {
 					break;
 				}
 				case MESSAGE_HIDE: {
+					ormmaEvent("hide","");
 					setVisibility(View.INVISIBLE);
 					break;
 				}
 				case MESSAGE_SHOW: {
+					ormmaEvent("show","");
 					setVisibility(View.VISIBLE);
 					break;
 				}
 				case MESSAGE_EXPAND: {
+					ormmaEvent("expand","");
 					mViewState = ViewState.EXPANDED;
 					expandInUIThread((Dimensions) data.getParcelable(EXPAND_DIMENSIONS), data.getString(EXPAND_URL),
 							(Properties) data.getParcelable(EXPAND_PROPERTIES));
@@ -1566,10 +1683,12 @@ public abstract class AdServerViewCore extends WebView {
 				}
 	
 				case MESSAGE_PLAY_AUDIO: {
+					ormmaEvent("playaudio","");
 					handler.post(new SetupOrmmaAudioPlayer(data));
 					break;
 				}
 				case MESSAGE_PLAY_VIDEO: {
+					ormmaEvent("playvideo","fulscreen=false");
 					handler.post(new SetupOrmmaPlayer(view, data));
 					break;
 				}
@@ -1577,6 +1696,7 @@ public abstract class AdServerViewCore extends WebView {
 					String strMsg = data.getString(ERROR_MESSAGE);
 					String action = data.getString(ERROR_ACTION);
 					String injection = "window.ormmaview.fireErrorEvent(\""+strMsg+"\", \""+action+"\")";
+					ormmaEvent("error","msg="+strMsg+";action="+action);
 					injectJavaScript(injection);
 					break;
 				}
@@ -1606,6 +1726,19 @@ public abstract class AdServerViewCore extends WebView {
 		msg.setData(data);
 
 		mHandler.sendMessage(msg);
+	}
+	
+	boolean ormaEnabled = false;
+	
+	public void ormmaEvent(String name, String params)
+	{
+		if(ormmaListener!=null)
+		{	
+			if(!ormaEnabled) ormmaListener.event((AdServerView)this, "ormmaenabled", "");
+			ormaEnabled = true;
+			if(params!=null) params = params.replace(";", "&");
+			ormmaListener.event((AdServerView)this, name, params); 
+		}
 	}
 	
 	public void close() {
@@ -1643,6 +1776,9 @@ public abstract class AdServerViewCore extends WebView {
 			URL = getUrl();
 			dontLoad = true;
 		}
+		
+		if(mExpandedFrame!=null) ((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).removeView(mExpandedFrame);
+		
 		mExpandedFrame = new RelativeLayout(getContext());
 		if(properties.use_background) {
 			int opacity = new Float(255*properties.background_opacity).intValue();
@@ -1663,11 +1799,11 @@ public abstract class AdServerViewCore extends WebView {
 		android.view.WindowManager.LayoutParams lp = new WindowManager.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.FILL_PARENT);
 
-		AdServerViewCore expandedView = new AdServerView(getContext());
-		expandedView.setContent(mContent);
-		expandedView.loadExpandedUrl(URL, this, mExpandedFrame, dontLoad);
+		AdServerView expandedView = new AdServerView(getContext(),true);
+		//expandedView.loadExpandedUrl(URL, this, mExpandedFrame, dontLoad);
 		mExpandedFrame.addView(expandedView, adLp);
-
+		expandedView.setContent(mContent);
+		
 		((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).addView(mExpandedFrame, lp);
 	}
 	
@@ -1717,6 +1853,7 @@ public abstract class AdServerViewCore extends WebView {
 
 	public void setContent(String content) {
 		mContent = content;
+		if (isExpanded) loadDataWithBaseURL(null, mContent, "text/html", "UTF-8", null);
 	}
 
 	/**
@@ -2382,6 +2519,7 @@ public abstract class AdServerViewCore extends WebView {
 
 		if (properties.isFullScreen()) {
 			try {
+				ormmaEvent("playvideo","fulscreen=true");
 				Intent intent = new Intent();
 				intent.setAction("ORMMA_ANCION_HANDLER");
 				intent.putExtras(data);
@@ -2519,7 +2657,7 @@ public abstract class AdServerViewCore extends WebView {
 	public void openMap(String POI, boolean fullscreen) {
 		POI = POI.trim();
 		POI = OrmmaUtils.convert(POI);
-		POI = "geo:0,0?" + POI; 
+		POI = "geo:0,0?q=" + POI; 
 
 //		if(fullscreen){
 			try {

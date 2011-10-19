@@ -114,6 +114,7 @@ public class OrmmaNetworkController extends OrmmaController {
 	}
 
 	public void request(String uri, String display) {
+		mOrmmaView.ormmaEvent("request", "uri="+uri+";display="+display);
 		if(isOnline()) {
 			response(uri, display);
 		} else {

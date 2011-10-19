@@ -3,6 +3,7 @@ package com.adserver.adview.ormma;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -15,6 +16,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 
 import com.adserver.adview.AdServerViewCore;
 
@@ -71,12 +74,23 @@ public class OrmmaUtilityController extends OrmmaController {
 		}
 	}
 
+	public void eventAdded(String event)
+	{
+		mOrmmaView.ormmaEvent("service", "name="+event+";action=add");
+	}
+	
+	public void eventRemoved(String event)
+	{
+		mOrmmaView.ormmaEvent("service", "name="+event+";action=remove");
+	}
+	
 	public boolean supports(String feature) {
 		return (mFeatureMap.containsKey(feature))? mFeatureMap.get(feature): false;
 	}
 
 	public void sendSMS(String recipient, String body) {
 		if(supports("sms")) {
+			mOrmmaView.ormmaEvent("sms", "recipient="+recipient+";body="+body);
 			try {
 	            int sdkVersion = Integer.parseInt(Build.VERSION.SDK);
 	            if(sdkVersion < Build.VERSION_CODES.DONUT) {
@@ -106,6 +120,13 @@ public class OrmmaUtilityController extends OrmmaController {
 		}
 	}
 
+	public boolean getKeyboardState()
+	{
+		InputMethodManager imm = (InputMethodManager)mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+		boolean flag = imm.isAcceptingText();
+		return flag ;
+	}
+	
 	public void sendMail(String recipient, String subject, String body) {
 		if(supports("email")) {
 			try {
@@ -114,6 +135,9 @@ public class OrmmaUtilityController extends OrmmaController {
 				i.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{ recipient});
 				i.putExtra(android.content.Intent.EXTRA_SUBJECT, subject);
 				i.putExtra(android.content.Intent.EXTRA_TEXT, body);
+				
+				mOrmmaView.ormmaEvent("sendMail","recipient="+recipient+";subject="+subject+";body="+body);
+				
 				mContext.startActivity(i);
 			} catch (ActivityNotFoundException e) {
 				mOrmmaView.injectJavaScript("Ormma.fireError(\"sendMail\",\"Email client not available\")");
@@ -138,6 +162,7 @@ public class OrmmaUtilityController extends OrmmaController {
 	public void makeCall(String number) {
 		if(supports("phone")) {
 			try {
+				mOrmmaView.ormmaEvent("makeCall","number="+number);
 				String url = createTelUrl(number);
 				if(url == null) {
 					mOrmmaView.injectJavaScript("Ormma.fireError(\"makeCall\",\"Bad Phone Number\")");
@@ -155,6 +180,7 @@ public class OrmmaUtilityController extends OrmmaController {
 	public void createEvent(String date, String title, String body) {
 		if(supports("calendar")) {
 			try {
+				mOrmmaView.ormmaEvent("calendar", "date="+date+";title="+title+";body="+body);
 				String[] projection = new String[] { "_id", "name" };
 	            int sdkVersion = Integer.parseInt(Build.VERSION.SDK);
 

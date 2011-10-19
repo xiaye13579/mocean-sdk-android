@@ -8,17 +8,21 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Surface;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.URLUtil;
 
 
+import com.adserver.adview.AdLog;
 import com.adserver.adview.AdServerViewCore;
 import com.adserver.adview.ormma.util.OrmmaConfigurationBroadcastReceiver;
+import com.google.ads.AdView;
 
 public class OrmmaDisplayController extends OrmmaController {
 	private WindowManager mWindowManager;
@@ -54,6 +58,7 @@ public class OrmmaDisplayController extends OrmmaController {
 
 	public void open(String url) {
 		try {
+			mOrmmaView.ormmaEvent("open", "url="+url);
 			Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url.toString()));
 			mContext.startActivity(i);
 		} catch (Exception e) {
@@ -62,7 +67,6 @@ public class OrmmaDisplayController extends OrmmaController {
 	}
 
 	public void expand(String dimensions, String URL, String properties) {
-
 		try {
 			Dimensions d = (Dimensions) getFromJSON(new JSONObject(dimensions), Dimensions.class);
 			d.width *= mDensity;
@@ -105,6 +109,11 @@ public class OrmmaDisplayController extends OrmmaController {
 	}
 
 	public boolean isVisible() {
+		return (mOrmmaView.getVisibility() == View.VISIBLE);
+	}
+	
+	public boolean getViewable()
+	{
 		return (mOrmmaView.getVisibility() == View.VISIBLE);
 	}
 
@@ -150,7 +159,17 @@ public class OrmmaDisplayController extends OrmmaController {
 	}
 
 	public String getMaxSize() {
-		return getScreenSize();
+		Rect rect= new Rect();
+		Window window= ((Activity) mOrmmaView.getContext()).getWindow();
+		window.getDecorView().getWindowVisibleDisplayFrame(rect);
+		int statusBarHeight= rect.top;
+		int contentViewTop= window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+		int height=rect.bottom - contentViewTop;
+		int width=rect.right - rect.left;
+		
+		return "{ \"width\": " + width + ", " + 
+		"\"height\": " + height + "}";
+		//return getScreenSize();
 	}
 
 	public String getDefaultPosition() {
@@ -173,13 +192,19 @@ public class OrmmaDisplayController extends OrmmaController {
 	}
 	
 	public void startOrientationListener() {
-		if(mOrientationListenerCount == 0) {
+		if((mOrientationListenerCount == 0) || (mConfigurationBroadCastReceiver==null) || 
+				(mConfigurationFilter==null)) {
 			mConfigurationBroadCastReceiver = new OrmmaConfigurationBroadcastReceiver(this);
 			mConfigurationFilter = new IntentFilter();
 			mConfigurationFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
 		}
 		mOrientationListenerCount++;
-		mContext.registerReceiver(mConfigurationBroadCastReceiver, mConfigurationFilter);
+		try
+		{
+			mContext.registerReceiver(mConfigurationBroadCastReceiver, mConfigurationFilter);
+		}catch (Exception e) {
+			mOrmmaView.getLog().log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "startOrientationListener", e.getMessage());
+		}
 	}
 
 	public void stopOrientationListener() {
@@ -262,6 +287,7 @@ public class OrmmaDisplayController extends OrmmaController {
 	 * @param fullscreen - boolean indicating whether map to be launched in full screen
 	 */
 	public void openMap(String url, boolean fullscreen) {
+		mOrmmaView.ormmaEvent("openmap", "url="+url+";fullscreen="+String.valueOf(fullscreen));
 		Log.d(LOG_TAG, "openMap: url: " + url);
 		mOrmmaView.openMap(url, fullscreen);
 	}

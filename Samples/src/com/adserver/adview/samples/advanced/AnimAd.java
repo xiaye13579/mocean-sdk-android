@@ -45,12 +45,12 @@ public class AnimAd extends Activity {
         
         adserverView1.setOnAdDownload(new OnAdDownload() {
 			@Override
-			public void error(String arg0) {
+			public void error(AdServerView sender, String arg0) {
 				
 			}
 			
 			@Override
-			public void end() {
+			public void end(AdServerView sender) {
 				Animation animation = new TranslateAnimation(
 			            Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
 			            Animation.RELATIVE_TO_SELF, -1.0f, Animation.RELATIVE_TO_SELF, 0.0f
@@ -60,7 +60,7 @@ public class AnimAd extends Activity {
 			}
 			
 			@Override
-			public void begin() {
+			public void begin(AdServerView sender) {
 				
 			}
 		});

@@ -46,17 +46,17 @@ public class Callback extends Activity {
     class UserAdDownload implements OnAdDownload
     {
 
-		public void begin() {
+		public void begin(AdServerView sender) {
 			Log.d("Callback", "begin");
 			updateUi(mUpdateResults, "Begin Downloading", 500);
 		}
 
-		public void end() {
+		public void end(AdServerView sender) {
 			Log.d("Callback", "end");
 			updateUi(mUpdateResults, "End Downloading", 500);
 		}
 
-		public void error(String arg0) {
+		public void error(AdServerView sender,String arg0) {
 			Log.d("Callback","error: "+arg0+"\n");
 			updateUi(mUpdateResults, "Error :" + arg0, 5000);
 
