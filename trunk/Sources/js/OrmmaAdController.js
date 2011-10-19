@@ -2,6 +2,9 @@
 /*
  * Anonymous function to encapsulate the OrmmaAdController methods
  */
+ //getViewable,supports
+ 
+ 
 const ORMMA_STATE_UNKNOWN  = "unknown";
 const ORMMA_STATE_HIDDEN   = "hidden";
 const ORMMA_STATE_DEFAULT  = "default";
@@ -89,6 +92,7 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		 * @param {Function} listener function name / anonymous function to execute 
 		 */
 		addEventListener : function( evt, listener ) {
+			ORMMAUtilityControllerBridge.eventAdded(evt);
 	        if (typeof listener == 'function') {
 	            if (!this.events[evt]) {
 	                this.events[evt] = [];
@@ -130,10 +134,13 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 	        }        
 		},
 		
-		removeEventListener : function( evt, listener ) {
+		removeEventListener : function( evt, listener ) {		
 			// notify the native API that the appropriate sensor should be 
 			// brough on-line
 			// now remove the actual listener
+			
+			ORMMAUtilityControllerBridge.eventRemoved(evt);
+			
 			if (evt == ORMMA_EVENT_LOCATION_CHANGE){
 	        	_stopLocationListener();
 	        }
@@ -202,7 +209,8 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
          * @returns nothing
          */
         close : function () {
-			if(this.state == ORMMA_STATE_EXPANDED || this.state == ORMMA_STATE_RESIZED) {
+			//if(this.state == ORMMA_STATE_EXPANDED || this.state == ORMMA_STATE_RESIZED) 
+			{
             	_close();
 				fireEvent(ORMMA_EVENT_STATE_CHANGE, ORMMA_STATE_DEFAULT);
             }
@@ -229,6 +237,10 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 				_show();
 				fireEvent(ORMMA_EVENT_STATE_CHANGE, this.lastState);
 			}
+		},
+		
+		getKeyboardState : function() {
+			return _getKeyboardState();
 		},
 		
         /**
@@ -258,6 +270,10 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 
 		getTilt: function() {
 			return _getTilt();
+		},
+
+		getViewable: function() {
+			return _getViewable();
 		},
 
 		gotTiltChange: function(change){
@@ -344,6 +360,7 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		
 		ready: function(){
 			fireEvent(ORMMA_EVENT_READY);
+			if (window.ORMMAReady){ ORMMAReady();}			
 		},
 		
 		fireError: function(action, message){
@@ -456,7 +473,7 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
      * @returns nothing
      */
     function fireEvent (event, args) {
-		if (event == ORMMA_EVENT_STATE_CHANGE) {
+		if (event == ORMMA_EVENT_STATE_CHANGE && args != ORMMA_STATE_EXPANDED) {
 			Ormma.lastState = Ormma.state;
 			Ormma.state = args;
 		}
@@ -508,6 +525,10 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
         ORMMADisplayControllerBridge.open(URL);
     }
 
+	function _getViewable () {
+        ORMMADisplayControllerBridge.getViewable();
+    }
+
     function _resize (width, height) {
         ORMMADisplayControllerBridge.resize(width, height);
     }
@@ -557,6 +578,10 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		return false;
 	}
 
+	function _getKeyboardState() {
+		return ORMMAUtilityControllerBridge.getKeyboardState();
+	}
+	
 	function _getHeading() {
 		return ORMMASensorControllerBridge.getHeading();
 	}
@@ -666,12 +691,12 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		var res = '{';
 		
     	for(var key in jsonData) {
+    		
+    		if(res!='{'){res += ', ';}
     		res += '"' + key + '"';
     		res += ': ';
-    		res += '"' + jsonData[key] + '"';
-    		res += ', ';
-   		}
-   		
+    		res += '"' + jsonData[key] + '"';    		
+   		}   		
    		res += '}';
 		return res;	
 	}
@@ -877,3 +902,4 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 	}
 	
 })();
+window.ormma=window.Ormma;

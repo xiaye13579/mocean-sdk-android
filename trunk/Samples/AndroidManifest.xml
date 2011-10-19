@@ -18,8 +18,7 @@
 
     <application android:icon="@drawable/icon" android:label="@string/app_name">
     
-        <activity android:name="com.google.ads.AdActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
-    	<provider android:name="com.greystripe.android.sdk.AdContentProvider"
+        <provider android:name="com.greystripe.android.sdk.AdContentProvider"
 			android:authorities="com.adserver.adview.samples.AdContentProvider"
 			android:multiprocess="true"
 			android:exported="false" 
@@ -46,18 +45,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity> 
-        <activity android:name=".simple.SAS.SASAd" android:label="3d party/SmartAdServer/Ad">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>
-                <category android:name="android.intent.category.SAMPLE_CODE"></category>
-            </intent-filter>
-        </activity>
-        <activity android:name=".simple.SAS.SASBackfill" android:label="3d party/SmartAdServer/Backfill">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>
-                <category android:name="android.intent.category.SAMPLE_CODE"></category>
-            </intent-filter>
-        </activity> 
         <activity android:name=".simple.GreyStripe.GreyStripeAd" android:label="3d party/GreyStripe/Ad">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
@@ -77,18 +64,6 @@
             </intent-filter>
         </activity>
         <activity android:label="3d party/Millennial/Backfill" android:name=".simple.Millennial.MillennialBackfill">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>
-                <category android:name="android.intent.category.SAMPLE_CODE"></category>
-            </intent-filter>
-        </activity>    
-        <activity android:name=".simple.AdMob.AdMobAd" android:label="3d party/AdMob/Ad">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>  
-                <category android:name="android.intent.category.SAMPLE_CODE"></category>              
-            </intent-filter>
-        </activity>
-        <activity android:label="3d party/AdMob/Backfill" android:name=".simple.AdMob.AdMobBackfill">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>

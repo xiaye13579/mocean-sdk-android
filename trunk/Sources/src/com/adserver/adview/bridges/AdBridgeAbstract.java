@@ -6,6 +6,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.adserver.adview.AdLog;
+import com.adserver.adview.AdServerView;
 import com.adserver.adview.AdServerViewCore.OnAdClickListener;
 import com.adserver.adview.AdServerViewCore.OnAdDownload;
 
@@ -51,7 +52,7 @@ public abstract class AdBridgeAbstract implements Runnable{
 			if(!IsDownloadEnd)
 			{	
 				IsDownloadEnd =true;
-				if(onAdDownload !=null) onAdDownload.end();
+				if(onAdDownload !=null) onAdDownload.end((AdServerView)view);
 			}
 		}
 		
@@ -61,7 +62,7 @@ public abstract class AdBridgeAbstract implements Runnable{
 			{
 				AdLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_ERROR, "DownloadError", error);
 				IsDownloadError =true;
-				if(onAdDownload !=null) onAdDownload.error(error);
+				if(onAdDownload !=null) onAdDownload.error((AdServerView)view,error);
 			}
 		}
 		

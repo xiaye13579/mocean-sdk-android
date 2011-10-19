@@ -16,31 +16,14 @@ public class AdBridgeFactory {
 	{
 		try
 		{
-			/*if((type.equals("iVdopia"))&&
-					IsClassExist("com.vdopia.client.android.VDOView")) return new AdBridgeiVdopia(context, view, AdLog, campaignId, externalParams,trackUrl);
-			if((type.equals("Millennial"))&&
-					IsClassExist("com.millennialmedia.android.MMAdView")) return new AdBridgeMillennial(context, view, AdLog, campaignId, externalParams,trackUrl);			
-			if((type.equals("SmartAdServer"))&&
-					IsClassExist("com.smartadserver.library.SmartAdServerAd")) return new AdBridgeSAS(context, view, AdLog, campaignId, externalParams,trackUrl);
-			//if(type.equals("admob"))&&(AdBridgeSAS.IsAvailable())) return new AdBridgeAdMob(context, view, AdLog,campaignId, externalParams,trackUrl);
-			if((type.equals("GreyStripe"))&&
-					IsClassExist("com.greystripe.android.sdk.BannerView")) return new AdBridgeGreyStripe(context, view, AdLog, campaignId, externalParams,trackUrl);
-			if((type.equals("Medialets"))&&
-					IsClassExist("com.medialets.advertising.AdView")) return new AdBridgeMedialets(context, view,AdLog, campaignId, externalParams,trackUrl);		
-			*/
-			
+
 			Class obj=null;
 			if((type.equalsIgnoreCase("iVdopia"))&&
 					IsClassExist("com.vdopia.client.android.VDOView")) obj = Class.forName("com.adserver.adview.bridges.AdBridgeiVdopia");
 			if((type.equalsIgnoreCase("Millennial"))&&
 					IsClassExist("com.millennialmedia.android.MMAdView")) obj = Class.forName("com.adserver.adview.bridges.AdBridgeMillennial");			
-			if((type.equalsIgnoreCase("SmartAdServer"))&&
-					IsClassExist("com.smartadserver.library.SmartAdServerAd"))obj = Class.forName("com.adserver.adview.bridges.AdBridgeSAS");
 			if((type.equalsIgnoreCase("GreyStripe"))&&
 					IsClassExist("com.greystripe.android.sdk.BannerView")) obj = Class.forName("com.adserver.adview.bridges.AdBridgeGreyStripe");
-			if((type.equalsIgnoreCase("admob"))&&
-					IsClassExist("com.google.ads.AdView")) obj = Class.forName("com.adserver.adview.bridges.AdBridgeAdMob");
-		
 			if(obj!=null) return (AdBridgeAbstract)obj.getConstructor(new Class[]{Context.class, WebView.class,AdLog.class, String.class,
 					String.class, String.class})
 				.newInstance(context, view,AdLog, campaignId, externalParams,trackUrl);		
