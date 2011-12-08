@@ -23,7 +23,7 @@ public class ORRMAlevel1 extends Activity {
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         
          
-        AdServerView adserverView = new AdServerView(this,8061,17487);
+        AdServerView adserverView = new AdServerView(this,17340,53923);
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,ApiDemos.BANNER_HEIGHT));
 		linearLayout.addView(adserverView);

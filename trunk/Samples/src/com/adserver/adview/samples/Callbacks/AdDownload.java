@@ -1,4 +1,4 @@
-package com.adserver.adview.samples.advanced;
+package com.adserver.adview.samples.Callbacks;
 
 import android.app.Activity;
 import android.content.Context;
@@ -15,7 +15,7 @@ import com.adserver.adview.AdServerViewCore.OnAdDownload;
 import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
-public class Callback extends Activity {
+public class AdDownload extends Activity {
     /** Called when the activity is first created. */
 	private Context context;
 	private LinearLayout linearLayout;

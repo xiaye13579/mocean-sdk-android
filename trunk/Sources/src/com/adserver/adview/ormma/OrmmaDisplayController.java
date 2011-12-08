@@ -22,14 +22,13 @@ import android.webkit.URLUtil;
 import com.adserver.adview.AdLog;
 import com.adserver.adview.AdServerViewCore;
 import com.adserver.adview.ormma.util.OrmmaConfigurationBroadcastReceiver;
-import com.google.ads.AdView;
 
 public class OrmmaDisplayController extends OrmmaController {
 	private WindowManager mWindowManager;
 	private OrmmaConfigurationBroadcastReceiver mConfigurationBroadCastReceiver;
 	private IntentFilter mConfigurationFilter;
 	private int mOrientationListenerCount = 0;
-	private float mDensity;
+	//private float mDensity;
 	private Dimensions defaultPosition;
 	private static final String LOG_TAG = "OrmmaDisplayController";
 
@@ -37,22 +36,32 @@ public class OrmmaDisplayController extends OrmmaController {
 		super(adView, c);
 		DisplayMetrics metrics = new DisplayMetrics();
 		((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		mDensity = metrics.density;
+		//mDensity = metrics.density;
 		mWindowManager = (WindowManager) c.getSystemService(Context.WINDOW_SERVICE);
 	}
 
+	public String getPlacementType()
+	{
+		return mOrmmaView.isInterstitial() ? "interstitial" : "inline";
+	}
+	
+	public void useCustomClose(boolean flag)
+	{
+		mOrmmaView.useCustomClose(flag);
+	}
+	
 	public void getState() {
 		mOrmmaView.getState();
 	}
 	
 	public void resize(int width, int height) {
-		DisplayMetrics metrics = new DisplayMetrics();
+		/*DisplayMetrics metrics = new DisplayMetrics();
 		mWindowManager.getDefaultDisplay().getMetrics(metrics);
 
 		if ((height > metrics.heightPixels) || (width > metrics.widthPixels)) {
 			mOrmmaView.injectJavaScript("Ormma.fireError(\"resize\",\"Maximum size exceeded\")");
-		} else {
-			mOrmmaView.resize((int)(mDensity*width), (int)(mDensity*height));
+		} else*/ {
+			mOrmmaView.resize((int)(/*mDensity*/width/*mDensity*/), (int)(/*mDensity*/height/*mDensity*/));
 		}
 	}
 
@@ -66,14 +75,15 @@ public class OrmmaDisplayController extends OrmmaController {
 		}
 	}
 
-	public void expand(String dimensions, String URL, String properties) {
+	public void expand(String URL, String properties) {
 		try {
-			Dimensions d = (Dimensions) getFromJSON(new JSONObject(dimensions), Dimensions.class);
-			d.width *= mDensity;
-			d.height *= mDensity;
-			d.x *= mDensity;
-			d.y *= mDensity;
-			if (d.height < 0)
+			Dimensions d = new Dimensions(); //(Dimensions) getFromJSON(new JSONObject(dimensions), Dimensions.class);
+			Properties prop = (Properties) getFromJSON(new JSONObject(properties), Properties.class);
+			d.width = prop.width;//*mDensity;
+			d.height =prop.height;//*mDensity;
+			d.x = 0;
+			d.y = 0;
+			/*if (d.height < 0)
 				d.height = mOrmmaView.getHeight();
 			if (d.width < 0)
 				d.width = mOrmmaView.getWidth();
@@ -84,9 +94,9 @@ public class OrmmaDisplayController extends OrmmaController {
 			if (d.y < 0) {
 				int topStuff = 0;// ((Activity)mContext).findViewById(Window.ID_ANDROID_CONTENT).getTop();
 				d.y = loc[1] - topStuff;
-			}
+			}*/
 			
-			mOrmmaView.expand(d, URL, (Properties) getFromJSON(new JSONObject(properties), Properties.class));
+			mOrmmaView.expand(d, URL, prop);
 		} catch (NumberFormatException e) {
 			mOrmmaView.injectJavaScript("Ormma.fireError(\"expand\",\"Wrong number\")");
 		} catch (JSONException e) {
@@ -113,13 +123,14 @@ public class OrmmaDisplayController extends OrmmaController {
 	}
 	
 	public boolean getViewable()
-	{
+	{		
 		return (mOrmmaView.getVisibility() == View.VISIBLE);
+		
 	}
 
 	public String dimensions() {
-		return "{ \"top\" :" + mOrmmaView.getTop()*mDensity + "," + "\"left\" :" + mOrmmaView.getLeft()*mDensity + "," + "\"bottom\" :"
-				+ mOrmmaView.getBottom()*mDensity + "," + "\"right\" :" + mOrmmaView.getRight()*mDensity + "}";
+		return "{ \"top\" :" + mOrmmaView.getTop()/*mDensity*/ + "," + "\"left\" :" + mOrmmaView.getLeft()/*mDensity*/ + "," + "\"bottom\" :"
+				+ mOrmmaView.getBottom()/*mDensity*/ + "," + "\"right\" :" + mOrmmaView.getRight()/*mDensity*/ + "}";
 	}
 
 	public int getOrientation() {
@@ -154,8 +165,8 @@ public class OrmmaDisplayController extends OrmmaController {
 	}
 
 	public String getSize() {
-		return "{ \"width\": " + mOrmmaView.getWidth()*mDensity + ", " + 
-		"\"height\": " + mOrmmaView.getHeight()*mDensity + "}";
+		return "{ \"width\": " + mOrmmaView.getWidth()/*mDensity*/ + ", " + 
+		"\"height\": " + mOrmmaView.getHeight()/*mDensity*/ + "}";
 	}
 
 	public String getMaxSize() {
@@ -184,10 +195,10 @@ public class OrmmaDisplayController extends OrmmaController {
 	public void setDefaultPosition() {
 		if(defaultPosition == null) {
 			defaultPosition = new Dimensions();
-			defaultPosition.x = (int)(mOrmmaView.getLeft()*mDensity);
-			defaultPosition.y = (int)(mOrmmaView.getTop()*mDensity);
-			defaultPosition.width = (int)(mOrmmaView.getWidth()*mDensity);
-			defaultPosition.height = (int)(mOrmmaView.getHeight()*mDensity);
+			defaultPosition.x = (int)(mOrmmaView.getLeft()/*mDensity*/);
+			defaultPosition.y = (int)(mOrmmaView.getTop()/*mDensity*/);
+			defaultPosition.width = (int)(mOrmmaView.getWidth()/*mDensity*/);
+			defaultPosition.height = (int)(mOrmmaView.getHeight()/*mDensity*/);
 		}
 	}
 	
@@ -298,11 +309,11 @@ public class OrmmaDisplayController extends OrmmaController {
 	 * @param d - dimensions received from java script
 	 * @return
 	 */
-	private Dimensions getDeviceDimensions(Dimensions d){
-		d.width *= mDensity;
-		d.height *= mDensity;
-		d.x *= mDensity;
-		d.y *= mDensity;
+	/*private Dimensions getDeviceDimensions(Dimensions d){
+		d.width /= mDensity;
+		d.height /= mDensity;
+		d.x /= mDensity;
+		d.y /= mDensity;
 		if (d.height < 0)
 			d.height = mOrmmaView.getHeight();
 		if (d.width < 0)
@@ -316,5 +327,5 @@ public class OrmmaDisplayController extends OrmmaController {
 			d.y = loc[1] - topStuff;
 		}
 		return d;
-	}
+	}*/
 }

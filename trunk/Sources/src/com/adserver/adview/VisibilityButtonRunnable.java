@@ -1,19 +1,20 @@
 package com.adserver.adview;
 
+import android.app.Dialog;
 import android.widget.Button;
 
 public class VisibilityButtonRunnable implements Runnable {
 	private Button button;
-	private int visibility;
+	private int visibility;	
 	
-	public VisibilityButtonRunnable(Button button, int visibility) {
+	public VisibilityButtonRunnable( Button button, int visibility) {
 		this.button = button;
-		this.visibility = visibility;
+		this.visibility = visibility;		
 	}
 
 	public void run() {
 		if(button != null) {
-			button.setVisibility(visibility);
-		}
+			button.setVisibility(visibility);			
+		}		
 	}
 }

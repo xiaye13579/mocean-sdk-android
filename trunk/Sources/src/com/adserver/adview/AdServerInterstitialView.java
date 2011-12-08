@@ -22,6 +22,9 @@ public class AdServerInterstitialView extends AdServerView {
 	public AdServerInterstitialView(Context context, Integer site, Integer zone) {
 		super(context, site, zone);
 	}
+	public AdServerInterstitialView(Context context) {
+		super(context);
+	}
 
 	/*
 	 *  Show interstitial advertising.
@@ -54,8 +57,6 @@ public class AdServerInterstitialView extends AdServerView {
 		}
 		
 		((AdServerInterstitialView)adServerView).dialog = dialog;
-		
-		dialog.setCancelable(false);
 		
 		if (adServerView.getParent() != null) {
 			((ViewGroup)adServerView.getParent()).removeAllViews();
@@ -91,11 +92,12 @@ public class AdServerInterstitialView extends AdServerView {
 			closeButton.setVisibility(View.VISIBLE);
 		} else {
 			closeButton.setVisibility(View.INVISIBLE);
-			ShowCloseButtonThread showButtonThread = new ShowCloseButtonThread(handler, closeButton, showCloseButtonTime);
+			dialog.setCancelable(false);
+			ShowCloseButtonThread showButtonThread = new ShowCloseButtonThread(handler,dialog, closeButton, showCloseButtonTime);
 			showButtonThread.start();
 		}
 		
-		if(autoCloseInterstitialTime > 0) {
+		if(autoCloseInterstitialTime > 0) {						
 			CloseDialogThread closeDialogThread = new CloseDialogThread(handler, dialog, autoCloseInterstitialTime);
 			closeDialogThread.start();
 		}
@@ -103,6 +105,11 @@ public class AdServerInterstitialView extends AdServerView {
 		dialog.setContentView(mainLayout);
 		dialog.show();
 		adServerView.update();
+	}
+	
+	@Override
+	public boolean isInterstitial() {
+		return true;
 	}
 	
 	@Override

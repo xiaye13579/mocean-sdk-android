@@ -28,6 +28,7 @@ public class AdserverRequest {
 	private final String parameter_userAgent = "ua";
 	private final String parameter_keywords = "keywords";
 	private final String parameter_premium = "premium";
+	private final String parameter_track = "track";
 	private final String parameter_test = "test";
 	private final String parameter_count = "count";
 	private final String parameter_country = "country";
@@ -254,6 +255,20 @@ public class AdserverRequest {
 					parameters.remove(parameter_test);
 				}
 			}
+		}
+		return this;
+	}
+	
+	public AdserverRequest setTrack(Boolean value) {
+		synchronized(parameters) {
+			if(value != null) {
+			
+				if(value) {
+					parameters.put(parameter_track, "1");
+				} else {
+					parameters.put(parameter_track, "0");
+				}			
+			}else parameters.remove(parameter_track);
 		}
 		return this;
 	}
@@ -695,6 +710,13 @@ public class AdserverRequest {
 		synchronized(parameters) {
 			String premium = parameters.get(parameter_premium);
 			return getIntParameter(premium,AdServerViewCore.PREMIUM_STATUS_BOTH);
+		}
+	}
+	
+	public Integer getTrack() {
+		synchronized(parameters) {
+			String track = parameters.get(parameter_track);
+			return getIntParameter(track,null);
 		}
 	}
 

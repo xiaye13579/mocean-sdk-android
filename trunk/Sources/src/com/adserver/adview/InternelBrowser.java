@@ -73,7 +73,7 @@ public class InternelBrowser extends Dialog {
 		bottomLayout.setId(ID_BOTTOM);
 		bottomLayout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT,0f));
 		bottomLayout.setOrientation(LinearLayout.HORIZONTAL);
-		bottomLayout.setBackgroundDrawable(GetDrawable("ib_bg_down.png"));
+		bottomLayout.setBackgroundDrawable(GetDrawable(_context,"ib_bg_down.png"));
 		
 		buttonBack = AddButton(bottomLayout,"ib_arrow_left_regular.png","ib_arrow_left_press.png","ib_arrow_left_disabled.png");
 		buttonForward = AddButton(bottomLayout,"ib_arrow_right_regular.png","ib_arrow_right_press.png","ib_arrow_right_disabled.png");
@@ -176,7 +176,7 @@ public class InternelBrowser extends Dialog {
 	{
 		Button button = new Button(_context);
 		button.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
-		button.setBackgroundDrawable(GetSelector(normal, pressed, disable));		
+		button.setBackgroundDrawable(GetSelector(_context,normal, pressed, disable));		
 		
 		LinearLayout ll = new LinearLayout(_context);
 		ll.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT,1f));
@@ -187,7 +187,7 @@ public class InternelBrowser extends Dialog {
 		{		
 			buttonStopRefresh = new Button(_context);
 			buttonStopRefresh.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
-			buttonStopRefresh.setBackgroundDrawable(GetSelector("ib_close_regular.png", "ib_close_press.png", null));
+			buttonStopRefresh.setBackgroundDrawable(GetSelector(_context,"ib_close_regular.png", "ib_close_press.png", null));
 			ll.addView(buttonStopRefresh);
 			buttonStopRefresh.setVisibility(buttonRefresh.GONE);
 		}
@@ -196,25 +196,25 @@ public class InternelBrowser extends Dialog {
 	}
 	
 	
-	StateListDrawable GetSelector(String normal,String pressed, String disable)
+	public static StateListDrawable GetSelector(Context context, String normal,String pressed, String disable)
 	{
 		StateListDrawable result = new StateListDrawable();
 		
 		result.addState((new int[] {-android.R.attr.state_pressed,
-				android.R.attr.state_enabled}),GetDrawable(normal)); 
+				android.R.attr.state_enabled}),GetDrawable(context,normal)); 
 		
 		if(pressed!=null) result.addState((new int[] {android.R.attr.state_pressed,
-				android.R.attr.state_enabled}),GetDrawable(pressed)); 
-		if(disable!=null) result.addState((new int[] {-android.R.attr.state_enabled}),GetDrawable(disable)); 
-			else result.addState((new int[] {-android.R.attr.state_enabled}),GetDrawable(normal));
+				android.R.attr.state_enabled}),GetDrawable(context,pressed)); 
+		if(disable!=null) result.addState((new int[] {-android.R.attr.state_enabled}),GetDrawable(context,disable)); 
+			else result.addState((new int[] {-android.R.attr.state_enabled}),GetDrawable(context,normal));
 		
 		return result;
 	}
 	
-	Drawable GetDrawable(String fileName)
+	public static Drawable GetDrawable(Context context, String fileName)
 	{
 		try {
-			return Drawable.createFromStream(_context.getAssets().open(fileName), null);
+			return Drawable.createFromStream(context.getAssets().open(fileName), null);
 		} catch (IOException e) {
 			return null;
 		}

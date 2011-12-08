@@ -72,6 +72,10 @@ public class OrmmaController {
 			background_color = 0;
 			background_opacity = 0;
 			is_modal = true;
+			width=0;
+			height=0;
+			useCustomClose = false;
+			lockOrientation = true;
 		};
 
 		public static final Parcelable.Creator<Properties> CREATOR = new Parcelable.Creator<Properties>() {
@@ -85,6 +89,10 @@ public class OrmmaController {
 		};
 		public TransitionStringEnum transition;
 		public NavigationStringEnum navigation;
+		public int width;
+		public int height;
+		public boolean useCustomClose;
+		public boolean lockOrientation;
 		public boolean use_background;
 		public int background_color;
 		public float background_opacity;
@@ -137,7 +145,7 @@ public class OrmmaController {
 				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 
 		}

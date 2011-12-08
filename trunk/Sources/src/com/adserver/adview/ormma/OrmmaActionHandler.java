@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.HeterogeneousExpandableList;
 import android.widget.RelativeLayout;
 
 import com.adserver.adview.AdServerViewCore;
@@ -28,7 +30,7 @@ public class OrmmaActionHandler extends Activity {
 
 		Bundle data = getIntent().getExtras();
 		
-		layout = new RelativeLayout(this);
+		layout = new RelativeLayout(getApplicationContext());
 		layout.setLayoutParams(new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		setContentView(layout);
 		
@@ -77,7 +79,7 @@ public class OrmmaActionHandler extends Activity {
 
 		Dimensions playDimensions = (Dimensions)playData.getParcelable(AdServerViewCore.DIMENSIONS);		
 				
-		OrmmaPlayer player = new OrmmaPlayer(this);
+		OrmmaPlayer player = new OrmmaPlayer(getApplicationContext());
 		player.setPlayData(properties,OrmmaUtils.getData(AdServerViewCore.EXPAND_URL, playData));
 		
 		RelativeLayout.LayoutParams lp;
