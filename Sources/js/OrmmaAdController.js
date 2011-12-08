@@ -23,6 +23,7 @@ const ORMMA_EVENT_SCREEN_CHANGE = "screenChange";
 const ORMMA_EVENT_SHAKE = "shake";
 const ORMMA_EVENT_SIZE_CHANGE = "sizeChange";
 const ORMMA_EVENT_STATE_CHANGE = "stateChange";
+const ORMMA_EVENT_VIEWABLE_CHANGE = "viewableChange";
 const ORMMA_EVENT_TILT_CHANGE = "tiltChange";
 const ORMMA_EVENT_ASSET_READY = "assetReady";
 const ORMMA_EVENT_ASSET_REMOVED = "assetRemoved";
@@ -47,7 +48,12 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
         /**
          * Holds the current property values
          */
+         
         expandProperties :  {
+        	"width" : 0,
+        	"height" : 0,
+        	"useCustomClose" :  false,
+            "lockOrientation" : false,
 			"use-background" : false,
 			"background-color" : "#FFFFFF",
 			"background-opacity" : 1.0,
@@ -92,8 +98,29 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		 * @param {Function} listener function name / anonymous function to execute 
 		 */
 		addEventListener : function( evt, listener ) {
+		
+		    if (evt != ORMMA_EVENT_ERROR &&
+		    	evt != ORMMA_EVENT_HEADING_CHANGE &&
+		    	evt != ORMMA_EVENT_KEYBOARD_CHANGE &&
+		    	evt != ORMMA_EVENT_LOCATION_CHANGE &&
+		    	evt != ORMMA_EVENT_NETWORK_CHANGE &&
+		    	evt != ORMMA_EVENT_ORIENTATION_CHANGE &&
+		    	evt != ORMMA_EVENT_READY &&
+		    	evt != ORMMA_EVENT_RESPONSE &&
+		    	evt != ORMMA_EVENT_SCREEN_CHANGE &&
+		    	evt != ORMMA_EVENT_SIZE_CHANGE &&
+		    	evt != ORMMA_EVENT_STATE_CHANGE &&
+		    	evt != ORMMA_EVENT_TILT_CHANGE &&
+		    	evt != ORMMA_EVENT_ASSET_READY &&
+		    	evt != ORMMA_EVENT_ASSET_REMOVED &&
+		    	evt != ORMMA_EVENT_SHAKE &&
+		    	evt != ORMMA_EVENT_VIEWABLE_CHANGE &&
+		    	evt != ORMMA_EVENT_ASSET_RETIRED){
+	        	ormma.fireError('addEventListener','Unknown event: '+evt);
+	        }
+	        
 			ORMMAUtilityControllerBridge.eventAdded(evt);
-	        if (typeof listener == 'function') {
+			if (typeof listener == 'function') {
 	            if (!this.events[evt]) {
 	                this.events[evt] = [];
 	            }
@@ -131,7 +158,7 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 
 			if (evt == ORMMA_EVENT_RESPONSE){
 	        	_startNetworkListener();
-	        }        
+	        }       
 		},
 		
 		removeEventListener : function( evt, listener ) {		
@@ -174,18 +201,29 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 	            if (listenerIndex !== -1) {
 	                this.events[evt].listeners.splice(listenerIndex, 1);
 	            }
+	        }else
+	        {
+	       		ormma.fireError('removeEventListener','Listener not currently registered for event \''+evt+'\'');
 	        }
 		},
 
-		expand : function (dimensions, URL){
-			if(this.state == ORMMA_STATE_DEFAULT || this.state == ORMMA_STATE_RESIZED) {
-				this.dimensions = dimensions;
-				_expand(dimensions, URL, this.expandProperties);
-				var data = { dimensions : dimensions,
-						 properties : this.expandProperties };
-	            fireEvent(ORMMA_EVENT_SIZE_CHANGE, data);
-				fireEvent(ORMMA_EVENT_STATE_CHANGE, ORMMA_STATE_EXPANDED);
-			}
+		expand : function (URL){
+			//if(this.state == ORMMA_STATE_DEFAULT) {
+			 	if(URL==undefined)
+				{
+					_resize(this.getExpandProperties().width,this.getExpandProperties().height);
+				}
+				else
+				{
+					_expand(URL, this.getExpandProperties());					
+				}
+				var data = { // dimensions : dimensions,
+							 properties : this.getExpandProperties() };
+				fireEvent(ORMMA_EVENT_SIZE_CHANGE, data);
+				fireEvent(ORMMA_EVENT_STATE_CHANGE, ORMMA_STATE_EXPANDED);				
+			//}else{
+			//	ormma.fireError('expand','Can only expand from the default state');
+			//}
 		},
 
         /**
@@ -194,13 +232,16 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
          * @returns nothing
          */
         resize : function (width, height) {
-			if(this.state == ORMMA_STATE_DEFAULT) {
+        	//if(this.state == ORMMA_STATE_DEFAULT) {
 	            _resize(width, height);
 	            var data = { dimensions : {width : width, height: height},
 						 properties : this.expandProperties };
 	            fireEvent(ORMMA_EVENT_SIZE_CHANGE, data);
 				fireEvent(ORMMA_EVENT_STATE_CHANGE, ORMMA_STATE_RESIZED);
-            }
+            //}else
+            //{
+            //   ormma.fireError('resize','Cannot resize an ad that is not in the default state');
+            //}
         },
 
         /**
@@ -209,7 +250,11 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
          * @returns nothing
          */
         close : function () {
-			//if(this.state == ORMMA_STATE_EXPANDED || this.state == ORMMA_STATE_RESIZED) 
+			if(this.state == ORMMA_STATE_DEFAULT)
+			{
+				ormma.hide();
+			} 
+			else
 			{
             	_close();
 				fireEvent(ORMMA_EVENT_STATE_CHANGE, ORMMA_STATE_DEFAULT);
@@ -228,7 +273,8 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		hide : function() {
 			if(this.state == ORMMA_STATE_DEFAULT) {
 				_hide();
-				fireEvent(ORMMA_EVENT_STATE_CHANGE, ORMMA_STATE_HIDDEN);
+				fireEvent(ORMMA_EVENT_STATE_CHANGE, ORMMA_STATE_HIDDEN);				
+				fireEvent(ORMMA_EVENT_VIEWABLE_CHANGE, false);				
 			}
 		},
 
@@ -236,6 +282,10 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 			if(this.state == ORMMA_STATE_HIDDEN) {
 				_show();
 				fireEvent(ORMMA_EVENT_STATE_CHANGE, this.lastState);
+				fireEvent(ORMMA_EVENT_VIEWABLE_CHANGE, true);
+			}else
+			{
+				ormma.fireError('show','Ad is currently visible');
 			}
 		},
 		
@@ -272,6 +322,10 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 			return _getTilt();
 		},
 
+		isViewable: function() {
+			return _getViewable();
+		},
+		
 		getViewable: function() {
 			return _getViewable();
 		},
@@ -351,6 +405,15 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		},
 		
 		getExpandProperties: function() {
+			var ms = this.getMaxSize();
+			if (this.expandProperties.width <= 0 || this.expandProperties.width == undefined ) 
+			{
+			   this.expandProperties.width = ms.width;
+			}
+			if (this.expandProperties.height <= 0|| this.expandProperties.height == undefined ) 
+			{
+			   this.expandProperties.height = ms.height; 
+			}
 			return this.expandProperties;
 		},
 
@@ -438,6 +501,16 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		}, 
 		openMap: function (POI, fullscreen) {
 			_openMap(POI, fullscreen);
+		},
+		getPlacementType: function(){
+			return _getPlacementType();
+		},
+		getVersion: function(){
+			return "1.1.0";
+		},
+		useCustomClose: function(flag)
+		{
+			_useCustomClose(flag);
 		}
 		
 	};
@@ -473,7 +546,8 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
      * @returns nothing
      */
     function fireEvent (event, args) {
-		if (event == ORMMA_EVENT_STATE_CHANGE && args != ORMMA_STATE_EXPANDED) {
+		//if (event == ORMMA_EVENT_STATE_CHANGE && args != ORMMA_STATE_EXPANDED) {
+		if (event == ORMMA_EVENT_STATE_CHANGE ) {
 			Ormma.lastState = Ormma.state;
 			Ormma.state = args;
 		}
@@ -486,7 +560,9 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
                 	(Ormma.events[event].listeners[i])(args.message, args.action);
             	} else if(event == ORMMA_EVENT_STATE_CHANGE) {
                 	(Ormma.events[event].listeners[i])(args);
-            	} else if(event == ORMMA_EVENT_SIZE_CHANGE) {
+            	} else if(event == ORMMA_EVENT_VIEWABLE_CHANGE) {
+                	(Ormma.events[event].listeners[i])(args);
+                } else if(event == ORMMA_EVENT_SIZE_CHANGE) {
                 	(Ormma.events[event].listeners[i])(args.dimensions.width, args.dimensions.height);
             	} else if(event == ORMMA_EVENT_HEADING_CHANGE) {
                 	(Ormma.events[event].listeners[i])(args);
@@ -517,8 +593,18 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
    
     /* implementations of public methods for specific vendors */
 
-    function _expand(dimensions, URL, properties) {
-        ORMMADisplayControllerBridge.expand(convertJsonToString(dimensions), URL, convertJsonToString(properties));
+	function _useCustomClose(flag)
+	{
+		ORMMADisplayControllerBridge.useCustomClose(flag);
+	}
+
+	function _getPlacementType()
+	{
+		return ORMMADisplayControllerBridge.getPlacementType();
+	}
+
+    function _expand( URL, properties) {
+        ORMMADisplayControllerBridge.expand(URL, convertJsonToString(properties));
     }
 
     function _open(URL, controls) {
@@ -526,7 +612,7 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
     }
 
 	function _getViewable () {
-        ORMMADisplayControllerBridge.getViewable();
+        return ORMMADisplayControllerBridge.getViewable();
     }
 
     function _resize (width, height) {
@@ -903,3 +989,4 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 	
 })();
 window.ormma=window.Ormma;
+window.mraid=window.Ormma;

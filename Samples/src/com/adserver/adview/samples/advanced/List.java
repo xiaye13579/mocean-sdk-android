@@ -18,18 +18,10 @@ public class List extends Activity {
 	int baners[]=
 	{
 			20249,//Always working mOcean ad
-//			"16109",// Sample site-zone with video ad 
-//			16685,// Sample site-zone with Medialets ad
-//			16110,// Sample site-zone with iAd ad 
-			16938,// Sample site-zone with Millenial ad 
-			18165,// Sample site-zone with iVdopia ad 
-			21636,// Sample site-zone with AdMob ad  
-			21675,// Sample site-zone with SmartAdServer ad 
 			17490,// Sample site-zone with HTML ad 
 			17487,// Sample site-zone with ORMMA level1 ad 
 			17488,// Sample site-zone with ORMMA level2 ad 
 			17489,// Sample site-zone with ORMMA level3 ad 
-			16111,// Sample site-zone with Greystripe ad 
 	};
 	
     public void onCreate(Bundle savedInstanceState) {

@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import android.view.ViewParent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.MeasureSpec;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.webkit.WebView;
 import android.widget.Button;
@@ -62,8 +64,8 @@ public class MainAdvanced extends Activity {
 	    	 linearLayout.addView(adserverView);
 	     }
 	}
-	 
-    @Override
+	
+	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = this;
@@ -77,15 +79,22 @@ public class MainAdvanced extends Activity {
         setContentView(R.layout.main_advanced);
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         
+        ((Button) findViewById(R.id.btnAdd)).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				createBaner();
+			}
+		});
         
         
-        //new InternelBrowser(context).show();
         
         Button interstitialAd = (Button) findViewById(R.id.interstitialAd);
         interstitialAd.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				OrmmaDisplayController dc = new OrmmaDisplayController(adserverView, context);
+				adserverView.update();
+				/*OrmmaDisplayController dc = new OrmmaDisplayController(adserverView, context);
 				String s = dc.getMaxSize();
 				s+= " ";
 				/*Rect rect= new Rect();
@@ -108,14 +117,19 @@ public class MainAdvanced extends Activity {
 				//adserverView.setVisibility(adserverView.getVisibility() == View.VISIBLE ? View.INVISIBLE :View.VISIBLE);
 				//adserverView.setUpdateTime(0);
 				//adserverView.update();
+				
 				/*AdServerInterstitialView interstitialView = 
-					new AdServerInterstitialView(context, 8061, 16112);
+					new AdServerInterstitialView(context);//, 8061, 8888);//16112);
 					//new AdServerInterstitialView(context, "10359", "21505");
+				interstitialView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
+				interstitialView.setSite(8061);
+				interstitialView.setZone(8888);
 				interstitialView.setLogLevel(AdLog.LOG_LEVEL_3);
-				interstitialView.setShowCloseButtonTime(3);
-				interstitialView.setAutoCloseInterstitialTime(20);
+				//interstitialView.setShowCloseButtonTime(3);
+				//interstitialView.setAutoCloseInterstitialTime(20);
 				interstitialView.setIsShowPhoneStatusBar(true);
-				interstitialView.show();*/
+				interstitialView.useCustomClose(false);
+				interstitialView.show();
 				//adserverView.setUpdateTime(adserverView.getUpdateTime() == 0 ? 1 : 0);
 				//((FrameLayout)findViewById(R.id.main)).refreshDrawableState();
 				
@@ -190,11 +204,11 @@ public class MainAdvanced extends Activity {
         	return;
         }*/
         
-        //if(true) return;
+        if(true) return;
         
         adserverView = new AdServerView(this);
-        adserverView.setSite(8061);
-        adserverView.setZone(21637);
+      //  adserverView.setSite(17340);
+      //  adserverView.setZone(53923);
       //  adserverView.setType(1);
 //       adserverView.setSite(8061);
 //        adserverView.setZone(22034);
@@ -203,7 +217,9 @@ public class MainAdvanced extends Activity {
         
         //adserverView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
         //adserverView.setSite(8061);
-        //adserverView.setZone(1306);
+        //adserverView.setZone(92008);
+        //adserverView.setZone(50001);
+        adserverView.setTrack(true);
 
 
 //        adserverView.setZone(1250);
@@ -254,10 +270,13 @@ public class MainAdvanced extends Activity {
 			}
 		});
         
-        adserverView.setId(1);        
+        adserverView.setId(1);
+        //LinearLayout.LayoutParams lpNew = new LinearLayout.LayoutParams(320, 50);
+		//lpNew.gravity = Gravity.RIGHT;
+		//adserverView.setLayoutParams(lpNew);
         //adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 150));
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 150));
-		//adserverView.setUpdateTime(5);
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
+		adserverView.setUpdateTime(5000);
 		//adserverView.setVisibility(View.GONE);
 		
 		//adserverView.setOnAdClickListener(new OnAdClickListener() {
@@ -380,5 +399,55 @@ public class MainAdvanced extends Activity {
 		//linearLayout.removeAllViews();
 		
     }
+	
+	void createBaner()
+	{
+		//if(adserverView!=null) linearLayout.removeView(adserverView);
+		 	adserverView = new AdServerView(this);
+	        //adserverView.setSite(17340);
+	        //adserverView.setZone(53923);
+		 	adserverView.setSite(8061);
+	        //adserverView.setZone(20249);
+		 	adserverView.setZone(22034);
+	        adserverView.setTrack(true);
+	        adserverView.setOnThirdPartyRequest(new OnThirdPartyRequest() {
+				public void event(AdServerView sender, HashMap<String, String> params) {
+					
+				}
+			});
+	        adserverView.getZone();
+	        
+	        adserverView.setOnOrmmaListener(new OnOrmmaListener() {
+				
+				@Override
+				public void event(AdServerView sender, String name, String params) {
+					Log.w("<<<<<<<<<<<<<<"+name, params);				
+				}
+			});
+	        
+	        adserverView.setId(1);
+	        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));
+			adserverView.setUpdateTime(10);
+			OnAdDownload adDownload = new OnAdDownload() {
+				@Override
+				public void begin(AdServerView sender) {
+					Log.w("mojiva","mojiva: OnAdDownload begin");
+				}
+
+				@Override
+				public void end(AdServerView sender) {
+					Log.w("mojiva","mojiva: OnAdDownload end");
+				}
+
+				@Override
+				public void error(AdServerView sender,String error) {
+					Log.w("mojiva","mojiva: OnAdDownload error=" + error);
+				}
+			};
+			adserverView.setOnAdDownload(adDownload);
+	        
+			linearLayout.addView(adserverView);
+				
+	}
 
 }
