@@ -1,5 +1,5 @@
 <project name="AdViewer" default="release.build.3rdPaty">
-    <property name="android.dir" value="c:\eclipse\android-sdk-windows-1.5_r3"/>
+    <property name="android.dir" value="c:\eclipse\android-sdk"/>
     <property name="android.jar" value="${android.dir}\platforms\android-8\android.jar"/>
 
     <property name="release.dir" value="release"/>

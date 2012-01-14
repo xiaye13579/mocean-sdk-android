@@ -127,6 +127,16 @@ public class AdServerView extends AdServerViewCore {
 		super.onDetachedFromWindow();
 	}
 	
+	/*@Override
+	public void destroy() {
+		if (image!=null)
+		{
+			image.recycle();
+			image = null;
+		}
+		super.destroy();
+	}
+	
 	/*private class AutoDetectParametersThread extends Thread {
 		private Context context;
 		private AdServerViewCore adserverView;
