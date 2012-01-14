@@ -8,8 +8,10 @@ import java.util.logging.Logger;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -49,13 +51,42 @@ public class MainAdvanced extends Activity {
 	private LinearLayout linearLayout;
 	 AdServerView adserverView;
 	 
+	//byte[] b = new byte[12 * 1000 * 1000];
+	 
 	void CreateTest()
 	{
-		 AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);   
+		AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);   
 	     setContentView(R.layout.main_test);
 	     linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
-	     
-	     for(int x=0;x<300;x++)
+		adserverView = new AdServerView(this,8061,20249);
+   	 	adserverView.setId(1);        
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));
+        //adserverView.setUpdateTime(5);
+        /*adserverView.setOnAdDownload(new OnAdDownload() {
+			
+			@Override
+			public void error(AdServerView sender, String error) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void end(AdServerView sender) {
+				while(true);				
+			}
+			
+			@Override
+			public void begin(AdServerView sender) {
+				// TODO Auto-generated method stub
+				
+			}
+		});*/
+   	 	linearLayout.addView(adserverView);
+   	 
+		 /*AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);   
+	     setContentView(R.layout.main_test);
+	     linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
+	     for(int x=0;x<20;x++)
 	     {
 	    	 adserverView = new AdServerView(this,8061,20249);
 	    	 adserverView.setId(x+1);        
@@ -63,6 +94,7 @@ public class MainAdvanced extends Activity {
 	         adserverView.setUpdateTime(300);
 	    	 linearLayout.addView(adserverView);
 	     }
+	    */
 	}
 	
 	@Override
@@ -70,9 +102,14 @@ public class MainAdvanced extends Activity {
         super.onCreate(savedInstanceState);
         context = this;
         
-        if(false)
+        if(true)
         {
         	CreateTest();
+        	
+        	/*WebView view = new WebView(this);
+	    	view.loadUrl("http://developer.android.com/sdk/index.html");
+	    	setContentView(view);*/
+        	
         	return;        	
         }
         AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);   
@@ -204,7 +241,7 @@ public class MainAdvanced extends Activity {
         	return;
         }*/
         
-        if(true) return;
+        //if(true) return;
         
         adserverView = new AdServerView(this);
       //  adserverView.setSite(17340);
@@ -215,9 +252,9 @@ public class MainAdvanced extends Activity {
 //        adserverView.setAdserverURL("http://192.168.1.153/test_mocean/request.php");
 //        adserverView.setAdserverURL("http://192.168.1.153/mocean/ad.php");
         
-        //adserverView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
-        //adserverView.setSite(8061);
-        //adserverView.setZone(92008);
+        adserverView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
+        adserverView.setSite(8061);
+        adserverView.setZone(96001);
         //adserverView.setZone(50001);
         adserverView.setTrack(true);
 
@@ -276,7 +313,7 @@ public class MainAdvanced extends Activity {
 		//adserverView.setLayoutParams(lpNew);
         //adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 150));
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
-		adserverView.setUpdateTime(5000);
+		//adserverView.setUpdateTime(5000);
 		//adserverView.setVisibility(View.GONE);
 		
 		//adserverView.setOnAdClickListener(new OnAdClickListener() {

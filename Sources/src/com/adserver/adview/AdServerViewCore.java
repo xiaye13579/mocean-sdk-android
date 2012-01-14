@@ -263,6 +263,16 @@ public abstract class AdServerViewCore extends WebView {
 		mViewState = ViewState.EXPANDED;
 	}
 	
+	boolean isContentAligned;
+	public void setContentAlignment(boolean isContentAligned)
+	{
+		this.isContentAligned = isContentAligned;
+	}
+	
+	public boolean getContentAlignment()
+	{
+		return isContentAligned;
+	}
 	
 	public void setLayoutParams(ViewGroup.LayoutParams params) {
 		lastX = params.width;
@@ -509,6 +519,9 @@ public abstract class AdServerViewCore extends WebView {
 			Integer maxSizeY = getIntParameter(attrs.getAttributeValue(null, "maxSizeY"));
 			Integer paramBG = GetColor(attrs.getAttributeValue(null, "backgroundColor"));
 			Integer type = getIntParameter(attrs.getAttributeValue(null, "type"));
+			
+			Boolean isContentAligned = getBooleanParameter(attrs.getAttributeValue(null, "isContentAligned"));
+			if (isContentAligned != null) this.isContentAligned = isContentAligned;
 			
 			Boolean locationDetection= getBooleanParameter(attrs.getAttributeValue(null, "locationDetection"));
 			Boolean internelBr = getBooleanParameter(attrs.getAttributeValue(null, "internalBrowser")); 
@@ -1061,13 +1074,21 @@ public abstract class AdServerViewCore extends WebView {
 								handler.post(new SetupVideoAction(context, view, videoUrl, clickUrl));
 								StartTimer(context,view);
 							} else {
-								
-								data = "<html><head>" +
-								"<style>*{margin:0;padding:0}</style>"+
-								//"<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\" />"+
-								"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
-								"</head>" +
-								"<body style=\"background-color:#"+getBackgroundColor()+";margin: 0px; padding: 0px; width: 100%; height: 100%\">"+data+"</body></html>";
+								if(isContentAligned)
+								{
+									data = "<html><head>" +
+											"<style>*{margin:0;padding:0}</style>"+
+											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
+											"</head>" +
+											"<body style=\"background-color:#"+getBackgroundColor()+
+											";margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
+												
+								}else
+									data = "<html><head>" +
+											"<style>*{margin:0;padding:0}</style>"+
+											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
+											"</head>" +
+											"<body style=\"background-color:#"+getBackgroundColor()+";margin: 0px; padding: 0px; width: 100%; height: 100%\">"+data+"</body></html>";
 								
 								mContent = data;
 								view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
@@ -1542,12 +1563,11 @@ public abstract class AdServerViewCore extends WebView {
 					ViewGroup.LayoutParams lp = getLayoutParams();
 					mOldHeight = lp.height;
 					mOldWidth = lp.width;
-					lp.height = data.getInt(RESIZE_HEIGHT, lp.height);
-					lp.width = data.getInt(RESIZE_WIDTH, lp.width);
-					
 					ormmaEvent("resize", "mOldWidth="+String.valueOf(mOldWidth)+";OldHeight="+String.valueOf(mOldWidth)+
 							   ";width="+String.valueOf(lp.width)+";height="+String.valueOf(lp.height));
 					
+					lp.height = data.getInt(RESIZE_HEIGHT, lp.height);
+					lp.width = data.getInt(RESIZE_WIDTH, lp.width);
 					requestLayout();
 					lastX = x;
 					lastY = y;
