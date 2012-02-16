@@ -117,9 +117,9 @@ public abstract class AdServerViewCore extends WebView {
 	private static final String PREFS_FILE_NAME = "AdserverViewPrefs";
 	private static final String PREF_IS_FIRST_APP_LAUNCH = "isFirstAppLaunch";
 	private static final String FIRST_APP_LAUNCH_URL = "http://www.moceanmobile.com/appconversion.php";
-	private static final long AD_RELOAD_PERIOD = 120000; //in milliseconds
-	private static final long AD_STOP_CHECK_PERIOD = 10000; //in milliseconds
-	private static final long AD_RELOAD_SHORT_PERIOD = 100; //in milliseconds
+	//private static final long AD_RELOAD_PERIOD = 120000; //in milliseconds
+	//private static final long AD_STOP_CHECK_PERIOD = 10000; //in milliseconds
+	//private static final long AD_RELOAD_SHORT_PERIOD = 100; //in milliseconds
 	Handler handler = new Handler(Looper.getMainLooper());
 	private Integer defaultImageResource;
 	protected AdserverRequest adserverRequest;
@@ -485,7 +485,7 @@ public abstract class AdServerViewCore extends WebView {
 		if(adReloadPeriod != null) {
 			return new Long(adReloadPeriod/1000).intValue();
 		} else {
-			return new Long(AD_RELOAD_PERIOD/1000).intValue();
+			return new Long(Constants.AD_RELOAD_PERIOD/1000).intValue();
 		}
 	}
 
@@ -919,8 +919,8 @@ public abstract class AdServerViewCore extends WebView {
 				
 				if(IsManualUpdate)
 				{
-					adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "Manual Update, StartTimer", String.valueOf(AD_RELOAD_SHORT_PERIOD/1000));
-					reloadTimer.schedule(newReloadTask, AD_RELOAD_SHORT_PERIOD);
+					adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "Manual Update, StartTimer", String.valueOf(Constants.AD_RELOAD_SHORT_PERIOD/1000));
+					reloadTimer.schedule(newReloadTask, Constants.AD_RELOAD_SHORT_PERIOD);
 					reloadTask = newReloadTask;
 					return;
 				}
@@ -933,8 +933,8 @@ public abstract class AdServerViewCore extends WebView {
 						adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "StartTimer", "stopped");
 					}
 				} else {
-					reloadTimer.schedule(newReloadTask, AD_RELOAD_PERIOD);
-					adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "StartTimer", String.valueOf(AD_RELOAD_PERIOD/1000)+" default");
+					reloadTimer.schedule(newReloadTask, Constants.AD_RELOAD_PERIOD);
+					adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "StartTimer", String.valueOf(Constants.AD_RELOAD_PERIOD/1000)+" default");
 				}
 				
 				reloadTask = newReloadTask; 
@@ -1122,6 +1122,42 @@ public abstract class AdServerViewCore extends WebView {
 			StartTimer(context,view);
 		}
 		isFirstTime = false;
+	}
+	
+	void setResult(String result, String error)
+	{
+		/*if(error!=null)
+		{
+			adLog.log(AdLog.LOG_LEVEL_ALL, AdLog.LOG_TYPE_ERROR, "requestGet result["+String.valueOf(rcounterLocal)+"][ERROR]", error);
+			if(onAdEventHandler!= null)onAdEventHandler.error(this, error);
+			StartTimer(getContext(),view,Constants.UPDATE_TIME_INTERVAL*1000);
+			return;
+		}
+		
+		adLog.log(AdLog.LOG_LEVEL_ALL, AdLog.LOG_TYPE_INFO, "requestGet result["+String.valueOf(rcounterLocal)+"]", result);
+		
+		try {
+			if((result != null) && (result.length() > 0)) {
+				
+				if(isJSON)
+				{
+					if(autoCollapse) handler.post(new Runnable() {
+						
+						@Override
+						public void run() {
+							setVisibility(View.VISIBLE);							
+						}
+					});
+					adLayoutVector.addBanner(result,onAdEventHandler);
+					//ff if (onAdEventHandler!=null) onAdEventHandler.refresh(this);					
+				}
+				autoCollapse = false;
+				StartTimer(getContext(),view,Constants.UPDATE_TIME_INTERVAL*1000);
+			}
+		} catch (Exception e) {
+			adLog.log(AdLog.LOG_LEVEL_CRITICAL, AdLog.LOG_TYPE_ERROR, "setResult", e.getMessage());
+			StartTimer(getContext(),view,Constants.UPDATE_TIME_INTERVAL*1000);
+		}*/
 	}
 	
 	void InterstitialClose()
@@ -1422,7 +1458,7 @@ public abstract class AdServerViewCore extends WebView {
 	}
 		
 	
-	private void _openUrlInExternalBrowser(Context context, String url) {
+	private void _openUrlInExternalBrowser(final Context context, final String url) {
 			String lastUrl = null;
 			String newUrl =  url;
 			URL connectURL;
@@ -1444,12 +1480,18 @@ public abstract class AdServerViewCore extends WebView {
 			Uri uri = Uri.parse(newUrl);
 			if(internalBrowser && (uri.getScheme().equals("http") || uri.getScheme().equals("https")))
 			{
-				try
-				{
-					new InternelBrowser(context,url).show();
-				}catch (Exception e) {
-					adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "openUrlInInternalBrowser", e.getMessage());
-				}
+					handler.post(new Runnable() {
+						
+						@Override
+						public void run() {
+							try
+							{
+								new InternelBrowser(context,url).show();
+							}catch (Exception e) {
+								adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "openUrlInInternalBrowser", e.getMessage());
+							}
+						}
+					});
 			}
 			else
 			{
