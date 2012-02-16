@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, Main!</string>
+    <string name="app_name">AdserverView</string>
+    <string name="millennial_download_error">Millennial Ad View Failed</string>
+    <string name="grey_stripe_download_error">GreyStripe Ad View Failed</string>
+    <string name="ivdopia_download_error">iVdopia Ad View Failed</string>
+    <string name="admob_download_error">AdMob Ad View Failed</string>
+    
+    <string name="app_id">764f0842b9025416f78b6b99891cb70302bd8c50</string>
+    <string name="use_test_servers">true</string>  
+</resources>
