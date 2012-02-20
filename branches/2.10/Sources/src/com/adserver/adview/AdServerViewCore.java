@@ -16,12 +16,10 @@ import java.util.TimerTask;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Application;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -30,7 +28,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -38,7 +35,6 @@ import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -52,7 +48,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.ViewGroup.LayoutParams;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -67,14 +62,14 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.adserver.adview.ormma.OrmmaAssetController;
+import com.adserver.adview.ormma.OrmmaController.Dimensions;
+import com.adserver.adview.ormma.OrmmaController.PlayerProperties;
+import com.adserver.adview.ormma.OrmmaController.Properties;
 import com.adserver.adview.ormma.OrmmaDisplayController;
 import com.adserver.adview.ormma.OrmmaLocationController;
 import com.adserver.adview.ormma.OrmmaNetworkController;
 import com.adserver.adview.ormma.OrmmaSensorController;
 import com.adserver.adview.ormma.OrmmaUtilityController;
-import com.adserver.adview.ormma.OrmmaController.Dimensions;
-import com.adserver.adview.ormma.OrmmaController.PlayerProperties;
-import com.adserver.adview.ormma.OrmmaController.Properties;
 import com.adserver.adview.ormma.util.OrmmaPlayer;
 import com.adserver.adview.ormma.util.OrmmaUtils;
 
@@ -198,6 +193,8 @@ public abstract class AdServerViewCore extends WebView {
 	private boolean isExpanded = false;
 	private int lastX;
 	private int lastY;
+	private ViewGroup parentView = null;
+	private boolean isUseCustomClose = false;
 	
 	public AdLog getLog()
 	{
@@ -802,11 +799,22 @@ public abstract class AdServerViewCore extends WebView {
 	
 	public void useCustomClose(final boolean flag)
 	{
+		isUseCustomClose = flag;
 		handler.post(new Runnable() {
-			
 			@Override
 			public void run() {
 				if(!flag) buttonClose.setVisibility(buttonClose.VISIBLE);
+				else buttonClose.setVisibility(buttonClose.GONE);
+			}
+		});
+	}
+
+	public void showCloseButton()
+	{
+		handler.post(new Runnable() {			
+			@Override
+			public void run() {
+				if(!isUseCustomClose) buttonClose.setVisibility(buttonClose.VISIBLE);
 				else buttonClose.setVisibility(buttonClose.GONE);
 			}
 		});
@@ -1616,6 +1624,7 @@ public abstract class AdServerViewCore extends WebView {
 					break;
 				}				
 				case MESSAGE_CLOSE: {
+					buttonClose.setVisibility(View.INVISIBLE);
 					ViewGroup.LayoutParams lp = getLayoutParams();
 					switch (mViewState) {
 					case RESIZED:
@@ -1627,10 +1636,15 @@ public abstract class AdServerViewCore extends WebView {
 						mViewState = ViewState.DEFAULT;
 						break;
 					case EXPANDED:
-						if(mExpandedFrame != null) {
+						if (mExpandedFrame != null) {
 							ormmaEvent("close","viewState=expanded");
 							closeExpanded(mExpandedFrame);
 							mViewState = ViewState.DEFAULT;
+						}
+						if (parentView != null) {
+							mExpandedFrame.removeAllViews();
+							parentView.addView(view, new LinearLayout.LayoutParams(mOldWidth, mOldHeight));
+							parentView = null;
 						}
 						lp.height = mOldHeight;
 						lp.width = mOldWidth;						
@@ -1650,13 +1664,17 @@ public abstract class AdServerViewCore extends WebView {
 					break;
 				}
 				case MESSAGE_EXPAND: {
-					ViewGroup.LayoutParams lp = getLayoutParams();
-					mOldHeight = lp.height;
-					mOldWidth = lp.width;
-					ormmaEvent("expand","");
-					mViewState = ViewState.EXPANDED;
-					expandInUIThread((Dimensions) data.getParcelable(EXPAND_DIMENSIONS), data.getString(EXPAND_URL),
-							(Properties) data.getParcelable(EXPAND_PROPERTIES));
+					if (mViewState != ViewState.EXPANDED) {
+						ViewGroup.LayoutParams lp = getLayoutParams();
+						mOldHeight = lp.height;
+						mOldWidth = lp.width;
+						ormmaEvent("expand","");
+						mViewState = ViewState.EXPANDED;
+						expandInUIThread((Dimensions) data.getParcelable(EXPAND_DIMENSIONS), data.getString(EXPAND_URL),
+								(Properties) data.getParcelable(EXPAND_PROPERTIES));
+					} else {
+						ormmaEvent("error","Expand is already executed");
+					}
 					break;
 				}
 	
@@ -1734,13 +1752,11 @@ public abstract class AdServerViewCore extends WebView {
 
 	public void expand(Dimensions dimensions, String URL, Properties properties) {
 		Message msg = mHandler.obtainMessage(MESSAGE_EXPAND);
-
 		Bundle data = new Bundle();
 		data.putParcelable(EXPAND_DIMENSIONS, dimensions);
 		data.putString(EXPAND_URL, URL);
 		data.putParcelable(EXPAND_PROPERTIES, properties);
 		msg.setData(data);
-
 		mHandler.sendMessage(msg);
 	}
 
@@ -1750,17 +1766,16 @@ public abstract class AdServerViewCore extends WebView {
 	}
 	
 	private void expandInUIThread(Dimensions dimensions, String URL, Properties properties) {
-		boolean dontLoad = false;
+		/*boolean dontLoad = false;
 		if (URL == null || URL.equals("undefined")) {
 			URL = getUrl();
 			dontLoad = true;
-		}
-		
-		
+		}*/
+
 		View dView = ((Activity) getContext()).getWindow().findViewById(Window.ID_ANDROID_CONTENT);		
-		dimensions.width = dimensions.width == 0 ? dView.getRight() - dView.getLeft() : dimensions.width;
-		dimensions.height = dimensions.height == 0 ? dView.getBottom() - dView.getTop() : dimensions.height;
-		
+		dimensions.width = dimensions.width == 0 ? ViewGroup.LayoutParams.FILL_PARENT : dimensions.width;
+		dimensions.height = dimensions.height == 0 ? ViewGroup.LayoutParams.FILL_PARENT : dimensions.height;
+
 		if(mExpandedFrame!=null) ((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).removeView(mExpandedFrame);
 		
 		mExpandedFrame = new RelativeLayout(getContext());
@@ -1775,42 +1790,49 @@ public abstract class AdServerViewCore extends WebView {
 							Color.blue(properties.background_color))
 					);
 		}
-		android.widget.RelativeLayout.LayoutParams adLp = new RelativeLayout.LayoutParams(dimensions.width,
-				dimensions.height);
+		android.widget.RelativeLayout.LayoutParams adLp = new RelativeLayout.LayoutParams(
+				dimensions.width, dimensions.height);
 		//Rect rectgle= new Rect(); 
 		//((Activity) getContext()).getWindow().getDecorView().getWindowVisibleDisplayFrame(rectgle); 
 		int contentViewTop= ((Activity) getContext()).getWindow().findViewById(Window.ID_ANDROID_CONTENT).getTop(); 
 		
 		adLp.leftMargin = dimensions.x;
-		adLp.topMargin = contentViewTop+dimensions.y;
+		adLp.topMargin = contentViewTop + dimensions.y;
 		
 		android.view.WindowManager.LayoutParams lp = new WindowManager.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.FILL_PARENT);
 
-		AdServerView expandedView = new AdServerView(getContext(),true);
-		mExpandedFrame.addView(expandedView, adLp);
-		expandedView.loadUrl(URL);
-		//expandedView.setContent(mContent);
-		
-		Button buttonClose = new Button(_context);
-		buttonClose.setBackgroundDrawable(InternelBrowser.GetSelector(_context,"b_close.png", "b_close.png", "b_close.png"));
-		buttonClose.setLayoutParams(new ViewGroup.LayoutParams(30,30));
-		buttonClose.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				handler.post(new Runnable() {
-					@Override
-					public void run() {						
-						injectJavaScript("ormma.close();");						
-					}
-				});
-			}
-		});
-		LinearLayout ll = new LinearLayout(_context);
-		ll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-		ll.setGravity(Gravity.RIGHT);
-		ll.addView(buttonClose);
-		expandedView.addView(ll);
+		if (URL == null || URL.equals("undefined")) {
+			parentView = (ViewGroup)getParent(); 
+			parentView.removeView(this);		
+			mExpandedFrame.addView(this,adLp);
+//			this.showCloseButton();
+		} else {
+			AdServerView expandedView = new AdServerView(getContext(), true);
+			mExpandedFrame.addView(expandedView, adLp);
+			expandedView.loadUrl(URL);
+			//expandedView.setContent(mContent);
+			
+			Button buttonClose = new Button(_context);
+			buttonClose.setBackgroundDrawable(InternelBrowser.GetSelector(_context,"b_close.png", "b_close.png", "b_close.png"));
+			buttonClose.setLayoutParams(new ViewGroup.LayoutParams(30,30));
+			buttonClose.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					handler.post(new Runnable() {
+						@Override
+						public void run() {						
+							injectJavaScript("ormma.close();");						
+						}
+					});
+				}
+			});
+			LinearLayout ll = new LinearLayout(_context);
+			ll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+			ll.setGravity(Gravity.RIGHT);
+			ll.addView(buttonClose);
+			expandedView.addView(ll);
+		}
 		
 		((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).addView(mExpandedFrame, lp);
 	}
