@@ -181,7 +181,7 @@ public abstract class AdServerViewCore extends WebView {
 
 	protected boolean isFirstTime;
 	ReloadTask reloadTask;
-	private ContentThread contentThread;
+	//private ContentThread contentThread;
 	private OpenUrlThread openUrlThread;
 	private Timer reloadTimer;
 	private boolean IsManualUpdate = false;
@@ -636,6 +636,7 @@ public abstract class AdServerViewCore extends WebView {
 			String region, 
 			Integer paramBG, Integer paramLINK, String carrier, 
 			Hashtable<String, String> customParameters) {
+		view = this;
 		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog);
 		adserverRequest.InitDefaultParameters(context);
 		adserverRequest.setUa(ua);
@@ -761,13 +762,14 @@ public abstract class AdServerViewCore extends WebView {
 			}
 		}
 		
-		if(contentThread != null) {
+		/*if(contentThread != null) {
 			try {
 				contentThread.interrupt();
 			} catch (Exception e) {
 				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "onDetachedFromWindow", e.getMessage());
 			}
-		}
+		}*/
+		ContentManager.getInstance(null).stopLoadContent(this);
 
 		if(mNetworkController != null) {
 			mNetworkController.stopAllNetworkListeners();
@@ -879,7 +881,7 @@ public abstract class AdServerViewCore extends WebView {
 		}
 	}
 	
-	private class ContentThread extends Thread {
+	/*private class ContentThread extends Thread {
 		private Context context;
 
 		public ContentThread(Context context, WebView webView) {
@@ -891,11 +893,11 @@ public abstract class AdServerViewCore extends WebView {
 		public void run() {
 			_contentThreadAction(context, view);
 		}
-	}
+	}*/
 	
 	void StartLoadContent(Context context, WebView view)
 	{
-		try
+		/*try
 		{
 			if((contentThread==null) || (contentThread.getState().equals(Thread.State.TERMINATED)))
 			{
@@ -907,7 +909,189 @@ public abstract class AdServerViewCore extends WebView {
 				StartTimer(context, view);
 		}catch (Exception e) {
 			adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
+		}*/
+		
+		setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+
+        boolean isRequestAd, isRefreshAd;
+		
+		adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "StartLoadContent", "");
+		
+		boolean isShownView = view.isShown() || isFirstTime || IsManualUpdate;//&&isScreenOn;
+		
+		IsManualUpdate = false;		
+		
+		if((getSite()==0) || (getZone()==0))
+		{
+			StartTimer(context,view);
+			adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_WARNING, "StartLoadContent", "site=0 or zone=0");
+			return;
 		}
+		
+		if(visibleMode == null) {
+			visibleMode = VISIBLE_MODE_CASE2;
+		}
+		
+    	switch (visibleMode) {
+		case VISIBLE_MODE_CASE1:
+			isRequestAd = true;
+			isRefreshAd = true;
+			break;
+		case VISIBLE_MODE_CASE2:
+			isRequestAd = isShownView;
+			isRefreshAd = isShownView;
+			break;
+		case VISIBLE_MODE_CASE3:
+			isRequestAd = true;
+			isRefreshAd = isShownView;
+			break;
+		default:
+			isRequestAd = true;
+			isRefreshAd = true;
+			break;
+		}
+		
+		if ((defaultImageResource!=null) && (getBackground()==null))
+		{
+			try {
+				handler.post(new SetBackgroundResourceAction(view, defaultImageResource));
+			} catch (Exception e) {
+				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
+			}
+		}
+		
+		InterceptOnAdDownload interceptOnAdDownload = new InterceptOnAdDownload(context,view);
+		
+		if(isRequestAd || isFirstTime) {
+			try {
+				if(mViewState != ViewState.EXPANDED) {
+					if(adserverRequest != null) {
+						interceptOnAdDownload.begin((AdServerView)this);
+						
+						adserverRequest.setExcampaigns(getExcampaignsString());
+						String url = adserverRequest.createURL();
+						RequestCounter++;
+						adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "requestGet["+String.valueOf(RequestCounter)+"]" , url);
+						ContentManager.getInstance(context).startLoadContent(this, adserverRequest.createURL());						
+					}
+				}
+			} catch (Exception e) {
+				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "StartLoadContent.requestGet", e.getMessage());
+				interceptOnAdDownload.error((AdServerView)this,e.getMessage());				
+			}
+		}
+		
+	}
+	
+	void setResult(String data, String error)
+	{
+		if(error!=null)
+		{
+			adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, "requestGet result["+String.valueOf(RequestCounter)+"][ERROR]", error);
+			//if(onAdEventHandler!= null)onAdEventHandler.error(this, error);
+			if(adDownload!= null) adDownload.error((AdServerView)this,error);
+			StartTimer(getContext(),view);
+			return;
+		}
+		
+		Context context = getContext();
+		
+		adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "requestGet result["+String.valueOf(RequestCounter)+"]", data);
+		try {
+			if((data != null) && (data.length() > 0)) {
+				String dataToLowercase = data.toLowerCase();
+				if ((dataToLowercase.contains("invalid params")) || (dataToLowercase.contains("error: -1")))
+				{	
+					InterstitialClose();
+					StartTimer(getContext(),view);
+					if(adDownload!= null) adDownload.error((AdServerView)this, "invalid params");
+				}else
+				{
+					//if(isRefreshAd || isFirstTime) 
+					{
+						//handler.post(new RemoveAllChildViews(view));
+						//String externalCampaignData = Utils.scrapeIgnoreCase(data, "<external_campaign", "</external_campaign>");
+	
+						 {
+							handler.post(new RemoveAllChildViews(view));
+							String videoData = Utils.scrapeIgnoreCase(data, "<video", "/>");
+							
+							if((videoData != null) && (videoData.length() > 0)) {
+								String videoUrl = Utils.scrapeIgnoreCase(videoData, "src=\"", "\"");
+								String clickUrl = Utils.scrapeIgnoreCase(data, "href=\"", "\"");
+								handler.post(new SetupVideoAction(context, view, videoUrl, clickUrl));
+								StartTimer(context,view);
+							} else {
+								if(isContentAligned)
+								{
+									data = "<html><head>" +
+											"<style>*{margin:0;padding:0}</style>"+
+											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
+											"</head>" +
+											"<body style=\"background-color:#"+getBackgroundColor()+
+											";margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
+												
+								}else
+									data = "<html><head>" +
+											"<style>*{margin:0;padding:0}</style>"+
+											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
+											"</head>" +
+											"<body style=\"background-color:#"+getBackgroundColor()+";margin: 0px; padding: 0px; width: 100%; height: 100%\">"+data+"</body></html>";
+								
+								mContent = data;
+								view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
+								handler.post(new Runnable() {
+									
+									@Override
+									public void run() {
+										getLayoutParams().width = lastX;
+										getLayoutParams().height = lastY;
+										requestLayout();
+									}
+								});	
+								StartTimer(context,view);
+							}							
+						}
+					}
+				}
+			}else
+			{
+				//adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_WARNING, "contentThreadAction", "data = null isShownView="+Boolean.toString(isShownView));
+				
+				//if(isShownView)
+				{
+					InterstitialClose();
+					if(adDownload!= null) adDownload.error((AdServerView)this,"empty server respons");
+				}
+				StartTimer(context,view);
+			}
+		} catch (Exception e) {
+			adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
+			StartTimer(context,view);
+		}
+		
+		/*try {
+			if((result != null) && (result.length() > 0)) {
+				
+				if(isJSON)
+				{
+					if(autoCollapse) handler.post(new Runnable() {
+						
+						@Override
+						public void run() {
+							setVisibility(View.VISIBLE);							
+						}
+					});
+					adLayoutVector.addBanner(result,onAdEventHandler);
+					//ff if (onAdEventHandler!=null) onAdEventHandler.refresh(this);					
+				}
+				autoCollapse = false;
+				StartTimer(getContext(),view,Constants.UPDATE_TIME_INTERVAL*1000);
+			}
+		} catch (Exception e) {
+			adLog.log(AdLog.LOG_LEVEL_CRITICAL, AdLog.LOG_TYPE_ERROR, "setResult", e.getMessage());
+			StartTimer(getContext(),view,Constants.UPDATE_TIME_INTERVAL*1000);
+		}*/
 	}
 	
 	private void StartTimer(Context context, WebView view)
@@ -952,7 +1136,7 @@ public abstract class AdServerViewCore extends WebView {
 		}
 	}
 		
-	private void _contentThreadAction(Context context, WebView view) {
+	/*private void _contentThreadAction(Context context, WebView view) {
 		if (isExpanded) return;
 			
 		InstallNotificationThread installNotificationThread = 
@@ -1130,43 +1314,10 @@ public abstract class AdServerViewCore extends WebView {
 			StartTimer(context,view);
 		}
 		isFirstTime = false;
-	}
+		
+	}*/
 	
-	void setResult(String result, String error)
-	{
-		/*if(error!=null)
-		{
-			adLog.log(AdLog.LOG_LEVEL_ALL, AdLog.LOG_TYPE_ERROR, "requestGet result["+String.valueOf(rcounterLocal)+"][ERROR]", error);
-			if(onAdEventHandler!= null)onAdEventHandler.error(this, error);
-			StartTimer(getContext(),view,Constants.UPDATE_TIME_INTERVAL*1000);
-			return;
-		}
-		
-		adLog.log(AdLog.LOG_LEVEL_ALL, AdLog.LOG_TYPE_INFO, "requestGet result["+String.valueOf(rcounterLocal)+"]", result);
-		
-		try {
-			if((result != null) && (result.length() > 0)) {
-				
-				if(isJSON)
-				{
-					if(autoCollapse) handler.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							setVisibility(View.VISIBLE);							
-						}
-					});
-					adLayoutVector.addBanner(result,onAdEventHandler);
-					//ff if (onAdEventHandler!=null) onAdEventHandler.refresh(this);					
-				}
-				autoCollapse = false;
-				StartTimer(getContext(),view,Constants.UPDATE_TIME_INTERVAL*1000);
-			}
-		} catch (Exception e) {
-			adLog.log(AdLog.LOG_LEVEL_CRITICAL, AdLog.LOG_TYPE_ERROR, "setResult", e.getMessage());
-			StartTimer(getContext(),view,Constants.UPDATE_TIME_INTERVAL*1000);
-		}*/
-	}
+	
 	
 	void InterstitialClose()
 	{

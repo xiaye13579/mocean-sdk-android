@@ -14,9 +14,9 @@
 	<target name="release.build.3rdPaty"  depends="clean, make.dirs">
 			<antcall target="release.build.mOcean"/>
 			<antcall target="samples"/>
-			<!--<antcall target="simple_samples"/>-->
+			<!--<antcall target="simple_samples"/>
 			<antcall target="tablet_samples"/>
-			<antcall target="javadoc.mocean"/>
+			<antcall target="javadoc.mocean"/>-->
 			<antcall target="zip"/>
 	        <delete dir="${temp.dir}"/>
 	</target>
@@ -101,7 +101,7 @@
 	<target name="samples">
 				<copy todir="${sample.mocean.dir}/Samples">
 		    	    <fileset 
-		    	    	dir="test/" 
+		    	    	dir="../Samples/" 
 		    	    	includes=",res/,src/,AndroidManifest.xml,.classpath,default.properties,.project,project.properties" 
 		    	    	casesensitive="false"
 		    	    />				

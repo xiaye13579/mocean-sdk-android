@@ -102,15 +102,15 @@ public class ContentManager {
 		thread.start();
 	}
 
-	public void startLoadContent(AdServerViewCore sender, String url, String w, String h) {
+	public void startLoadContent(AdServerViewCore sender, String url/*, String w, String h*/) {
 		if (senderParameters.containsKey(sender))
 			stopLoadContent(sender);
 
 		ContentParameters parameters = new ContentParameters();
 		parameters.sender = sender;
 		parameters.url = url;
-		parameters.w = w;
-		parameters.h = h;
+		//parameters.w = w;
+		//parameters.h = h;
 
 		senderParameters.put(sender, parameters);
 
@@ -130,8 +130,8 @@ public class ContentManager {
 
 	private class ContentParameters {
 		public String url;
-		public String w;
-		public String h;
+		//public String w;
+		//public String h;
 		public AdServerViewCore sender;
 		ContentThread cTh;
 	};
@@ -149,9 +149,9 @@ public class ContentManager {
 			try {
 				DefaultHttpClient client = new DefaultHttpClient();
 				HttpGet get = new HttpGet(parameters.url);
-				get.addHeader("Accept-Encoding", "gzip");
-				get.addHeader("Accept", "application/json");
-				get.addHeader("UA-Pixels", parameters.w + "x" + parameters.h);
+				//get.addHeader("Accept-Encoding", "gzip");
+				//get.addHeader("Accept", "application/json");
+				//get.addHeader("UA-Pixels", parameters.w + "x" + parameters.h);
 				get.addHeader("User-Agent", userAgent);
 
 				HttpConnectionParams.setConnectionTimeout(get.getParams(), Constants.AD_RELOAD_PERIOD);
