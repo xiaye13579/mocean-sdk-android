@@ -27,6 +27,8 @@ import org.apache.http.util.ByteArrayBuffer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 import android.webkit.WebView;
@@ -39,6 +41,7 @@ public class ContentManager {
 	private static boolean isSimAvailable;
 	private HashMap<AdServerViewCore, ContentParameters> senderParameters = new HashMap<AdServerViewCore, ContentParameters>();
 	private static String id = null;
+	private Context context;
 
 	static public ContentManager getInstance(Context context) {
 		if (instance == null)
@@ -49,11 +52,11 @@ public class ContentManager {
 
 	private ContentManager(final Context context) {
 		userAgent = (new WebView(context)).getSettings().getUserAgentString();
-		
+		this.context = context.getApplicationContext();
 		Thread thread = new Thread() {
 			@Override
 			public void run() {
-				initDefaultParameters(context);
+				initDefaultParameters();
 			}
 		};
 		thread.setName("[ContentManager] InitDefaultParameters");
@@ -78,7 +81,6 @@ public class ContentManager {
 		}
 		return true;
 	}
-
 	
 	public String getAutoDetectParameters() {
 		return autoDetectParameters;
@@ -129,8 +131,8 @@ public class ContentManager {
 		}
 	}
 
-	public void installNotification(Context context, Integer advertiserId, String groupCode)
-	{
+	public void installNotification(Integer advertiserId, String groupCode)
+	{	
 		InstallNotificationThread installNotificationThread = 
 			new InstallNotificationThread(context, advertiserId, groupCode);
 		installNotificationThread.start();
@@ -259,7 +261,7 @@ public class ContentManager {
 		}
 	}
 
-	private void initDefaultParameters(Context context) {
+	private void initDefaultParameters() {
 		String deviceId;
 		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 		isSimAvailable = tm.getSimState() > TelephonyManager.SIM_STATE_ABSENT;
@@ -282,8 +284,25 @@ public class ContentManager {
 		}
 		
 		String deviceIdMd5 = Utils.md5(deviceId);
+		
+		autoDetectParameters = "";
+		
+		if (tm!=null) 
+		{
+			String networkOperator = tm.getNetworkOperator();      
+			if ((networkOperator != null) && (networkOperator.length()>3)) 
+			{         
+				String mcc = networkOperator.substring(0, 3);   
+				String mnc = networkOperator.substring(3);  
+				autoDetectParameters += "&mcc=" + mcc;
+				autoDetectParameters += "&mnc=" + mnc;
+				
+			} 
+			//adserverRequest.setMCC(tm.getNetworkCountryIso());
+			//tm.getNetworkOperator()
+		}
 
-		autoDetectParameters = "&cfmt=text,image,html5richmedia";
+		/*autoDetectParameters = "&cfmt=text,image,html5richmedia";
 		autoDetectParameters += "&sft=jpeg,png,gif";
 		autoDetectParameters += "&fmt=json";
 		autoDetectParameters += "&cltp=app";
@@ -292,17 +311,43 @@ public class ContentManager {
 		autoDetectParameters += "&loptin=1";
 		autoDetectParameters += "&lc=" + Locale.getDefault().toString().replace("_", "-");
 		autoDetectParameters += "&idtp=muid";
-		autoDetectParameters += "&deviceOSID=204";
+		autoDetectParameters += "&deviceOSID=204";*/
 
 		if ((deviceIdMd5 != null) && (deviceIdMd5.length() > 0)) {
-			autoDetectParameters += "&uid=" + deviceIdMd5;
+			autoDetectParameters += "&"+AdserverRequest.parameter_device_id+"=" + deviceIdMd5;
+		}
+		
+		Integer connectionSpeed = null;
+    	ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    	NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+    	
+		if(networkInfo != null) {
+			int type = networkInfo.getType();
+			int subtype = networkInfo.getSubtype();
+			
+			//0 - low (gprs, edge), 1 - fast (3g, wifi)
+			if(type == ConnectivityManager.TYPE_WIFI) {
+				connectionSpeed = 1;
+			} else if(type == ConnectivityManager.TYPE_MOBILE) {
+				if(subtype == TelephonyManager.NETWORK_TYPE_EDGE) {
+					connectionSpeed = 0;
+				} else if(subtype == TelephonyManager.NETWORK_TYPE_GPRS) {
+					connectionSpeed = 0;
+				} else if(subtype == TelephonyManager.NETWORK_TYPE_UMTS) {
+					connectionSpeed = 1;
+				}
+			}
+		}
+		
+		if(connectionSpeed != null) {
+			autoDetectParameters += "&connection_speed="+connectionSpeed.toString();
 		}
 
-		autoDetectParameters += "&devicemake=" + URLEncoder.encode(android.os.Build.MANUFACTURER);
+		/*autoDetectParameters += "&devicemake=" + URLEncoder.encode(android.os.Build.MANUFACTURER);
 		// autoDetectParameters += "&devicemodel="+android.os.Build.MODEL;
 		autoDetectParameters += "&devicemodel=" + URLEncoder.encode(android.os.Build.MODEL);
 		autoDetectParameters += "&deviceos=Android";
-		autoDetectParameters += "&deviceosversion=" + URLEncoder.encode(android.os.Build.VERSION.RELEASE);
+		autoDetectParameters += "&deviceosversion=" + URLEncoder.encode(android.os.Build.VERSION.RELEASE);*/
 	}
 
 	private synchronized static String getId(Context context) {

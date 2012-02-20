@@ -49,10 +49,10 @@ public class AdserverRequest {
 	private final String parameter_size_y = "size_y";
 	private final String parameter_excampaigns = "excampaigns";
 	private final String parameter_version = "version";
-	private final String parameter_connection_speed = "connection_speed";
+	//private final String parameter_connection_speed = "connection_speed";
 	private final String parameter_size_required = "size_required";
-	private final String parameter_mcc = "mcc";
-	private final String parameter_mnc = "mnc";
+	//private final String parameter_mcc = "mcc";
+	//private final String parameter_mnc = "mnc";
 	private final String parameter_type = "type";
 	//private final String parameter_debug = "debug";
 	public final static String parameter_device_id = "udid";
@@ -73,7 +73,7 @@ public class AdserverRequest {
 		setZone(zone);		
 	}*/
 	
-    private static String sID = null;
+    /*private static String sID = null;
     private static final String INSTALLATION = "INSTALLATION";
     public synchronized static String id(Context context) {
     	if (sID == null) {
@@ -101,9 +101,9 @@ public class AdserverRequest {
     	String id = UUID.randomUUID().toString();
     	out.write(id.getBytes());
     	out.close();
-    }
+    }*/
 	
-	void InitDefaultParameters(Context context)
+	/*void InitDefaultParameters(Context context)
 	{
 		String deviceId;
 		
@@ -127,7 +127,7 @@ public class AdserverRequest {
 		if((deviceIdMD5 != null) && (deviceIdMD5.length() > 0)) {
 			parameters.put(parameter_device_id, deviceIdMD5);			
 		}
-	}
+	}*/
 	/**
 	 * Get URL of ad server.
 	 * @return
@@ -365,7 +365,7 @@ public class AdserverRequest {
 		return this;
 	}
 	
-	public AdserverRequest setMCC(String mcc) {
+	/*public AdserverRequest setMCC(String mcc) {
 		if(mcc != null) {
 			synchronized(parameters) {
 				parameters.put(parameter_mcc, mcc);
@@ -381,7 +381,7 @@ public class AdserverRequest {
 			}
 		}
 		return this;
-	}
+	}*/
 
 	/**
 	 * Optional.
@@ -664,7 +664,7 @@ public class AdserverRequest {
 	 * @param connectionSpeed
 	 * @return
 	 */
-	public AdserverRequest setConnectionSpeed(Integer connectionSpeed) {
+	/*public AdserverRequest setConnectionSpeed(Integer connectionSpeed) {
 		if(connectionSpeed != null) {
 			synchronized(parameters) {
 				parameters.put(parameter_connection_speed, String.valueOf(connectionSpeed));
@@ -878,12 +878,12 @@ public class AdserverRequest {
 		}
 	}
 
-	public Integer getConnectionSpeed() {
+	/*public Integer getConnectionSpeed() {
 		synchronized(parameters) {
 			String connectionSpeed = parameters.get(parameter_connection_speed);
 			return getIntParameter(connectionSpeed,null);
 		}
-	}
+	}*/
 
 	public Integer getSizeRequired() {
 		synchronized(parameters) {
@@ -926,7 +926,8 @@ public class AdserverRequest {
 
 	public synchronized String toString() {
 		StringBuilder builderToString = new StringBuilder();
-		String adserverURL = this.adserverURL+"?key=1";		
+		String adserverURL = this.adserverURL+"?key=1";	
+		adserverURL += ContentManager.getInstance(null).getAutoDetectParameters();
 		builderToString.append(adserverURL);
 		appendParameters(builderToString, parameters);
 		appendParameters(builderToString, customParameters);

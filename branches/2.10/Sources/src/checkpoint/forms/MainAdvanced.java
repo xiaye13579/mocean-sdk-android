@@ -50,6 +50,7 @@ public class MainAdvanced extends Activity {
 	private Context context;
 	private LinearLayout linearLayout;
 	AdServerView adserverView;
+	byte[] array = new byte[12*1024*1024]; 
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -107,10 +108,10 @@ public class MainAdvanced extends Activity {
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
 		
-		linearLayout.addView(adserverView);
-			
-      
-		
+		linearLayout.addView(adserverView);//*/
+        /*WebView wv= new WebView(this);
+        wv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
+        linearLayout.addView(wv);*/
     }
 	
 	

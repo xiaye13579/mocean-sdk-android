@@ -636,7 +636,7 @@ public abstract class AdServerViewCore extends WebView {
 			Hashtable<String, String> customParameters) {
 		view = this;
 		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog);
-		adserverRequest.InitDefaultParameters(context);
+		//adserverRequest.InitDefaultParameters(context);
 		adserverRequest.setUa(ua);
 		adserverRequest.setCount(1);
 		adserverRequest.setSizeRequired(0);
@@ -666,7 +666,7 @@ public abstract class AdServerViewCore extends WebView {
 		webSettings.setJavaScriptEnabled(true);
 		webSettings.setSupportZoom(false);
 		webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-				
+		
 		mAssetController = new OrmmaAssetController(this, context);
 		mDisplayController = new OrmmaDisplayController(this, context);
 		mUtilityController = new OrmmaUtilityController(this, context);
@@ -895,21 +895,8 @@ public abstract class AdServerViewCore extends WebView {
 	
 	void StartLoadContent(Context context, WebView view)
 	{
-		/*try
-		{
-			if((contentThread==null) || (contentThread.getState().equals(Thread.State.TERMINATED)))
-			{
-				contentThread = new ContentThread(getContext(), this);
-				contentThread.start();
-			} else if(contentThread.getState().equals(Thread.State.NEW))
-				contentThread.start();
-			else
-				StartTimer(context, view);
-		}catch (Exception e) {
-			adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
-		}*/
 		
-		ContentManager.getInstance(context).installNotification(context, advertiserId, groupCode);
+		ContentManager.getInstance(context).installNotification( advertiserId, groupCode);
 		
 		setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
 		
@@ -1014,7 +1001,7 @@ public abstract class AdServerViewCore extends WebView {
 	
 						 {
 							handler.post(new RemoveAllChildViews(view));
-							String videoData = Utils.scrapeIgnoreCase(data, "<video", "/>");
+							String videoData="";// = Utils.scrapeIgnoreCase(data, "<video", "/>");
 							
 							if((videoData != null) && (videoData.length() > 0)) {
 								String videoUrl = Utils.scrapeIgnoreCase(videoData, "src=\"", "\"");

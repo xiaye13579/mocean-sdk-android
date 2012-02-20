@@ -81,7 +81,7 @@ public class AdServerView extends AdServerViewCore {
 	 */
 	public AdServerView(Context context) {
 		super(context);
-		AutoDetectParameters(context);
+		//AutoDetectParameters(context);
 		isFirstTime =true;
 		//DetectParameters(context);
 		//initialize(context);
@@ -161,7 +161,7 @@ public class AdServerView extends AdServerViewCore {
 		if(adserverRequest != null) {
 			AutoDetectParameters autoDetectParameters = AutoDetectParameters.getInstance();
 			
-			TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+			/*TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 			if (tm!=null) 
 			{
 				String networkOperator = tm.getNetworkOperator();      
@@ -174,7 +174,7 @@ public class AdServerView extends AdServerViewCore {
 				} 
 				//adserverRequest.setMCC(tm.getNetworkCountryIso());
 				//tm.getNetworkOperator()
-			}
+			}*/
 			
 			if(adserverRequest.getVersion() == null) {
 				if(autoDetectParameters.getVersion() == null) {
@@ -195,60 +195,11 @@ public class AdServerView extends AdServerViewCore {
 				}
 			}
 			
-			/*if((adserverRequest.getLatitude() == null) || (adserverRequest.getLongitude() == null)) {
-				if((autoDetectParameters.getLatitude() == null) || (autoDetectParameters.getLongitude() == null)) {
-			    	int isAccessFineLocation = context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
-			    	
-			    	if(isAccessFineLocation == PackageManager.PERMISSION_GRANTED) {
-						locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
-						boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 		
-						if(isGpsEnabled) {
-							listener = new WhereamiLocationListener(locationManager, autoDetectParameters); 
-							locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener, Looper.getMainLooper());
-						}else
-						{
-							adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps", "not avalable");
-						}
-			    	}else adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps", "no permission ACCESS_FINE_LOCATION");
-				} else {
-					adserverRequest.setLatitude(autoDetectParameters.getLatitude());
-					adserverRequest.setLongitude(autoDetectParameters.getLongitude());
-					adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps=", "("+autoDetectParameters.getLatitude()+";"+autoDetectParameters.getLongitude()+")");
-				}
-			}
-*/
 			if(adserverRequest.getPremium() == null) {
 				adserverRequest.setPremium(2);					
 			}
-			/*if(adserverRequest.getCarrier() == null) {
-				if(autoDetectParameters.getCarrier() == null) {
-					TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-					String networkOperatorName = telephonyManager.getNetworkOperatorName();
-				
-					if((networkOperatorName != null) && (networkOperatorName.length() > 0)) {
-						adserverRequest.setCarrier(networkOperatorName);
-						autoDetectParameters.setCarrier(networkOperatorName);
-					}
-				} else {
-					adserverRequest.setCarrier(autoDetectParameters.getCarrier());
-				}
-			}
-			
-			if(adserverRequest.getCountry() == null) {
-				if(autoDetectParameters.getCountry() == null) {
-					Locale defaultLocale = Locale.getDefault();
-					String country = defaultLocale.getCountry();
-
-					if((country != null) && (country.length() > 0)) {
-						adserverRequest.setCountry(country);
-						autoDetectParameters.setCountry(country);
-					}
-				} else {
-					adserverRequest.setCountry(autoDetectParameters.getCountry());
-				}
-			}*/
-
+		
 			if(adserverRequest.getUa() == null) {
 				if(autoDetectParameters.getUa() == null) {
 					String userAgent = adserverView.getSettings().getUserAgentString();
@@ -262,7 +213,7 @@ public class AdServerView extends AdServerViewCore {
 				}
 			}
 			
-			if(adserverRequest.getConnectionSpeed() == null) {
+			/*if(adserverRequest.getConnectionSpeed() == null) {
 				if(autoDetectParameters.getConnectionSpeed() == null) {
 					try {
 						Integer connectionSpeed = null;
@@ -296,7 +247,7 @@ public class AdServerView extends AdServerViewCore {
 				} else {
 					adserverRequest.setConnectionSpeed(autoDetectParameters.getConnectionSpeed());
 				}
-			}
+			}*/
 		}
 	}
 	
