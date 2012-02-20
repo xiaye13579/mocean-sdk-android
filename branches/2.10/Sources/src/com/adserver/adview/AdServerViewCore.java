@@ -109,9 +109,6 @@ public abstract class AdServerViewCore extends WebView {
 	 */
 	public static final int VISIBLE_MODE_CASE3 = 3; 
 	
-	private static final String PREFS_FILE_NAME = "AdserverViewPrefs";
-	private static final String PREF_IS_FIRST_APP_LAUNCH = "isFirstAppLaunch";
-	private static final String FIRST_APP_LAUNCH_URL = "http://www.moceanmobile.com/appconversion.php";
 	//private static final long AD_RELOAD_PERIOD = 120000; //in milliseconds
 	//private static final long AD_STOP_CHECK_PERIOD = 10000; //in milliseconds
 	//private static final long AD_RELOAD_SHORT_PERIOD = 100; //in milliseconds
@@ -805,8 +802,8 @@ public abstract class AdServerViewCore extends WebView {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				if(!flag) buttonClose.setVisibility(buttonClose.VISIBLE);
-				else buttonClose.setVisibility(buttonClose.GONE);
+				if(!flag) buttonClose.setVisibility(View.VISIBLE);
+				else buttonClose.setVisibility(View.GONE);
 			}
 		});
 	}
@@ -816,18 +813,18 @@ public abstract class AdServerViewCore extends WebView {
 		handler.post(new Runnable() {			
 			@Override
 			public void run() {
-				if(!isUseCustomClose) buttonClose.setVisibility(buttonClose.VISIBLE);
-				else buttonClose.setVisibility(buttonClose.GONE);
+				if(!isUseCustomClose) buttonClose.setVisibility(View.VISIBLE);
+				else buttonClose.setVisibility(View.GONE);
 			}
 		});
 	}
 	
 	boolean isCustomClose()
 	{
-		return buttonClose.getVisibility() != buttonClose.VISIBLE;
+		return buttonClose.getVisibility() != View.VISIBLE;
 	}
 	
-	private class InstallNotificationThread extends Thread {
+	/*private class InstallNotificationThread extends Thread {
 		private Context context;
 		private Integer advertiserId;
 		private String groupCode;
@@ -911,8 +908,10 @@ public abstract class AdServerViewCore extends WebView {
 			adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
 		}*/
 		
+		ContentManager.getInstance(context).installNotification(context, advertiserId, groupCode);
+		
 		setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-
+		
         boolean isRequestAd, isRefreshAd;
 		
 		adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "StartLoadContent", "");
@@ -1684,7 +1683,7 @@ public abstract class AdServerViewCore extends WebView {
 	
 	static int RequestCounter = 0;
 	
-	private String requestGet(String url) throws IOException {
+	/*private String requestGet(String url) throws IOException {
 		lastRequest = url;
 		
 		RequestCounter++;
@@ -1713,7 +1712,7 @@ public abstract class AdServerViewCore extends WebView {
 	        out.append(new String(buffer, 0, n));
 	    }
 	    return out.toString();
-	}
+	}*/
 	
 	Integer getIntParameter(String stringValue) {
 		if(stringValue != null) {

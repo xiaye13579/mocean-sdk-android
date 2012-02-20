@@ -26,6 +26,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.ByteArrayBuffer;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 import android.webkit.WebView;
@@ -128,6 +129,67 @@ public class ContentManager {
 		}
 	}
 
+	public void installNotification(Context context, Integer advertiserId, String groupCode)
+	{
+		InstallNotificationThread installNotificationThread = 
+			new InstallNotificationThread(context, advertiserId, groupCode);
+		installNotificationThread.start();
+	}
+	
+	private class InstallNotificationThread extends Thread {
+		private Context context;
+		private Integer advertiserId;
+		private String groupCode;
+
+		public InstallNotificationThread(Context context, Integer advertiserId, String groupCode) {
+			this.context = context;
+			this.advertiserId = advertiserId;
+			this.groupCode = groupCode;
+		}
+
+		@Override
+		public synchronized void run() {
+			try {
+				if(context != null) {
+					if((advertiserId != null) && (advertiserId > 0)
+							&& (groupCode != null) && (groupCode.length() > 0)) {
+						SharedPreferences settings = context.getSharedPreferences(Constants.PREFS_FILE_NAME, 0);
+						boolean isFirstAppLaunch = settings.getBoolean(Constants.PREF_IS_FIRST_APP_LAUNCH, true);
+
+						if(isFirstAppLaunch) {
+							String deviceId;
+							TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+							String temp = tm.getDeviceId();
+							if (null !=  temp) deviceId = temp;
+							else {
+								temp = Secure.getString(context.getContentResolver(),Secure.ANDROID_ID); ;
+								if (null != temp) deviceId = temp;
+								else deviceId = "";
+							}
+							
+							String deviceIdMD5 = Utils.md5(deviceId);
+							
+							if((deviceIdMD5 != null) && (deviceIdMD5.length() > 0)) {
+								StringBuilder url = new StringBuilder(Constants.FIRST_APP_LAUNCH_URL);
+								url.append("?advertiser_id=" + advertiserId.toString());
+								url.append("&group_code=" + URLEncoder.encode(groupCode));
+								url.append("&"+AdserverRequest.parameter_device_id+"=" + URLEncoder.encode(deviceIdMD5));
+								
+								sendImpr(url.toString());
+								
+								SharedPreferences.Editor editor = settings.edit();
+								editor.putBoolean(Constants.PREF_IS_FIRST_APP_LAUNCH, false);
+								editor.commit();
+							}
+						}
+					}
+				}
+			} catch (Exception e) {
+				//adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "InstallNotificationThread", e.getMessage());
+			}
+		}
+	}
+	
 	private class ContentParameters {
 		public String url;
 		//public String w;
