@@ -69,7 +69,9 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		},
 			
 		state : ORMMA_STATE_DEFAULT,	
-		lastState : ORMMA_STATE_DEFAULT,	
+		lastState : ORMMA_STATE_DEFAULT,
+		oldResizeWidth : 0, 
+		oldResizeHeight : 0, 	
 			
 		/**
 		 * Use this method to subscribe a specific handler method to a specific
@@ -214,9 +216,15 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 				//	_resize(this.getExpandProperties().width,this.getExpandProperties().height);
 				//}
 				//else
-				{
-					_expand(URL, this.getExpandProperties());					
-				}
+				//{
+				//	_expand(URL, this.getExpandProperties());					
+				//}
+				
+				var currentSize = this.getSize();
+				this.oldResizeWidth = currentSize.width;
+				this.oldResizeHeight = currentSize.height;
+			
+				_expand(URL, this.getExpandProperties());					
 				
 				var sizeChangeWidth = this.getExpandProperties().width;
 				var sizeChangeHeight = this.getExpandProperties().height;
@@ -243,7 +251,12 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
          */
         resize : function (width, height) {
         	//if(this.state == ORMMA_STATE_DEFAULT) {
+				var currentSize = this.getSize();
+				this.oldResizeWidth = currentSize.width;
+				this.oldResizeHeight = currentSize.height;
+				
 	            _resize(width, height);
+	            
 	            var data = { dimensions : {width : width, height: height},
 						 properties : this.expandProperties };
 	            fireEvent(ORMMA_EVENT_SIZE_CHANGE, data);
@@ -267,6 +280,9 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 			else
 			{
             	_close();
+            	
+				var data = {dimensions : {width : this.oldResizeWidth, height: this.oldResizeHeight}};
+				fireEvent(ORMMA_EVENT_SIZE_CHANGE, data);
 				fireEvent(ORMMA_EVENT_STATE_CHANGE, ORMMA_STATE_DEFAULT);
             }
         },
