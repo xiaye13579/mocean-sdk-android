@@ -217,8 +217,18 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 				{
 					_expand(URL, this.getExpandProperties());					
 				}
-				var data = { // dimensions : dimensions,
-							 properties : this.getExpandProperties() };
+				
+				var sizeChangeWidth = this.getExpandProperties().width;
+				var sizeChangeHeight = this.getExpandProperties().height;
+				var ms = this.getMaxSize();
+				if (this.expandProperties.width == 0) {
+				   sizeChangeWidth = ms.width;
+				}
+				if (this.expandProperties.height == 0) {
+				   sizeChangeHeight = ms.height;
+				}
+				
+				var data = {dimensions : {width : sizeChangeWidth, height: sizeChangeHeight}};
 				fireEvent(ORMMA_EVENT_SIZE_CHANGE, data);
 				fireEvent(ORMMA_EVENT_STATE_CHANGE, ORMMA_STATE_EXPANDED);				
 			//}else{
