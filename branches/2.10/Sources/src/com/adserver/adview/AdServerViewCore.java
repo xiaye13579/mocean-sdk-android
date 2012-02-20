@@ -17,6 +17,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 
 import android.Manifest;
 import android.app.Activity;
@@ -1960,7 +1961,18 @@ public abstract class AdServerViewCore extends WebView {
 		} else {
 			AdServerView expandedView = new AdServerView(getContext(), true);
 			mExpandedFrame.addView(expandedView, adLp);
-			expandedView.loadUrl(URL);
+
+			try {
+				DefaultHttpClient client = new DefaultHttpClient();
+				HttpGet get = new HttpGet(URL);
+				HttpResponse response = client.execute(get);
+				HttpEntity entity = response.getEntity();
+				String responseValue = EntityUtils.toString(entity, "UTF-8");				
+				expandedView.loadDataWithBaseURL(null, responseValue, "text/html", "UTF-8", null);
+			} catch (IOException e) {
+				e.printStackTrace();
+				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "expandInUIThread", e.getMessage());
+			}						
 			//expandedView.setContent(mContent);
 			
 			Button buttonClose = new Button(_context);
