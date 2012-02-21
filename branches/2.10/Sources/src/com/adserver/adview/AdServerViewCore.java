@@ -1,11 +1,8 @@
 package com.adserver.adview;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -25,7 +22,6 @@ import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -40,8 +36,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.Settings.Secure;
-import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -778,6 +772,14 @@ public abstract class AdServerViewCore extends WebView {
 		}
 		
 		super.onDetachedFromWindow();
+	}
+
+	@Override
+	protected void onSizeChanged(int w, int h, int ow, int oh) {
+		String script = String.format(
+				"Ormma.fireEvent(ORMMA_EVENT_SIZE_CHANGE, {dimensions : {width : %d, height: %d}});", w, h);
+		injectJavaScript(script);
+		super.onSizeChanged(w, h, ow, oh);
 	}
 
 	/**
@@ -1728,7 +1730,7 @@ public abstract class AdServerViewCore extends WebView {
 		{
 			super.loadUrl("javascript:" + str);
 		}catch (Exception e) {
-			//Log.e("injectJavaScript", e.getMessage()+" "+str);
+//			Log.e("injectJavaScript", e.getMessage()+" "+str);
 		}
 	}
 
