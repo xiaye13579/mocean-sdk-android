@@ -900,6 +900,13 @@ public abstract class AdServerViewCore extends WebView {
 		
 		ContentManager.getInstance(context).installNotification( advertiserId, groupCode);
 		
+		if(ContentManager.getInstance(context).getAutoDetectParameters().equals(""))
+		{
+			IsManualUpdate = true;
+			StartTimer(context, view);
+			return;
+		}
+		
 		setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
 		
         boolean isRequestAd, isRefreshAd;

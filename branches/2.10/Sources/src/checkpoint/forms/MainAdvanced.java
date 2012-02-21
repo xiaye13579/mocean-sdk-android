@@ -50,7 +50,7 @@ public class MainAdvanced extends Activity {
 	private Context context;
 	private LinearLayout linearLayout;
 	AdServerView adserverView;
-	byte[] array = new byte[12*1024*1024]; 
+	//byte[] array = new byte[12*1024*1024]; 
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
