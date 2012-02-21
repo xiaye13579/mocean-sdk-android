@@ -55,14 +55,25 @@ public class OrmmaDisplayController extends OrmmaController {
 	}
 	
 	public void resize(int width, int height) {
-		/*DisplayMetrics metrics = new DisplayMetrics();
-		mWindowManager.getDefaultDisplay().getMetrics(metrics);
+		int maxSizeWidth = width;
+		int maxSizeHeight = height;
 
-		if ((height > metrics.heightPixels) || (width > metrics.widthPixels)) {
-			mOrmmaView.injectJavaScript("Ormma.fireError(\"resize\",\"Maximum size exceeded\")");
-		} else*/ {
-			mOrmmaView.resize((int)(/*mDensity*/width/*mDensity*/), (int)(/*mDensity*/height/*mDensity*/));
+		try {
+			String maxSize = getMaxSize();
+			Dimensions properties = (Dimensions) getFromJSON(new JSONObject(maxSize), Dimensions.class);
+			maxSizeWidth = properties.width;
+			maxSizeHeight = properties.height;
+			
+			if (width > maxSizeWidth) {
+				width = maxSizeWidth;
+			}
+			if (height > maxSizeHeight) {
+				height = maxSizeHeight;
+			}
+		} catch (Exception e) {
 		}
+		
+		mOrmmaView.resize((int)(/*mDensity*/width/*mDensity*/), (int)(/*mDensity*/height/*mDensity*/));
 	}
 
 	public void open(String url) {
