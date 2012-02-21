@@ -148,6 +148,10 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 	        	_startOrientationListener();
 	        }        
 
+			if (evt == ORMMA_EVENT_SCREEN_CHANGE){
+	        	_startOrientationListener();
+	        }        
+
 			if (evt == ORMMA_EVENT_NETWORK_CHANGE){
 	        	_startNetworkListener();
 	        }        
@@ -181,6 +185,10 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 	        }  
 	                      
 			if (evt == ORMMA_EVENT_ORIENTATION_CHANGE){
+	        	_stopOrientationListener();
+	        }  
+
+			if (evt == ORMMA_EVENT_SCREEN_CHANGE){
 	        	_stopOrientationListener();
 	        }  
 	              
@@ -335,6 +343,7 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 
 		gotOrientationChange: function(change){
 			fireEvent(ORMMA_EVENT_ORIENTATION_CHANGE, change);
+			fireEvent(ORMMA_EVENT_SCREEN_CHANGE, ormma.getScreenSize());
 		},
 
 		gotNetworkChange: function(change){
@@ -561,6 +570,8 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
                 	(Ormma.events[event].listeners[i])();
             	} else if(event == ORMMA_EVENT_ORIENTATION_CHANGE) {
                 	(Ormma.events[event].listeners[i])(args);
+            	} else if(event == ORMMA_EVENT_SCREEN_CHANGE) {
+                	(Ormma.events[event].listeners[i])(args.width, args.height);
             	} else if(event == ORMMA_EVENT_LOCATION_CHANGE) {
                 	(Ormma.events[event].listeners[i])(args.lat, args.lon, args.acc);
             	} else if(event == ORMMA_EVENT_NETWORK_CHANGE) {
