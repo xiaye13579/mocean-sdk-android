@@ -1023,7 +1023,7 @@ public abstract class AdServerViewCore extends WebView {
 									data = "<html><head>" +
 											"<style>*{margin:0;padding:0}</style>"+
 											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
-											"</head>" +
+											"<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>" +
 											"<body style=\"background-color:#"+getBackgroundColor()+
 											";margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
 												
@@ -1031,7 +1031,7 @@ public abstract class AdServerViewCore extends WebView {
 									data = "<html><head>" +
 											"<style>*{margin:0;padding:0}</style>"+
 											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
-											"</head>" +
+											"<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>" +
 											"<body style=\"background-color:#"+getBackgroundColor()+";margin: 0px; padding: 0px; width: 100%; height: 100%\">"+data+"</body></html>";
 								
 								mContent = data;
