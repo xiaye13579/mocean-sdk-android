@@ -731,8 +731,10 @@ public abstract class AdServerViewCore extends WebView {
 	@Override
 	protected void onAttachedToWindow() {
 		reloadTimer = new Timer();
-		
-		StartLoadContent(getContext(), this);
+
+		if(mViewState != ViewState.EXPANDED) {
+			StartLoadContent(getContext(), this);
+		}
 		
 		super.onAttachedToWindow();
 	}
@@ -1783,15 +1785,15 @@ public abstract class AdServerViewCore extends WebView {
 						mViewState = ViewState.DEFAULT;
 						break;
 					case EXPANDED:
-						if (mExpandedFrame != null) {
-							ormmaEvent("close","viewState=expanded");
-							closeExpanded(mExpandedFrame);
-							mViewState = ViewState.DEFAULT;
-						}
 						if (parentView != null) {
 							mExpandedFrame.removeAllViews();
 							parentView.addView(view, new LinearLayout.LayoutParams(mOldWidth, mOldHeight));
 							parentView = null;
+						}
+						if (mExpandedFrame != null) {
+							ormmaEvent("close","viewState=expanded");
+							closeExpanded(mExpandedFrame);
+							mViewState = ViewState.DEFAULT;
 						}
 						lp.height = mOldHeight;
 						lp.width = mOldWidth;						
