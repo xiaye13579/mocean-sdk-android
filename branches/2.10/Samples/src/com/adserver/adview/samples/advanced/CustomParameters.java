@@ -11,8 +11,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.adserver.adview.AdServerViewCore.OnAdDownload;
 import com.adserver.adview.MASTAdServerView;
+import com.adserver.adview.MASTAdServerViewCore.MASTOnAdDownload;
 import com.adserver.adview.samples.R;
 
 public class CustomParameters  extends Activity{
@@ -32,7 +32,7 @@ public class CustomParameters  extends Activity{
         
         final Button btnUpdate =  ((Button)findViewById(R.id.btnUpdate));
         
-        adServerView.setOnAdDownload(new OnAdDownload() {
+        adServerView.setOnAdDownload(new MASTOnAdDownload() {
 			
 			@Override
 			public void error(MASTAdServerView sender,String arg0) {

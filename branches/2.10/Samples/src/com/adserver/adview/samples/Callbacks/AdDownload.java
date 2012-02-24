@@ -9,8 +9,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.adserver.adview.AdServerViewCore.OnAdDownload;
 import com.adserver.adview.MASTAdServerView;
+import com.adserver.adview.MASTAdServerViewCore.MASTOnAdDownload;
 import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
@@ -42,7 +42,7 @@ public class AdDownload extends Activity {
     }
     
        
-    class UserAdDownload implements OnAdDownload
+    class UserAdDownload implements MASTOnAdDownload
     {
 
 		public void begin(MASTAdServerView sender) {

@@ -10,8 +10,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.adserver.adview.AdServerViewCore.OnThirdPartyRequest;
 import com.adserver.adview.MASTAdServerView;
+import com.adserver.adview.MASTAdServerViewCore.MASTOnThirdPartyRequest;
 import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
@@ -43,7 +43,7 @@ public class ThirdPartyRequest extends Activity {
 		linearLayout.addView(adserverView);
     }
     
-    class UserOnThirdPartyRequest implements OnThirdPartyRequest
+    class UserOnThirdPartyRequest implements MASTOnThirdPartyRequest
     {
 
 		private void updateUi(Runnable mUpdateResults, String string, int i) {

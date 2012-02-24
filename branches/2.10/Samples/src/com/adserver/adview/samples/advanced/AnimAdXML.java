@@ -8,8 +8,8 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
 
-import com.adserver.adview.AdServerViewCore.OnAdDownload;
 import com.adserver.adview.MASTAdServerView;
+import com.adserver.adview.MASTAdServerViewCore.MASTOnAdDownload;
 import com.adserver.adview.samples.R;
 
 public class AnimAdXML extends Activity {
@@ -36,7 +36,7 @@ public class AnimAdXML extends Activity {
         animation2.setFillAfter(true);
 		adserverView1.startAnimation(animation2);
         
-        adserverView1.setOnAdDownload(new OnAdDownload() {
+        adserverView1.setOnAdDownload(new MASTOnAdDownload() {
 			@Override
 			public void error(MASTAdServerView sender,String arg0) {
 				
@@ -67,7 +67,7 @@ public class AnimAdXML extends Activity {
         animation.setFillAfter(true);
 		adserverView1.startAnimation(animation);		
         
-        adserverView1.setOnAdDownload(new OnAdDownload() {
+        adserverView1.setOnAdDownload(new MASTOnAdDownload() {
 			@Override
 			public void error(String arg0) {
 				
@@ -101,7 +101,7 @@ public class AnimAdXML extends Activity {
         animation2.setFillAfter(true);
 		adserverView2.startAnimation(animation2);		
         
-		adserverView2.setOnAdDownload(new OnAdDownload() {
+		adserverView2.setOnAdDownload(new MASTOnAdDownload() {
 			@Override
 			public void error(String arg0) {
 				

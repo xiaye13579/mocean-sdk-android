@@ -8,8 +8,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.adserver.adview.AdServerViewCore.OnOrmmaListener;
 import com.adserver.adview.MASTAdServerView;
+import com.adserver.adview.MASTAdServerViewCore.MASTOnOrmmaListener;
 import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
@@ -40,7 +40,7 @@ public class OrmmaListener extends Activity {
 		linearLayout.addView(adserverView);
     }
     
-    class UserOnOrmmaListener implements OnOrmmaListener
+    class UserOnOrmmaListener implements MASTOnOrmmaListener
     {
 
 		private void updateUi(Runnable mUpdateResults, String string, int i) {

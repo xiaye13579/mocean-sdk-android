@@ -8,8 +8,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.adserver.adview.AdServerViewCore.OnAdClickListener;
 import com.adserver.adview.MASTAdServerView;
+import com.adserver.adview.MASTAdServerViewCore.MASTOnAdClickListener;
 import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
@@ -40,7 +40,7 @@ public class AdClickListener extends Activity {
 		linearLayout.addView(adserverView);
     }
     
-    class UserOnAdClickListener implements OnAdClickListener
+    class UserOnAdClickListener implements MASTOnAdClickListener
     {
 
 		@Override
