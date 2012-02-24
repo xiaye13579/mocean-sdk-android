@@ -14,7 +14,7 @@ public class Constants {
 	public static final String PREF_IS_FIRST_APP_LAUNCH = "isFirstAppLaunch";
 	public static final String FIRST_APP_LAUNCH_URL = "http://www.moceanmobile.com/appconversion.php";
 
-	
+	//public static final String STR_RESPONSE_ERROR = "AdserverViewPrefs";
 	
 	public static final String STR_IMPRESSION_NOT_SEND  = "Impression is not sent";
 	

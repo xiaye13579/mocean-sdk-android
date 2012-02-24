@@ -221,6 +221,15 @@ public class ContentManager {
 				HttpConnectionParams.setConnectionTimeout(get.getParams(), Constants.AD_RELOAD_PERIOD);
 				HttpConnectionParams.setSoTimeout(get.getParams(), Constants.DEFAULT_REQUEST_TIMEOUT);
 				HttpResponse response = client.execute(get);
+				
+				if(response.getStatusLine().getStatusCode()!=200)
+				{
+					if (parameters.sender != null)
+						parameters.sender.setResult("", "Response code = "+String.valueOf(response.getStatusLine().getStatusCode()));
+					stopLoadContent(parameters.sender);
+					return;
+				}
+				
 				HttpEntity entity = response.getEntity();
 				InputStream inputStream = entity.getContent();
 				BufferedInputStream bufferedInputStream = new BufferedInputStream(
