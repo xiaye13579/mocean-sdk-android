@@ -1967,7 +1967,7 @@ public abstract class AdServerViewCore extends WebView {
 				HttpEntity entity = response.getEntity();
 				String responseValue = EntityUtils.toString(entity, "UTF-8");				
 				expandedView.loadDataWithBaseURL(null, responseValue, "text/html", "UTF-8", null);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "expandInUIThread", e.getMessage());
 			}						
