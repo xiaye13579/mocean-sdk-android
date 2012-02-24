@@ -165,7 +165,8 @@ public abstract class AdServerViewCore extends WebView {
 	private String mContent;
 	private HashSet<String> excampaigns = new HashSet<String>();
 	private Button buttonClose;
-		
+	protected boolean isInterstitial = false;
+	
 	MASTAdLog adLog = new MASTAdLog(this);
 	Dialog dialog;
 	private static OrmmaPlayer player;
@@ -271,7 +272,7 @@ public abstract class AdServerViewCore extends WebView {
 	
 	public boolean isInterstitial()
 	{
-		return isExpanded;
+		return isExpanded || isInterstitial;
 	}
 	
 	void AutoDetectParameters(Context context)
@@ -766,7 +767,7 @@ public abstract class AdServerViewCore extends WebView {
 				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "onDetachedFromWindow", e.getMessage());
 			}
 		}*/
-		ContentManager.getInstance(null).stopLoadContent(this);
+		ContentManager.getInstance(this).stopLoadContent(this);
 
 		if(mNetworkController != null) {
 			mNetworkController.stopAllNetworkListeners();

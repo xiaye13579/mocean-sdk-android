@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -22,11 +23,16 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.provider.UserDictionary.Words;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.RelativeLayout;
 
 /**
  * Viewer of advertising.
@@ -38,7 +44,11 @@ import android.view.MotionEvent;
  * ua - The browser user agent of the device making the request.
  */
 public class MASTAdServerView extends AdServerViewCore {
-	//private AutoDetectParametersThread autoDetectParametersThread;
+	
+	private Integer showCloseButtonTime; 
+	private Integer autoCloseInterstitialTime;
+	private Boolean isShowPhoneStatusBar;
+	private Button closeButton;	
 	
 		/**
 	 * Creation of viewer of advertising.
@@ -48,8 +58,6 @@ public class MASTAdServerView extends AdServerViewCore {
 	 */
 	public MASTAdServerView(Context context, Integer site, Integer zone) {
 		super(context, site, zone);
-		//DetectParameters(context);
-		//initialize(context);		
 	}
 	
 	/**
@@ -60,8 +68,6 @@ public class MASTAdServerView extends AdServerViewCore {
 	 */
 	public MASTAdServerView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		//DetectParameters(context);
-		//initialize(context);
 	}
 
 	/**
@@ -72,7 +78,6 @@ public class MASTAdServerView extends AdServerViewCore {
 	public MASTAdServerView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		AutoDetectParameters(context);
-		//initialize(context);
 	}
 
 	/**
@@ -81,15 +86,9 @@ public class MASTAdServerView extends AdServerViewCore {
 	 */
 	public MASTAdServerView(Context context) {
 		super(context);
-		//AutoDetectParameters(context);
-		//DetectParameters(context);
-		//initialize(context);
 	}
 	
-	/*private void initialize(Context context) {
-		autoDetectParametersThread = new AutoDetectParametersThread(context, this, adserverRequest);
-	}*/
-	
+
 	protected MASTAdServerView(Context context, boolean expanded) {
 		super(context,expanded);
 	}
@@ -97,10 +96,6 @@ public class MASTAdServerView extends AdServerViewCore {
 	@Override	
 	protected void onAttachedToWindow() {
 		adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_INFO, "AttachedToWindow", "");
-		/*if((autoDetectParametersThread != null) 
-				&& (autoDetectParametersThread.getState().equals(Thread.State.NEW))) { 
-			autoDetectParametersThread.start();
-		}*/
 		super.onAttachedToWindow();
 	}
 
@@ -108,14 +103,6 @@ public class MASTAdServerView extends AdServerViewCore {
 	protected void onDetachedFromWindow() {
 		adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_INFO, "DetachedFromWindow", "");
 		
-
-		/*if(autoDetectParametersThread != null) {
-			try {
-				autoDetectParametersThread.interrupt();
-			} catch (Exception e) {
-			}
-		}*/
-
 		if (image!=null)
 		{
 			image.recycle();
@@ -126,6 +113,164 @@ public class MASTAdServerView extends AdServerViewCore {
 		super.onDetachedFromWindow();
 	}
 	
+	/*
+	 *  Show interstitial advertising.
+	 */
+	public void show() {
+		this.isInterstitial = true;
+		openInterstitialForm(getContext(), showCloseButtonTime, 
+				autoCloseInterstitialTime, isShowPhoneStatusBar, this, closeButton);
+	}
+	
+	private static void openInterstitialForm(Context context,
+			Integer showCloseButtonTime, Integer autoCloseInterstitialTime,
+			Boolean isShowPhoneStatusBar, MASTAdServerView adServerView, Button closeButton) {
+		if((showCloseButtonTime == null) || (showCloseButtonTime < 0)) {
+			showCloseButtonTime = 0;
+		}
+		if((autoCloseInterstitialTime == null) || (autoCloseInterstitialTime < 0)) {
+			autoCloseInterstitialTime = 0;
+		}
+		if(isShowPhoneStatusBar == null) {
+			isShowPhoneStatusBar = true;
+		} 
+
+		//show dialog
+		final Dialog dialog;
+		
+		if(isShowPhoneStatusBar) {
+			dialog = new Dialog(context, android.R.style.Theme_NoTitleBar);
+		} else {
+			dialog = new Dialog(context, android.R.style.Theme_NoTitleBar_Fullscreen);
+		}
+		
+		adServerView.dialog = dialog;
+		
+		if (adServerView.getParent() != null) {
+			((ViewGroup)adServerView.getParent()).removeAllViews();
+		}
+		
+		RelativeLayout mainLayout = new RelativeLayout(context);
+		mainLayout.setLayoutParams(new ViewGroup.LayoutParams(
+				ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+		adServerView.setLayoutParams(new ViewGroup.LayoutParams(
+				ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+		mainLayout.addView(adServerView);
+		
+		if(closeButton == null) {
+			closeButton = new Button(context);
+			closeButton.setText("Close");
+			RelativeLayout.LayoutParams closeLayoutParams = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+			closeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+			closeLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+			closeButton.setLayoutParams(closeLayoutParams);
+		}
+		closeButton.setOnClickListener(new View.OnClickListener(){
+			@Override
+			public void onClick(View view) {
+				dialog.dismiss();
+			}
+		});
+		mainLayout.addView(closeButton);
+
+		Handler handler = new Handler();
+		
+		if(showCloseButtonTime <= 0) {
+			closeButton.setVisibility(View.VISIBLE);
+		} else {
+			closeButton.setVisibility(View.INVISIBLE);
+			dialog.setCancelable(false);
+			ShowCloseButtonThread showButtonThread = new ShowCloseButtonThread(handler,dialog, closeButton, showCloseButtonTime);
+			showButtonThread.start();
+		}
+		
+		if(autoCloseInterstitialTime > 0) {						
+			CloseDialogThread closeDialogThread = new CloseDialogThread(handler, dialog, autoCloseInterstitialTime);
+			closeDialogThread.start();
+		}
+		
+		dialog.setContentView(mainLayout);
+		dialog.show();
+		adServerView.update();
+	}
+	
+	/**
+	 * Get show close button after delay.
+	 * @return
+	 */
+	public Integer getShowCloseButtonTime() {
+		return showCloseButtonTime;
+	}
+
+	/**
+	 * Set show close button after delay.
+	 * @param showCloseButtonTime
+	 */
+	public void setShowCloseButtonTime(Integer showCloseButtonTime) {
+		this.showCloseButtonTime = showCloseButtonTime;
+	}
+
+	/**
+	 * get auto-close interstitial time.
+	 * @return
+	 */
+	public Integer getAutoCloseInterstitialTime() {
+		return autoCloseInterstitialTime;
+	}
+
+	/**
+	 * Set auto-close interstitial time.
+	 * @param autoCloseInterstitialTime
+	 */
+	public void setAutoCloseInterstitialTime(Integer autoCloseInterstitialTime) {
+		this.autoCloseInterstitialTime = autoCloseInterstitialTime;
+	}
+
+	/**
+	 * Get whether to show Phone Status Bar or not.
+	 * @return
+	 */
+	public Boolean getIsShowPhoneStatusBar() {
+		return isShowPhoneStatusBar;
+	}
+
+	/**
+	 * Set whether to show Phone Status Bar or not.
+	 * @param isShowPhoneStatusBar
+	 */
+	public void setIsShowPhoneStatusBar(Boolean isShowPhoneStatusBar) {
+		this.isShowPhoneStatusBar = isShowPhoneStatusBar;
+	}
+
+	/**
+	 * Get Object for customization close button view.
+	 * @return
+	 */
+	public Button getCloseButton() {
+		return closeButton;
+	}
+
+	/**
+	 * Set Object for customization close button view.
+	 * @param closeButton
+	 */
+	public void setCloseButton(Button closeButton) {
+		this.closeButton = closeButton;
+	}
+	
+	@Override
+	void InterstitialClose() {
+		if(isInterstitial)			
+			handler.post(new Runnable() {
+				public void run() {
+					if(dialog != null) {
+						dialog.dismiss();
+					}
+				}
+			});		
+	}
+	
 	/*@Override
 	public void destroy() {
 		if (image!=null)
@@ -134,23 +279,6 @@ public class MASTAdServerView extends AdServerViewCore {
 			image = null;
 		}
 		super.destroy();
-	}
-	
-	/*private class AutoDetectParametersThread extends Thread {
-		private Context context;
-		private AdServerViewCore adserverView;
-		private AdserverRequest adserverRequest;
-
-		public AutoDetectParametersThread(Context context,
-				AdServerViewCore adserverView, AdserverRequest adserverRequest) {
-			this.context = context;
-			this.adserverView = adserverView;
-			this.adserverRequest = adserverRequest;
-		}
-
-		@Override
-		public void run() {
-		}
 	}*/
 	
 	@Override
@@ -159,21 +287,6 @@ public class MASTAdServerView extends AdServerViewCore {
 		AdServerViewCore adserverView = this;
 		if(adserverRequest != null) {
 			AutoDetectParameters autoDetectParameters = AutoDetectParameters.getInstance();
-			
-			/*TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-			if (tm!=null) 
-			{
-				String networkOperator = tm.getNetworkOperator();      
-				if ((networkOperator != null) && (networkOperator.length()>3)) 
-				{         
-					String mcc = networkOperator.substring(0, 3);   
-					String mnc = networkOperator.substring(3);  
-					adserverRequest.setMCC(mcc);
-					adserverRequest.setMNC(mnc);
-				} 
-				//adserverRequest.setMCC(tm.getNetworkCountryIso());
-				//tm.getNetworkOperator()
-			}*/
 			
 			if(adserverRequest.getVersion() == null) {
 				if(autoDetectParameters.getVersion() == null) {
@@ -211,87 +324,9 @@ public class MASTAdServerView extends AdServerViewCore {
 					adserverRequest.setUa(autoDetectParameters.getUa());
 				}
 			}
-			
-			/*if(adserverRequest.getConnectionSpeed() == null) {
-				if(autoDetectParameters.getConnectionSpeed() == null) {
-					try {
-						Integer connectionSpeed = null;
-				    	ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-				    	NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-				    	
-						if(networkInfo != null) {
-							int type = networkInfo.getType();
-							int subtype = networkInfo.getSubtype();
-							
-							//0 - low (gprs, edge), 1 - fast (3g, wifi)
-							if(type == ConnectivityManager.TYPE_WIFI) {
-								connectionSpeed = 1;
-							} else if(type == ConnectivityManager.TYPE_MOBILE) {
-								if(subtype == TelephonyManager.NETWORK_TYPE_EDGE) {
-									connectionSpeed = 0;
-								} else if(subtype == TelephonyManager.NETWORK_TYPE_GPRS) {
-									connectionSpeed = 0;
-								} else if(subtype == TelephonyManager.NETWORK_TYPE_UMTS) {
-									connectionSpeed = 1;
-								}
-							}
-						}
-						
-						if(connectionSpeed != null) {
-							adserverRequest.setConnectionSpeed(connectionSpeed);
-							autoDetectParameters.setConnectionSpeed(connectionSpeed);
-						}
-					} catch (Exception e) {
-					}
-				} else {
-					adserverRequest.setConnectionSpeed(autoDetectParameters.getConnectionSpeed());
-				}
-			}*/
 		}
 	}
 	
-	/*private class WhereamiLocationListener implements LocationListener {
-		private LocationManager locationManager;
-		private AutoDetectParameters autoDetectParameters;
-		
-		public WhereamiLocationListener(LocationManager locationManager, 
-				AutoDetectParameters autoDetectParameters) {
-			this.locationManager = locationManager;
-			this.autoDetectParameters = autoDetectParameters;
-		}
-
-		public void onLocationChanged(Location location) {
-			locationManager.removeUpdates(this);
-			
-			try {
-				double latitude = location.getLatitude();
-				double longitude = location.getLongitude();
-				
-				
-				adserverRequest.setLatitude(Double.toString(latitude));
-				adserverRequest.setLongitude(Double.toString(longitude));
-				autoDetectParameters.setLatitude(Double.toString(latitude));
-				autoDetectParameters.setLongitude(Double.toString(longitude));
-				adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "GPSLocationChanged=", "("+autoDetectParameters.getLatitude()+";"+autoDetectParameters.getLongitude()+")");
-				
-    		} catch (Exception e) {
-    			adLog.log(AdLog.LOG_LEVEL_2,AdLog.LOG_TYPE_ERROR,"GPSLocationChanged",e.getMessage());
-    		}
-	    }
-
-		@Override
-		public void onProviderDisabled(String provider) {
-		}
-
-		@Override
-		public void onProviderEnabled(String provider) {
-		}
-
-		@Override
-		public void onStatusChanged(String provider, int status, Bundle extras) {
-		}
-	}*/
-
 	Bitmap image;
 	Canvas c;
 	Paint paint;

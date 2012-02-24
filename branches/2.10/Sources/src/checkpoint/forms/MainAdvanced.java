@@ -36,7 +36,6 @@ import android.widget.LinearLayout;
 import android.widget.FrameLayout;
 
 import com.adserver.adview.MASTAdLog;
-import com.adserver.adview.AdServerInterstitialView;
 import com.adserver.adview.MASTAdServerView;
 import com.adserver.adview.InternelBrowser;
 import com.adserver.adview.AdServerViewCore.OnAdClickListener;
@@ -67,8 +66,8 @@ public class MainAdvanced extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				AdServerInterstitialView interstitialView = 
-						new AdServerInterstitialView(context);//, 8061, 8888);//16112);
+				MASTAdServerView interstitialView = 
+						new MASTAdServerView(context);//, 8061, 8888);//16112);
 						//new AdServerInterstitialView(context, "10359", "21505");
 					interstitialView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
 					interstitialView.setSite(8061);
