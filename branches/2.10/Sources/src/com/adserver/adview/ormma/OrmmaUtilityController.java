@@ -19,13 +19,13 @@ import android.text.TextUtils;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 
-import com.adserver.adview.AdServerViewCore;
+import com.adserver.adview.MASTAdServerViewCore;
 
 public class OrmmaUtilityController extends OrmmaController {
 
 	static HashMap<String, Boolean> mFeatureMap = null;
 
-	public OrmmaUtilityController(AdServerViewCore adView, Context context) {
+	public OrmmaUtilityController(MASTAdServerViewCore adView, Context context) {
 		super(adView, context);
 		setFeatureMap();
 	}

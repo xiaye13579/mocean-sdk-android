@@ -65,7 +65,7 @@ public class AdserverRequest {
 	
 	public AdserverRequest(MASTAdLog AdLog) {
 		this.AdLog = AdLog;
-		setPremium(AdServerViewCore.PREMIUM_STATUS_BOTH);
+		setPremium(MASTAdServerViewCore.PREMIUM_STATUS_BOTH);
 	}
 
 	/*public AdserverRequest(Integer site, Integer zone) {
@@ -709,7 +709,7 @@ public class AdserverRequest {
 	public Integer getPremium() {
 		synchronized(parameters) {
 			String premium = parameters.get(parameter_premium);
-			return getIntParameter(premium,AdServerViewCore.PREMIUM_STATUS_BOTH);
+			return getIntParameter(premium,MASTAdServerViewCore.PREMIUM_STATUS_BOTH);
 		}
 	}
 	

@@ -20,7 +20,7 @@ import android.webkit.URLUtil;
 
 
 import com.adserver.adview.MASTAdLog;
-import com.adserver.adview.AdServerViewCore;
+import com.adserver.adview.MASTAdServerViewCore;
 import com.adserver.adview.ormma.util.OrmmaConfigurationBroadcastReceiver;
 
 public class OrmmaDisplayController extends OrmmaController {
@@ -32,7 +32,7 @@ public class OrmmaDisplayController extends OrmmaController {
 	private Dimensions defaultPosition;
 	private static final String LOG_TAG = "OrmmaDisplayController";
 
-	public OrmmaDisplayController(AdServerViewCore adView, Context c) {
+	public OrmmaDisplayController(MASTAdServerViewCore adView, Context c) {
 		super(adView, c);
 		DisplayMetrics metrics = new DisplayMetrics();
 		((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(metrics);

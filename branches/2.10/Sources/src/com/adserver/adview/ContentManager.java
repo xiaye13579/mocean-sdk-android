@@ -39,7 +39,7 @@ public class ContentManager {
 	private String userAgent = "";
 	private static ContentManager instance;
 	private static boolean isSimAvailable;
-	private HashMap<AdServerViewCore, ContentParameters> senderParameters = new HashMap<AdServerViewCore, ContentParameters>();
+	private HashMap<MASTAdServerViewCore, ContentParameters> senderParameters = new HashMap<MASTAdServerViewCore, ContentParameters>();
 	private static String id = null;
 	private Context context;
 
@@ -105,7 +105,7 @@ public class ContentManager {
 		thread.start();
 	}
 
-	public void startLoadContent(AdServerViewCore sender, String url/*, String w, String h*/) {
+	public void startLoadContent(MASTAdServerViewCore sender, String url/*, String w, String h*/) {
 		if (senderParameters.containsKey(sender))
 			stopLoadContent(sender);
 
@@ -123,7 +123,7 @@ public class ContentManager {
 		cTh.start();
 	}
 
-	public void stopLoadContent(AdServerViewCore sender) {
+	public void stopLoadContent(MASTAdServerViewCore sender) {
 		if (senderParameters.containsKey(sender)) {
 			senderParameters.get(sender).sender = null;
 			senderParameters.get(sender).cTh.cancel();
@@ -196,7 +196,7 @@ public class ContentManager {
 		public String url;
 		//public String w;
 		//public String h;
-		public AdServerViewCore sender;
+		public MASTAdServerViewCore sender;
 		ContentThread cTh;
 	};
 

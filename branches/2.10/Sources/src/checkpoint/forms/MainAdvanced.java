@@ -38,10 +38,10 @@ import android.widget.FrameLayout;
 import com.adserver.adview.MASTAdLog;
 import com.adserver.adview.MASTAdServerView;
 import com.adserver.adview.InternelBrowser;
-import com.adserver.adview.AdServerViewCore.OnAdClickListener;
-import com.adserver.adview.AdServerViewCore.OnAdDownload;
-import com.adserver.adview.AdServerViewCore.OnOrmmaListener;
-import com.adserver.adview.AdServerViewCore.OnThirdPartyRequest;
+import com.adserver.adview.MASTAdServerViewCore.MASTOnAdClickListener;
+import com.adserver.adview.MASTAdServerViewCore.MASTOnAdDownload;
+import com.adserver.adview.MASTAdServerViewCore.MASTOnOrmmaListener;
+import com.adserver.adview.MASTAdServerViewCore.MASTOnThirdPartyRequest;
 import com.adserver.adview.ormma.OrmmaDisplayController;
 
 public class MainAdvanced extends Activity {
@@ -115,7 +115,7 @@ public class MainAdvanced extends Activity {
 //        adserverView = new AdServerView(this, "8061", "16686");//Medialets
 //        adserverView = new AdServerView(this, "10113", "20991");
 //        adserverView = new AdServerView(this, "8061", "14");
-        adserverView.setOnThirdPartyRequest(new OnThirdPartyRequest() {
+        adserverView.setOnThirdPartyRequest(new MASTOnThirdPartyRequest() {
 			public void event(MASTAdServerView sender, HashMap<String, String> params) {
 				
 			}

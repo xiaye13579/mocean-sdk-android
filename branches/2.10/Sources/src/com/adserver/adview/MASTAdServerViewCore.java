@@ -71,7 +71,7 @@ import com.adserver.adview.ormma.util.OrmmaUtils;
 /**
  * Viewer of advertising.
  */
-public abstract class AdServerViewCore extends WebView {
+public abstract class MASTAdServerViewCore extends WebView {
 	
 	static final int ID_CLOSE = 1;
 	
@@ -110,10 +110,10 @@ public abstract class AdServerViewCore extends WebView {
 	Handler handler = new Handler(Looper.getMainLooper());
 	private Integer defaultImageResource;
 	protected AdserverRequest adserverRequest;
-	private OnAdClickListener adClickListener;
-	private OnAdDownload adDownload;
-	private OnOrmmaListener ormmaListener;
-	private OnThirdPartyRequest onThirdPartyRequest;
+	private MASTOnAdClickListener adClickListener;
+	private MASTOnAdDownload adDownload;
+	private MASTOnOrmmaListener ormmaListener;
+	private MASTOnThirdPartyRequest onThirdPartyRequest;
 	private Long adReloadPeriod;
 	private Integer visibleMode;
 	private Integer advertiserId; 
@@ -158,7 +158,7 @@ public abstract class AdServerViewCore extends WebView {
 	private OrmmaNetworkController mNetworkController;
 	private OrmmaSensorController mSensorController;
 	private ViewState mViewState = ViewState.DEFAULT;
-	private AdServerViewCore mParentAd = null;
+	private MASTAdServerViewCore mParentAd = null;
 	private static ViewGroup mExpandedFrame;
 	public String mDataToInject = null;
 	private static String mScriptPath = null;
@@ -200,7 +200,7 @@ public abstract class AdServerViewCore extends WebView {
 	 * @param site - The id of the publisher site.
 	 * @param zone - The id of the zone of publisher site.
 	 */
-	public AdServerViewCore(Context context, Integer site, Integer zone) {
+	public MASTAdServerViewCore(Context context, Integer site, Integer zone) {
 		super(context);
 		AutoDetectParameters(context);
 		//isFirstTime =true;
@@ -218,7 +218,7 @@ public abstract class AdServerViewCore extends WebView {
 	 * @param attrs
 	 * @param defStyle
 	 */
-	public AdServerViewCore(Context context, AttributeSet attrs, int defStyle) {
+	public MASTAdServerViewCore(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		AutoDetectParameters(context);
 		initialize(context, attrs);
@@ -229,7 +229,7 @@ public abstract class AdServerViewCore extends WebView {
 	 * @param context
 	 * @param attrs
 	 */
-	public AdServerViewCore(Context context, AttributeSet attrs) {
+	public MASTAdServerViewCore(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		AutoDetectParameters(context);
 		initialize(context, attrs);
@@ -239,13 +239,13 @@ public abstract class AdServerViewCore extends WebView {
 	 * Creation of viewer of advertising. It is used for element creation in a XML template.
 	 * @param context
 	 */
-	public AdServerViewCore(Context context) {
+	public MASTAdServerViewCore(Context context) {
 		super(context);
 		AutoDetectParameters(context);
 		initialize(context, null);
 	}
 	
-	public AdServerViewCore(Context context, boolean expanded) {
+	public MASTAdServerViewCore(Context context, boolean expanded) {
 		super(context);
 		isExpanded =expanded; 
 		AutoDetectParameters(context);
@@ -281,22 +281,22 @@ public abstract class AdServerViewCore extends WebView {
 		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog);
 	}
 	
-	public OnThirdPartyRequest getOnThirdPartyRequest() {
+	public MASTOnThirdPartyRequest getOnThirdPartyRequest() {
 		return onThirdPartyRequest;
 	}
 	
-	public void setOnThirdPartyRequest(OnThirdPartyRequest onThirdPartyRequest) {
+	public void setOnThirdPartyRequest(MASTOnThirdPartyRequest onThirdPartyRequest) {
 		this.onThirdPartyRequest = onThirdPartyRequest;
 	}
 	
 		/**
 	 * Get interface for advertising opening.
 	 */
-	public OnAdClickListener getOnAdClickListener() {
+	public MASTOnAdClickListener getOnAdClickListener() {
 		return adClickListener;
 	}
 	
-	public OnOrmmaListener getOnOrmmaListener() {
+	public MASTOnOrmmaListener getOnOrmmaListener() {
 		return ormmaListener;
 	}
 
@@ -304,29 +304,29 @@ public abstract class AdServerViewCore extends WebView {
 	 * Set interface for advertising opening.
 	 * @param adClickListener
 	 */
-	public void setOnAdClickListener(OnAdClickListener adClickListener) {
+	public void setOnAdClickListener(MASTOnAdClickListener adClickListener) {
 		this.adClickListener = adClickListener;
 	}
 	
 	/**
 	 * The interface for advertising opening in an internal browser.
 	 */
-	public interface OnAdClickListener {
+	public interface MASTOnAdClickListener {
 		public void click(MASTAdServerView sender, String url);
 	}
 	
-	public interface OnOrmmaListener {
+	public interface MASTOnOrmmaListener {
 		public void event(MASTAdServerView sender, String name, String params);
 	}
 	
-	public interface OnThirdPartyRequest {
+	public interface MASTOnThirdPartyRequest {
 		public void event(MASTAdServerView sender, HashMap<String,String> params);
 	}
 
 	/**
 	 * The interface for advertising downloading.
 	 */
-	public interface OnAdDownload {
+	public interface MASTOnAdDownload {
 		/**
 		 * This event is fired before banner download begins. 
 		 */
@@ -344,7 +344,7 @@ public abstract class AdServerViewCore extends WebView {
 	/**
 	 * Get interface for advertising downloading.
 	 */
-	public OnAdDownload getOnAdDownload() {
+	public MASTOnAdDownload getOnAdDownload() {
 		return adDownload;
 	}
 
@@ -352,11 +352,11 @@ public abstract class AdServerViewCore extends WebView {
 	 * Set interface for advertising downloading.
 	 * @param adDownload
 	 */
-	public void setOnAdDownload(OnAdDownload adDownload) {
+	public void setOnAdDownload(MASTOnAdDownload adDownload) {
 		this.adDownload = adDownload;
 	}
 	
-	public void setOnOrmmaListener(OnOrmmaListener ormmaListener) {
+	public void setOnOrmmaListener(MASTOnOrmmaListener ormmaListener) {
 		this.ormmaListener = ormmaListener;
 	}
 
@@ -1351,7 +1351,7 @@ public abstract class AdServerViewCore extends WebView {
 		}
 	}
 	
-	private class InterceptOnAdDownload implements OnAdDownload
+	private class InterceptOnAdDownload implements MASTOnAdDownload
 	{
 		private Context context;
 		private WebView view;
@@ -1543,7 +1543,7 @@ public abstract class AdServerViewCore extends WebView {
 
 		@Override
 		public void onPageFinished(WebView view, String url) {
-			((AdServerViewCore) view).onPageFinished();
+			((MASTAdServerViewCore) view).onPageFinished();
 			
 			if(adDownload != null) {
 				adDownload.end((MASTAdServerView)view);
@@ -1605,11 +1605,11 @@ public abstract class AdServerViewCore extends WebView {
 	}	
 	
 	private class OpenUrlThread extends Thread {
-		AdServerViewCore ad;
+		MASTAdServerViewCore ad;
 		Context context;
 		String url;
 		
-		public OpenUrlThread(Context context,AdServerViewCore ad, String url) {
+		public OpenUrlThread(Context context,MASTAdServerViewCore ad, String url) {
 			this.ad = ad;
 			this.context =context;
 			this.url = url;
@@ -2014,7 +2014,7 @@ public abstract class AdServerViewCore extends WebView {
 		((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).addView(mExpandedFrame, lp);
 	}
 	
-	private void loadExpandedUrl(String Url, AdServerViewCore parentAd, ViewGroup expandedFrame, boolean dontLoad) {
+	private void loadExpandedUrl(String Url, MASTAdServerViewCore parentAd, ViewGroup expandedFrame, boolean dontLoad) {
 		mParentAd = parentAd;
 		mExpandedFrame = expandedFrame;
 		mViewState = ViewState.EXPANDED;

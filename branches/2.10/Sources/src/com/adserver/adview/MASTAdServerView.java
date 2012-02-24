@@ -43,7 +43,7 @@ import android.widget.RelativeLayout;
  * country - Country of visitor (for example: US). 
  * ua - The browser user agent of the device making the request.
  */
-public class MASTAdServerView extends AdServerViewCore {
+public class MASTAdServerView extends MASTAdServerViewCore {
 	
 	private Integer showCloseButtonTime; 
 	private Integer autoCloseInterstitialTime;
@@ -284,7 +284,7 @@ public class MASTAdServerView extends AdServerViewCore {
 	@Override
 	void AutoDetectParameters(Context context) {
 		super.AutoDetectParameters(context);
-		AdServerViewCore adserverView = this;
+		MASTAdServerViewCore adserverView = this;
 		if(adserverRequest != null) {
 			AutoDetectParameters autoDetectParameters = AutoDetectParameters.getInstance();
 			

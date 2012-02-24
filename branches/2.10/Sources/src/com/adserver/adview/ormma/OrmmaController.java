@@ -11,13 +11,13 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.adserver.adview.AdServerViewCore;
+import com.adserver.adview.MASTAdServerViewCore;
 import com.adserver.adview.ormma.util.NavigationStringEnum;
 import com.adserver.adview.ormma.util.TransitionStringEnum;
 
 public class OrmmaController {
 
-	protected AdServerViewCore mOrmmaView;
+	protected MASTAdServerViewCore mOrmmaView;
 
 	private static final String STRING_TYPE = "class java.lang.String";
 	private static final String INT_TYPE = "int";
@@ -99,7 +99,7 @@ public class OrmmaController {
 		public boolean is_modal;
 	}
 
-	public OrmmaController(AdServerViewCore adView, Context context) {
+	public OrmmaController(MASTAdServerViewCore adView, Context context) {
 		mOrmmaView = adView;
 		mContext = context;
 	}

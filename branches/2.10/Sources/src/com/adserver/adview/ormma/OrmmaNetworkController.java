@@ -9,7 +9,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import com.adserver.adview.AdServerViewCore;
+import com.adserver.adview.MASTAdServerViewCore;
 import com.adserver.adview.Base64;
 import com.adserver.adview.ormma.util.OrmmaNetworkBroadcastReceiver;
 
@@ -20,7 +20,7 @@ public class OrmmaNetworkController extends OrmmaController {
 	private IntentFilter mFilter;
 	private Hashtable<String, String> requests;
 
-	public OrmmaNetworkController(AdServerViewCore adView, Context context) {
+	public OrmmaNetworkController(MASTAdServerViewCore adView, Context context) {
 		super(adView, context);
 		mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		requests = new Hashtable<String, String>();

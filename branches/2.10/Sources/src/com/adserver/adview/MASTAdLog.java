@@ -22,7 +22,7 @@ public class MASTAdLog {
 	int CurrentLogLevel = 0;
 	String AppName="";
 	
-	AdServerViewCore adView;
+	MASTAdServerViewCore adView;
 	
 	private static int DefaultLevel = LOG_LEVEL_NONE;
 	
@@ -44,7 +44,7 @@ public class MASTAdLog {
 		}
 	}
 	
-	public MASTAdLog(AdServerViewCore adView)
+	public MASTAdLog(MASTAdServerViewCore adView)
 	{
 		this.adView =  adView;
 		setLogLevel(DefaultLevel);

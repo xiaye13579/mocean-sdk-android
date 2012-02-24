@@ -11,13 +11,13 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.HeterogeneousExpandableList;
 import android.widget.RelativeLayout;
 
-import com.adserver.adview.AdServerViewCore;
+import com.adserver.adview.MASTAdServerViewCore;
 import com.adserver.adview.ormma.OrmmaController.Dimensions;
 import com.adserver.adview.ormma.OrmmaController.PlayerProperties;
 import com.adserver.adview.ormma.util.OrmmaPlayer;
 import com.adserver.adview.ormma.util.OrmmaPlayerListener;
 import com.adserver.adview.ormma.util.OrmmaUtils;
-import com.adserver.adview.AdServerViewCore.ACTION;
+import com.adserver.adview.MASTAdServerViewCore.ACTION;
 
 public class OrmmaActionHandler extends Activity {
 
@@ -44,12 +44,12 @@ public class OrmmaActionHandler extends Activity {
 	 */
 	private void doAction(Bundle data) {
 
-		String actionData = data.getString(AdServerViewCore.ACTION_KEY);
+		String actionData = data.getString(MASTAdServerViewCore.ACTION_KEY);
 				
 		if(actionData == null)
 			return;
 		
-		AdServerViewCore.ACTION actionType = AdServerViewCore.ACTION.valueOf(actionData); 
+		MASTAdServerViewCore.ACTION actionType = MASTAdServerViewCore.ACTION.valueOf(actionData); 
 		
 		switch (actionType) {
 		case PLAY_AUDIO: {
@@ -75,12 +75,12 @@ public class OrmmaActionHandler extends Activity {
 	 */
 	OrmmaPlayer initPlayer(Bundle playData,ACTION actionType){				
 
-		PlayerProperties properties = (PlayerProperties) playData.getParcelable(AdServerViewCore.PLAYER_PROPERTIES);
+		PlayerProperties properties = (PlayerProperties) playData.getParcelable(MASTAdServerViewCore.PLAYER_PROPERTIES);
 
-		Dimensions playDimensions = (Dimensions)playData.getParcelable(AdServerViewCore.DIMENSIONS);		
+		Dimensions playDimensions = (Dimensions)playData.getParcelable(MASTAdServerViewCore.DIMENSIONS);		
 				
 		OrmmaPlayer player = new OrmmaPlayer(getApplicationContext());
-		player.setPlayData(properties,OrmmaUtils.getData(AdServerViewCore.EXPAND_URL, playData));
+		player.setPlayData(properties,OrmmaUtils.getData(MASTAdServerViewCore.EXPAND_URL, playData));
 		
 		RelativeLayout.LayoutParams lp;
 		if(playDimensions == null) {
