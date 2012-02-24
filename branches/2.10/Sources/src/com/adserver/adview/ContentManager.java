@@ -94,12 +94,12 @@ public class ContentManager {
 		return isSimAvailable;
 	}
 
-	public void sendImpression(final String uri,final AdLog adLog) {
+	public void sendImpression(final String uri,final MASTAdLog adLog) {
 		Thread thread = new Thread() {
 			@Override
 			public void run() {
 				if(!sendImpr(uri))
-					adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_WARNING, Constants.STR_IMPRESSION_NOT_SEND, uri);
+					adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_WARNING, Constants.STR_IMPRESSION_NOT_SEND, uri);
 			}
 		};
 		thread.start();

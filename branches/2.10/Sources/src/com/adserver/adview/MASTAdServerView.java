@@ -37,7 +37,7 @@ import android.view.MotionEvent;
  * country - Country of visitor (for example: US). 
  * ua - The browser user agent of the device making the request.
  */
-public class AdServerView extends AdServerViewCore {
+public class MASTAdServerView extends AdServerViewCore {
 	//private AutoDetectParametersThread autoDetectParametersThread;
 	
 		/**
@@ -46,7 +46,7 @@ public class AdServerView extends AdServerViewCore {
 	 * @param site - The id of the publisher site.
 	 * @param zone - The id of the zone of publisher site.
 	 */
-	public AdServerView(Context context, Integer site, Integer zone) {
+	public MASTAdServerView(Context context, Integer site, Integer zone) {
 		super(context, site, zone);
 		//DetectParameters(context);
 		//initialize(context);		
@@ -58,7 +58,7 @@ public class AdServerView extends AdServerViewCore {
 	 * @param attrs
 	 * @param defStyle
 	 */
-	public AdServerView(Context context, AttributeSet attrs, int defStyle) {
+	public MASTAdServerView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		//DetectParameters(context);
 		//initialize(context);
@@ -69,7 +69,7 @@ public class AdServerView extends AdServerViewCore {
 	 * @param context
 	 * @param attrs
 	 */
-	public AdServerView(Context context, AttributeSet attrs) {
+	public MASTAdServerView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		AutoDetectParameters(context);
 		//initialize(context);
@@ -79,7 +79,7 @@ public class AdServerView extends AdServerViewCore {
 	 * Creation of advanced viewer of advertising. It is used for element creation in a XML template.
 	 * @param context
 	 */
-	public AdServerView(Context context) {
+	public MASTAdServerView(Context context) {
 		super(context);
 		//AutoDetectParameters(context);
 		//DetectParameters(context);
@@ -90,13 +90,13 @@ public class AdServerView extends AdServerViewCore {
 		autoDetectParametersThread = new AutoDetectParametersThread(context, this, adserverRequest);
 	}*/
 	
-	protected AdServerView(Context context, boolean expanded) {
+	protected MASTAdServerView(Context context, boolean expanded) {
 		super(context,expanded);
 	}
 
 	@Override	
 	protected void onAttachedToWindow() {
-		adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_INFO, "AttachedToWindow", "");
+		adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_INFO, "AttachedToWindow", "");
 		/*if((autoDetectParametersThread != null) 
 				&& (autoDetectParametersThread.getState().equals(Thread.State.NEW))) { 
 			autoDetectParametersThread.start();
@@ -106,7 +106,7 @@ public class AdServerView extends AdServerViewCore {
 
 	@Override
 	protected void onDetachedFromWindow() {
-		adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_INFO, "DetachedFromWindow", "");
+		adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_INFO, "DetachedFromWindow", "");
 		
 
 		/*if(autoDetectParametersThread != null) {
@@ -184,13 +184,13 @@ public class AdServerView extends AdServerViewCore {
 							adserverRequest.setVersion(version);
 							autoDetectParameters.setVersion(version);
 						}
-						adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_INFO, "AutoDetectParameters.SDK_VERSION", version);
+						adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_INFO, "AutoDetectParameters.SDK_VERSION", version);
 					} catch (Exception e) {
-						adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "SDK_VERSION", e.getMessage());
+						adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "SDK_VERSION", e.getMessage());
 					}
 				} else {
 					adserverRequest.setVersion(autoDetectParameters.getVersion());
-					adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_INFO, "AutoDetectParameters.SDK_VERSION", autoDetectParameters.getVersion());
+					adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_INFO, "AutoDetectParameters.SDK_VERSION", autoDetectParameters.getVersion());
 				}
 			}
 			
@@ -313,7 +313,7 @@ public class AdServerView extends AdServerViewCore {
 				} return false;
 			}else return super.onTouchEvent(ev);
 		}catch (Exception e) {
-			adLog.log(AdLog.LOG_LEVEL_1,AdLog.LOG_TYPE_ERROR,"onTouchEvent",e.getMessage());
+			adLog.log(MASTAdLog.LOG_LEVEL_1,MASTAdLog.LOG_TYPE_ERROR,"onTouchEvent",e.getMessage());
 			return true;
 		}
 	}

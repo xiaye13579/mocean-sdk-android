@@ -18,7 +18,7 @@
 	    <!-- <WebView         android:id="@+id/webview"        android:layout_width="fill_parent"        android:layout_height="fill_parent"    />
 	    -->
 	    
-	   <!-- <com.adserver.adview.AdServerView 
+	   <!-- <com.adserver.adview.MASTAdServerView 
 	   android:id="@+id/AdServerView" 
 	    android:layout_width="fill_parent" 
 	    android:layout_height="450dip"
@@ -26,7 +26,7 @@
 		zone="20249" 
 		/> -->
 	    
-	    <!--<com.adserver.adview.AdServerView 
+	    <!--<com.adserver.adview.MASTAdServerView 
 		
 	    	android:layout_width="fill_parent" 
 	    	android:layout_height="50dip"
@@ -43,7 +43,7 @@
 			zip="687456"							
 	   	/> -->
 
-	   	<!--<com.adserver.adview.AdServerView 
+	   	<!--<com.adserver.adview.MASTAdServerView 
 	    	android:id="@+id/adViewer2" 
 	    	android:layout_width="fill_parent" 
 	    	android:layout_height="50dip"

@@ -61,9 +61,9 @@ public class AdserverRequest {
 	
 	private Hashtable<String, String> customParameters;
 	
-	AdLog AdLog;
+	MASTAdLog AdLog;
 	
-	public AdserverRequest(AdLog AdLog) {
+	public AdserverRequest(MASTAdLog AdLog) {
 		this.AdLog = AdLog;
 		setPremium(AdServerViewCore.PREMIUM_STATUS_BOTH);
 	}

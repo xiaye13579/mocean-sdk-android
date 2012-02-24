@@ -166,7 +166,7 @@ public abstract class AdServerViewCore extends WebView {
 	private HashSet<String> excampaigns = new HashSet<String>();
 	private Button buttonClose;
 		
-	AdLog adLog = new AdLog(this);
+	MASTAdLog adLog = new MASTAdLog(this);
 	Dialog dialog;
 	private static OrmmaPlayer player;
 	private WebView view;
@@ -188,7 +188,7 @@ public abstract class AdServerViewCore extends WebView {
 	private ViewGroup parentView = null;
 	private boolean isUseCustomClose = false;
 	
-	public AdLog getLog()
+	public MASTAdLog getLog()
 	{
 		return adLog;
 	}
@@ -311,15 +311,15 @@ public abstract class AdServerViewCore extends WebView {
 	 * The interface for advertising opening in an internal browser.
 	 */
 	public interface OnAdClickListener {
-		public void click(AdServerView sender, String url);
+		public void click(MASTAdServerView sender, String url);
 	}
 	
 	public interface OnOrmmaListener {
-		public void event(AdServerView sender, String name, String params);
+		public void event(MASTAdServerView sender, String name, String params);
 	}
 	
 	public interface OnThirdPartyRequest {
-		public void event(AdServerView sender, HashMap<String,String> params);
+		public void event(MASTAdServerView sender, HashMap<String,String> params);
 	}
 
 	/**
@@ -329,15 +329,15 @@ public abstract class AdServerViewCore extends WebView {
 		/**
 		 * This event is fired before banner download begins. 
 		 */
-		public void begin(AdServerView sender);
+		public void begin(MASTAdServerView sender);
 		/**
 		 * This event is fired after banner content fully downloaded. 
 		 */
-		public void end(AdServerView sender);
+		public void end(MASTAdServerView sender);
 		/**
 		 * This event is fired after fail to download content. 
 		 */
-		public void error(AdServerView sender, String error);
+		public void error(MASTAdServerView sender, String error);
 	}
 	
 	/**
@@ -446,7 +446,7 @@ public abstract class AdServerViewCore extends WebView {
 			if(advertiserId>0)
 				this.advertiserId = advertiserId;
 			else
-				adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, AdserverRequest.INVALID_PARAM_TITLE,"advertiserId="+advertiserId.toString()+" (valid: int>0)");
+				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, AdserverRequest.INVALID_PARAM_TITLE,"advertiserId="+advertiserId.toString()+" (valid: int>0)");
 		}
 	}
 
@@ -484,7 +484,7 @@ public abstract class AdServerViewCore extends WebView {
 	 */
 	public void setUpdateTime(Integer updateTime) {
 		if(updateTime != null) {
-			adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_INFO, "setUpdateTime", String.valueOf(updateTime));
+			adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_INFO, "setUpdateTime", String.valueOf(updateTime));
 			this.adReloadPeriod = new Long(updateTime*1000); //in milliseconds
 			update(false);
 		}
@@ -755,7 +755,7 @@ public abstract class AdServerViewCore extends WebView {
 				reloadTimer.cancel();
 				reloadTimer = null;
 			} catch (Exception e) {
-				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "onDetachedFromWindow", e.getMessage());				
+				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "onDetachedFromWindow", e.getMessage());				
 			}
 		}
 		
@@ -802,7 +802,7 @@ public abstract class AdServerViewCore extends WebView {
 	void update(boolean isManual) {
 		if(isShown() || isManual) 
 		{
-			adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "update", "");
+			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "update", "");
 			if(isManual) IsManualUpdate = true;
 			StartLoadContent(getContext(), this);
 		}
@@ -920,7 +920,7 @@ public abstract class AdServerViewCore extends WebView {
 		
         boolean isRequestAd, isRefreshAd;
 		
-		adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "StartLoadContent", "");
+		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "StartLoadContent", "");
 		
 		boolean isShownView = view.isShown() || IsManualUpdate;//&&isScreenOn;
 		
@@ -929,7 +929,7 @@ public abstract class AdServerViewCore extends WebView {
 		if((getSite()==0) || (getZone()==0))
 		{
 			StartTimer(context,view);
-			adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_WARNING, "StartLoadContent", "site=0 or zone=0");
+			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_WARNING, "StartLoadContent", "site=0 or zone=0");
 			return;
 		}
 		
@@ -961,7 +961,7 @@ public abstract class AdServerViewCore extends WebView {
 			try {
 				handler.post(new SetBackgroundResourceAction(view, defaultImageResource));
 			} catch (Exception e) {
-				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
+				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
 			}
 		}
 		
@@ -971,18 +971,18 @@ public abstract class AdServerViewCore extends WebView {
 			try {
 				if(mViewState != ViewState.EXPANDED) {
 					if(adserverRequest != null) {
-						interceptOnAdDownload.begin((AdServerView)this);
+						interceptOnAdDownload.begin((MASTAdServerView)this);
 						
 						adserverRequest.setExcampaigns(getExcampaignsString());
 						String url = adserverRequest.createURL();
 						RequestCounter++;
-						adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "requestGet["+String.valueOf(RequestCounter)+"]" , url);
+						adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "requestGet["+String.valueOf(RequestCounter)+"]" , url);
 						ContentManager.getInstance(this).startLoadContent(this, adserverRequest.createURL());						
 					}
 				}
 			} catch (Exception e) {
-				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "StartLoadContent.requestGet", e.getMessage());
-				interceptOnAdDownload.error((AdServerView)this,e.getMessage());				
+				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "StartLoadContent.requestGet", e.getMessage());
+				interceptOnAdDownload.error((MASTAdServerView)this,e.getMessage());				
 			}
 		}
 		
@@ -992,9 +992,9 @@ public abstract class AdServerViewCore extends WebView {
 	{
 		if(error!=null)
 		{
-			adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, "requestGet result["+String.valueOf(RequestCounter)+"][ERROR]", error);
+			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, "requestGet result["+String.valueOf(RequestCounter)+"][ERROR]", error);
 			//if(onAdEventHandler!= null)onAdEventHandler.error(this, error);
-			if(adDownload!= null) adDownload.error((AdServerView)this,error);
+			if(adDownload!= null) adDownload.error((MASTAdServerView)this,error);
 			StartTimer(getContext(),view);
 			return;
 		}
@@ -1003,7 +1003,7 @@ public abstract class AdServerViewCore extends WebView {
 		
 		Context context = getContext();
 		
-		adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "requestGet result["+String.valueOf(RequestCounter)+"]", data);
+		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "requestGet result["+String.valueOf(RequestCounter)+"]", data);
 		try {
 			if((data != null) && (data.length() > 0)) {
 				String dataToLowercase = data.toLowerCase();
@@ -1011,7 +1011,7 @@ public abstract class AdServerViewCore extends WebView {
 				{	
 					InterstitialClose();
 					StartTimer(getContext(),view);
-					if(adDownload!= null) adDownload.error((AdServerView)this, "invalid params");
+					if(adDownload!= null) adDownload.error((MASTAdServerView)this, "invalid params");
 				}else
 				{
 					//if(isRefreshAd || isFirstTime) 
@@ -1068,12 +1068,12 @@ public abstract class AdServerViewCore extends WebView {
 				//if(isShownView)
 				{
 					InterstitialClose();
-					if(adDownload!= null) adDownload.error((AdServerView)this,"empty server respons");
+					if(adDownload!= null) adDownload.error((MASTAdServerView)this,"empty server respons");
 				}
 				StartTimer(context,view);
 			}
 		} catch (Exception e) {
-			adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
+			adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
 			StartTimer(context,view);
 		}
 		
@@ -1120,12 +1120,12 @@ public abstract class AdServerViewCore extends WebView {
 				{
 					if(ContentManager.getInstance(this).getAutoDetectParameters().equals(""))
 					{
-						adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "AutoDetectParameters, StartTimer", String.valueOf(Constants.AD_AUTO_DETECT_PERIOD/1000));
+						adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "AutoDetectParameters, StartTimer", String.valueOf(Constants.AD_AUTO_DETECT_PERIOD/1000));
 						reloadTimer.schedule(newReloadTask, Constants.AD_AUTO_DETECT_PERIOD);
 						reloadTask = newReloadTask;
 						return;
 					}
-					adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "Manual Update, StartTimer", String.valueOf(Constants.AD_RELOAD_SHORT_PERIOD/1000));
+					adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "Manual Update, StartTimer", String.valueOf(Constants.AD_RELOAD_SHORT_PERIOD/1000));
 					reloadTimer.schedule(newReloadTask, Constants.AD_RELOAD_SHORT_PERIOD);
 					reloadTask = newReloadTask;
 					return;
@@ -1133,19 +1133,19 @@ public abstract class AdServerViewCore extends WebView {
 				
 				if((adReloadPeriod != null) && (adReloadPeriod >= 0)) {
 					if(adReloadPeriod > 0) {
-						adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "StartTimer", String.valueOf(adReloadPeriod/1000));					
+						adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "StartTimer", String.valueOf(adReloadPeriod/1000));					
 						reloadTimer.schedule(newReloadTask, adReloadPeriod);
 					} else {
-						adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "StartTimer", "stopped");
+						adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "StartTimer", "stopped");
 					}
 				} else {
 					reloadTimer.schedule(newReloadTask, Constants.AD_RELOAD_PERIOD);
-					adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "StartTimer", String.valueOf(Constants.AD_RELOAD_PERIOD/1000)+" default");
+					adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "StartTimer", String.valueOf(Constants.AD_RELOAD_PERIOD/1000)+" default");
 				}
 				
 				reloadTask = newReloadTask; 
 			} catch (Exception e) {
-				adLog.log(AdLog.LOG_LEVEL_3,AdLog.LOG_TYPE_ERROR,"StartTimer",e.getMessage());
+				adLog.log(MASTAdLog.LOG_LEVEL_3,MASTAdLog.LOG_TYPE_ERROR,"StartTimer",e.getMessage());
 			}
 		}
 	}
@@ -1340,7 +1340,7 @@ public abstract class AdServerViewCore extends WebView {
 	
 	private void RestartExcampaings(String campaignId,Context context, WebView view)
 	{
-		adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_WARNING, "RestartExcampaings", campaignId);
+		adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_WARNING, "RestartExcampaings", campaignId);
 		if (excampaigns.contains(campaignId))
 			StartTimer(context, view);
 		else
@@ -1370,19 +1370,19 @@ public abstract class AdServerViewCore extends WebView {
 		
 		
 		@Override
-		public void begin(AdServerView sender) {
+		public void begin(MASTAdServerView sender) {
 			if(adDownload!= null) adDownload.begin(sender);			
 		}
 
 		@Override
-		public void end(AdServerView sender) {
+		public void end(MASTAdServerView sender) {
 			view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
 			StartTimer(context, view);			
 			if(adDownload!= null) adDownload.end(sender);
 		}
 
 		@Override
-		public void error(AdServerView sender, String error) {
+		public void error(MASTAdServerView sender, String error) {
 			if(campaignId != null)
 				RestartExcampaings(campaignId,context, view);
 			else StartTimer(context, view);
@@ -1419,7 +1419,7 @@ public abstract class AdServerViewCore extends WebView {
 			try {
 				//view.removeAllViews();
 			} catch (Exception e) {
-				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "RemoveAllChildViews", e.getMessage());
+				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "RemoveAllChildViews", e.getMessage());
 			}
 		}
 	}	
@@ -1454,7 +1454,7 @@ public abstract class AdServerViewCore extends WebView {
 	                        	mp.seekTo(0);
 	                        	mp.start();
 	                        } catch(Exception e){
-	                        	adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "SetupVideoAction", e.getMessage());
+	                        	adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "SetupVideoAction", e.getMessage());
 	                        }
 		                }
 					});
@@ -1463,7 +1463,7 @@ public abstract class AdServerViewCore extends WebView {
 						
 						@Override
 						public boolean onError(MediaPlayer mp, int what, int extra) {							
-							adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "Play video",
+							adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "Play video",
 									"what="+String.valueOf(what)+";extra="+String.valueOf(extra) );
 							return true;
 						}
@@ -1508,9 +1508,9 @@ public abstract class AdServerViewCore extends WebView {
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			try
 			{
-				adLog.log(AdLog.LOG_LEVEL_2,AdLog.LOG_TYPE_INFO,"OverrideUrlLoading",url);
+				adLog.log(MASTAdLog.LOG_LEVEL_2,MASTAdLog.LOG_TYPE_INFO,"OverrideUrlLoading",url);
 				if(adClickListener != null) {
-						adClickListener.click((AdServerView)view, url);
+						adClickListener.click((MASTAdServerView)view, url);
 				}else {
 			    	int isAccessNetworkState = context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE);
 			    	
@@ -1525,7 +1525,7 @@ public abstract class AdServerViewCore extends WebView {
 			    	}
 				}
 			}catch(Exception e){
-				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "shouldOverrideUrlLoading", e.getMessage());
+				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "shouldOverrideUrlLoading", e.getMessage());
 			}
 			
 			return true;
@@ -1545,7 +1545,7 @@ public abstract class AdServerViewCore extends WebView {
 			((AdServerViewCore) view).onPageFinished();
 			
 			if(adDownload != null) {
-				adDownload.end((AdServerView)view);
+				adDownload.end((MASTAdServerView)view);
 			}
 		}
 
@@ -1554,7 +1554,7 @@ public abstract class AdServerViewCore extends WebView {
 				String description, String failingUrl) {
 			super.onReceivedError(view, errorCode, description, failingUrl);
 			if(adDownload != null) {
-				adDownload.error((AdServerView)view, description);
+				adDownload.error((MASTAdServerView)view, description);
 			}
 		}
 	}
@@ -1598,7 +1598,7 @@ public abstract class AdServerViewCore extends WebView {
 					view.setBackgroundColor(0);					
 				}
 			} catch (Exception e) {
-				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "SetBackgroundResourceAction", e.getMessage());
+				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "SetBackgroundResourceAction", e.getMessage());
 			}
 		}
 	}	
@@ -1661,7 +1661,7 @@ public abstract class AdServerViewCore extends WebView {
 							{
 								new InternelBrowser(context,url).show();
 							}catch (Exception e) {
-								adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "openUrlInInternalBrowser", e.getMessage());
+								adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "openUrlInInternalBrowser", e.getMessage());
 							}
 						}
 					});
@@ -1673,7 +1673,7 @@ public abstract class AdServerViewCore extends WebView {
 					Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(newUrl));
 					context.startActivity(intent);
 				} catch (Exception e) {
-					adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "openUrlInExternalBrowser","url="+ newUrl+"; error="+e.getMessage());
+					adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "openUrlInExternalBrowser","url="+ newUrl+"; error="+e.getMessage());
 				}
 			}		
 	}
@@ -1895,10 +1895,10 @@ public abstract class AdServerViewCore extends WebView {
 	{
 		if(ormmaListener!=null)
 		{	
-			if(!ormaEnabled) ormmaListener.event((AdServerView)this, "ormmaenabled", "");
+			if(!ormaEnabled) ormmaListener.event((MASTAdServerView)this, "ormmaenabled", "");
 			ormaEnabled = true;
 			if(params!=null) params = params.replace(";", "&");
-			ormmaListener.event((AdServerView)this, name, params); 
+			ormmaListener.event((MASTAdServerView)this, name, params); 
 		}
 	}
 	
@@ -1973,7 +1973,7 @@ public abstract class AdServerViewCore extends WebView {
 			mExpandedFrame.addView(this,adLp);
 //			this.showCloseButton();
 		} else {
-			AdServerView expandedView = new AdServerView(getContext(), true);
+			MASTAdServerView expandedView = new MASTAdServerView(getContext(), true);
 			mExpandedFrame.addView(expandedView, adLp);
 
 			try {
@@ -1985,7 +1985,7 @@ public abstract class AdServerViewCore extends WebView {
 				expandedView.loadDataWithBaseURL(null, responseValue, "text/html", "UTF-8", null);
 			} catch (Exception e) {
 				e.printStackTrace();
-				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "expandInUIThread", e.getMessage());
+				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "expandInUIThread", e.getMessage());
 			}						
 			//expandedView.setContent(mContent);
 			
@@ -2030,7 +2030,7 @@ public abstract class AdServerViewCore extends WebView {
 				return;
 			} catch (Exception e) {
 				e.printStackTrace();
-				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "loadUrl", e.getMessage());
+				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "loadUrl", e.getMessage());
 				return;
 			}
 		} else {
@@ -2294,7 +2294,7 @@ public abstract class AdServerViewCore extends WebView {
 				super.setBackgroundColor(backgroundColor);
 			}catch(Exception e)
 			{
-				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "AdServerViewCore.setBackgroundColor", e.getMessage());
+				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "AdServerViewCore.setBackgroundColor", e.getMessage());
 			}
 		}	
 	}
@@ -2618,13 +2618,13 @@ public abstract class AdServerViewCore extends WebView {
 							locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener, Looper.getMainLooper());
 						}else
 						{
-							adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps", "not avalable");
+							adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps", "not avalable");
 						}
-			    	}else adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps", "no permission ACCESS_FINE_LOCATION");
+			    	}else adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps", "no permission ACCESS_FINE_LOCATION");
 				} else {
 					adserverRequest.setLatitude(autoDetectParameters.getLatitude());
 					adserverRequest.setLongitude(autoDetectParameters.getLongitude());
-					adLog.log(AdLog.LOG_LEVEL_2, AdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps=", "("+autoDetectParameters.getLatitude()+";"+autoDetectParameters.getLongitude()+")");
+					adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps=", "("+autoDetectParameters.getLatitude()+";"+autoDetectParameters.getLongitude()+")");
 				}
 			}
 		}
@@ -2652,10 +2652,10 @@ public abstract class AdServerViewCore extends WebView {
 				adserverRequest.setLongitude(Double.toString(longitude));
 				autoDetectParameters.setLatitude(Double.toString(latitude));
 				autoDetectParameters.setLongitude(Double.toString(longitude));
-				adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "GPSLocationChanged=", "("+autoDetectParameters.getLatitude()+";"+autoDetectParameters.getLongitude()+")");
+				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "GPSLocationChanged=", "("+autoDetectParameters.getLatitude()+";"+autoDetectParameters.getLongitude()+")");
 				
     		} catch (Exception e) {
-    			adLog.log(AdLog.LOG_LEVEL_2,AdLog.LOG_TYPE_ERROR,"GPSLocationChanged",e.getMessage());
+    			adLog.log(MASTAdLog.LOG_LEVEL_2,MASTAdLog.LOG_TYPE_ERROR,"GPSLocationChanged",e.getMessage());
     		}
 	    }
 

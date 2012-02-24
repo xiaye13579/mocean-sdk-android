@@ -35,9 +35,9 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.FrameLayout;
 
-import com.adserver.adview.AdLog;
+import com.adserver.adview.MASTAdLog;
 import com.adserver.adview.AdServerInterstitialView;
-import com.adserver.adview.AdServerView;
+import com.adserver.adview.MASTAdServerView;
 import com.adserver.adview.InternelBrowser;
 import com.adserver.adview.AdServerViewCore.OnAdClickListener;
 import com.adserver.adview.AdServerViewCore.OnAdDownload;
@@ -49,7 +49,7 @@ public class MainAdvanced extends Activity {
     /** Called when the activity is first created. */
 	private Context context;
 	private LinearLayout linearLayout;
-	AdServerView adserverView;
+	MASTAdServerView adserverView;
 	//byte[] array = new byte[12*1024*1024]; 
 	
 	@Override
@@ -57,11 +57,11 @@ public class MainAdvanced extends Activity {
         super.onCreate(savedInstanceState);
         context = this;
        
-        AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);   
+        MASTAdLog.setDefaultLogLevel(MASTAdLog.LOG_LEVEL_3);   
         setContentView(R.layout.main_advanced);
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
          
-        AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);
+        MASTAdLog.setDefaultLogLevel(MASTAdLog.LOG_LEVEL_3);
         
         ((Button)findViewById(R.id.interstitialAd)).setOnClickListener(new Button.OnClickListener() {
 			
@@ -73,7 +73,7 @@ public class MainAdvanced extends Activity {
 					interstitialView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
 					interstitialView.setSite(8061);
 					interstitialView.setZone(8888);
-					interstitialView.setLogLevel(AdLog.LOG_LEVEL_3);
+					interstitialView.setLogLevel(MASTAdLog.LOG_LEVEL_3);
 					interstitialView.setIsShowPhoneStatusBar(true);
 					interstitialView.useCustomClose(false);
 					interstitialView.show();
@@ -97,7 +97,7 @@ public class MainAdvanced extends Activity {
         //adserverView.setTrack(true);
 
 
-        adserverView = new AdServerView(this, 8061, 20249);//Default mOcean ad
+        adserverView = new MASTAdServerView(this, 8061, 20249);//Default mOcean ad
 //adserverView.setBackgroundResource(R.drawable.icon);
 //      adserverView = new AdServerView(this, 8061, 2);
 //      adserverView.setBackgroundColor(0);
@@ -117,7 +117,7 @@ public class MainAdvanced extends Activity {
 //        adserverView = new AdServerView(this, "10113", "20991");
 //        adserverView = new AdServerView(this, "8061", "14");
         adserverView.setOnThirdPartyRequest(new OnThirdPartyRequest() {
-			public void event(AdServerView sender, HashMap<String, String> params) {
+			public void event(MASTAdServerView sender, HashMap<String, String> params) {
 				
 			}
 		});

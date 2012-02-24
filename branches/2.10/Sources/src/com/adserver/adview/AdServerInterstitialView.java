@@ -13,7 +13,7 @@ import android.widget.RelativeLayout;
 /**
  * Viewer of interstitial advertising.
  */
-public class AdServerInterstitialView extends AdServerView {
+public class AdServerInterstitialView extends MASTAdServerView {
 	private Integer showCloseButtonTime; 
 	private Integer autoCloseInterstitialTime;
 	private Boolean isShowPhoneStatusBar;
@@ -36,7 +36,7 @@ public class AdServerInterstitialView extends AdServerView {
 	
 	private static void openInterstitialForm(Context context,
 			Integer showCloseButtonTime, Integer autoCloseInterstitialTime,
-			Boolean isShowPhoneStatusBar, AdServerView adServerView, Button closeButton) {
+			Boolean isShowPhoneStatusBar, MASTAdServerView adServerView, Button closeButton) {
 		if((showCloseButtonTime == null) || (showCloseButtonTime < 0)) {
 			showCloseButtonTime = 0;
 		}

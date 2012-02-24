@@ -19,7 +19,7 @@ import android.view.WindowManager;
 import android.webkit.URLUtil;
 
 
-import com.adserver.adview.AdLog;
+import com.adserver.adview.MASTAdLog;
 import com.adserver.adview.AdServerViewCore;
 import com.adserver.adview.ormma.util.OrmmaConfigurationBroadcastReceiver;
 
@@ -225,7 +225,7 @@ public class OrmmaDisplayController extends OrmmaController {
 		{
 			mContext.registerReceiver(mConfigurationBroadCastReceiver, mConfigurationFilter);
 		}catch (Exception e) {
-			mOrmmaView.getLog().log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "startOrientationListener", e.getMessage());
+			mOrmmaView.getLog().log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "startOrientationListener", e.getMessage());
 		}
 	}
 
