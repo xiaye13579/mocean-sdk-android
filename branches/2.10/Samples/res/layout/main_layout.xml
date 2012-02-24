@@ -5,7 +5,7 @@
     android:layout_height="fill_parent"
 >
 
-	<com.adserver.adview.AdServerView 
+	<com.adserver.adview.MASTAdServerView 
 	    android:layout_width="fill_parent" 
 	    android:layout_height="50dip"
 		site="8061" 

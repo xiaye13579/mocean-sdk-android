@@ -8,9 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.adserver.adview.AdLog;
-
-import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +16,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import com.adserver.adview.MASTAdLog;
 
 public class ApiDemos extends ListActivity {
 
@@ -30,7 +29,7 @@ public class ApiDemos extends ListActivity {
         
         Intent intent = getIntent();
         
-        AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);
+        MASTAdLog.setDefaultLogLevel(MASTAdLog.LOG_LEVEL_3);
         String path = intent.getStringExtra("com.adserver.adview.sample.Path");
         
         if (path == null) {

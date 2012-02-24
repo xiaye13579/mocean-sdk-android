@@ -1,12 +1,12 @@
 package com.adserver.adview.samples.simple;
 
-import com.adserver.adview.AdServerView;
-import com.adserver.adview.samples.R;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+
+import com.adserver.adview.MASTAdServerView;
+import com.adserver.adview.samples.R;
 
 public class Video extends Activity {
     /** Called when the activity is first created. */
@@ -19,7 +19,7 @@ public class Video extends Activity {
         setContentView(R.layout.main);
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
          
-        AdServerView adserverView = new AdServerView(this,8061,16109);
+        MASTAdServerView adserverView = new MASTAdServerView(this,8061,16109);
         adserverView.setUpdateTime(30000);
         adserverView.setMinSizeX(320);
 	    adserverView.setMinSizeY(50);

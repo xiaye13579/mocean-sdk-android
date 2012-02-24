@@ -13,7 +13,7 @@
 	    
     >
     
-    <com.adserver.adview.AdServerView 
+    <com.adserver.adview.MASTAdServerView 
     	site="8061" 
 		zone="20249"
     	android:id="@+id/adServerView" 

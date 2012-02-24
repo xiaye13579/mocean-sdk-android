@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.adserver.adview.AdServerView;
+import com.adserver.adview.MASTAdServerView;
 import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
@@ -34,13 +34,13 @@ public class List extends Activity {
         
         for(int x=0;x<baners.length;x++)
         {
-        	AdServerView adserverView = new AdServerView(this,8061,baners[x]);
+        	MASTAdServerView adserverView = new MASTAdServerView(this,8061,baners[x]);
         	adserverView.setUpdateTime(3000);
             adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
             linearLayout.addView(adserverView);
         }
         
-        /*AdServerView adserverView = new AdServerView(this,"8061","20249");
+        /*MASTAdServerView adserverView = new MASTAdServerView(this,"8061","20249");
         
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 56));

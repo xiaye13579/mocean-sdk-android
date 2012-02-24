@@ -6,16 +6,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.adserver.adview.AdServerView;
-import com.adserver.adview.AdServerViewCore.OnAdClickListener;
-import com.adserver.adview.AdServerViewCore.OnAdDownload;
 import com.adserver.adview.AdServerViewCore.OnThirdPartyRequest;
+import com.adserver.adview.MASTAdServerView;
 import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
@@ -34,7 +30,7 @@ public class ThirdPartyRequest extends Activity {
         context = this;
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         
-        AdServerView adserverView = new AdServerView(this,8061,21637);
+        MASTAdServerView adserverView = new MASTAdServerView(this,8061,21637);
         adserverView.setOnThirdPartyRequest(new UserOnThirdPartyRequest());
         adserverView.setDefaultImage(R.drawable.robot2);
         adserverView.setMinSizeX(320);
@@ -58,7 +54,7 @@ public class ThirdPartyRequest extends Activity {
 		}
 
 		@Override
-		public void event(AdServerView arg0, HashMap<String, String> arg1) {			
+		public void event(MASTAdServerView arg0, HashMap<String, String> arg1) {			
 			updateUi(mUpdateResults, arg1.toString(),Toast.LENGTH_LONG  );			
 		}
     	

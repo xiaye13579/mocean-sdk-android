@@ -3,20 +3,13 @@ package com.adserver.adview.samples.advanced;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
 import android.view.animation.TranslateAnimation;
-import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.adserver.adview.AdServerView;
 import com.adserver.adview.AdServerViewCore.OnAdDownload;
-import com.adserver.adview.samples.ApiDemos;
+import com.adserver.adview.MASTAdServerView;
 import com.adserver.adview.samples.R;
 
 public class AnimAdXML extends Activity {
@@ -30,7 +23,7 @@ public class AnimAdXML extends Activity {
         setContentView(R.layout.animation_ad_xml);
         context = this;
         
-        final AdServerView adserverView1 = (AdServerView)findViewById(R.id.adServerView);
+        final MASTAdServerView adserverView1 = (MASTAdServerView)findViewById(R.id.adServerView);
         final Animation animation = 
         	AnimationUtils.loadAnimation(getApplicationContext(),
         	R.animator.ad_in_out);
@@ -45,23 +38,23 @@ public class AnimAdXML extends Activity {
         
         adserverView1.setOnAdDownload(new OnAdDownload() {
 			@Override
-			public void error(AdServerView sender,String arg0) {
+			public void error(MASTAdServerView sender,String arg0) {
 				
 			}
 			
 			@Override
-			public void end(AdServerView sender) {
+			public void end(MASTAdServerView sender) {
 				adserverView1.startAnimation(animation);	
 			}
 			
 			@Override
-			public void begin(AdServerView sender) {
+			public void begin(MASTAdServerView sender) {
 				
 			}
 		});
         /*linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
          
-        final AdServerView adserverView1 = new AdServerView(this,8061,20249);
+        final MASTAdServerView adserverView1 = new MASTAdServerView(this,8061,20249);
         
         adserverView1.setId(1);
         adserverView1.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
@@ -98,7 +91,7 @@ public class AnimAdXML extends Activity {
         
         linearLayout.addView(adserverView1);
         
-       /* final AdServerView adserverView2 = new AdServerView(this,8061,20249);
+       /* final MASTAdServerView adserverView2 = new MASTAdServerView(this,8061,20249);
         
         adserverView2.setId(1);
         adserverView2.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));

@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.adserver.adview.AdServerView;
+import com.adserver.adview.MASTAdServerView;
 import com.adserver.adview.samples.R;
 
 public class ORRMAlevel3 extends Activity {
@@ -22,7 +22,7 @@ public class ORRMAlevel3 extends Activity {
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         
          
-        AdServerView adserverView = new AdServerView(this,8061,17489);
+        MASTAdServerView adserverView = new MASTAdServerView(this,8061,17489);
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 200));
 		linearLayout.addView(adserverView);

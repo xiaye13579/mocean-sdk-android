@@ -18,7 +18,7 @@
 	    	android:layout_height="wrap_content"
 	    	
     	android:layout_width="fill_parent"/>
-    	<com.adserver.adview.AdServerView 
+    	<com.adserver.adview.MASTAdServerView 
     	android:id="@+id/adServerView" 
 	    android:layout_width="fill_parent" android:layout_height="200dip"
 	    site="8061" 

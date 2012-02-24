@@ -1,14 +1,14 @@
 package com.adserver.adview.samples.advanced;
 
-import com.adserver.adview.AdServerView;
-import com.adserver.adview.samples.ApiDemos;
-import com.adserver.adview.samples.R;
-
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+
+import com.adserver.adview.MASTAdServerView;
+import com.adserver.adview.samples.ApiDemos;
+import com.adserver.adview.samples.R;
 
 public class Test extends Activity {
 	private Context context;
@@ -21,7 +21,7 @@ public class Test extends Activity {
         context = this;
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
          
-        AdServerView adserverView = new AdServerView(this,8061,20249);
+        MASTAdServerView adserverView = new MASTAdServerView(this,8061,20249);
         adserverView.setMinSizeX(320);
 	    adserverView.setMinSizeY(50);
 	    adserverView.setMaxSizeX(320);

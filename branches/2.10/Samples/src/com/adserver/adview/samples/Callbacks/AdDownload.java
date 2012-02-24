@@ -7,11 +7,10 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.adserver.adview.AdServerView;
 import com.adserver.adview.AdServerViewCore.OnAdDownload;
+import com.adserver.adview.MASTAdServerView;
 import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
@@ -30,7 +29,7 @@ public class AdDownload extends Activity {
         context = this;
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         
-        AdServerView adserverView = new AdServerView(this,8061,20249);
+        MASTAdServerView adserverView = new MASTAdServerView(this,8061,20249);
         adserverView.setOnAdDownload(new UserAdDownload());
         adserverView.setDefaultImage(R.drawable.robot2);
         adserverView.setMinSizeX(320);
@@ -46,17 +45,17 @@ public class AdDownload extends Activity {
     class UserAdDownload implements OnAdDownload
     {
 
-		public void begin(AdServerView sender) {
+		public void begin(MASTAdServerView sender) {
 			Log.d("Callback", "begin");
 			updateUi(mUpdateResults, "Begin Downloading", 500);
 		}
 
-		public void end(AdServerView sender) {
+		public void end(MASTAdServerView sender) {
 			Log.d("Callback", "end");
 			updateUi(mUpdateResults, "End Downloading", 500);
 		}
 
-		public void error(AdServerView sender,String arg0) {
+		public void error(MASTAdServerView sender,String arg0) {
 			Log.d("Callback","error: "+arg0+"\n");
 			updateUi(mUpdateResults, "Error :" + arg0, 5000);
 

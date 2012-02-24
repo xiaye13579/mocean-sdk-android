@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.adserver.adview.AdServerView;
+import com.adserver.adview.MASTAdServerView;
 import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
@@ -27,8 +27,8 @@ public class Debug extends Activity {
         Hashtable<String, String> customParameters = new Hashtable<String, String>();
         customParameters.put("debug", "1");
                 
-        AdServerView adserverView = new AdServerView(this,8061,20249);
-        //AdServerView sa= new AdServerView()
+        MASTAdServerView adserverView = new MASTAdServerView(this,8061,20249);
+        //MASTAdServerView sa= new MASTAdServerView()
         adserverView.setCustomParameters(customParameters);
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,ApiDemos.BANNER_HEIGHT));        

@@ -1,21 +1,13 @@
 package com.adserver.adview.samples.simple;
 
-import java.nio.Buffer;
-import java.util.Hashtable;
-
-import com.adserver.adview.AdServerInterstitialView;
-import com.adserver.adview.AdServerView;
-import com.adserver.adview.samples.R;
-
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
+
+import com.adserver.adview.AdServerInterstitialView;
+import com.adserver.adview.samples.R;
 
 public class Interstitial extends Activity {
     /** Called when the activity is first created. */
