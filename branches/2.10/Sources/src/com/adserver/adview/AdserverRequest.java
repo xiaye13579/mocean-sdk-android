@@ -21,6 +21,9 @@ public class AdserverRequest {
 	
 	public static String INVALID_PARAM_TITLE = "invalid param";
 	
+	public int sizeX=-1;
+	public int sizeY=-1;
+	public int timeout = 1000;
 	
 	private Map<String, String> parameters = new HashMap<String, String>();
 	private final String parameter_site = "site";
@@ -56,6 +59,8 @@ public class AdserverRequest {
 	private final String parameter_type = "type";
 	//private final String parameter_debug = "debug";
 	public final static String parameter_device_id = "udid";
+	public final static String parameter_Ad_Call_Timeout = "timeout"; 
+
 	
 	private String adserverURL = "http://ads.mocean.mobi/ad"; 
 	
@@ -931,6 +936,11 @@ public class AdserverRequest {
 		builderToString.append(adserverURL);
 		appendParameters(builderToString, parameters);
 		appendParameters(builderToString, customParameters);
+		if ((getSizeX()==0)&&(sizeX>-1))
+			builderToString.append("&"+parameter_size_x+"="+String.valueOf(sizeX));
+		if ((getSizeY()==0)&&(sizeY>-1))
+			builderToString.append("&"+parameter_size_y+"="+String.valueOf(sizeY));
+		builderToString.append("&"+parameter_Ad_Call_Timeout+"="+String.valueOf(timeout));
 		return  builderToString.toString();//builderToString.toString().equals(adserverURL) ?  this.adserverURL : builderToString.toString();
 	}
 

@@ -166,6 +166,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 	private HashSet<String> excampaigns = new HashSet<String>();
 	private Button buttonClose;
 	protected boolean isInterstitial = false;
+	protected boolean isShowPreviousAdOnError = true;
+	protected boolean isAutoCollapse = true;
 	
 	MASTAdLog adLog = new MASTAdLog(this);
 	Dialog dialog;
@@ -251,6 +253,36 @@ public abstract class MASTAdServerViewCore extends WebView {
 		AutoDetectParameters(context);
 		initialize(context, null);
 		mViewState = ViewState.EXPANDED;
+	}
+	
+	public void SetAd_Call_Timeout(int timeout)
+	{
+		if((timeout>=1000)&&(timeout<=3000))
+		adserverRequest.timeout = timeout;
+	}
+	public int GetAd_Call_Timeout()
+	{
+		return adserverRequest.timeout;
+	}
+	
+	public void SetAutoCollapse(boolean value)
+	{
+		isAutoCollapse = value;
+	}
+	
+	public boolean GetAutoCollapse()
+	{
+		return isAutoCollapse;
+	}
+	
+	public void SetShowPreviousAdOnError(boolean value)
+	{
+		isShowPreviousAdOnError = value;
+	}
+	
+	public boolean GetShowPreviousAdOnError()
+	{
+		return isShowPreviousAdOnError;
 	}
 	
 	boolean isContentAligned;
@@ -629,6 +661,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 			String region, 
 			Integer paramBG, Integer paramLINK, String carrier, 
 			Hashtable<String, String> customParameters) {
+		if(isAutoCollapse) this.SetAdVisibility(View.INVISIBLE);
 		view = this;
 		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog);
 		//adserverRequest.InitDefaultParameters(context);
@@ -786,6 +819,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 				"Ormma.fireEvent(ORMMA_EVENT_SIZE_CHANGE, {dimensions : {width : %d, height: %d}});", w, h);
 		injectJavaScript(script);
 		super.onSizeChanged(w, h, ow, oh);
+		adserverRequest.sizeX = w;
+		adserverRequest.sizeY = h;
 	}
 
 	/**
@@ -989,6 +1024,17 @@ public abstract class MASTAdServerViewCore extends WebView {
 		
 	}
 	
+	void SetAdVisibility(final int visibility)
+	{
+		handler.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				setVisibility(visibility);
+			}
+		});
+	}
+	
 	void setResult(String data, String error)
 	{
 		if(error!=null)
@@ -997,11 +1043,38 @@ public abstract class MASTAdServerViewCore extends WebView {
 			//if(onAdEventHandler!= null)onAdEventHandler.error(this, error);
 			if(adDownload!= null) adDownload.error((MASTAdServerView)this,error);
 			StartTimer(getContext(),view);
+			
+			
+			if((mContent!=null) && (!mContent.equals("")) && isShowPreviousAdOnError)
+			{
+				return;
+			}
+				if (defaultImageResource!=null)
+				{
+					try {
+						handler.post(new SetBackgroundResourceAction(view, defaultImageResource));
+					} catch (Exception e) {
+						adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "setResult", e.getMessage());
+					}
+				}else
+				{
+					if(isAutoCollapse) this.SetAdVisibility(View.INVISIBLE);
+					else
+					{	
+						data = "<html><head>" +
+								"<style>*{margin:0;padding:0}</style>"+
+								"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
+								"<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>" +
+								"<body style=\"background-color:#"+getBackgroundColor()+";margin: 0px; padding: 0px; width: 100%; height: 100%\">"+"</body></html>";
+					
+						view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
+					}
+				}
 			return;
 		}
 		
 		//isFirstTime = false;
-		
+		if(isAutoCollapse) this.SetAdVisibility(View.VISIBLE);
 		Context context = getContext();
 		
 		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "requestGet result["+String.valueOf(RequestCounter)+"]", data);

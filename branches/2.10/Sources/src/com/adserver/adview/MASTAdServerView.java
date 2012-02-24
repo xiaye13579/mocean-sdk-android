@@ -242,6 +242,7 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 	public void setIsShowPhoneStatusBar(Boolean isShowPhoneStatusBar) {
 		this.isShowPhoneStatusBar = isShowPhoneStatusBar;
 	}
+	
 
 	/**
 	 * Get Object for customization close button view.
