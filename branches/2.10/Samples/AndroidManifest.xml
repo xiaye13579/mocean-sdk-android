@@ -31,12 +31,6 @@
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Simple/Interstitial" android:name=".simple.Interstitial">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"></action>
-                <category android:name="android.intent.category.SAMPLE_CODE"></category>
-            </intent-filter>
-        </activity>
         <activity android:label="Simple/Layout" android:name=".simple.Layout">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
