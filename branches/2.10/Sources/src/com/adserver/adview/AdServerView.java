@@ -82,7 +82,6 @@ public class AdServerView extends AdServerViewCore {
 	public AdServerView(Context context) {
 		super(context);
 		//AutoDetectParameters(context);
-		isFirstTime =true;
 		//DetectParameters(context);
 		//initialize(context);
 	}

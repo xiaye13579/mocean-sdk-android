@@ -6,7 +6,7 @@ public class Constants {
 	public static final int DEFAULT_COLOR = 0xFFFFFF;
 	
 	public static final int AD_RELOAD_PERIOD = 120000; //in milliseconds
-	public static final int AD_STOP_CHECK_PERIOD = 10000; //in milliseconds
+	public static final int AD_AUTO_DETECT_PERIOD = 1000; //in milliseconds
 	public static final int AD_RELOAD_SHORT_PERIOD = 100; //in milliseconds
 	public static final int DEFAULT_REQUEST_TIMEOUT = 20000; //in seconds
 	

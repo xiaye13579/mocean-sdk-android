@@ -63,6 +63,24 @@ public class MainAdvanced extends Activity {
          
         AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);
         
+        ((Button)findViewById(R.id.interstitialAd)).setOnClickListener(new Button.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				AdServerInterstitialView interstitialView = 
+						new AdServerInterstitialView(context);//, 8061, 8888);//16112);
+						//new AdServerInterstitialView(context, "10359", "21505");
+					interstitialView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
+					interstitialView.setSite(8061);
+					interstitialView.setZone(8888);
+					interstitialView.setLogLevel(AdLog.LOG_LEVEL_3);
+					interstitialView.setIsShowPhoneStatusBar(true);
+					interstitialView.useCustomClose(false);
+					interstitialView.show();
+	
+			}
+		});
+        
       //  adserverView = new AdServerView(this);
       //  adserverView.setSite(17340);
       //  adserverView.setZone(53923);
@@ -107,9 +125,10 @@ public class MainAdvanced extends Activity {
 
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
-		
+        adserverView.update();
+        
 		linearLayout.addView(adserverView);//*/
-        /*WebView wv= new WebView(this);
+		/*WebView wv= new WebView(this);
         wv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
         linearLayout.addView(wv);*/
     }

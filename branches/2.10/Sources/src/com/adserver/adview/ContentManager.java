@@ -43,16 +43,16 @@ public class ContentManager {
 	private static String id = null;
 	private Context context;
 
-	static public ContentManager getInstance(Context context) {
+	static public ContentManager getInstance(WebView webView) {
 		if (instance == null)
-			instance = new ContentManager(context);
+			instance = new ContentManager(webView);
 		
 		return instance;
 	}
 
-	private ContentManager(final Context context) {
-		userAgent = (new WebView(context)).getSettings().getUserAgentString();
-		this.context = context.getApplicationContext();
+	private ContentManager(WebView webView) {
+		userAgent = webView.getSettings().getUserAgentString();
+		this.context = webView.getContext().getApplicationContext();
 		Thread thread = new Thread() {
 			@Override
 			public void run() {
@@ -216,7 +216,7 @@ public class ContentManager {
 				//get.addHeader("Accept-Encoding", "gzip");
 				//get.addHeader("Accept", "application/json");
 				//get.addHeader("UA-Pixels", parameters.w + "x" + parameters.h);
-				get.addHeader("User-Agent", userAgent);
+				get.addHeader("User-Agent", userAgent);				
 
 				HttpConnectionParams.setConnectionTimeout(get.getParams(), Constants.AD_RELOAD_PERIOD);
 				HttpConnectionParams.setSoTimeout(get.getParams(), Constants.DEFAULT_REQUEST_TIMEOUT);

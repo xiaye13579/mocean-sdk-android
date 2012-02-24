@@ -171,7 +171,7 @@ public abstract class AdServerViewCore extends WebView {
 	private static OrmmaPlayer player;
 	private WebView view;
 
-	protected boolean isFirstTime;
+	//protected boolean isFirstTime;
 	ReloadTask reloadTask;
 	//private ContentThread contentThread;
 	private OpenUrlThread openUrlThread;
@@ -202,7 +202,7 @@ public abstract class AdServerViewCore extends WebView {
 	public AdServerViewCore(Context context, Integer site, Integer zone) {
 		super(context);
 		AutoDetectParameters(context);
-		isFirstTime =true;
+		//isFirstTime =true;
 		loadContent(context, 
 				null, null, null, null, 
 				null,   
@@ -492,7 +492,7 @@ public abstract class AdServerViewCore extends WebView {
 	
 	private void initialize(Context context, AttributeSet attrs) {
 		if(attrs != null) {
-			isFirstTime =true;
+			//isFirstTime =true;
 			Integer logLevel = getIntParameter(attrs.getAttributeValue(null, "logLevel"));
 			if(logLevel!=null) setLogLevel(logLevel);
 			
@@ -725,16 +725,19 @@ public abstract class AdServerViewCore extends WebView {
 		ll.addView(buttonClose);
 		
 		addView(ll);
-		StartLoadContent(getContext(), this);
+		//StartLoadContent(getContext(), this);
 	}
 	
 	@Override
 	protected void onAttachedToWindow() {
-		reloadTimer = new Timer();
-
-		if(mViewState != ViewState.EXPANDED) {
-			StartLoadContent(getContext(), this);
+		
+		if(reloadTimer==null)
+		{
+			reloadTimer = new Timer();
+			StartTimer(getContext(), view);
 		}
+		
+		//StartLoadContent(getContext(), this);
 		
 		super.onAttachedToWindow();
 	}
@@ -789,6 +792,10 @@ public abstract class AdServerViewCore extends WebView {
 	 */
 	public void update()
 	{
+		if(reloadTimer==null)
+		{
+			reloadTimer = new Timer();			
+		}
 		update(true);
 	}
 	
@@ -900,9 +907,9 @@ public abstract class AdServerViewCore extends WebView {
 	void StartLoadContent(Context context, WebView view)
 	{
 		
-		ContentManager.getInstance(context).installNotification( advertiserId, groupCode);
+		ContentManager.getInstance(this).installNotification( advertiserId, groupCode);
 		
-		if(ContentManager.getInstance(context).getAutoDetectParameters().equals(""))
+		if(ContentManager.getInstance(this).getAutoDetectParameters().equals(""))
 		{
 			IsManualUpdate = true;
 			StartTimer(context, view);
@@ -915,7 +922,7 @@ public abstract class AdServerViewCore extends WebView {
 		
 		adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "StartLoadContent", "");
 		
-		boolean isShownView = view.isShown() || isFirstTime || IsManualUpdate;//&&isScreenOn;
+		boolean isShownView = view.isShown() || IsManualUpdate;//&&isScreenOn;
 		
 		IsManualUpdate = false;		
 		
@@ -960,7 +967,7 @@ public abstract class AdServerViewCore extends WebView {
 		
 		InterceptOnAdDownload interceptOnAdDownload = new InterceptOnAdDownload(context,view);
 		
-		if(isRequestAd || isFirstTime) {
+		if(isRequestAd ) {
 			try {
 				if(mViewState != ViewState.EXPANDED) {
 					if(adserverRequest != null) {
@@ -970,7 +977,7 @@ public abstract class AdServerViewCore extends WebView {
 						String url = adserverRequest.createURL();
 						RequestCounter++;
 						adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "requestGet["+String.valueOf(RequestCounter)+"]" , url);
-						ContentManager.getInstance(context).startLoadContent(this, adserverRequest.createURL());						
+						ContentManager.getInstance(this).startLoadContent(this, adserverRequest.createURL());						
 					}
 				}
 			} catch (Exception e) {
@@ -991,6 +998,8 @@ public abstract class AdServerViewCore extends WebView {
 			StartTimer(getContext(),view);
 			return;
 		}
+		
+		//isFirstTime = false;
 		
 		Context context = getContext();
 		
@@ -1109,6 +1118,13 @@ public abstract class AdServerViewCore extends WebView {
 				
 				if(IsManualUpdate)
 				{
+					if(ContentManager.getInstance(this).getAutoDetectParameters().equals(""))
+					{
+						adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "AutoDetectParameters, StartTimer", String.valueOf(Constants.AD_AUTO_DETECT_PERIOD/1000));
+						reloadTimer.schedule(newReloadTask, Constants.AD_AUTO_DETECT_PERIOD);
+						reloadTask = newReloadTask;
+						return;
+					}
 					adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "Manual Update, StartTimer", String.valueOf(Constants.AD_RELOAD_SHORT_PERIOD/1000));
 					reloadTimer.schedule(newReloadTask, Constants.AD_RELOAD_SHORT_PERIOD);
 					reloadTask = newReloadTask;
