@@ -211,15 +211,18 @@ public class ContentManager {
 		@Override
 		public void run() {
 			try {
+				System.setProperty("http.keepAlive", "false");
 				DefaultHttpClient client = new DefaultHttpClient();
 				HttpGet get = new HttpGet(parameters.url);
 				//get.addHeader("Accept-Encoding", "gzip");
 				//get.addHeader("Accept", "application/json");
 				//get.addHeader("UA-Pixels", parameters.w + "x" + parameters.h);
-				get.addHeader("User-Agent", userAgent);				
+				get.addHeader("User-Agent", userAgent);	
+				get.addHeader("Connection","close");
 
+				
 				HttpConnectionParams.setConnectionTimeout(get.getParams(), Constants.AD_RELOAD_PERIOD);
-				HttpConnectionParams.setSoTimeout(get.getParams(), Constants.DEFAULT_REQUEST_TIMEOUT);
+				HttpConnectionParams.setSoTimeout(get.getParams(), Constants.DEFAULT_REQUEST_TIMEOUT);				
 				HttpResponse response = client.execute(get);
 				
 				if(response.getStatusLine().getStatusCode()!=200)

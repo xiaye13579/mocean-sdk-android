@@ -80,7 +80,7 @@ public class MainAdvanced extends Activity {
 			}
 		});
         
-      //  adserverView = new AdServerView(this);
+        adserverView = new MASTAdServerView(this);
       //  adserverView.setSite(17340);
       //  adserverView.setZone(53923);
       //  adserverView.setType(1);
@@ -89,14 +89,14 @@ public class MainAdvanced extends Activity {
 //        adserverView.setAdserverURL("http://192.168.1.153/test_mocean/request.php");
 //        adserverView.setAdserverURL("http://192.168.1.153/mocean/ad.php");
         
-        //adserverView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
-        //adserverView.setSite(8061);
-        //adserverView.setZone(96001);
+        adserverView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
+        adserverView.setSite(8061);
+        adserverView.setZone(98006);
         //adserverView.setZone(50001);
         //adserverView.setTrack(true);
 
 
-        adserverView = new MASTAdServerView(this, 8061, 20249);//Default mOcean ad
+//        adserverView = new MASTAdServerView(this, 8061, 20249);//Default mOcean ad
 //adserverView.setBackgroundResource(R.drawable.icon);
 //      adserverView = new AdServerView(this, 8061, 2);
 //      adserverView.setBackgroundColor(0);
