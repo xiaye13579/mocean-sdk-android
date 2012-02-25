@@ -35,7 +35,34 @@
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Simple/Layout" 
+        <activity android:label="Simple/Bottom" 
+            android:name=".simple.Bottom"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
+        <activity android:label="Simple/Table" 
+            android:name=".simple.Table"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
+        <activity android:label="Simple/Top and Bottom" 
+            android:name=".simple.TopAndBottom"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
+		<activity android:label="Simple/Layout" 
             android:name=".simple.Layout"
 			android:screenOrientation="sensor"
 			android:configChanges="keyboardHidden|orientation">

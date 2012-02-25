@@ -1,12 +1,12 @@
-package com.adserver.adview.samples.Callbacks;
-
-import java.util.HashMap;
+package com.adserver.adview.samples.simple;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -14,31 +14,23 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.adserver.adview.MASTAdServerView;
-import com.adserver.adview.MASTAdServerViewCore.MASTOnThirdPartyRequest;
-import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
-public class ThirdPartyRequest extends Activity {
-	private Context context;
+public class Table extends Activity {
 	private MASTAdServerView adserverView;
 	private LinearLayout linearLayout;
 	private EditText inpSite;
 	private EditText inpZone;
 	private Button btnRefresh;
-	private int site = 8061;
-	private int zone = 21637;
-	public Handler handler = new Handler();
-	String uMessage;
-	int uTime;
+	private int site = 19829;
+	private int zone = 88269;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-        setContentView(R.layout.main);
-        context = this;
+        setContentView(R.layout.main_table);
         
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         inpSite = (EditText) findViewById(R.id.inpSite);
@@ -62,42 +54,57 @@ public class ThirdPartyRequest extends Activity {
 		});
         
         adserverView = new MASTAdServerView(this, site, zone);
-        adserverView.setOnThirdPartyRequest(new UserOnThirdPartyRequest());
-        adserverView.setDefaultImage(R.drawable.robot2);
-        adserverView.setMinSizeX(320);
-	    adserverView.setMinSizeY(50);
-	    adserverView.setMaxSizeX(320);
-	    adserverView.setMaxSizeY(50);
         adserverView.setId(1);
-        adserverView.setUpdateTime(5);
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
-		linearLayout.addView(adserverView);
+        setAdLayoutParams();
+        linearLayout.addView(adserverView);
+		adserverView.update();
+        
+        LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);
+        BitmapDrawable background = (BitmapDrawable)getResources().getDrawable(R.drawable.repeat_bg);
+        background.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+        frameMain.setBackgroundDrawable(background);
     }
     
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
+		setAdLayoutParams();
+		adserverView.update();
 	}
-    
-    class UserOnThirdPartyRequest implements MASTOnThirdPartyRequest {
+	
+	private void setAdLayoutParams() {
+		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+		DisplayMetrics metrics = new DisplayMetrics();
+		windowManager.getDefaultDisplay().getMetrics(metrics);
+		int height = 50;
 
-		private void updateUi(Runnable mUpdateResults, String string, int i) {
-	    	uMessage = string;
-	    	uTime = i;
-	    	handler.post(mUpdateResults);
+		int maxSize = metrics.heightPixels;
+		if (maxSize < metrics.widthPixels) {
+			maxSize = metrics.widthPixels;
 		}
-
-		@Override
-		public void event(MASTAdServerView arg0, HashMap<String, String> arg1) {			
-			updateUi(mUpdateResults, arg1.toString(),Toast.LENGTH_LONG  );			
+		
+		if (maxSize <= 480) {
+			height = 50;
+		} else if ((maxSize > 480) && (maxSize <= 800)) {
+			height = 100;
+		} else if (maxSize > 800) {
+			height = 120;
 		}
-    	
-    }
-    
-    private Runnable mUpdateResults = new Runnable() {
-    	public void run() {
-    		Toast.makeText(context, uMessage, uTime).show();
+		
+		ViewGroup.LayoutParams lp = adserverView.getLayoutParams();
+		if (lp == null) {
+			lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
+			adserverView.setLayoutParams(lp);
+		} else {
+			lp.height = height;
+			adserverView.setLayoutParams(lp);
 		}
-	};
+		
+        adserverView.setMinSizeX(metrics.widthPixels);
+        adserverView.setMinSizeY(height);
+        adserverView.setMaxSizeX(metrics.widthPixels);
+        adserverView.setMaxSizeY(height);
+		adserverView.requestLayout();
+	}
 	
 }
