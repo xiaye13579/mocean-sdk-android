@@ -114,6 +114,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 	private MASTOnAdDownload adDownload;
 	private MASTOnOrmmaListener ormmaListener;
 	private MASTOnThirdPartyRequest onThirdPartyRequest;
+	private MASTOnActivityHandler onActivityHandler;
 	private Long adReloadPeriod;
 	private Integer visibleMode;
 	private Integer advertiserId; 
@@ -321,6 +322,14 @@ public abstract class MASTAdServerViewCore extends WebView {
 		this.onThirdPartyRequest = onThirdPartyRequest;
 	}
 	
+	public MASTOnActivityHandler getOnActivityHandler() {
+		return onActivityHandler;
+	}
+
+	public void setOnActivityHandler(MASTOnActivityHandler onActivityHandler) {
+		this.onActivityHandler = onActivityHandler;
+	}
+
 		/**
 	 * Get interface for advertising opening.
 	 */
@@ -371,6 +380,11 @@ public abstract class MASTAdServerViewCore extends WebView {
 		 * This event is fired after fail to download content. 
 		 */
 		public void error(MASTAdServerView sender, String error);
+	}
+
+	public interface MASTOnActivityHandler {
+		public void onAttachedToActivity(MASTAdServerView sender);
+		public void onDetachedFromActivity(MASTAdServerView sender);
 	}
 	
 	/**
@@ -774,6 +788,10 @@ public abstract class MASTAdServerViewCore extends WebView {
 		//StartLoadContent(getContext(), this);
 		
 		super.onAttachedToWindow();
+		
+		if(onActivityHandler != null) {
+			onActivityHandler.onAttachedToActivity((MASTAdServerView)this);
+		}							
 	}
 	
 	@Override
@@ -811,6 +829,10 @@ public abstract class MASTAdServerViewCore extends WebView {
 		}
 		
 		super.onDetachedFromWindow();
+		
+		if(onActivityHandler != null) {
+			onActivityHandler.onDetachedFromActivity((MASTAdServerView)this);
+		}							
 	}
 
 	@Override
