@@ -95,7 +95,7 @@
 			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
-            </intent-filter>
+			</intent-filter>
         </activity>
         <activity android:label="Callbacks/AdDownload" 
             android:name=".Callbacks.AdDownload"

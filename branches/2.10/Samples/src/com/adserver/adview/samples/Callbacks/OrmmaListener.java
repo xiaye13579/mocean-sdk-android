@@ -5,7 +5,11 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -15,21 +19,45 @@ import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
 public class OrmmaListener extends Activity {
-    /** Called when the activity is first created. */
 	private Context context;
+	private MASTAdServerView adserverView;
 	private LinearLayout linearLayout;
+	private EditText inpSite;
+	private EditText inpZone;
+	private Button btnRefresh;
+	private int site = 8061;
+	private int zone = 17488;
 	public Handler handler = new Handler();
 	String uMessage;
 	int uTime;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
         setContentView(R.layout.main);
         context = this;
-        linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         
-        MASTAdServerView adserverView = new MASTAdServerView(this,8061,17488);
+        linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
+        inpSite = (EditText) findViewById(R.id.inpSite);
+        inpSite.setText(String.valueOf(site));
+        inpZone = (EditText) findViewById(R.id.inpZone);
+        inpZone.setText(String.valueOf(zone));
+        btnRefresh = (Button) findViewById(R.id.btnRefresh);
+        btnRefresh.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				try {
+					site = Integer.parseInt(inpSite.getText().toString());
+			        zone = Integer.parseInt(inpZone.getText().toString());
+			        adserverView.setSite(site);
+			        adserverView.setZone(zone);
+					adserverView.update();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+        
+        adserverView = new MASTAdServerView(this, site, zone);
         adserverView.setOnOrmmaListener(new UserOnOrmmaListener());
         adserverView.setDefaultImage(R.drawable.robot2);
         adserverView.setMinSizeX(320);
@@ -46,11 +74,9 @@ public class OrmmaListener extends Activity {
 		super.onConfigurationChanged(newConfig);
 	}
     
-    class UserOnOrmmaListener implements MASTOnOrmmaListener
-    {
+    class UserOnOrmmaListener implements MASTOnOrmmaListener {
 
 		private void updateUi(Runnable mUpdateResults, String string, int i) {
-			
 	    	uMessage = string;
 	    	uTime = i;
 	    	handler.post(mUpdateResults);
@@ -66,6 +92,7 @@ public class OrmmaListener extends Activity {
     private Runnable mUpdateResults = new Runnable() {
     	public void run() {
     		Toast.makeText(context, uMessage, uTime).show();
-    		}
-    	};
+		}
+	};
+	
 }

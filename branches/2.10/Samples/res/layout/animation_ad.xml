@@ -3,16 +3,56 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="@drawable/mocean_blackbkg_xsml"
 >
 
 	<LinearLayout
 		android:id="@+id/frameAdContent" 
 	    android:orientation="vertical"
-	    android:layout_height="fill_parent"
+	    android:layout_height="wrap_content"
 	    android:layout_width="fill_parent" 
-	    android:background="@drawable/mocean_blackbkg_xsml"
-    >
+    />
 	
-    </LinearLayout>
+	<LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal" 
+	>
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/site" 
+        />
+		<EditText 
+			android:id="@+id/inpSite" 
+			android:layout_height="wrap_content" 
+			android:layout_width="70dp"
+			android:singleLine="true"
+			android:text="0"
+			android:inputType="number"
+		/>
+	    	    
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/zone" 
+	        android:layout_marginLeft="10dp"
+        />
+		<EditText 
+			android:id="@+id/inpZone" 
+			android:layout_height="wrap_content" 
+			android:layout_width="70dp"
+			android:singleLine="true"
+			android:text="0"
+			android:inputType="number"
+		/>
+		<Button
+	    	android:id="@+id/btnRefresh"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/refresh"
+	        android:layout_marginLeft="10dp"
+		/>
+	</LinearLayout>
  
 </LinearLayout>

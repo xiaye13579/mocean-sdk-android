@@ -20,8 +20,7 @@ public class OpenGL extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-LinearLayout base = new LinearLayout(this);
-        
+        LinearLayout base = new LinearLayout(this);
         FrameLayout frame = new FrameLayout(this);
         
         mGLView = new GLSurfaceView(this);
@@ -36,7 +35,6 @@ LinearLayout base = new LinearLayout(this);
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
         frame.addView(adserverView);
-        
         base.addView(frame);
         
         setContentView(base);

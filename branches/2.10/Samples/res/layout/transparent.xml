@@ -1,31 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
->
+    android:orientation="vertical" >
 
-	<FrameLayout
-		android:id="@+id/frameAdContent" 
-	    android:orientation="vertical"
-	    android:layout_height="wrap_content"
-	    android:layout_width="fill_parent" 
-	    android:background="@drawable/mocean_blackbkg_xsml"
-    >
-    	<Button 
-	    	android:id="@+id/btnTest" 
-	    	android:text="Test" 
-	    	android:layout_height="wrap_content"
-	    	
-    	android:layout_width="fill_parent"/>
-    	<com.adserver.adview.MASTAdServerView 
-    	android:id="@+id/adServerView" 
-	    android:layout_width="fill_parent" android:layout_height="200dip"
-	    site="8061" 
-		zone="20249" 
-	    />
-    
+    <FrameLayout
+        android:id="@+id/frameAdContent"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/mocean_blackbkg_xsml"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/btnTest"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Test" />
+
+        <com.adserver.adview.MASTAdServerView
+            android:id="@+id/adServerView"
+            android:layout_width="fill_parent"
+            android:layout_height="200dip"
+            site="8061"
+            zone="20249" />
     </FrameLayout>
-	<Button android:text="Update" android:id="@+id/btnUpdate" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+
+    <Button
+        android:id="@+id/btnUpdate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Update" >
+    </Button>
 
 </LinearLayout>
