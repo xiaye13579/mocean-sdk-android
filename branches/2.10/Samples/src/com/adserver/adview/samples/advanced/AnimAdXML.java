@@ -2,6 +2,7 @@ package com.adserver.adview.samples.advanced;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -122,4 +123,10 @@ public class AnimAdXML extends Activity {
         
         linearLayout.addView(adserverView2);*/       
     }
+    
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+	}
+    
 }

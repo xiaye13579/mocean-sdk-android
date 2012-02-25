@@ -17,127 +17,188 @@
 	<uses-permission android:name="android.permission.WAKE_LOCK" />    
 
     <application android:icon="@drawable/icon" android:label="@string/app_name">
-    
-            <activity android:name=".ApiDemos"
-                  android:label="@string/app_name">
+		<activity android:name=".ApiDemos"
+				android:label="@string/app_name"
+				android:screenOrientation="sensor"
+				android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:label="Simple/Default" android:name=".simple.Default">
+        <activity android:label="Simple/Default" 
+            android:name=".simple.Default"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Simple/Layout" android:name=".simple.Layout">
+        <activity android:label="Simple/Layout" 
+            android:name=".simple.Layout"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Simple/Video" android:name=".simple.Video">
+        <activity android:label="Simple/Video" 
+            android:name=".simple.Video"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Advanced/ORMMA/Banner" android:name=".simple.ORRMA.ORRMABanner">
+        <activity android:label="Advanced/ORMMA/Banner" 
+            android:name=".simple.ORRMA.ORRMABanner"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Advanced/ORMMA/Sample 1" android:name=".simple.ORRMA.ORRMAlevel1">
+        <activity android:label="Advanced/ORMMA/Sample 1" 
+            android:name=".simple.ORRMA.ORRMAlevel1"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Advanced/ORMMA/Sample 2" android:name=".simple.ORRMA.ORRMAlevel2">
+        <activity android:label="Advanced/ORMMA/Sample 2" 
+            android:name=".simple.ORRMA.ORRMAlevel2"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Advanced/ORMMA/Sample 3" android:name=".simple.ORRMA.ORRMAlevel3">
+        <activity android:label="Advanced/ORMMA/Sample 3" 
+            android:name=".simple.ORRMA.ORRMAlevel3"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Advanced/Debug" android:name=".advanced.Debug">
+        <activity android:label="Advanced/Debug" 
+            android:name=".advanced.Debug"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
             </intent-filter>
         </activity>
-        <activity android:label="Callbacks/AdDownload" android:name=".Callbacks.AdDownload">
+        <activity android:label="Callbacks/AdDownload" 
+            android:name=".Callbacks.AdDownload"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Advanced/OpenGL" android:name=".advanced.OpenGL">
+        <activity android:label="Advanced/OpenGL" 
+            android:name=".advanced.OpenGL"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:name=".advanced.Orientation" android:label="Advanced/Orientation support" android:configChanges="orientation">
+        <activity android:name=".advanced.Orientation" 
+            android:label="Advanced/Orientation support" 
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
          	<intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Advanced/Test baner" android:name=".advanced.Test">
+        <activity android:label="Advanced/Test baner" 
+            android:name=".advanced.Test"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Advanced/List" android:name=".advanced.List">
+        <activity android:label="Advanced/List" 
+            android:name=".advanced.List"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-         <activity android:label="Advanced/Custom site,zone" android:name=".advanced.CustomParameters" android:configChanges="keyboardHidden|orientation" android:screenOrientation="sensor">
+         <activity android:label="Advanced/Custom site,zone" 
+            android:name=".advanced.CustomParameters" 
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-         <activity android:label="Advanced/Transparent" android:name=".advanced.Transparent">
+         <activity android:label="Advanced/Transparent" 
+            android:name=".advanced.Transparent"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>               
             </intent-filter>
         </activity>
-         <activity android:label="Advanced/AnimatedAd" android:name=".advanced.AnimAd">
+         <activity android:label="Advanced/AnimatedAd" 
+            android:name=".advanced.AnimAd"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Advanced/AnimatedAdXML" android:name=".advanced.AnimAdXML">
+        <activity android:label="Advanced/AnimatedAdXML" 
+            android:name=".advanced.AnimAdXML"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Callbacks/AdClickListener" android:name=".Callbacks.AdClickListener">
+        <activity android:label="Callbacks/AdClickListener" 
+            android:name=".Callbacks.AdClickListener"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Callbacks/OrmmaListener" android:name=".Callbacks.OrmmaListener">
+        <activity android:label="Callbacks/OrmmaListener" 
+            android:name=".Callbacks.OrmmaListener"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Callbacks/ThirdPartyRequest" android:name=".Callbacks.ThirdPartyRequest">
+        <activity android:label="Callbacks/ThirdPartyRequest" 
+            android:name=".Callbacks.ThirdPartyRequest"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>

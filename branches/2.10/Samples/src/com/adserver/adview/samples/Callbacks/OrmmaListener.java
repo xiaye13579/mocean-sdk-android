@@ -2,6 +2,7 @@ package com.adserver.adview.samples.Callbacks;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.ViewGroup;
@@ -39,6 +40,11 @@ public class OrmmaListener extends Activity {
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
 		linearLayout.addView(adserverView);
     }
+    
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+	}
     
     class UserOnOrmmaListener implements MASTOnOrmmaListener
     {

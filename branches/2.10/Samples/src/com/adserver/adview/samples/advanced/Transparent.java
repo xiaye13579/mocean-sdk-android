@@ -2,6 +2,7 @@ package com.adserver.adview.samples.advanced;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -34,6 +35,11 @@ public class Transparent extends Activity {
 		});
         
     }
+    
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+	}
     
     void Update()
     {

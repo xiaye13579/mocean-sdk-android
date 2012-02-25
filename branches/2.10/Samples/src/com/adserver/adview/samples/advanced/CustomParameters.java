@@ -3,6 +3,7 @@ package com.adserver.adview.samples.advanced;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -15,7 +16,7 @@ import com.adserver.adview.MASTAdServerView;
 import com.adserver.adview.MASTAdServerViewCore.MASTOnAdDownload;
 import com.adserver.adview.samples.R;
 
-public class CustomParameters  extends Activity{
+public class CustomParameters extends Activity {
 	private Context context;
 	private LinearLayout linearLayout;
 	MASTAdServerView adServerView;
@@ -71,6 +72,11 @@ public class CustomParameters  extends Activity{
 		}
        });       
     }
+    
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+	}
     
     Runnable updateUI = new Runnable() {
 		@Override

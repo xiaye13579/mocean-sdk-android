@@ -4,6 +4,7 @@ import java.util.Hashtable;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -34,4 +35,10 @@ public class Debug extends Activity {
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,ApiDemos.BANNER_HEIGHT));        
 		linearLayout.addView(adserverView);
     }
+    
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+	}
+    
 }

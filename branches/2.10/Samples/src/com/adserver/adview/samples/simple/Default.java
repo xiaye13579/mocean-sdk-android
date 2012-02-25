@@ -2,12 +2,12 @@ package com.adserver.adview.samples.simple;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.adserver.adview.MASTAdServerView;
-import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
 public class Default extends Activity {
@@ -22,11 +22,15 @@ public class Default extends Activity {
         context = this;
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         
-         
         MASTAdServerView adserverView = new MASTAdServerView(this,8061,20249);
-        
         adserverView.setId(1);
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
         linearLayout.addView(adserverView);
     }
+    
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+	}
+    
 }

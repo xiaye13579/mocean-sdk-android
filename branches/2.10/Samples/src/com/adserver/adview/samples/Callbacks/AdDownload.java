@@ -2,6 +2,7 @@ package com.adserver.adview.samples.Callbacks;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -41,6 +42,10 @@ public class AdDownload extends Activity {
 		linearLayout.addView(adserverView);
     }
     
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+	}
        
     class UserAdDownload implements MASTOnAdDownload
     {

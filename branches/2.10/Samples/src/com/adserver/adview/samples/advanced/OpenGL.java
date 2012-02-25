@@ -2,6 +2,7 @@ package com.adserver.adview.samples.advanced;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -50,6 +51,11 @@ LinearLayout base = new LinearLayout(this);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));
 		linearLayout.addView(adserverView);*/
     }
+    
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+	}
     
     protected void onPause() {
         super.onPause();

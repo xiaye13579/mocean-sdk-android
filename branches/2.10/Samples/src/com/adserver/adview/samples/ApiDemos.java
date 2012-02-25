@@ -12,6 +12,7 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
@@ -44,6 +45,11 @@ public class ApiDemos extends ListActivity {
         getListView().setTextFilterEnabled(true);
     }
 
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+	}
+    
     protected List getData(String prefix) {
         List<Map> myData = new ArrayList<Map>();
 
