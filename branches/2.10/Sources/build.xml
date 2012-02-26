@@ -9,7 +9,7 @@
     <property name="doc.mocean.dir" value="${demo.mocean.dir}\Documentation"/>
     <property name="temp.dir" value="${release.dir}\temp"/>
     <property name="temp.classes.dir" value="${temp.dir}\classes"/>
-	<property name="jar.name" value="AdserverView.jar"/>
+	<property name="jar.name" value="MASTAdserverView.jar"/>
 
 	<target name="release.build.3rdPaty"  depends="clean, make.dirs">
 			<antcall target="release.build.mOcean"/>

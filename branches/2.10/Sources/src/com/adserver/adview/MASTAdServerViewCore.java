@@ -964,6 +964,11 @@ public abstract class MASTAdServerViewCore extends WebView {
 	
 	void StartLoadContent(Context context, WebView view)
 	{
+		if(reloadTask!=null)
+		{
+			reloadTask.cancel();
+			reloadTask = null;
+		}
 		
 		ContentManager.getInstance(this).installNotification( advertiserId, groupCode);
 		
