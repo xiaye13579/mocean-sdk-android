@@ -1,5 +1,4 @@
 package com.adserver.adview;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -22,7 +21,9 @@ import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
@@ -675,6 +676,27 @@ public abstract class MASTAdServerViewCore extends WebView {
 			String region, 
 			Integer paramBG, Integer paramLINK, String carrier, 
 			Hashtable<String, String> customParameters) {
+		
+		String logString = "SDK version = "+Constants.SDK_VERSION+
+				"; DeviceModel = " + android.os.Build.MODEL+"; DeviceOsVersion = " +android.os.Build.VERSION.RELEASE+
+				"; PackageName = "+context.getPackageName();
+		try {
+			PackageInfo pinfo;
+			pinfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+			if(pinfo!=null)
+			{
+				logString += "; versionName="+pinfo.versionName;
+			}						
+			
+		} catch (Exception e) {			
+		}
+		
+		
+		
+		adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_INFO, "created", logString);
+		//android.content.pm.PackageManager.
+		
+		
 		if(isAutoCollapse) this.setVisibility(View.INVISIBLE);
 		view = this;
 		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog);

@@ -79,8 +79,8 @@ public class MainAdvanced extends Activity {
 	
 			}
 		});
-        
         adserverView = new MASTAdServerView(this);
+        //adserverView.setUA("test ua");
       //  adserverView.setSite(17340);
       //  adserverView.setZone(53923);
       //  adserverView.setType(1);
@@ -122,7 +122,7 @@ public class MainAdvanced extends Activity {
 			}
 		});
         adserverView.setInternalBrowser(true);
-
+        
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
         //adserverView.setAutoCollapse(false);

@@ -195,6 +195,16 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 		adServerView.update();
 	}
 	
+	public void setUA(String ua)
+	{
+		adserverRequest.setUa(ua);
+	}
+	
+	public String getUA()
+	{
+		return adserverRequest.getUa();
+	}
+	
 	/**
 	 * Get show close button after delay.
 	 * @return
