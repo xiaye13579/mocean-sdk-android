@@ -80,7 +80,7 @@ public class MainAdvanced extends Activity {
 			}
 		});
         
-      //  adserverView = new MASTAdServerView(this);
+        adserverView = new MASTAdServerView(this);
       //  adserverView.setSite(17340);
       //  adserverView.setZone(53923);
       //  adserverView.setType(1);
@@ -90,13 +90,14 @@ public class MainAdvanced extends Activity {
 //        adserverView.setAdserverURL("http://192.168.1.153/mocean/ad.php");
         
         //adserverView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
-        //adserverView.setSite(8061);
-        //adserverView.setZone(98006);
+        adserverView.setAdserverURL("http://192.168.1.162/orm/exp/bool.html");
+        adserverView.setSite(8061);
+        adserverView.setZone(98006);
         //adserverView.setZone(50001);
         //adserverView.setTrack(true);
 
 
-        adserverView = new MASTAdServerView(this, 8061, 20249);//Default mOcean ad
+        //adserverView = new MASTAdServerView(this, 8061, 20249);//Default mOcean ad
 //adserverView.setBackgroundResource(R.drawable.icon);
 //      adserverView = new AdServerView(this, 8061, 2);
 //      adserverView.setBackgroundColor(0);
@@ -124,9 +125,11 @@ public class MainAdvanced extends Activity {
 
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
-        
+        //adserverView.setAutoCollapse(false);
 		adserverView.update();
-        linearLayout.addView(adserverView);//*/
+        linearLayout.addView(adserverView);
+        //adserverView.setVisibility(View.VISIBLE);
+        //*/
 		/*WebView wv= new WebView(this);
         wv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
         linearLayout.addView(wv);*/

@@ -255,22 +255,22 @@ public abstract class MASTAdServerViewCore extends WebView {
 		mViewState = ViewState.EXPANDED;
 	}
 	
-	public void SetAd_Call_Timeout(int timeout)
+	public void setAd_Call_Timeout(int timeout)
 	{
 		if((timeout>=1000)&&(timeout<=3000))
 		adserverRequest.timeout = timeout;
 	}
-	public int GetAd_Call_Timeout()
+	public int getAd_Call_Timeout()
 	{
 		return adserverRequest.timeout;
 	}
 	
-	public void SetAutoCollapse(boolean value)
+	public void setAutoCollapse(boolean value)
 	{
 		isAutoCollapse = value;
 	}
 	
-	public boolean GetAutoCollapse()
+	public boolean getAutoCollapse()
 	{
 		return isAutoCollapse;
 	}
@@ -674,7 +674,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 			String region, 
 			Integer paramBG, Integer paramLINK, String carrier, 
 			Hashtable<String, String> customParameters) {
-		if(isAutoCollapse) this.SetAdVisibility(View.INVISIBLE);
+		if(isAutoCollapse) this.setVisibility(View.INVISIBLE);
 		view = this;
 		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog);
 		//adserverRequest.InitDefaultParameters(context);
@@ -1034,7 +1034,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 		
 	}
 	
-	void SetAdVisibility(final int visibility)
+	void setAdVisibility(final int visibility)
 	{
 		handler.post(new Runnable() {
 			
@@ -1068,7 +1068,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 					}
 				}else
 				{
-					if(isAutoCollapse) this.SetAdVisibility(View.INVISIBLE);
+					if(isAutoCollapse) this.setAdVisibility(View.INVISIBLE);
 					else
 					{	
 						data = "<html><head>" +
@@ -1084,7 +1084,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 		}
 		
 		//isFirstTime = false;
-		if(isAutoCollapse) this.SetAdVisibility(View.VISIBLE);
+		if(isAutoCollapse) this.setAdVisibility(View.VISIBLE);
 		Context context = getContext();
 		
 		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "requestGet result["+String.valueOf(RequestCounter)+"]", data);
@@ -2058,6 +2058,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 			this.useCloseButton(!properties.useCustomClose);
 		} else {
 			MASTAdServerView expandedView = new MASTAdServerView(getContext(), true);
+			expandedView.setAutoCollapse(false);
+			expandedView.setVisibility(View.VISIBLE);
 			mExpandedFrame.addView(expandedView, adLp);
 
 			try {
