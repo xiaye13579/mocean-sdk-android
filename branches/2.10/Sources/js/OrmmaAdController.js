@@ -54,10 +54,10 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
         	"height" : 0,
         	"useCustomClose" :  false,
             "lockOrientation" : false,
-			"use-background" : false,
-			"background-color" : "#FFFFFF",
-			"background-opacity" : 1.0,
-			"is-modal" : true},
+			"useBackground" : false,
+			"backgroundColor" : "#FFFFFF",
+			"backgroundOpacity" : 1.0,
+			"isModal" : true},
 
 		shakeProperties : {
 			"interval" : "10",
@@ -381,7 +381,14 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		},
 
 		setShakeProperties: function(properties) {
-			this.shakeProperties = properties;
+	       var fields = ['interval', 'intensity'];
+	
+	       for (f in fields) {
+	           var field = fields[f];
+	           if (properties[field] !== undefined) {
+	               this.shakeProperties[field] = properties[field];
+	           }
+	       }
 		},
 
 		getMaxSize: function() {
@@ -413,7 +420,16 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		},
 
 		setExpandProperties: function(properties) {
-			this.expandProperties = properties;
+	       var fields = ['width', 'height', 'useCustomClose', 'isModal',
+	           'lockOrientation', 'useBackground', 'backgroundColor',
+	           'backgroundOpacity'];
+	
+	       for (f in fields) {
+	           var field = fields[f];
+	           if (properties[field] !== undefined) {
+	               this.expandProperties[field] = properties[field];
+	           }
+	       }
 		},
 		
 		ready: function(){

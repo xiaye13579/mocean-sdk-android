@@ -68,10 +68,10 @@ public class OrmmaController {
 		public Properties() {
 			transition = TransitionStringEnum.DEFAULT;
 			navigation = NavigationStringEnum.NONE;
-			use_background = false;
-			background_color = 0;
-			background_opacity = 0;
-			is_modal = true;
+			useBackground = false;
+			backgroundColor = 0;
+			backgroundOpacity = 0;
+			isModal = true;
 			width=0;
 			height=0;
 			useCustomClose = false;
@@ -93,10 +93,10 @@ public class OrmmaController {
 		public int height;
 		public boolean useCustomClose;
 		public boolean lockOrientation;
-		public boolean use_background;
-		public int background_color;
-		public float background_opacity;
-		public boolean is_modal;
+		public boolean useBackground;
+		public int backgroundColor;
+		public float backgroundOpacity;
+		public boolean isModal;
 	}
 
 	public OrmmaController(MASTAdServerViewCore adView, Context context) {

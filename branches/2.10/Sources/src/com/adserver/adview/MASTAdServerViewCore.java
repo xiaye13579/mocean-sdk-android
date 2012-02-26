@@ -2040,15 +2040,15 @@ public abstract class MASTAdServerViewCore extends WebView {
 		if(mExpandedFrame!=null) ((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).removeView(mExpandedFrame);
 		
 		mExpandedFrame = new RelativeLayout(getContext());
-		if(properties.use_background) {
-			int opacity = new Float(255*properties.background_opacity).intValue();
+		if(properties.useBackground) {
+			int opacity = new Float(255*properties.backgroundOpacity).intValue();
 			if(opacity < 0) opacity = 0;
 			if(opacity > 255) opacity = 255;
 			mExpandedFrame.setBackgroundColor(
 					Color.argb(opacity, 
-							Color.red(properties.background_color), 
-							Color.green(properties.background_color), 
-							Color.blue(properties.background_color))
+							Color.red(properties.backgroundColor), 
+							Color.green(properties.backgroundColor), 
+							Color.blue(properties.backgroundColor))
 					);
 		}
 		android.widget.RelativeLayout.LayoutParams adLp = new RelativeLayout.LayoutParams(
