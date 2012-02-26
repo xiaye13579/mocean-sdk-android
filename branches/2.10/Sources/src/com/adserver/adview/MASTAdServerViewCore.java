@@ -190,7 +190,6 @@ public abstract class MASTAdServerViewCore extends WebView {
 	private int lastX;
 	private int lastY;
 	private ViewGroup parentView = null;
-	private boolean isUseCustomClose = false;
 	
 	public MASTAdLog getLog()
 	{
@@ -759,8 +758,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 							InterstitialClose();
 						}else
 						{
-							ormmaEvent("hide","");
-							setVisibility(View.INVISIBLE);								
+							injectJavaScript("ormma.close();");						
 						}
 					}
 				});
@@ -866,32 +864,17 @@ public abstract class MASTAdServerViewCore extends WebView {
 		}
 	}
 	
-	public void useCustomClose(final boolean flag)
-	{
-		isUseCustomClose = flag;
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				if(!flag) buttonClose.setVisibility(View.VISIBLE);
-				else buttonClose.setVisibility(View.GONE);
-			}
-		});
-	}
-
-	public void showCloseButton()
-	{
+	public void useCloseButton(final boolean show) {
 		handler.post(new Runnable() {			
 			@Override
 			public void run() {
-				if(!isUseCustomClose) buttonClose.setVisibility(View.VISIBLE);
-				else buttonClose.setVisibility(View.GONE);
+				if (show) {
+					buttonClose.setVisibility(View.VISIBLE);
+				} else {
+					buttonClose.setVisibility(View.GONE);
+				}
 			}
 		});
-	}
-	
-	boolean isCustomClose()
-	{
-		return buttonClose.getVisibility() != View.VISIBLE;
 	}
 	
 	/*private class InstallNotificationThread extends Thread {
@@ -2072,7 +2055,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 			parentView = (ViewGroup)getParent(); 
 			parentView.removeView(this);		
 			mExpandedFrame.addView(this,adLp);
-//			this.showCloseButton();
+			this.useCloseButton(!properties.useCustomClose);
 		} else {
 			MASTAdServerView expandedView = new MASTAdServerView(getContext(), true);
 			mExpandedFrame.addView(expandedView, adLp);
@@ -2088,27 +2071,28 @@ public abstract class MASTAdServerViewCore extends WebView {
 				e.printStackTrace();
 				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "expandInUIThread", e.getMessage());
 			}						
-			//expandedView.setContent(mContent);
 			
-			Button buttonClose = new Button(_context);
-			buttonClose.setBackgroundDrawable(InternelBrowser.GetSelector(_context,"b_close.png", "b_close.png", "b_close.png"));
-			buttonClose.setLayoutParams(new ViewGroup.LayoutParams(30,30));
-			buttonClose.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					handler.post(new Runnable() {
-						@Override
-						public void run() {						
-							injectJavaScript("ormma.close();");						
-						}
-					});
-				}
-			});
-			LinearLayout ll = new LinearLayout(_context);
-			ll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-			ll.setGravity(Gravity.RIGHT);
-			ll.addView(buttonClose);
-			expandedView.addView(ll);
+			if (!properties.useCustomClose) {
+				Button buttonClose = new Button(_context);
+				buttonClose.setBackgroundDrawable(InternelBrowser.GetSelector(_context,"b_close.png", "b_close.png", "b_close.png"));
+				buttonClose.setLayoutParams(new ViewGroup.LayoutParams(30,30));
+				buttonClose.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						handler.post(new Runnable() {
+							@Override
+							public void run() {						
+								injectJavaScript("ormma.close();");						
+							}
+						});
+					}
+				});
+				LinearLayout ll = new LinearLayout(_context);
+				ll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+				ll.setGravity(Gravity.RIGHT);
+				ll.addView(buttonClose);
+				expandedView.addView(ll);
+			}
 		}
 		
 		((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).addView(mExpandedFrame, lp);

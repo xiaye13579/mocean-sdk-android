@@ -45,11 +45,6 @@ public class OrmmaDisplayController extends OrmmaController {
 		return mOrmmaView.isInterstitial() ? "interstitial" : "inline";
 	}
 	
-	public void useCustomClose(boolean flag)
-	{
-		mOrmmaView.useCustomClose(flag);
-	}
-	
 	public void getState() {
 		mOrmmaView.getState();
 	}
