@@ -20,14 +20,14 @@
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="true">
 		
 
-        <activity android:name="com.adserver.adview.ormma.OrmmaActionHandler" 
+       <!-- <activity android:name="com.adserver.adview.ormma.OrmmaActionHandler" 
               android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
               android:configChanges="orientation|keyboard|keyboardHidden">
             <intent-filter>
                 <action android:name="ORMMA_ANCION_HANDLER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>            
-        </activity>
+        </activity>-->
         <activity android:name=".MainAdvanced"
                   android:label="@string/app_name">
             <intent-filter>

@@ -276,7 +276,8 @@ public class OrmmaDisplayController extends OrmmaController {
 			Log.d(LOG_TAG, "invalid url: " + url);
 //			mOrmmaView.raiseError("Invalid url", "playVideo");
 		}else{
-			mOrmmaView.playVideo(url, audioMuted, autoPlay, controls, loop, d, startStyle, stopStyle);
+			//mOrmmaView.playVideo(url, audioMuted, autoPlay, controls, loop, d, startStyle, stopStyle);
+			mOrmmaView.playVideo(url, false, true, true, false, null, "fullscreen", "exit");
 		}
 	}
 	

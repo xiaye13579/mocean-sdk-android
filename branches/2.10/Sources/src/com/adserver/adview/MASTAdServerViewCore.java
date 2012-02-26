@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -45,6 +46,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -52,6 +54,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.RelativeLayout;
@@ -171,6 +174,9 @@ public abstract class MASTAdServerViewCore extends WebView {
 	protected boolean isInterstitial = false;
 	protected boolean isShowPreviousAdOnError = true;
 	protected boolean isAutoCollapse = true;
+	private static ViewGroup mediaPlayerFrame;
+	private boolean isShowMediaPlayerFrame = false;
+	
 	
 	MASTAdLog adLog = new MASTAdLog(this);
 	Dialog dialog;
@@ -2840,7 +2846,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 		if(d != null)
 			data.putParcelable(DIMENSIONS, d);
 
-		if (properties.isFullScreen()) {
+		/*if (properties.isFullScreen()) {
 			try {
 				ormmaEvent("playvideo","fulscreen=true");
 				Intent intent = new Intent();
@@ -2851,7 +2857,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 			catch(ActivityNotFoundException e){
 				e.printStackTrace();
 			}
-		} else {
+		} else*/ {
 			msg.setData(data);
 			mHandler.sendMessage(msg);
 		}
@@ -2870,6 +2876,81 @@ public abstract class MASTAdServerViewCore extends WebView {
 		@Override
 		public void run() {
 			try {
+				if (isShowMediaPlayerFrame == false) {
+					if (mediaPlayerFrame != null) {
+						((ViewGroup) ((Activity) getContext()).getWindow().getDecorView()).removeView(mediaPlayerFrame);
+					}
+					
+					PlayerProperties properties = (PlayerProperties) data.getParcelable(PLAYER_PROPERTIES);
+					String url = data.getString(EXPAND_URL);
+	
+					final OrmmaPlayer videoPlayer = getPlayer();
+					videoPlayer.setPlayData(properties, url);
+	
+					int contentViewTop = ((Activity) getContext()).getWindow()
+							.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+					mediaPlayerFrame = new RelativeLayout(getContext());
+					RelativeLayout.LayoutParams mediaPlayerLayoutParams = new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
+					mediaPlayerFrame.setPadding(0, contentViewTop, 0, 0);
+					mediaPlayerFrame.setBackgroundColor(Color.BLACK);
+	
+					final Runnable closeRunnable = new Runnable() {
+						@Override
+						public void run() {
+							isShowMediaPlayerFrame = false;
+							if (mediaPlayerFrame != null) {
+								((ViewGroup) ((Activity) getContext()).getWindow().getDecorView()).removeView(mediaPlayerFrame);
+							}
+						}
+					};
+					videoPlayer.setOnCompletionRunnable(closeRunnable);
+					videoPlayer.setOnErrorRunnable(closeRunnable);
+					
+					Button buttonClose = new Button(getContext());
+					buttonClose.setBackgroundDrawable(Utils.GetSelector(getContext(),"b_close.png", "b_close.png", "b_close.png"));
+					buttonClose.setLayoutParams(getLayoutParamsByDrawableSize("b_close.png"));
+					buttonClose.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							handler.post(new Runnable() {
+								@Override
+								public void run() {
+									isShowMediaPlayerFrame = false;
+									videoPlayer.releasePlayer();
+									if (mediaPlayerFrame != null) {
+										((ViewGroup) ((Activity) getContext()).getWindow().getDecorView()).removeView(mediaPlayerFrame);
+									}
+								}
+							});
+						}
+					});
+					LinearLayout buttonCloseFrame = new LinearLayout(getContext());
+					buttonCloseFrame.setLayoutParams(new LinearLayout.LayoutParams(
+							ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+					buttonCloseFrame.setGravity(Gravity.RIGHT);
+					buttonCloseFrame.addView(buttonClose);
+					
+					videoPlayer.setLayoutParams(new LinearLayout.LayoutParams(
+							ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+
+					LinearLayout videoFrame = new LinearLayout(getContext());
+					videoFrame.setLayoutParams(new LinearLayout.LayoutParams(
+							ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+					videoFrame.setGravity(Gravity.CENTER);
+					videoFrame.addView(videoPlayer);
+					mediaPlayerFrame.addView(videoFrame);
+					mediaPlayerFrame.addView(buttonCloseFrame);
+					
+					((ViewGroup) ((Activity) getContext()).getWindow().getDecorView())
+							.addView(mediaPlayerFrame, mediaPlayerLayoutParams);
+					
+					videoPlayer.playVideo();
+					isShowMediaPlayerFrame = true;
+				}
+			} catch (Exception e) {
+			}
+			/*try {
 				PlayerProperties properties = (PlayerProperties) data.getParcelable(PLAYER_PROPERTIES);
 				Dimensions d = (Dimensions) data.getParcelable(DIMENSIONS);
 				String url = data.getString(EXPAND_URL);
@@ -2891,8 +2972,24 @@ public abstract class MASTAdServerViewCore extends WebView {
 				}
 				videoPlayer.playVideo();
 			} catch (Exception e){
-			}
+			}*/
 		}
+	}
+	
+	private ViewGroup.LayoutParams getLayoutParamsByDrawableSize(String fileName) {
+		int sizeDrawableWidth = ViewGroup.LayoutParams.WRAP_CONTENT;
+		int sizeDrawablehHeight = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+		try {
+			BitmapDrawable sizeDrawable = (BitmapDrawable)Utils.GetDrawable(getContext(), fileName);
+			if (sizeDrawable != null) {
+				sizeDrawableWidth = sizeDrawable.getBitmap().getWidth();
+				sizeDrawablehHeight = sizeDrawable.getBitmap().getHeight();
+			}
+		} catch (Exception e) {
+		}
+		
+		return new ViewGroup.LayoutParams(sizeDrawableWidth, sizeDrawablehHeight);
 	}
 
 	OrmmaPlayer getPlayer() {
@@ -2933,7 +3030,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 		data.putString(EXPAND_URL, url);
 		data.putParcelable(PLAYER_PROPERTIES, properties);
 
-		if (properties.isFullScreen()) {
+		/*if (properties.isFullScreen()) {
 			try {
 				Intent intent = new Intent();
 				intent.setAction("ORMMA_ANCION_HANDLER");
@@ -2943,7 +3040,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 			catch(ActivityNotFoundException e){
 				e.printStackTrace();
 			}
-		} else {
+		} else*/ {
 			Message msg = mHandler.obtainMessage(MESSAGE_PLAY_AUDIO);
 			msg.setData(data);
 			mHandler.sendMessage(msg);
@@ -2958,14 +3055,93 @@ public abstract class MASTAdServerViewCore extends WebView {
 
 		@Override
 		public void run() {
-			PlayerProperties properties = (PlayerProperties) data.getParcelable(PLAYER_PROPERTIES);
+			try {
+				if (isShowMediaPlayerFrame == false) {
+					if (mediaPlayerFrame != null) {
+						((ViewGroup) ((Activity) getContext()).getWindow().getDecorView()).removeView(mediaPlayerFrame);
+					}
+					
+					PlayerProperties properties = (PlayerProperties) data.getParcelable(PLAYER_PROPERTIES);
+					String url = data.getString(EXPAND_URL);
+	
+					final OrmmaPlayer audioPlayer = getPlayer();
+					audioPlayer.setPlayData(properties, url);
+	
+					int contentViewTop = ((Activity) getContext()).getWindow()
+							.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+					mediaPlayerFrame = new RelativeLayout(getContext());
+					RelativeLayout.LayoutParams mediaPlayerLayoutParams = new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
+					mediaPlayerFrame.setPadding(0, contentViewTop, 0, 0);
+	
+					final Runnable closeRunnable = new Runnable() {
+						@Override
+						public void run() {
+							isShowMediaPlayerFrame = false;
+							if (mediaPlayerFrame != null) {
+								((ViewGroup) ((Activity) getContext()).getWindow().getDecorView()).removeView(mediaPlayerFrame);
+							}
+						}
+					};
+					audioPlayer.setOnCompletionRunnable(closeRunnable);
+					audioPlayer.setOnErrorRunnable(closeRunnable);
+					
+					Button buttonClose = new Button(getContext());
+					buttonClose.setBackgroundDrawable(Utils.GetSelector(getContext(),"b_close.png", "b_close.png", "b_close.png"));
+					buttonClose.setLayoutParams(getLayoutParamsByDrawableSize("b_close.png"));
+					buttonClose.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							handler.post(new Runnable() {
+								@Override
+								public void run() {
+									isShowMediaPlayerFrame = false;
+									audioPlayer.releasePlayer();
+									if (mediaPlayerFrame != null) {
+										((ViewGroup) ((Activity) getContext()).getWindow().getDecorView()).removeView(mediaPlayerFrame);
+									}
+								}
+							});
+						}
+					});
+					LinearLayout buttonCloseFrame = new LinearLayout(getContext());
+					buttonCloseFrame.setLayoutParams(new LinearLayout.LayoutParams(
+							ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+					buttonCloseFrame.setGravity(Gravity.RIGHT);
+					buttonCloseFrame.addView(buttonClose);
+					
+					ImageView audioPlayerLogo = new ImageView(getContext());
+					audioPlayerLogo.setImageDrawable(Utils.GetDrawable(getContext(), "note.png"));
+					audioPlayerLogo.setLayoutParams(new LinearLayout.LayoutParams(
+							ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+					LinearLayout audioPlayerLogoFrame = new LinearLayout(getContext());
+					audioPlayerLogoFrame.setLayoutParams(new LinearLayout.LayoutParams(
+							ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+					audioPlayerLogoFrame.setGravity(Gravity.CENTER);
+					audioPlayerLogoFrame.addView(audioPlayerLogo);
+					
+					audioPlayer.setLayoutParams(new LinearLayout.LayoutParams(
+							ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+					mediaPlayerFrame.addView(audioPlayer);
+					mediaPlayerFrame.addView(audioPlayerLogoFrame);
+					mediaPlayerFrame.addView(buttonCloseFrame);
+					
+					((ViewGroup) ((Activity) getContext()).getWindow().getDecorView())
+							.addView(mediaPlayerFrame, mediaPlayerLayoutParams);
+					
+					audioPlayer.playAudio();
+					isShowMediaPlayerFrame = true;
+				}
+			} catch (Exception e) {
+			}
+			/*PlayerProperties properties = (PlayerProperties) data.getParcelable(PLAYER_PROPERTIES);
 			String url = data.getString(EXPAND_URL);
 
 			OrmmaPlayer audioPlayer = getPlayer();
 			audioPlayer.setPlayData(properties, url);
 			audioPlayer.setLayoutParams(new ViewGroup.LayoutParams(1, 1));
 			((ViewGroup) getParent()).addView(audioPlayer);
-			audioPlayer.playAudio();
+			audioPlayer.playAudio();*/
 		}
 	}
 	

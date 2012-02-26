@@ -90,7 +90,7 @@ public class MainAdvanced extends Activity {
 //        adserverView.setAdserverURL("http://192.168.1.153/mocean/ad.php");
         
         //adserverView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
-        adserverView.setAdserverURL("http://192.168.1.162/orm/exp/bool.html");
+        adserverView.setAdserverURL("http://192.168.1.162/orm/av.html");
         adserverView.setSite(8061);
         adserverView.setZone(98006);
         //adserverView.setZone(50001);
