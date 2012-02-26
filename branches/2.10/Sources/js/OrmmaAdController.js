@@ -521,7 +521,7 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		},
 		useCustomClose: function(flag)
 		{
-			_useCustomClose(flag);
+			ormma.setExpandProperties({"useCustomClose" : flag});
 		}, 
 	    fireEvent: function(event, args) 
 	    {
