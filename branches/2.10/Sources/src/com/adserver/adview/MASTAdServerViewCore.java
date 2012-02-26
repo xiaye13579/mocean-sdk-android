@@ -2072,27 +2072,25 @@ public abstract class MASTAdServerViewCore extends WebView {
 				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "expandInUIThread", e.getMessage());
 			}						
 			
-			if (!properties.useCustomClose) {
-				Button buttonClose = new Button(_context);
-				buttonClose.setBackgroundDrawable(InternelBrowser.GetSelector(_context,"b_close.png", "b_close.png", "b_close.png"));
-				buttonClose.setLayoutParams(new ViewGroup.LayoutParams(30,30));
-				buttonClose.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						handler.post(new Runnable() {
-							@Override
-							public void run() {						
-								injectJavaScript("ormma.close();");						
-							}
-						});
-					}
-				});
-				LinearLayout ll = new LinearLayout(_context);
-				ll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-				ll.setGravity(Gravity.RIGHT);
-				ll.addView(buttonClose);
-				expandedView.addView(ll);
-			}
+			Button buttonClose = new Button(_context);
+			buttonClose.setBackgroundDrawable(InternelBrowser.GetSelector(_context,"b_close.png", "b_close.png", "b_close.png"));
+			buttonClose.setLayoutParams(new ViewGroup.LayoutParams(30,30));
+			buttonClose.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					handler.post(new Runnable() {
+						@Override
+						public void run() {						
+							injectJavaScript("ormma.close();");						
+						}
+					});
+				}
+			});
+			LinearLayout ll = new LinearLayout(_context);
+			ll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+			ll.setGravity(Gravity.RIGHT);
+			ll.addView(buttonClose);
+			expandedView.addView(ll);
 		}
 		
 		((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).addView(mExpandedFrame, lp);
