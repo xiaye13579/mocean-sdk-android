@@ -38,6 +38,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -841,6 +842,17 @@ public abstract class MASTAdServerViewCore extends WebView {
 		super.onSizeChanged(w, h, ow, oh);
 		adserverRequest.sizeX = w;
 		adserverRequest.sizeY = h;
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+			if (mViewState == ViewState.EXPANDED) {
+				injectJavaScript("ormma.close();");
+				return true;
+			}
+        }
+		return super.onKeyDown(keyCode, event);
 	}
 
 	/**
@@ -2056,6 +2068,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 			parentView.removeView(this);		
 			mExpandedFrame.addView(this,adLp);
 			this.useCloseButton(!properties.useCustomClose);
+			requestFocus();
 		} else {
 			MASTAdServerView expandedView = new MASTAdServerView(getContext(), true);
 			expandedView.setAutoCollapse(false);
