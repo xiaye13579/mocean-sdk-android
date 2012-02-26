@@ -189,6 +189,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 
 	private boolean internalBrowser = false;
 	private boolean isExpanded = false;
+	private MASTAdServerViewCore expandParent;
 	private int lastX;
 	private int lastY;
 	private ViewGroup parentView = null;
@@ -249,9 +250,10 @@ public abstract class MASTAdServerViewCore extends WebView {
 		initialize(context, null);
 	}
 	
-	public MASTAdServerViewCore(Context context, boolean expanded) {
+	public MASTAdServerViewCore(Context context, boolean expanded, MASTAdServerViewCore expandParent) {
 		super(context);
-		isExpanded =expanded; 
+		isExpanded =expanded;
+		this.expandParent = expandParent;
 		AutoDetectParameters(context);
 		initialize(context, null);
 		mViewState = ViewState.EXPANDED;
@@ -870,7 +872,11 @@ public abstract class MASTAdServerViewCore extends WebView {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
 			if (mViewState == ViewState.EXPANDED) {
-				injectJavaScript("ormma.close();");
+				if (expandParent != null) {
+					expandParent.injectJavaScript("ormma.close();");
+				} else {
+					injectJavaScript("ormma.close();");
+				}
 				return true;
 			}
         }
@@ -2092,7 +2098,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 			this.useCloseButton(!properties.useCustomClose);
 			requestFocus();
 		} else {
-			MASTAdServerView expandedView = new MASTAdServerView(getContext(), true);
+			MASTAdServerView expandedView = new MASTAdServerView(getContext(), true, this);
 			expandedView.setAutoCollapse(false);
 			expandedView.setVisibility(View.VISIBLE);
 			mExpandedFrame.addView(expandedView, adLp);

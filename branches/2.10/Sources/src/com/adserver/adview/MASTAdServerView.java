@@ -89,10 +89,10 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 	}
 	
 
-	protected MASTAdServerView(Context context, boolean expanded) {
-		super(context,expanded);
+	protected MASTAdServerView(Context context, boolean expanded, MASTAdServerViewCore expandParent) {
+		super(context, expanded, expandParent);
 	}
-
+	
 	@Override	
 	protected void onAttachedToWindow() {
 		adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_INFO, "AttachedToWindow", "");
