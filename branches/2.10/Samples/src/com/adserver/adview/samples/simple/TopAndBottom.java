@@ -134,9 +134,6 @@ public class TopAndBottom extends Activity {
 		if (lp == null) {
 			lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
 			adserverViewTop.setLayoutParams(lp);
-		} else {
-			lp.height = height;
-			adserverViewTop.setLayoutParams(lp);
 		}
 		
         adserverViewTop.setMinSizeX(metrics.widthPixels);

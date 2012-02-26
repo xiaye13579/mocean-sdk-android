@@ -95,9 +95,6 @@ public class Default extends Activity {
 		if (lp == null) {
 			lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
 			adserverView.setLayoutParams(lp);
-		} else {
-			lp.height = height;
-			adserverView.setLayoutParams(lp);
 		}
 		
         adserverView.setMinSizeX(metrics.widthPixels);
