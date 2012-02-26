@@ -1,6 +1,6 @@
 <project name="AdViewer" default="release.build.3rdPaty">
     <property name="android.dir" value="c:\eclipse\android-sdk"/>
-    <property name="android.jar" value="${android.dir}\platforms\android-8\android.jar"/>
+    <property name="android.jar" value="${android.dir}\platforms\android-11\android.jar"/>
 
     <property name="release.dir" value="release"/>
     <property name="demo.mocean.dir" value="${release.dir}\ads.mocean.mobi"/>
