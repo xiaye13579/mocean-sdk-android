@@ -23,9 +23,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.location.LocationListener;
@@ -1121,7 +1121,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 								"<style>*{margin:0;padding:0}</style>"+
 								"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
 								"<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>" +
-								"<body style=\"background-color:#"+getBackgroundColor()+";margin: 0px; padding: 0px; width: 100%; height: 100%\">"+"</body></html>";
+								"<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">"+"</body></html>";
 					
 						view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 					}
@@ -1165,15 +1165,14 @@ public abstract class MASTAdServerViewCore extends WebView {
 											"<style>*{margin:0;padding:0}</style>"+
 											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
 											"<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>" +
-											"<body style=\"background-color:#"+getBackgroundColor()+
-											";margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
+											"<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
 												
 								}else
 									data = "<html><head>" +
 											"<style>*{margin:0;padding:0}</style>"+
 											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
 											"<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>" +
-											"<body style=\"background-color:#"+getBackgroundColor()+";margin: 0px; padding: 0px; width: 100%; height: 100%\">"+data+"</body></html>";
+											"<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">"+data+"</body></html>";
 								
 								mContent = data;
 								view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
@@ -1896,6 +1895,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 	private Handler mHandler = new Handler() {
 		private int mOldHeight;
 		private int mOldWidth;
+		private Drawable mOldExpandBackground;
+		private int mOldExpandBackgroundColor;
 
 		@Override
 		public void handleMessage(Message msg) {
@@ -1933,6 +1934,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 					case EXPANDED:
 						if (parentView != null) {
 							mExpandedFrame.removeAllViews();
+							view.setBackgroundColor(mOldExpandBackgroundColor);
+							view.setBackgroundDrawable(mOldExpandBackground);
 							parentView.addView(view, new LinearLayout.LayoutParams(mOldWidth, mOldHeight));
 							parentView = null;
 						}
@@ -1942,7 +1945,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 							mViewState = ViewState.DEFAULT;
 						}
 						lp.height = mOldHeight;
-						lp.width = mOldWidth;						
+						lp.width = mOldWidth;
 						requestLayout();
 						break;					
 					};		
@@ -1963,6 +1966,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 						ViewGroup.LayoutParams lp = getLayoutParams();
 						mOldHeight = lp.height;
 						mOldWidth = lp.width;
+						mOldExpandBackground = getBackground();
+						mOldExpandBackgroundColor = getBackgroundColor();
 						ormmaEvent("expand","");
 						mViewState = ViewState.EXPANDED;
 						expandInUIThread((Dimensions) data.getParcelable(EXPAND_DIMENSIONS), data.getString(EXPAND_URL),
@@ -2067,28 +2072,14 @@ public abstract class MASTAdServerViewCore extends WebView {
 			dontLoad = true;
 		}*/
 
-		View dView = ((Activity) getContext()).getWindow().findViewById(Window.ID_ANDROID_CONTENT);		
 		dimensions.width = dimensions.width == 0 ? ViewGroup.LayoutParams.FILL_PARENT : dimensions.width;
 		dimensions.height = dimensions.height == 0 ? ViewGroup.LayoutParams.FILL_PARENT : dimensions.height;
 
 		if(mExpandedFrame!=null) ((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).removeView(mExpandedFrame);
 		
 		mExpandedFrame = new RelativeLayout(getContext());
-		if(properties.useBackground) {
-			int opacity = new Float(255*properties.backgroundOpacity).intValue();
-			if(opacity < 0) opacity = 0;
-			if(opacity > 255) opacity = 255;
-			mExpandedFrame.setBackgroundColor(
-					Color.argb(opacity, 
-							Color.red(properties.backgroundColor), 
-							Color.green(properties.backgroundColor), 
-							Color.blue(properties.backgroundColor))
-					);
-		}
 		android.widget.RelativeLayout.LayoutParams adLp = new RelativeLayout.LayoutParams(
 				dimensions.width, dimensions.height);
-		//Rect rectgle= new Rect(); 
-		//((Activity) getContext()).getWindow().getDecorView().getWindowVisibleDisplayFrame(rectgle); 
 		int contentViewTop= ((Activity) getContext()).getWindow().findViewById(Window.ID_ANDROID_CONTENT).getTop(); 
 		
 		adLp.leftMargin = dimensions.x;
@@ -2099,12 +2090,14 @@ public abstract class MASTAdServerViewCore extends WebView {
 
 		if (URL == null || URL.equals("undefined")) {
 			parentView = (ViewGroup)getParent(); 
-			parentView.removeView(this);		
+			parentView.removeView(this);
+			setExpandBackgroundColor(properties, this);
 			mExpandedFrame.addView(this,adLp);
 			this.useCloseButton(!properties.useCustomClose);
 			requestFocus();
 		} else {
 			MASTAdServerView expandedView = new MASTAdServerView(getContext(), true, this);
+			setExpandBackgroundColor(properties, expandedView);
 			expandedView.setAutoCollapse(false);
 			expandedView.setVisibility(View.VISIBLE);
 			mExpandedFrame.addView(expandedView, adLp);
@@ -2143,6 +2136,20 @@ public abstract class MASTAdServerViewCore extends WebView {
 		}
 		
 		((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).addView(mExpandedFrame, lp);
+	}
+
+	private void setExpandBackgroundColor(Properties properties, View view) {
+		if(properties.useBackground) {
+			int opacity = new Float(255*properties.backgroundOpacity).intValue();
+			if(opacity < 0) opacity = 0;
+			if(opacity > 255) opacity = 255;
+			view.setBackgroundColor(
+					Color.argb(opacity, 
+							Color.red(properties.backgroundColor), 
+							Color.green(properties.backgroundColor), 
+							Color.blue(properties.backgroundColor))
+					);
+		}
 	}
 	
 	private void loadExpandedUrl(String Url, MASTAdServerViewCore parentAd, ViewGroup expandedFrame, boolean dontLoad) {

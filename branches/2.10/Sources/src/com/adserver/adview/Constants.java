@@ -3,7 +3,7 @@ package com.adserver.adview;
 public class Constants {
 
 	public static final String SDK_VERSION = "2.10";
-	public static final int DEFAULT_COLOR = 0xFFFFFF;
+	public static final int DEFAULT_COLOR = 0xFFFFFFFF;
 	
 	public static final int AD_RELOAD_PERIOD = 120000; //in milliseconds
 	public static final int AD_AUTO_DETECT_PERIOD = 1000; //in milliseconds
