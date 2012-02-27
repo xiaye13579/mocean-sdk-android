@@ -121,7 +121,7 @@ public class OrmmaDisplayController extends OrmmaController {
 	}
 
 	public void show() {
-		mOrmmaView.show();
+		mOrmmaView.showAdView();
 	}
 
 	public boolean isVisible() {

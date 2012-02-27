@@ -2046,7 +2046,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 		if(isInterstitial() && !isExpanded) InterstitialClose();
 	}
 
-	public void show() {
+	public void showAdView() {
 		mHandler.sendEmptyMessage(MESSAGE_SHOW);
 	}
 
