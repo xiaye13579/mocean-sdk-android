@@ -1903,20 +1903,24 @@ public abstract class MASTAdServerViewCore extends WebView {
 			Bundle data = msg.getData();
 			switch (msg.what) {
 				case MESSAGE_RESIZE: {
-					int x = lastX;
-					int y = lastY;
-					mViewState = ViewState.RESIZED;
-					ViewGroup.LayoutParams lp = getLayoutParams();
-					mOldHeight = lp.height;
-					mOldWidth = lp.width;
-					ormmaEvent("resize", "mOldWidth="+String.valueOf(mOldWidth)+";OldHeight="+String.valueOf(mOldWidth)+
-							   ";width="+String.valueOf(lp.width)+";height="+String.valueOf(lp.height));
-					
-					lp.height = data.getInt(RESIZE_HEIGHT, lp.height);
-					lp.width = data.getInt(RESIZE_WIDTH, lp.width);
-					requestLayout();
-					lastX = x;
-					lastY = y;
+					if (mViewState == ViewState.DEFAULT) {
+						int x = lastX;
+						int y = lastY;
+						mViewState = ViewState.RESIZED;
+						ViewGroup.LayoutParams lp = getLayoutParams();
+						mOldHeight = lp.height;
+						mOldWidth = lp.width;
+						ormmaEvent("resize", "mOldWidth="+String.valueOf(mOldWidth)+";OldHeight="+String.valueOf(mOldWidth)+
+								   ";width="+String.valueOf(lp.width)+";height="+String.valueOf(lp.height));
+						
+						lp.height = data.getInt(RESIZE_HEIGHT, lp.height);
+						lp.width = data.getInt(RESIZE_WIDTH, lp.width);
+						requestLayout();
+						lastX = x;
+						lastY = y;
+					} else {
+						ormmaEvent("error","Error was happened: (resize: Cannot resize an ad that is not in the default state.)");
+					}
 					break;
 				}				
 				case MESSAGE_CLOSE: {
@@ -1952,8 +1956,12 @@ public abstract class MASTAdServerViewCore extends WebView {
 					break;
 				}
 				case MESSAGE_HIDE: {
-					ormmaEvent("hide","");
-					setVisibility(View.INVISIBLE);
+					if (mViewState == ViewState.DEFAULT) {
+						ormmaEvent("hide","");
+						setVisibility(View.INVISIBLE);
+					} else {
+						ormmaEvent("error","Error was happened: (hide: Cannot hide an ad that is not in the default state.)");
+					}
 					break;
 				}
 				case MESSAGE_SHOW: {
@@ -1962,7 +1970,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 					break;
 				}
 				case MESSAGE_EXPAND: {
-					if (mViewState != ViewState.EXPANDED) {
+					if (mViewState == ViewState.DEFAULT) {
 						ViewGroup.LayoutParams lp = getLayoutParams();
 						mOldHeight = lp.height;
 						mOldWidth = lp.width;
@@ -1973,11 +1981,10 @@ public abstract class MASTAdServerViewCore extends WebView {
 						expandInUIThread((Dimensions) data.getParcelable(EXPAND_DIMENSIONS), data.getString(EXPAND_URL),
 								(Properties) data.getParcelable(EXPAND_PROPERTIES));
 					} else {
-						ormmaEvent("error","Expand is already executed");
+						ormmaEvent("error","Error was happened: (expand: Cannot expand an ad that is not in the default state.)");
 					}
 					break;
 				}
-	
 				case MESSAGE_PLAY_AUDIO: {
 					ormmaEvent("playaudio","");
 					handler.post(new SetupOrmmaAudioPlayer(data));
