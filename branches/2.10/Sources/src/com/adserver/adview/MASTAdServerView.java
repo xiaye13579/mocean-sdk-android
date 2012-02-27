@@ -7,6 +7,7 @@ import java.util.Locale;
 import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -103,12 +104,16 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 	protected void onDetachedFromWindow() {
 		adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_INFO, "DetachedFromWindow", "");
 		
+		if(c != null) c = null;
+		if(paint != null) paint = null;
+		if(matrix != null) matrix = null;
+		if(clear != null) clear = null;		
+		
 		if (image!=null)
 		{
 			image.recycle();
 			image = null;
-		}
-		
+		}		
 		
 		super.onDetachedFromWindow();
 	}
@@ -150,7 +155,7 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 			((ViewGroup)adServerView.getParent()).removeAllViews();
 		}
 		
-		RelativeLayout mainLayout = new RelativeLayout(context);
+		final RelativeLayout mainLayout = new RelativeLayout(context);
 		mainLayout.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
 		adServerView.setLayoutParams(new ViewGroup.LayoutParams(
@@ -191,6 +196,14 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 		}
 		
 		dialog.setContentView(mainLayout);
+		dialog.setOnDismissListener(new Dialog.OnDismissListener() {
+			
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				mainLayout.removeAllViews();
+			}
+		});		
+
 		dialog.show();
 		adServerView.update();
 	}
@@ -374,6 +387,7 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 				{
 					if (image!=null) image.recycle();
 					image = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+					adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "onDraw", "create bmp "+String.valueOf(getWidth())+"x"+String.valueOf(getHeight()));
 					c = new Canvas(image);
 					paint = new Paint();						
 					matrix = new Matrix();

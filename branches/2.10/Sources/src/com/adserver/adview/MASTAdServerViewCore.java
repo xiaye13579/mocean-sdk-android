@@ -78,11 +78,11 @@ import com.adserver.adview.ormma.util.OrmmaUtils;
  */
 public abstract class MASTAdServerViewCore extends WebView {
 	
-	static final int ID_CLOSE = 1;
+	/*static final int ID_CLOSE = 1;
 	
 	public static final int TYPE_TEXT = 1;
 	public static final int TYPE_IMAGES = 2;
-	public static final int TYPE_RICHMEDIA = 4;
+	public static final int TYPE_RICHMEDIA = 4;*/
 	
 	/**
 	 * Premium type: premium and non-premium.
@@ -820,7 +820,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 		
 		if(onActivityHandler != null) {
 			onActivityHandler.onAttachedToActivity((MASTAdServerView)this);
-		}							
+		}	
+		if(getBackgroundColor()==0) invalidate();
 	}
 	
 	@Override
@@ -1071,7 +1072,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 						adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "requestGet["+String.valueOf(RequestCounter)+"]" , url);
 						ContentManager.getInstance(this).startLoadContent(this, adserverRequest.createURL());						
 					}
-				}
+				}//else StartTimer(context, view);
 			} catch (Exception e) {
 				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "StartLoadContent.requestGet", e.getMessage());
 				interceptOnAdDownload.error((MASTAdServerView)this,e.getMessage());				

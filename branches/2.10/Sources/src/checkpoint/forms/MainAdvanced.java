@@ -3,6 +3,8 @@
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,6 +36,7 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 
 import com.adserver.adview.MASTAdLog;
 import com.adserver.adview.MASTAdServerView;
@@ -49,14 +52,24 @@ public class MainAdvanced extends Activity {
 	private Context context;
 	private LinearLayout linearLayout;
 	MASTAdServerView adserverView;
-	//byte[] array = new byte[12*1024*1024]; 
+	byte[] array = new byte[2*1024*1024]; 
+	Handler handler = new Handler();
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = this;
        
-        MASTAdLog.setDefaultLogLevel(MASTAdLog.LOG_LEVEL_3);   
+        MASTAdLog.setDefaultLogLevel(MASTAdLog.LOG_LEVEL_3);
+        
+        if(false)
+        {
+        	setContentView(R.layout.main_list);
+        	ListView lw = ((ListView)findViewById(R.id.listView));
+        	lw.setAdapter(new TestListAdapter(this));
+        	return;
+        }
+        
         setContentView(R.layout.main_advanced);
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
          
@@ -75,11 +88,12 @@ public class MainAdvanced extends Activity {
 					interstitialView.setLogLevel(MASTAdLog.LOG_LEVEL_3);
 					interstitialView.setIsShowPhoneStatusBar(true);
 					//interstitialView.useCustomClose(false);
+					interstitialView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));
 					interstitialView.show();
 	
 			}
 		});
-        adserverView = new MASTAdServerView(this);
+      /*  adserverView = new MASTAdServerView(this);
         //adserverView.setUA("test ua");
       //  adserverView.setSite(17340);
       //  adserverView.setZone(53923);
@@ -90,7 +104,7 @@ public class MainAdvanced extends Activity {
 //        adserverView.setAdserverURL("http://192.168.1.153/mocean/ad.php");
         
         //adserverView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
-        adserverView.setAdserverURL("http://192.168.1.162/orm/av.html");
+        adserverView.setAdserverURL("http://192.168.1.162/orm/exp/bool.html");
         adserverView.setSite(8061);
         adserverView.setZone(98006);
         //adserverView.setZone(50001);
@@ -127,12 +141,28 @@ public class MainAdvanced extends Activity {
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
         //adserverView.setAutoCollapse(false);
 		adserverView.update();
-        linearLayout.addView(adserverView);
+		adserverView.setBackgroundColor(0);
+        linearLayout.addView(adserverView);        
         //adserverView.setVisibility(View.VISIBLE);
         //*/
 		/*WebView wv= new WebView(this);
         wv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
         linearLayout.addView(wv);*/
+       /* (new Timer()).schedule(new TimerTask() {
+			@Override
+			public void run() {
+				handler.post(new Runnable() {
+					
+					@Override
+					public void run() {
+						linearLayout.removeView(adserverView);
+						linearLayout.addView(adserverView); 
+						adserverView.update();
+						adserverView.invalidate();
+					}
+				});				
+			}
+		}, 6000, 6000);*/
     }
 	
 	
