@@ -2129,10 +2129,11 @@ public abstract class MASTAdServerViewCore extends WebView {
 				}
 			});
 			LinearLayout ll = new LinearLayout(_context);
-			ll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+			ll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 			ll.setGravity(Gravity.RIGHT);
 			ll.addView(buttonClose);
-			expandedView.addView(ll);
+			mExpandedFrame.addView(ll, adLp);
+			expandedView.requestFocus();
 		}
 		
 		((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).addView(mExpandedFrame, lp);
