@@ -6,4 +6,10 @@
     <string name="refresh">Refresh</string>
     <string name="site">site:</string>
 	<string name="zone">zone:</string>
+	<string name="dimensions">Dimensions</string>
+    <string name="width">width: %d</string>
+    <string name="height">height: %d</string>
+	<string name="x">x: %d</string>
+	<string name="y">y: %d</string>
+	<string name="ok">OK</string>
 </resources>
