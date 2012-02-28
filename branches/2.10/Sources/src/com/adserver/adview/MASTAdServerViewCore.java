@@ -1132,6 +1132,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 			return;
 		}
 		
+		lastResponse=data;
+		
 		//isFirstTime = false;
 		if(isAutoCollapse) this.setAdVisibility(View.VISIBLE);
 		Context context = getContext();
