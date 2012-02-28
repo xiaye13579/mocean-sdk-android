@@ -111,7 +111,9 @@ public class MainAdvanced extends Activity {
         //adserverView.setTrack(true);
 
 
-        adserverView = new MASTAdServerView(this, 8061, 20249);//Default mOcean ad
+        //adserverView = new MASTAdServerView(this, 8061, 20249);//Default mOcean ad
+        adserverView = new MASTAdServerView(this, 8061, 54731);
+        
 //adserverView.setBackgroundResource(R.drawable.icon);
 //      adserverView = new AdServerView(this, 8061, 2);
 //      adserverView.setBackgroundColor(0);
@@ -143,6 +145,28 @@ public class MainAdvanced extends Activity {
 		adserverView.update();
 		adserverView.setContentAlignment(true);
 		//adserverView.setBackgroundColor(0);
+		
+		adserverView.setOnAdDownload(new MASTOnAdDownload() {
+			
+			@Override
+			public void error(MASTAdServerView sender, String error) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void end(MASTAdServerView sender) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void begin(MASTAdServerView sender) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
         linearLayout.addView(adserverView);        
         //adserverView.setVisibility(View.VISIBLE);
         //*/
