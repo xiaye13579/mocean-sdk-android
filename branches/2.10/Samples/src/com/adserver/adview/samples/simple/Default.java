@@ -52,13 +52,14 @@ public class Default extends Activity {
 				}
 			}
 		});
-        
+
         adserverView = new MASTAdServerView(this, site, zone);
         adserverView.setId(1);
         setAdLayoutParams();
         linearLayout.addView(adserverView);
+        adserverView.setContentAlignment(true);
 		adserverView.update();
-        
+		
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);
         BitmapDrawable background = (BitmapDrawable)getResources().getDrawable(R.drawable.repeat_bg);
         background.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);

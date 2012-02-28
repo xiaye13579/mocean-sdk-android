@@ -1,14 +1,11 @@
-package com.adserver.adview.samples.Callbacks;
+package com.adserver.adview.samples.simple;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,25 +16,21 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.adserver.adview.MASTAdServerView;
-import com.adserver.adview.MASTAdServerViewCore.MASTOnAdClickListener;
 import com.adserver.adview.samples.R;
 
-public class AdClickListener extends Activity {
-	private Context context;
-	private Handler handler = new Handler();
+public class DefaultText extends Activity {
 	private MASTAdServerView adserverView;
 	private LinearLayout linearLayout;
 	private EditText inpSite;
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 88269;
+	private int zone = 89888;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         setContentView(R.layout.main);
-        context = this;
         
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         inpSite = (EditText) findViewById(R.id.inpSite);
@@ -59,15 +52,14 @@ public class AdClickListener extends Activity {
 				}
 			}
 		});
-        
+
         adserverView = new MASTAdServerView(this, site, zone);
         adserverView.setId(1);
         setAdLayoutParams();
-        adserverView.setOnAdClickListener(new UserOnAdClickListener());
         linearLayout.addView(adserverView);
         adserverView.setContentAlignment(true);
 		adserverView.update();
-        
+		
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);
         BitmapDrawable background = (BitmapDrawable)getResources().getDrawable(R.drawable.repeat_bg);
         background.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
@@ -80,39 +72,6 @@ public class AdClickListener extends Activity {
 		setAdLayoutParams();
 		adserverView.update();
 	}
-	
-	String uMessage;
-    class UserOnAdClickListener implements MASTOnAdClickListener {
-
-		@Override
-		public void click(MASTAdServerView arg0, String arg1) {
-			updateUi(mUpdateResults, "Click url = "+ arg1);
-		}
-		
-		private void updateUi(Runnable mUpdateResults, String string) {
-	    	uMessage = string;
-	    	handler.post(mUpdateResults);
-		}
-    	
-    }
-    
-    private Runnable mUpdateResults = new Runnable() {
-    	public void run() {
-	    	AlertDialog.Builder builder = new AlertDialog.Builder(context)
-			.setTitle("OnAdClickListener")
-			.setMessage(uMessage);
-
-	    	DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface arg0, int arg1) {
-					arg0.dismiss();
-				}
-			};
-				
-			builder.setPositiveButton(context.getResources().getString(R.string.ok), okListener);
-			builder.create().show();
-		}
-	};
 	
 	private void setAdLayoutParams() {
 		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);

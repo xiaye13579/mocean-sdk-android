@@ -13,13 +13,16 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import com.adserver.adview.MASTAdLog;
+import com.adserver.adview.samples.advanced.Interstitial;
 
 public class ApiDemos extends ListActivity {
 
@@ -141,8 +144,16 @@ public class ApiDemos extends ListActivity {
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Map map = (Map) l.getItemAtPosition(position);
-
         Intent intent = (Intent) map.get("intent");
+        
+        if (intent.getComponent().getClassName().equals(Interstitial.class.getName())) {
+    		Rect rectgle= new Rect();
+    		getWindow().getDecorView().getWindowVisibleDisplayFrame(rectgle);
+    		int statusBarHeight = rectgle.top;		
+        	
+			intent.putExtra(Interstitial.PARAMETER_STATUS_BAR_HEIGHT, statusBarHeight);
+		}
+        
         startActivity(intent);
     }
 

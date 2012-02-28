@@ -1,10 +1,11 @@
-package com.adserver.adview.samples.Callbacks;
+package com.adserver.adview.samples.advanced;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -17,12 +18,16 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
+import android.widget.TextView;
 
 import com.adserver.adview.MASTAdServerView;
-import com.adserver.adview.MASTAdServerViewCore.MASTOnAdClickListener;
+import com.adserver.adview.MASTAdServerViewCore.MASTOnAdDownload;
 import com.adserver.adview.samples.R;
 
-public class AdClickListener extends Activity {
+public class RequestAndResponse extends Activity {
 	private Context context;
 	private Handler handler = new Handler();
 	private MASTAdServerView adserverView;
@@ -32,12 +37,24 @@ public class AdClickListener extends Activity {
 	private Button btnRefresh;
 	private int site = 19829;
 	private int zone = 88269;
+	private RadioGroup rgTypes;
+	private RadioButton rbtnRequest;
+	private RadioButton rbtnResponse;
+	private TextView lblStatistics;
+	private TextView lblTextRequestResponse;
+	private int countRequests = 0;
+	private int countResponses = 0;
+	private int countErrors = 0;
+	private Resources res;
+	private String requestText;
+	private String responseText;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-        setContentView(R.layout.main);
+        setContentView(R.layout.request_and_response);
         context = this;
+        res = getResources();
         
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         inpSite = (EditText) findViewById(R.id.inpSite);
@@ -60,14 +77,87 @@ public class AdClickListener extends Activity {
 			}
 		});
         
+        rgTypes = (RadioGroup) findViewById(R.id.rgTypes);
+        rbtnRequest = (RadioButton) findViewById(R.id.rbtnRequest);
+        rbtnRequest.setChecked(true);
+    	rbtnResponse = (RadioButton) findViewById(R.id.rbtnResponse);
+    	lblStatistics = (TextView) findViewById(R.id.lblStatistics);
+		lblStatistics.setText(res.getString(R.string.requests_responses_errors, countRequests, countResponses, countErrors));
+    	lblTextRequestResponse = (TextView) findViewById(R.id.lblTextRequestResponse);
+    	
         adserverView = new MASTAdServerView(this, site, zone);
         adserverView.setId(1);
-        setAdLayoutParams();
-        adserverView.setOnAdClickListener(new UserOnAdClickListener());
-        linearLayout.addView(adserverView);
         adserverView.setContentAlignment(true);
+        setAdLayoutParams();
+        
+        
+        adserverView.setOnAdDownload(new MASTOnAdDownload() {
+			@Override
+			public void error(final MASTAdServerView sender, final String error) {
+				handler.post(new Runnable(){
+					@Override
+					public void run() {
+						countErrors++;
+						lblStatistics.setText(res.getString(R.string.requests_responses_errors, countRequests, countResponses, countErrors));
+						responseText = sender.GetLastResponse();
+
+						if (rbtnResponse.isChecked()) {
+							lblTextRequestResponse.setText(responseText);
+						}
+						
+				    	AlertDialog.Builder builder = new AlertDialog.Builder(context)
+						.setTitle(R.string.error)
+						.setMessage(error);
+
+				    	DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface arg0, int arg1) {
+								arg0.dismiss();
+							}
+						};
+							
+						builder.setPositiveButton(context.getResources().getString(R.string.ok), okListener);
+						builder.create().show();
+					}
+				});
+			}
+			
+			@Override
+			public void end(MASTAdServerView sender) {
+				countResponses++;
+				lblStatistics.setText(res.getString(R.string.requests_responses_errors, countRequests, countResponses, countErrors));
+				responseText = sender.GetLastResponse();
+				requestText = sender.GetLastRequest();
+
+				if (rbtnRequest.isChecked()) {
+					lblTextRequestResponse.setText(requestText);
+				}
+				if (rbtnResponse.isChecked()) {
+					lblTextRequestResponse.setText(responseText);
+				}
+			}
+			
+			@Override
+			public void begin(MASTAdServerView sender) {
+				countRequests++;
+				lblStatistics.setText(res.getString(R.string.requests_responses_errors, countRequests, countResponses, countErrors));
+			}
+		});        
+        
+        linearLayout.addView(adserverView);
 		adserverView.update();
         
+		rgTypes.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				if (checkedId == R.id.rbtnRequest) {
+					lblTextRequestResponse.setText(requestText);
+				} else {
+					lblTextRequestResponse.setText(responseText);
+				}
+			}
+		});
+		
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);
         BitmapDrawable background = (BitmapDrawable)getResources().getDrawable(R.drawable.repeat_bg);
         background.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
@@ -80,39 +170,6 @@ public class AdClickListener extends Activity {
 		setAdLayoutParams();
 		adserverView.update();
 	}
-	
-	String uMessage;
-    class UserOnAdClickListener implements MASTOnAdClickListener {
-
-		@Override
-		public void click(MASTAdServerView arg0, String arg1) {
-			updateUi(mUpdateResults, "Click url = "+ arg1);
-		}
-		
-		private void updateUi(Runnable mUpdateResults, String string) {
-	    	uMessage = string;
-	    	handler.post(mUpdateResults);
-		}
-    	
-    }
-    
-    private Runnable mUpdateResults = new Runnable() {
-    	public void run() {
-	    	AlertDialog.Builder builder = new AlertDialog.Builder(context)
-			.setTitle("OnAdClickListener")
-			.setMessage(uMessage);
-
-	    	DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface arg0, int arg1) {
-					arg0.dismiss();
-				}
-			};
-				
-			builder.setPositiveButton(context.getResources().getString(R.string.ok), okListener);
-			builder.create().show();
-		}
-	};
 	
 	private void setAdLayoutParams() {
 		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);

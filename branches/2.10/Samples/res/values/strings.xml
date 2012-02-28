@@ -12,4 +12,9 @@
 	<string name="x">x: %d</string>
 	<string name="y">y: %d</string>
 	<string name="ok">OK</string>
+	<string name="show">Show</string>
+	<string name="requests_responses_errors">Request: %1$d   Content: %2$d   Errors: %3$d</string>
+	<string name="request">Request</string>
+	<string name="response">Response</string>
+	<string name="error">Error</string>
 </resources>

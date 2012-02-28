@@ -1,4 +1,4 @@
-package com.adserver.adview.samples.simple;
+package com.adserver.adview.samples.advanced;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -68,6 +68,7 @@ public class Dimensions extends Activity {
         adserverView.setId(1);
         setAdLayoutParams();
         linearLayout.addView(adserverView);
+        adserverView.setContentAlignment(true);
 		adserverView.update();
         
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);

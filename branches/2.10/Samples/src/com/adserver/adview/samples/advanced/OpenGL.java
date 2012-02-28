@@ -1,7 +1,6 @@
 package com.adserver.adview.samples.advanced;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
@@ -14,9 +13,6 @@ import com.adserver.adview.MASTAdServerView;
 import com.adserver.adview.samples.ApiDemos;
 
 public class OpenGL extends Activity {
-    /** Called when the activity is first created. */
-	private Context context;
-	private LinearLayout linearLayout;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,7 +25,7 @@ public class OpenGL extends Activity {
         mGLView.setRenderer(new TriangleRenderer(this));
         frame.addView(mGLView);
         
-        MASTAdServerView adserverView = new MASTAdServerView(this,8061,20249);
+        MASTAdServerView adserverView = new MASTAdServerView(this, 19829, 88269);
         adserverView.setMinSizeX(320);
 	    adserverView.setMinSizeY(50);
 	    adserverView.setMaxSizeX(320);
@@ -37,19 +33,11 @@ public class OpenGL extends Activity {
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
         frame.addView(adserverView);
+        adserverView.setContentAlignment(true);
+        adserverView.update();
         base.addView(frame);
         
         setContentView(base);
-        
-        /*setContentView(R.layout.main);
-        context = this;
-        linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
-        
-         
-        MASTAdServerView adserverView = new MASTAdServerView(this,"8061","20249");
-        adserverView.setId(1);
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));
-		linearLayout.addView(adserverView);*/
     }
     
 	@Override

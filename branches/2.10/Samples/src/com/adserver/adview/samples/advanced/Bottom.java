@@ -1,4 +1,4 @@
-package com.adserver.adview.samples.simple;
+package com.adserver.adview.samples.advanced;
 
 import android.app.Activity;
 import android.content.Context;
@@ -57,6 +57,7 @@ public class Bottom extends Activity {
         adserverView.setId(1);
         setAdLayoutParams();
         linearLayout.addView(adserverView);
+        adserverView.setContentAlignment(true);
 		adserverView.update();
         
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);

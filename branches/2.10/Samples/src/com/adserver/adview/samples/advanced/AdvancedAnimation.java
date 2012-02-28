@@ -1,8 +1,12 @@
 package com.adserver.adview.samples.advanced;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -15,23 +19,23 @@ import android.widget.LinearLayout;
 
 import com.adserver.adview.MASTAdServerView;
 import com.adserver.adview.MASTAdServerViewCore.MASTOnAdDownload;
-import com.adserver.adview.samples.ApiDemos;
 import com.adserver.adview.samples.R;
 
-public class AnimAd extends Activity {
+public class AdvancedAnimation extends Activity {
+	private MASTAdServerView adserverView;
 	private LinearLayout linearLayout;
 	private EditText inpSite;
 	private EditText inpZone;
 	private Button btnRefresh;
-	private MASTAdServerView adserverView;
-	private int site = 8061;
-	private int zone = 20249;
+	private Animation animation;
+	private int site = 19829;
+	private int zone = 88269;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-        setContentView(R.layout.animation_ad);
-
+        setContentView(R.layout.main);
+        
         linearLayout = (LinearLayout) findViewById(R.id.frameAdContent);
         inpSite = (EditText) findViewById(R.id.inpSite);
         inpSite.setText(String.valueOf(site));
@@ -52,19 +56,21 @@ public class AnimAd extends Activity {
 				}
 			}
 		});
-        
-        adserverView = new MASTAdServerView(this, site, zone);
-        adserverView.setId(1);
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
-        
-        Animation animation = new TranslateAnimation(
+
+        animation = new TranslateAnimation(
 	            Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
 	            Animation.RELATIVE_TO_SELF, -1.0f, Animation.RELATIVE_TO_SELF, -1.0f
 	        );
         animation.setDuration(Integer.MAX_VALUE);
         animation.setFillAfter(true);
-        adserverView.startAnimation(animation);		
         
+        adserverView = new MASTAdServerView(this, site, zone);
+        adserverView.setId(1);
+        setAdLayoutParams();
+        linearLayout.addView(adserverView);
+        adserverView.setContentAlignment(true);
+		adserverView.update();
+		
         adserverView.setOnAdDownload(new MASTOnAdDownload() {
 			@Override
 			public void error(MASTAdServerView sender, String arg0) {
@@ -83,16 +89,54 @@ public class AnimAd extends Activity {
 			
 			@Override
 			public void begin(MASTAdServerView sender) {
-				
+		        adserverView.startAnimation(animation);		
 			}
 		});
         
-        linearLayout.addView(adserverView);         
+        
+        LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);
+        BitmapDrawable background = (BitmapDrawable)getResources().getDrawable(R.drawable.repeat_bg);
+        background.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+        frameMain.setBackgroundDrawable(background);
     }
     
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
+		setAdLayoutParams();
+		adserverView.update();
 	}
-    
+	
+	private void setAdLayoutParams() {
+		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+		DisplayMetrics metrics = new DisplayMetrics();
+		windowManager.getDefaultDisplay().getMetrics(metrics);
+		int height = 50;
+
+		int maxSize = metrics.heightPixels;
+		if (maxSize < metrics.widthPixels) {
+			maxSize = metrics.widthPixels;
+		}
+		
+		if (maxSize <= 480) {
+			height = 50;
+		} else if ((maxSize > 480) && (maxSize <= 800)) {
+			height = 100;
+		} else if (maxSize > 800) {
+			height = 120;
+		}
+		
+		ViewGroup.LayoutParams lp = adserverView.getLayoutParams();
+		if (lp == null) {
+			lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
+			adserverView.setLayoutParams(lp);
+		}
+		
+        adserverView.setMinSizeX(metrics.widthPixels);
+        adserverView.setMinSizeY(height);
+        adserverView.setMaxSizeX(metrics.widthPixels);
+        adserverView.setMaxSizeY(height);
+		adserverView.requestLayout();
+	}
+	
 }
