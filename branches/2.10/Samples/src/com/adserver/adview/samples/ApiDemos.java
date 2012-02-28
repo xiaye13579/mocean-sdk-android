@@ -22,7 +22,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import com.adserver.adview.MASTAdLog;
-import com.adserver.adview.samples.advanced.Interstitial;
+import com.adserver.adview.samples.simple.Interstitial;
 
 public class ApiDemos extends ListActivity {
 

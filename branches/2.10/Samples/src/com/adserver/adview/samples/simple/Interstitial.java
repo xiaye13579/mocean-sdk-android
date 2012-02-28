@@ -1,4 +1,4 @@
-package com.adserver.adview.samples.advanced;
+package com.adserver.adview.samples.simple;
 
 import android.app.Activity;
 import android.content.Context;
