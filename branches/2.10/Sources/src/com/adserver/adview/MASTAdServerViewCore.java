@@ -1136,7 +1136,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 		}
 		
 		//isFirstTime = false;
-		if(isAutoCollapse) this.setAdVisibility(View.VISIBLE);
+		//if(isAutoCollapse) this.setAdVisibility(View.VISIBLE);
 		Context context = getContext();
 		
 		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "requestGet result["+String.valueOf(RequestCounter)+"]", data);
@@ -1711,6 +1711,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			((MASTAdServerViewCore) view).onPageFinished();
+			
+			if(isAutoCollapse) setAdVisibility(View.VISIBLE);
 			
 			if(adDownload != null) {
 				adDownload.end((MASTAdServerView)view);

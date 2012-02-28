@@ -80,7 +80,7 @@
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Advanced/Dimensions" 
+        <activity android:label="Advanced/Dimensions (use menu)" 
             android:name=".advanced.Dimensions"
 			android:screenOrientation="sensor"
 			android:configChanges="keyboardHidden|orientation">
@@ -125,7 +125,7 @@
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Advanced/OpenGL" 
+        <activity android:label="Advanced/OpenGL, Content Alignment" 
             android:name=".advanced.OpenGL"
 			android:screenOrientation="sensor"
 			android:configChanges="keyboardHidden|orientation">

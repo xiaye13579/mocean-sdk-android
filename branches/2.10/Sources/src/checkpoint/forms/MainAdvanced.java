@@ -111,8 +111,8 @@ public class MainAdvanced extends Activity {
         //adserverView.setTrack(true);
 
 
-        //adserverView = new MASTAdServerView(this, 8061, 20249);//Default mOcean ad
-        adserverView = new MASTAdServerView(this, 8061, 54731);
+        adserverView = new MASTAdServerView(this, 8061, 20249);//Default mOcean ad
+        //adserverView = new MASTAdServerView(this, 8061, 54731);
         
 //adserverView.setBackgroundResource(R.drawable.icon);
 //      adserverView = new AdServerView(this, 8061, 2);
