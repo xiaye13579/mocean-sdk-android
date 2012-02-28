@@ -16,6 +16,14 @@ public class Constants {
 
 	//public static final String STR_RESPONSE_ERROR = "AdserverViewPrefs";
 	
-	public static final String STR_IMPRESSION_NOT_SEND  = "Impression is not sent";
+	public static final String STR_IMPRESSION_NOT_SEND  = "Impression is not sent";	
+	public static final String STR_ADVETTISER_ID_INVALID =  "advertiserId=%s (valid: int>0)";
+	public static final String STR_INVALID_PARAM = "invalid param";
+	public static final String STR_EMPTY_SERVER_RESPONS = "empty servb er respons";
+	
+	public static final String STR_ORMMA_ERROR_RESIZE = "Error was happened: (resize: Cannot resize an ad that is not in the default state.)";
+	public static final String STR_ORMMA_ERROR_HIDE = "Error was happened: (hide: Cannot hide an ad that is not in the default state.)";
+	public static final String STR_ORMMA_ERROR_EXPAND = "Error was happened: (expand: Cannot expand an ad that is not in the default state.)";
+	public static final String STR_ORMMA_ERROR_OPEN_MAP = "Error: no Google Api or error in parameters";
 	
 }

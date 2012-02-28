@@ -502,7 +502,9 @@ public abstract class MASTAdServerViewCore extends WebView {
 			if(advertiserId>0)
 				this.advertiserId = advertiserId;
 			else
-				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, AdserverRequest.INVALID_PARAM_TITLE,"advertiserId="+advertiserId.toString()+" (valid: int>0)");
+				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, Constants.STR_INVALID_PARAM,
+						String.format(Constants.STR_ADVETTISER_ID_INVALID, advertiserId.toString()));
+						//"advertiserId="+advertiserId.toString()+" (valid: int>0)");
 		}
 	}
 
@@ -1198,7 +1200,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 				//if(isShownView)
 				{
 					InterstitialClose();
-					if(adDownload!= null) adDownload.error((MASTAdServerView)this,"empty server respons");
+					if(adDownload!= null) adDownload.error((MASTAdServerView)this,Constants.STR_EMPTY_SERVER_RESPONS);
 				}
 				StartTimer(context,view);
 			}
@@ -1920,7 +1922,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 						lastX = x;
 						lastY = y;
 					} else {
-						ormmaEvent("error","Error was happened: (resize: Cannot resize an ad that is not in the default state.)");
+						ormmaEvent("error",Constants.STR_ORMMA_ERROR_RESIZE);
 					}
 					break;
 				}				
@@ -1961,7 +1963,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 						ormmaEvent("hide","");
 						setVisibility(View.INVISIBLE);
 					} else {
-						ormmaEvent("error","Error was happened: (hide: Cannot hide an ad that is not in the default state.)");
+						ormmaEvent("error",Constants.STR_ORMMA_ERROR_HIDE);
 					}
 					break;
 				}
@@ -1982,7 +1984,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 						expandInUIThread((Dimensions) data.getParcelable(EXPAND_DIMENSIONS), data.getString(EXPAND_URL),
 								(Properties) data.getParcelable(EXPAND_PROPERTIES));
 					} else {
-						ormmaEvent("error","Error was happened: (expand: Cannot expand an ad that is not in the default state.)");
+						ormmaEvent("error",Constants.STR_ORMMA_ERROR_EXPAND);
 					}
 					break;
 				}
@@ -3181,8 +3183,9 @@ public abstract class MASTAdServerViewCore extends WebView {
 				getContext().startActivity(mapIntent);
 				
 			} catch (ActivityNotFoundException e) {
-				e.printStackTrace();
-				Toast.makeText(getContext(), "Error: no Google Api or error in parameters", Toast.LENGTH_LONG).show();
+				//e.printStackTrace();
+				//Toast.makeText(getContext(), Constants.STR_ORMMA_ERROR_OPEN_MAP, Toast.LENGTH_LONG).show();
+				adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_ERROR, "openMap", Constants.STR_ORMMA_ERROR_OPEN_MAP);
 			}
 	}
 }
