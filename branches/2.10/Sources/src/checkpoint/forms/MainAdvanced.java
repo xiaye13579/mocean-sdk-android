@@ -144,6 +144,7 @@ public class MainAdvanced extends Activity {
         //adserverView.setAutoCollapse(false);
 		adserverView.update();
 		adserverView.setContentAlignment(true);
+		adserverView.setScaleOnDPI(true);
 		//adserverView.setBackgroundColor(0);
 		
 		adserverView.setOnAdDownload(new MASTOnAdDownload() {

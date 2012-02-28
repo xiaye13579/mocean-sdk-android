@@ -199,6 +199,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 	private int lastX;
 	private int lastY;
 	private ViewGroup parentView = null;
+	private boolean scaleOnDPI = false;
 	
 	public MASTAdLog getLog()
 	{
@@ -263,6 +264,18 @@ public abstract class MASTAdServerViewCore extends WebView {
 		AutoDetectParameters(context);
 		initialize(context, null);
 		mViewState = ViewState.EXPANDED;
+	}
+	
+	@java.lang.Deprecated
+	public void setScaleOnDPI(boolean scaleOnDPI)
+	{
+		this.scaleOnDPI = scaleOnDPI;
+	}
+	
+	@java.lang.Deprecated
+	public boolean getScaleOnDPI()
+	{
+		return scaleOnDPI;
 	}
 	
 	public void setAd_Call_Timeout(int timeout)
@@ -1195,26 +1208,30 @@ public abstract class MASTAdServerViewCore extends WebView {
 								handler.post(new SetupVideoAction(context, view, videoUrl, clickUrl));
 								StartTimer(context,view);
 							} else {
+								String dataOut="";
 								if(isContentAligned)
 								{
-									data = "<html><head>" +
+									
+									dataOut = "<html><head>" +
 											"<style>*{margin:0;padding:0}</style>"+
-											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
-											"<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>" +
-											"<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;\">"+
+											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>";
+									if(!scaleOnDPI) dataOut+="<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/>";
+									dataOut+="</head><body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;\">"+
 											data+"</body>";
 
 											//"<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
 												
 								}else
-									data = "<html><head>" +
+								{
+									dataOut = "<html><head>" +
 											"<style>*{margin:0;padding:0}</style>"+
-											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
-											"<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>" +
-											"<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">"+data+"</body></html>";
+											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>";
+									if(!scaleOnDPI) dataOut+="<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/>";
+									dataOut+="</head><body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">"+data+"</body></html>";
+								}
 								
-								mContent = data;
-								view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
+								mContent = dataOut;
+								view.loadDataWithBaseURL(null, dataOut, "text/html", "UTF-8", null);
 								handler.post(new Runnable() {
 									
 									@Override
