@@ -205,7 +205,7 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 		});		
 
 		dialog.show();
-		adServerView.update();
+		//adServerView.update();
 	}
 	
 	public void setUA(String ua)

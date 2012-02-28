@@ -296,7 +296,8 @@ public class OrmmaDisplayController extends OrmmaController {
 		if(!URLUtil.isValidUrl(url)){
 //			mOrmmaView.raiseError("Invalid url", "playAudio");
 		}else{
-			mOrmmaView.playAudio(url, autoPlay, controls, loop, position, startStyle, stopStyle);
+			//mOrmmaView.playAudio(url, autoPlay, controls, loop, position, startStyle, stopStyle);
+			mOrmmaView.playAudio(url, true, true, false, false, "fullscreen", "exit");
 		}
 		
 	}

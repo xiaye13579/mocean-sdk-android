@@ -2963,6 +2963,13 @@ public abstract class MASTAdServerViewCore extends WebView {
 					((ViewGroup) ((Activity) getContext()).getWindow().getDecorView())
 							.addView(mediaPlayerFrame, mediaPlayerLayoutParams);
 					
+					mediaPlayerFrame.setOnTouchListener(new View.OnTouchListener() {						
+						@Override
+						public boolean onTouch(View v, MotionEvent event) {
+							return true;
+						}
+					});
+					
 					videoPlayer.playVideo();
 					isShowMediaPlayerFrame = true;
 				}
@@ -3146,6 +3153,13 @@ public abstract class MASTAdServerViewCore extends WebView {
 					
 					((ViewGroup) ((Activity) getContext()).getWindow().getDecorView())
 							.addView(mediaPlayerFrame, mediaPlayerLayoutParams);
+					
+					mediaPlayerFrame.setOnTouchListener(new View.OnTouchListener() {						
+						@Override
+						public boolean onTouch(View v, MotionEvent event) {
+							return true;
+						}
+					});
 					
 					audioPlayer.playAudio();
 					isShowMediaPlayerFrame = true;
