@@ -31,13 +31,13 @@ import android.view.View;
 import android.view.Window;
 import android.webkit.URLUtil;
 
-import com.adserver.adview.AdServerViewCore;
+import com.adserver.adview.MASTAdServerViewCore;
 import com.adserver.adview.ormma.util.FileComparatorByDate;
 
 public class OrmmaAssetController extends OrmmaController {
 	private static final String ASSETS_DIRECTORY = "ormma_assets";
 
-	public OrmmaAssetController(AdServerViewCore adView, Context c) {
+	public OrmmaAssetController(MASTAdServerViewCore adView, Context c) {
 		super(adView, c);
 	}
 

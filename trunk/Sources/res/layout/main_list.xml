@@ -3,13 +3,14 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="@drawable/test_banner"
+    android:id="@+id/main"
 >
 
-	<com.adserver.adview.AdServerView 
-	    android:layout_width="fill_parent" 
-	    android:layout_height="50dip"
-		site="8061" 
-		zone="20249" 	
-	   	/>
-	 
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+    </ListView>
+	
 </LinearLayout>

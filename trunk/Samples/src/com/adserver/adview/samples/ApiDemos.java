@@ -8,17 +8,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.adserver.adview.AdLog;
-
-import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import com.adserver.adview.MASTAdLog;
+import com.adserver.adview.samples.simple.Interstitial;
 
 public class ApiDemos extends ListActivity {
 
@@ -27,10 +31,11 @@ public class ApiDemos extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         
         Intent intent = getIntent();
         
-        AdLog.setDefaultLogLevel(AdLog.LOG_LEVEL_3);
+        MASTAdLog.setDefaultLogLevel(MASTAdLog.LOG_LEVEL_3);
         String path = intent.getStringExtra("com.adserver.adview.sample.Path");
         
         if (path == null) {
@@ -45,6 +50,11 @@ public class ApiDemos extends ListActivity {
         getListView().setTextFilterEnabled(true);
     }
 
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+	}
+    
     protected List getData(String prefix) {
         List<Map> myData = new ArrayList<Map>();
 
@@ -134,8 +144,16 @@ public class ApiDemos extends ListActivity {
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Map map = (Map) l.getItemAtPosition(position);
-
         Intent intent = (Intent) map.get("intent");
+        
+        if (intent.getComponent().getClassName().equals(Interstitial.class.getName())) {
+    		Rect rectgle= new Rect();
+    		getWindow().getDecorView().getWindowVisibleDisplayFrame(rectgle);
+    		int statusBarHeight = rectgle.top;		
+        	
+			intent.putExtra(Interstitial.PARAMETER_STATUS_BAR_HEIGHT, statusBarHeight);
+		}
+        
         startActivity(intent);
     }
 

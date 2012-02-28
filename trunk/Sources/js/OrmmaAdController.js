@@ -54,10 +54,10 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
         	"height" : 0,
         	"useCustomClose" :  false,
             "lockOrientation" : false,
-			"use-background" : false,
-			"background-color" : "#FFFFFF",
-			"background-opacity" : 1.0,
-			"is-modal" : true},
+			"useBackground" : false,
+			"backgroundColor" : "#FFFFFF",
+			"backgroundOpacity" : 1.0,
+			"isModal" : true},
 
 		shakeProperties : {
 			"interval" : "10",
@@ -69,7 +69,7 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		},
 			
 		state : ORMMA_STATE_DEFAULT,	
-		lastState : ORMMA_STATE_DEFAULT,	
+		lastState : ORMMA_STATE_DEFAULT,
 			
 		/**
 		 * Use this method to subscribe a specific handler method to a specific
@@ -148,6 +148,10 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 	        	_startOrientationListener();
 	        }        
 
+			if (evt == ORMMA_EVENT_SCREEN_CHANGE){
+	        	_startOrientationListener();
+	        }        
+
 			if (evt == ORMMA_EVENT_NETWORK_CHANGE){
 	        	_startNetworkListener();
 	        }        
@@ -183,6 +187,10 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 			if (evt == ORMMA_EVENT_ORIENTATION_CHANGE){
 	        	_stopOrientationListener();
 	        }  
+
+			if (evt == ORMMA_EVENT_SCREEN_CHANGE){
+	        	_stopOrientationListener();
+	        }  
 	              
 			if (evt == ORMMA_EVENT_NETWORK_CHANGE){
 	        	_stopNetworkListener();
@@ -209,17 +217,15 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 
 		expand : function (URL){
 			//if(this.state == ORMMA_STATE_DEFAULT) {
-			 	if(URL==undefined)
-				{
-					_resize(this.getExpandProperties().width,this.getExpandProperties().height);
-				}
-				else
+			 	//if(URL==undefined)
+				//{
+				//	_resize(this.getExpandProperties().width,this.getExpandProperties().height);
+				//}
+				//else
 				{
 					_expand(URL, this.getExpandProperties());					
 				}
-				var data = { // dimensions : dimensions,
-							 properties : this.getExpandProperties() };
-				fireEvent(ORMMA_EVENT_SIZE_CHANGE, data);
+				
 				fireEvent(ORMMA_EVENT_STATE_CHANGE, ORMMA_STATE_EXPANDED);				
 			//}else{
 			//	ormma.fireError('expand','Can only expand from the default state');
@@ -234,9 +240,6 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
         resize : function (width, height) {
         	//if(this.state == ORMMA_STATE_DEFAULT) {
 	            _resize(width, height);
-	            var data = { dimensions : {width : width, height: height},
-						 properties : this.expandProperties };
-	            fireEvent(ORMMA_EVENT_SIZE_CHANGE, data);
 				fireEvent(ORMMA_EVENT_STATE_CHANGE, ORMMA_STATE_RESIZED);
             //}else
             //{
@@ -340,6 +343,7 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 
 		gotOrientationChange: function(change){
 			fireEvent(ORMMA_EVENT_ORIENTATION_CHANGE, change);
+			fireEvent(ORMMA_EVENT_SCREEN_CHANGE, ormma.getScreenSize());
 		},
 
 		gotNetworkChange: function(change){
@@ -377,7 +381,14 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		},
 
 		setShakeProperties: function(properties) {
-			this.shakeProperties = properties;
+	       var fields = ['interval', 'intensity'];
+	
+	       for (f in fields) {
+	           var field = fields[f];
+	           if (properties[field] !== undefined) {
+	               this.shakeProperties[field] = properties[field];
+	           }
+	       }
 		},
 
 		getMaxSize: function() {
@@ -405,20 +416,20 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		},
 		
 		getExpandProperties: function() {
-			var ms = this.getMaxSize();
-			if (this.expandProperties.width <= 0 || this.expandProperties.width == undefined ) 
-			{
-			   this.expandProperties.width = ms.width;
-			}
-			if (this.expandProperties.height <= 0|| this.expandProperties.height == undefined ) 
-			{
-			   this.expandProperties.height = ms.height; 
-			}
 			return this.expandProperties;
 		},
 
 		setExpandProperties: function(properties) {
-			this.expandProperties = properties;
+	       var fields = ['width', 'height', 'useCustomClose', 'isModal',
+	           'lockOrientation', 'useBackground', 'backgroundColor',
+	           'backgroundOpacity'];
+	
+	       for (f in fields) {
+	           var field = fields[f];
+	           if (properties[field] !== undefined) {
+	               this.expandProperties[field] = properties[field];
+	           }
+	       }
 		},
 		
 		ready: function(){
@@ -510,9 +521,12 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		},
 		useCustomClose: function(flag)
 		{
-			_useCustomClose(flag);
-		}
-		
+			ormma.setExpandProperties({"useCustomClose" : flag});
+		}, 
+	    fireEvent: function(event, args) 
+	    {
+	    	fireEvent (event, args)
+	    }
 	};
     /**
      * The private methods
@@ -572,6 +586,8 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
                 	(Ormma.events[event].listeners[i])();
             	} else if(event == ORMMA_EVENT_ORIENTATION_CHANGE) {
                 	(Ormma.events[event].listeners[i])(args);
+            	} else if(event == ORMMA_EVENT_SCREEN_CHANGE) {
+                	(Ormma.events[event].listeners[i])(args.width, args.height);
             	} else if(event == ORMMA_EVENT_LOCATION_CHANGE) {
                 	(Ormma.events[event].listeners[i])(args.lat, args.lon, args.acc);
             	} else if(event == ORMMA_EVENT_NETWORK_CHANGE) {

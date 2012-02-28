@@ -19,8 +19,8 @@ import android.view.WindowManager;
 import android.webkit.URLUtil;
 
 
-import com.adserver.adview.AdLog;
-import com.adserver.adview.AdServerViewCore;
+import com.adserver.adview.MASTAdLog;
+import com.adserver.adview.MASTAdServerViewCore;
 import com.adserver.adview.ormma.util.OrmmaConfigurationBroadcastReceiver;
 
 public class OrmmaDisplayController extends OrmmaController {
@@ -32,7 +32,7 @@ public class OrmmaDisplayController extends OrmmaController {
 	private Dimensions defaultPosition;
 	private static final String LOG_TAG = "OrmmaDisplayController";
 
-	public OrmmaDisplayController(AdServerViewCore adView, Context c) {
+	public OrmmaDisplayController(MASTAdServerViewCore adView, Context c) {
 		super(adView, c);
 		DisplayMetrics metrics = new DisplayMetrics();
 		((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -45,24 +45,30 @@ public class OrmmaDisplayController extends OrmmaController {
 		return mOrmmaView.isInterstitial() ? "interstitial" : "inline";
 	}
 	
-	public void useCustomClose(boolean flag)
-	{
-		mOrmmaView.useCustomClose(flag);
-	}
-	
 	public void getState() {
 		mOrmmaView.getState();
 	}
 	
 	public void resize(int width, int height) {
-		/*DisplayMetrics metrics = new DisplayMetrics();
-		mWindowManager.getDefaultDisplay().getMetrics(metrics);
+		int maxSizeWidth = width;
+		int maxSizeHeight = height;
 
-		if ((height > metrics.heightPixels) || (width > metrics.widthPixels)) {
-			mOrmmaView.injectJavaScript("Ormma.fireError(\"resize\",\"Maximum size exceeded\")");
-		} else*/ {
-			mOrmmaView.resize((int)(/*mDensity*/width/*mDensity*/), (int)(/*mDensity*/height/*mDensity*/));
+		try {
+			String maxSize = getMaxSize();
+			Dimensions properties = (Dimensions) getFromJSON(new JSONObject(maxSize), Dimensions.class);
+			maxSizeWidth = properties.width;
+			maxSizeHeight = properties.height;
+			
+			if (width > maxSizeWidth) {
+				width = maxSizeWidth;
+			}
+			if (height > maxSizeHeight) {
+				height = maxSizeHeight;
+			}
+		} catch (Exception e) {
 		}
+		
+		mOrmmaView.resize((int)(/*mDensity*/width/*mDensity*/), (int)(/*mDensity*/height/*mDensity*/));
 	}
 
 	public void open(String url) {
@@ -115,7 +121,7 @@ public class OrmmaDisplayController extends OrmmaController {
 	}
 
 	public void show() {
-		mOrmmaView.show();
+		mOrmmaView.showAdView();
 	}
 
 	public boolean isVisible() {
@@ -214,7 +220,7 @@ public class OrmmaDisplayController extends OrmmaController {
 		{
 			mContext.registerReceiver(mConfigurationBroadCastReceiver, mConfigurationFilter);
 		}catch (Exception e) {
-			mOrmmaView.getLog().log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "startOrientationListener", e.getMessage());
+			mOrmmaView.getLog().log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "startOrientationListener", e.getMessage());
 		}
 	}
 
@@ -270,7 +276,8 @@ public class OrmmaDisplayController extends OrmmaController {
 			Log.d(LOG_TAG, "invalid url: " + url);
 //			mOrmmaView.raiseError("Invalid url", "playVideo");
 		}else{
-			mOrmmaView.playVideo(url, audioMuted, autoPlay, controls, loop, d, startStyle, stopStyle);
+			//mOrmmaView.playVideo(url, audioMuted, autoPlay, controls, loop, d, startStyle, stopStyle);
+			mOrmmaView.playVideo(url, false, true, true, false, null, "fullscreen", "exit");
 		}
 	}
 	
@@ -289,7 +296,8 @@ public class OrmmaDisplayController extends OrmmaController {
 		if(!URLUtil.isValidUrl(url)){
 //			mOrmmaView.raiseError("Invalid url", "playAudio");
 		}else{
-			mOrmmaView.playAudio(url, autoPlay, controls, loop, position, startStyle, stopStyle);
+			//mOrmmaView.playAudio(url, autoPlay, controls, loop, position, startStyle, stopStyle);
+			mOrmmaView.playAudio(url, true, true, false, false, "fullscreen", "exit");
 		}
 		
 	}

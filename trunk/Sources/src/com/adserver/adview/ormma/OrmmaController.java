@@ -11,13 +11,13 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.adserver.adview.AdServerViewCore;
+import com.adserver.adview.MASTAdServerViewCore;
 import com.adserver.adview.ormma.util.NavigationStringEnum;
 import com.adserver.adview.ormma.util.TransitionStringEnum;
 
 public class OrmmaController {
 
-	protected AdServerViewCore mOrmmaView;
+	protected MASTAdServerViewCore mOrmmaView;
 
 	private static final String STRING_TYPE = "class java.lang.String";
 	private static final String INT_TYPE = "int";
@@ -68,10 +68,10 @@ public class OrmmaController {
 		public Properties() {
 			transition = TransitionStringEnum.DEFAULT;
 			navigation = NavigationStringEnum.NONE;
-			use_background = false;
-			background_color = 0;
-			background_opacity = 0;
-			is_modal = true;
+			useBackground = false;
+			backgroundColor = 0;
+			backgroundOpacity = 0;
+			isModal = true;
 			width=0;
 			height=0;
 			useCustomClose = false;
@@ -93,13 +93,13 @@ public class OrmmaController {
 		public int height;
 		public boolean useCustomClose;
 		public boolean lockOrientation;
-		public boolean use_background;
-		public int background_color;
-		public float background_opacity;
-		public boolean is_modal;
+		public boolean useBackground;
+		public int backgroundColor;
+		public float backgroundOpacity;
+		public boolean isModal;
 	}
 
-	public OrmmaController(AdServerViewCore adView, Context context) {
+	public OrmmaController(MASTAdServerViewCore adView, Context context) {
 		mOrmmaView = adView;
 		mContext = context;
 	}
