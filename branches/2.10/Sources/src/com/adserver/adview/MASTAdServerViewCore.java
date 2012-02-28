@@ -1153,8 +1153,38 @@ public abstract class MASTAdServerViewCore extends WebView {
 					//if(isRefreshAd || isFirstTime) 
 					{
 						//handler.post(new RemoveAllChildViews(view));
-						//String externalCampaignData = Utils.scrapeIgnoreCase(data, "<external_campaign", "</external_campaign>");
-	
+						String externalCampaignData = Utils.scrapeIgnoreCase(data, "<external_campaign", "</external_campaign>");
+						if((externalCampaignData != null) && (externalCampaignData.length() > 0)) {
+							String type = Utils.scrapeIgnoreCase(externalCampaignData, "<type>", "</type>");
+							String campaignId = Utils.scrapeIgnoreCase(externalCampaignData, "<campaign_id>", "</campaign_id>");
+							String trackUrl = Utils.scrapeIgnoreCase(externalCampaignData, "<track_url>", "</track_url>");
+							String externalParams = Utils.scrapeIgnoreCase(externalCampaignData, "<external_params>", "</external_params>");
+							//interceptOnAdDownload.SetCampaingId(campaignId);
+							
+							if(onThirdPartyRequest!=null)
+							{
+								try
+								{
+									HashMap<String, String> params = new HashMap<String, String>();
+									params.put("type", type);
+									params.put("campaignId", campaignId);
+									params.put("trackUrl", trackUrl);
+									String[] args = externalParams.split("</param>");
+									for(int x=0;x<args.length;x++)
+									{
+										String[] vals = args[x].split("\">");
+										String val = vals.length>1 ? vals[1] : "";
+										String arg = vals[0].split("\"")[1];
+										params.put(arg, val);
+									}
+									
+									onThirdPartyRequest.event((MASTAdServerView) this, params);
+								}catch (Exception e) {
+									adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "onThirdPartyRequest", e.getMessage());										
+								}
+									StartTimer(context, view);
+							} else RestartExcampaings(campaignId,context,view);							
+						} else
 						 {
 							handler.post(new RemoveAllChildViews(view));
 							String videoData="";// = Utils.scrapeIgnoreCase(data, "<video", "/>");
