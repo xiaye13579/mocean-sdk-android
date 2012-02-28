@@ -1,5 +1,7 @@
 package com.adserver.adview.ormma.util;
 
+import com.adserver.adview.ormma.OrmmaController.PlayerProperties;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -8,6 +10,7 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.net.Uri;
+import android.os.Handler;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -16,7 +19,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
 
-import com.adserver.adview.ormma.OrmmaController.PlayerProperties;
 
 /**
  * 
@@ -36,6 +38,8 @@ public class OrmmaPlayer extends VideoView implements OnCompletionListener, OnEr
 	private static String transientText = "Loading. Please Wait..";
 	private static String LOG_TAG = "Ormma Player";
 	private boolean isReleased;
+	private Runnable onCompletionRunnable;
+	private Runnable onErrorRunnable;
 			
 	/**
 	 * Constructor
@@ -153,6 +157,10 @@ public class OrmmaPlayer extends VideoView implements OnCompletionListener, OnEr
 			// for inline audio on completion, release player
 			releasePlayer();
 		}
+		
+		if (onCompletionRunnable != null) {
+			new Handler().post(onCompletionRunnable);
+		}
 	}
 	
 	@Override
@@ -162,6 +170,11 @@ public class OrmmaPlayer extends VideoView implements OnCompletionListener, OnEr
 		removeView();
 		if(listener != null)
 			listener.onError();
+		
+		if (onErrorRunnable != null) {
+			new Handler().post(onErrorRunnable);
+		}
+		
 		return false;
 	}
 
@@ -231,6 +244,22 @@ public class OrmmaPlayer extends VideoView implements OnCompletionListener, OnEr
 			ViewGroup parent = (ViewGroup) getParent();
 			parent.removeView(transientLayout);
 		}		
+	}
+
+	public Runnable getOnCompletionRunnable() {
+		return onCompletionRunnable;
+	}
+
+	public void setOnCompletionRunnable(Runnable onCompletionRunnable) {
+		this.onCompletionRunnable = onCompletionRunnable;
+	}
+
+	public Runnable getOnErrorRunnable() {
+		return onErrorRunnable;
+	}
+
+	public void setOnErrorRunnable(Runnable onErrorRunnable) {
+		this.onErrorRunnable = onErrorRunnable;
 	}	
 	
 }

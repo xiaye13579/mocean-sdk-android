@@ -54,7 +54,7 @@ public class InternelBrowser extends Dialog {
 		
 		this._context = context;
 		
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);		
 
 		LinearLayout mailLayout = new LinearLayout(context);
 		mailLayout.setId(ID_MAIN);

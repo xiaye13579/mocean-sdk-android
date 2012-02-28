@@ -9,7 +9,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
-public class AdLog {
+public class MASTAdLog {
 	public static final int LOG_LEVEL_NONE =0;
 	public static final int LOG_LEVEL_1 =1;
 	public static final int LOG_LEVEL_2 =2;
@@ -22,7 +22,7 @@ public class AdLog {
 	int CurrentLogLevel = 0;
 	String AppName="";
 	
-	AdServerViewCore adView;
+	MASTAdServerViewCore adView;
 	
 	private static int DefaultLevel = LOG_LEVEL_NONE;
 	
@@ -44,7 +44,7 @@ public class AdLog {
 		}
 	}
 	
-	public AdLog(AdServerViewCore adView)
+	public MASTAdLog(MASTAdServerViewCore adView)
 	{
 		this.adView =  adView;
 		setLogLevel(DefaultLevel);

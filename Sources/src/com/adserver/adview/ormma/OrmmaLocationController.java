@@ -7,7 +7,7 @@ import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 
-import com.adserver.adview.AdServerViewCore;
+import com.adserver.adview.MASTAdServerViewCore;
 import com.adserver.adview.ormma.listeners.LocListener;
 
 public class OrmmaLocationController extends OrmmaController {
@@ -18,7 +18,7 @@ public class OrmmaLocationController extends OrmmaController {
 	private LocListener mNetwork;
 	private int mLocListenerCount;
 
-	public OrmmaLocationController(AdServerViewCore adView, Context context) {
+	public OrmmaLocationController(MASTAdServerViewCore adView, Context context) {
 		super(adView, context);
 
 		try{

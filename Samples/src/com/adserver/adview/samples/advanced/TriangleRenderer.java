@@ -26,8 +26,6 @@ import java.nio.ShortBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import com.adserver.adview.samples.R;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -36,7 +34,9 @@ import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.os.SystemClock;
 
-public class TriangleRenderer implements GLSurfaceView.Renderer{
+import com.adserver.adview.samples.R;
+
+public class TriangleRenderer implements GLSurfaceView.Renderer {
 
     public TriangleRenderer(Context context) {
         mContext = context;

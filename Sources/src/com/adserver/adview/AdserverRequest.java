@@ -19,8 +19,10 @@ import android.telephony.TelephonyManager;
 
 public class AdserverRequest {
 	
-	public static String INVALID_PARAM_TITLE = "invalid param";
 	
+	public int sizeX=-1;
+	public int sizeY=-1;
+	public int timeout = 1000;
 	
 	private Map<String, String> parameters = new HashMap<String, String>();
 	private final String parameter_site = "site";
@@ -49,23 +51,25 @@ public class AdserverRequest {
 	private final String parameter_size_y = "size_y";
 	private final String parameter_excampaigns = "excampaigns";
 	private final String parameter_version = "version";
-	private final String parameter_connection_speed = "connection_speed";
+	//private final String parameter_connection_speed = "connection_speed";
 	private final String parameter_size_required = "size_required";
-	private final String parameter_mcc = "mcc";
-	private final String parameter_mnc = "mnc";
+	//private final String parameter_mcc = "mcc";
+	//private final String parameter_mnc = "mnc";
 	private final String parameter_type = "type";
 	//private final String parameter_debug = "debug";
 	public final static String parameter_device_id = "udid";
+	public final static String parameter_Ad_Call_Timeout = "timeout"; 
+
 	
 	private String adserverURL = "http://ads.mocean.mobi/ad"; 
 	
 	private Hashtable<String, String> customParameters;
 	
-	AdLog AdLog;
+	MASTAdLog AdLog;
 	
-	public AdserverRequest(AdLog AdLog) {
+	public AdserverRequest(MASTAdLog AdLog) {
 		this.AdLog = AdLog;
-		setPremium(AdServerViewCore.PREMIUM_STATUS_BOTH);
+		setPremium(MASTAdServerViewCore.PREMIUM_STATUS_BOTH);
 	}
 
 	/*public AdserverRequest(Integer site, Integer zone) {
@@ -73,7 +77,7 @@ public class AdserverRequest {
 		setZone(zone);		
 	}*/
 	
-    private static String sID = null;
+    /*private static String sID = null;
     private static final String INSTALLATION = "INSTALLATION";
     public synchronized static String id(Context context) {
     	if (sID == null) {
@@ -101,9 +105,9 @@ public class AdserverRequest {
     	String id = UUID.randomUUID().toString();
     	out.write(id.getBytes());
     	out.close();
-    }
+    }*/
 	
-	void InitDefaultParameters(Context context)
+	/*void InitDefaultParameters(Context context)
 	{
 		String deviceId;
 		
@@ -127,7 +131,7 @@ public class AdserverRequest {
 		if((deviceIdMD5 != null) && (deviceIdMD5.length() > 0)) {
 			parameters.put(parameter_device_id, deviceIdMD5);			
 		}
-	}
+	}*/
 	/**
 	 * Get URL of ad server.
 	 * @return
@@ -160,7 +164,7 @@ public class AdserverRequest {
 			}
 		}else if((site != null)&&(site<1))
 		{
-			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"site="+site.toString()+" (valid: int>0)");
+			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"site="+site.toString()+" (valid: int>0)");
 		}
 		return this;
 	}
@@ -213,7 +217,7 @@ public class AdserverRequest {
 				}
 				break;
 				default:
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"premium="+premium.toString()+"  (valid: 0 - non-premium, 1 - premium only, 2 - both)");
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"premium="+premium.toString()+"  (valid: 0 - non-premium, 1 - premium only, 2 - both)");
 			};
 			
 			
@@ -234,7 +238,7 @@ public class AdserverRequest {
 			}
 		}else if((zone != null)&&(zone<1))
 		{
-			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"zone="+zone.toString()+" (valid: int>0)");
+			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"zone="+zone.toString()+" (valid: int>0)");
 		}
 		return this;
 	}
@@ -365,7 +369,7 @@ public class AdserverRequest {
 		return this;
 	}
 	
-	public AdserverRequest setMCC(String mcc) {
+	/*public AdserverRequest setMCC(String mcc) {
 		if(mcc != null) {
 			synchronized(parameters) {
 				parameters.put(parameter_mcc, mcc);
@@ -381,7 +385,7 @@ public class AdserverRequest {
 			}
 		}
 		return this;
-	}
+	}*/
 
 	/**
 	 * Optional.
@@ -444,7 +448,7 @@ public class AdserverRequest {
 					parameters.put(parameter_latitude, latitude);
 				}
 			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"latitude="+latitude+"  (valid: -90<=double<=90)");	
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"latitude="+latitude+"  (valid: -90<=double<=90)");	
 		}
 		/*if(latitude != null) {
 			synchronized(parameters) {
@@ -476,7 +480,7 @@ public class AdserverRequest {
 					parameters.put(parameter_longitude, longitude);
 				}
 			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"longitude="+longitude+" (valid: -180<=double<=180)");	
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"longitude="+longitude+" (valid: -180<=double<=180)");	
 		}
 		/*if((minSizeY != null)) {
 			if((minSizeY>0))
@@ -556,7 +560,7 @@ public class AdserverRequest {
 				parameters.put(parameter_min_size_x, String.valueOf(minSizeX));
 			}
 			else
-			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"minSizeX="+minSizeX.toString()+" valid>0");			
+			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"minSizeX="+minSizeX.toString()+" valid>0");			
 		}
 		return this;	
 	}
@@ -574,7 +578,7 @@ public class AdserverRequest {
 				parameters.put(parameter_min_size_y, String.valueOf(minSizeY));
 			}
 			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"minSizeY="+minSizeY.toString()+" valid>0");			
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"minSizeY="+minSizeY.toString()+" valid>0");			
 			
 		}
 		return this;	
@@ -587,7 +591,7 @@ public class AdserverRequest {
 				parameters.put(parameter_type, String.valueOf(type));
 			}
 			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"type="+type.toString()+" (valid: 1<=int<=7, 1 - text, 2 - image, 4 - richmedia ad, set combinations as sum of this values)");
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"type="+type.toString()+" (valid: 1<=int<=7, 1 - text, 2 - image, 4 - richmedia ad, set combinations as sum of this values)");
 		}
 		return this;	
 	}
@@ -605,7 +609,7 @@ public class AdserverRequest {
 				parameters.put(parameter_size_x, String.valueOf(sizeX));
 			}
 			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"maxSizeX="+sizeX.toString()+" valid>0");
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"maxSizeX="+sizeX.toString()+" valid>0");
 		}
 		return this;	
 	}
@@ -623,7 +627,7 @@ public class AdserverRequest {
 				parameters.put(parameter_size_y, String.valueOf(sizeY));
 			}
 			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, INVALID_PARAM_TITLE,"maxSizeY="+sizeY.toString()+" valid>0");
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"maxSizeY="+sizeY.toString()+" valid>0");
 		}
 		return this;	
 	}
@@ -664,7 +668,7 @@ public class AdserverRequest {
 	 * @param connectionSpeed
 	 * @return
 	 */
-	public AdserverRequest setConnectionSpeed(Integer connectionSpeed) {
+	/*public AdserverRequest setConnectionSpeed(Integer connectionSpeed) {
 		if(connectionSpeed != null) {
 			synchronized(parameters) {
 				parameters.put(parameter_connection_speed, String.valueOf(connectionSpeed));
@@ -709,7 +713,7 @@ public class AdserverRequest {
 	public Integer getPremium() {
 		synchronized(parameters) {
 			String premium = parameters.get(parameter_premium);
-			return getIntParameter(premium,AdServerViewCore.PREMIUM_STATUS_BOTH);
+			return getIntParameter(premium,MASTAdServerViewCore.PREMIUM_STATUS_BOTH);
 		}
 	}
 	
@@ -878,12 +882,12 @@ public class AdserverRequest {
 		}
 	}
 
-	public Integer getConnectionSpeed() {
+	/*public Integer getConnectionSpeed() {
 		synchronized(parameters) {
 			String connectionSpeed = parameters.get(parameter_connection_speed);
 			return getIntParameter(connectionSpeed,null);
 		}
-	}
+	}*/
 
 	public Integer getSizeRequired() {
 		synchronized(parameters) {
@@ -926,10 +930,16 @@ public class AdserverRequest {
 
 	public synchronized String toString() {
 		StringBuilder builderToString = new StringBuilder();
-		String adserverURL = this.adserverURL+"?key=1";		
+		String adserverURL = this.adserverURL+"?key=1";	
+		adserverURL += ContentManager.getInstance(null).getAutoDetectParameters();
 		builderToString.append(adserverURL);
 		appendParameters(builderToString, parameters);
 		appendParameters(builderToString, customParameters);
+		if ((getSizeX()==0)&&(sizeX>-1))
+			builderToString.append("&"+parameter_size_x+"="+String.valueOf(sizeX));
+		if ((getSizeY()==0)&&(sizeY>-1))
+			builderToString.append("&"+parameter_size_y+"="+String.valueOf(sizeY));
+		builderToString.append("&"+parameter_Ad_Call_Timeout+"="+String.valueOf(timeout));
 		return  builderToString.toString();//builderToString.toString().equals(adserverURL) ?  this.adserverURL : builderToString.toString();
 	}
 

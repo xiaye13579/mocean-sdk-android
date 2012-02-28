@@ -1,6 +1,6 @@
 <project name="AdViewer" default="release.build.3rdPaty">
     <property name="android.dir" value="c:\eclipse\android-sdk"/>
-    <property name="android.jar" value="${android.dir}\platforms\android-8\android.jar"/>
+    <property name="android.jar" value="${android.dir}\platforms\android-11\android.jar"/>
 
     <property name="release.dir" value="release"/>
     <property name="demo.mocean.dir" value="${release.dir}\ads.mocean.mobi"/>
@@ -9,14 +9,14 @@
     <property name="doc.mocean.dir" value="${demo.mocean.dir}\Documentation"/>
     <property name="temp.dir" value="${release.dir}\temp"/>
     <property name="temp.classes.dir" value="${temp.dir}\classes"/>
-	<property name="jar.name" value="AdserverView.jar"/>
+	<property name="jar.name" value="MASTAdserverView.jar"/>
 
 	<target name="release.build.3rdPaty"  depends="clean, make.dirs">
 			<antcall target="release.build.mOcean"/>
 			<antcall target="samples"/>
-			<!--<antcall target="simple_samples"/>-->
+			<!--<antcall target="simple_samples"/>
 			<antcall target="tablet_samples"/>
-			<antcall target="javadoc.mocean"/>
+			<antcall target="javadoc.mocean"/>-->
 			<antcall target="zip"/>
 	        <delete dir="${temp.dir}"/>
 	</target>
@@ -99,20 +99,28 @@
 						</copy>
 		</target>
 	<target name="samples">
-				<copy todir="${sample.mocean.dir}/Samples">
+		<copy todir="../Samples/lib">
+												    	    <fileset 
+												    	    	dir="${lib.mocean.dir}" 
+												    	    	includes="${jar.name}" 
+												    	    	casesensitive="false"
+												    	    />
+								</copy>	
+		<copy todir="${sample.mocean.dir}/Samples">
 		    	    <fileset 
-		    	    	dir="test/" 
-		    	    	includes=",res/,src/,AndroidManifest.xml,.classpath,default.properties,.project,project.properties" 
+		    	    	dir="../Samples/" 
+		    	    	includes=",res/,lib/,src/,AndroidManifest.xml,.classpath,default.properties,.project,project.properties" 
 		    	    	casesensitive="false"
 		    	    />				
 				</copy>		
-			<copy todir="${sample.mocean.dir}/Samples/lib">
+			<!--<copy todir="${sample.mocean.dir}/Samples/lib">
 								    	    <fileset 
 								    	    	dir="${lib.mocean.dir}" 
 								    	    	includes="${jar.name}" 
 								    	    	casesensitive="false"
 								    	    />
-				</copy>
+				</copy>-->
+		
 			 	<copy todir="${sample.mocean.dir}">
 						    	    <fileset 
 						    	    	dir="${lib.mocean.dir}" 
