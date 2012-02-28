@@ -93,7 +93,7 @@ public class MainAdvanced extends Activity {
 	
 			}
 		});
-      /*  adserverView = new MASTAdServerView(this);
+        adserverView = new MASTAdServerView(this);
         //adserverView.setUA("test ua");
       //  adserverView.setSite(17340);
       //  adserverView.setZone(53923);
@@ -103,11 +103,11 @@ public class MainAdvanced extends Activity {
 //        adserverView.setAdserverURL("http://192.168.1.153/test_mocean/request.php");
 //        adserverView.setAdserverURL("http://192.168.1.153/mocean/ad.php");
         
-        //adserverView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
-        adserverView.setAdserverURL("http://192.168.1.162/orm/exp/bool.html");
+        adserverView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
+        //adserverView.setAdserverURL("http://192.168.1.162/orm/exp/bool.html");
         adserverView.setSite(8061);
-        adserverView.setZone(98006);
-        //adserverView.setZone(50001);
+        //adserverView.setZone(98006);
+        adserverView.setZone(50002);
         //adserverView.setTrack(true);
 
 
@@ -141,7 +141,7 @@ public class MainAdvanced extends Activity {
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
         //adserverView.setAutoCollapse(false);
 		adserverView.update();
-		adserverView.setBackgroundColor(0);
+		//adserverView.setBackgroundColor(0);
         linearLayout.addView(adserverView);        
         //adserverView.setVisibility(View.VISIBLE);
         //*/
