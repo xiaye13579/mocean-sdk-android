@@ -10,6 +10,7 @@ import java.util.Map;
 
 import android.app.ListActivity;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
@@ -21,6 +22,7 @@ import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import com.adserver.adview.Constants;
 import com.adserver.adview.MASTAdLog;
 import com.adserver.adview.samples.simple.Interstitial;
 
@@ -40,6 +42,20 @@ public class ApiDemos extends ListActivity {
         
         if (path == null) {
             path = "";
+
+            String versionName = "";
+            try {
+    			PackageInfo pinfo;
+    			pinfo = getApplicationContext().getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), 0);
+    			if(pinfo!=null)
+    			{
+    				versionName = pinfo.versionName;
+    			}						
+    			
+    		} catch (Exception e) {			
+    		}
+
+            setTitle(getTitle()+ " SDK="+Constants.SDK_VERSION + " appVersionName="+versionName);
         }
         else setTitle(path);
         	
