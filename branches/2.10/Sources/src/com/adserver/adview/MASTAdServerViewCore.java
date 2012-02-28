@@ -1097,6 +1097,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 	
 	void setResult(String data, String error)
 	{
+		lastResponse=data;
+		
 		if(error!=null)
 		{
 			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, "requestGet result["+String.valueOf(RequestCounter)+"][ERROR]", error);
@@ -1132,8 +1134,6 @@ public abstract class MASTAdServerViewCore extends WebView {
 				}
 			return;
 		}
-		
-		lastResponse=data;
 		
 		//isFirstTime = false;
 		if(isAutoCollapse) this.setAdVisibility(View.VISIBLE);
