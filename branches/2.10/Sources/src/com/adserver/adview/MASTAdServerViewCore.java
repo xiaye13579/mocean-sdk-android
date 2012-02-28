@@ -1070,6 +1070,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 						
 						adserverRequest.setExcampaigns(getExcampaignsString());
 						String url = adserverRequest.createURL();
+						lastRequest = url;
 						RequestCounter++;
 						adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "requestGet["+String.valueOf(RequestCounter)+"]" , url);
 						ContentManager.getInstance(this).startLoadContent(this, adserverRequest.createURL());						
@@ -1170,7 +1171,10 @@ public abstract class MASTAdServerViewCore extends WebView {
 											"<style>*{margin:0;padding:0}</style>"+
 											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
 											"<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>" +
-											"<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
+											"<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;\">"+
+											data+"</body>";
+
+											//"<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
 												
 								}else
 									data = "<html><head>" +
