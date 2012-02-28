@@ -88,7 +88,7 @@ public class MainAdvanced extends Activity {
 					interstitialView.setLogLevel(MASTAdLog.LOG_LEVEL_3);
 					interstitialView.setIsShowPhoneStatusBar(true);
 					//interstitialView.useCustomClose(false);
-					interstitialView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 50));
+					interstitialView.setLayoutParams(new ViewGroup.LayoutParams(320, 50));
 					interstitialView.show();
 	
 			}
@@ -140,7 +140,7 @@ public class MainAdvanced extends Activity {
         adserverView.setInternalBrowser(true);
         
         adserverView.setId(1);
-        adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 300));
+        adserverView.setLayoutParams(new ViewGroup.LayoutParams(320, 300));
         //adserverView.setAutoCollapse(false);
 		adserverView.update();
 		adserverView.setContentAlignment(true);
