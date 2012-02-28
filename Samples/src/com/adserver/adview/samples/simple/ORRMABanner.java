@@ -54,6 +54,7 @@ public class ORRMABanner extends Activity {
 		});
         
         adserverView = new MASTAdServerView(this, site, zone);
+        adserverView.setScaleOnDPI(true);
         adserverView.setId(1);
         setAdLayoutParams();
         linearLayout.addView(adserverView);
