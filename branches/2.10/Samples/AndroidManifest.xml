@@ -90,7 +90,7 @@
             </intent-filter>
         </activity>
         <activity android:label="Simple/Interstitial" 
-            android:name=".advanced.Interstitial"
+            android:name=".simple.Interstitial"
 			android:screenOrientation="sensor"
 			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
