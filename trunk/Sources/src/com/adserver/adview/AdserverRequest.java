@@ -606,7 +606,15 @@ public class AdserverRequest {
 		if(sizeX != null) {
 			if(sizeX>0)
 			synchronized(parameters) {
-				parameters.put(parameter_size_x, String.valueOf(sizeX));
+				if (sizeX < getMinSizeX())
+				{
+					parameters.put(parameter_size_x, parameters.get(parameter_min_size_x));
+					AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"maxSizeX="+sizeX.toString()+" <minSizeX");
+				}
+				else
+				{
+					parameters.put(parameter_size_x, String.valueOf(sizeX));
+				}
 			}
 			else
 				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"maxSizeX="+sizeX.toString()+" valid>0");
@@ -624,7 +632,15 @@ public class AdserverRequest {
 		if(sizeY != null) {
 			if(sizeY>0)
 			synchronized(parameters) {
-				parameters.put(parameter_size_y, String.valueOf(sizeY));
+				if (sizeY < getMinSizeY())
+				{
+					parameters.put(parameter_size_y, parameters.get(parameter_min_size_y));
+					AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"maxSizeY="+sizeY.toString()+" <minSizeY");
+				}
+				else
+				{
+					parameters.put(parameter_size_y, String.valueOf(sizeY));
+				}
 			}
 			else
 				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"maxSizeY="+sizeY.toString()+" valid>0");
