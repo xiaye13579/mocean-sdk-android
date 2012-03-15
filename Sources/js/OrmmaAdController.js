@@ -416,6 +416,15 @@ const ORMMA_EVENT_ASSET_RETIRED = "assetRetired";
 		},
 		
 		getExpandProperties: function() {
+			var ms = this.getMaxSize();
+			if (this.expandProperties.width <= 0 || this.expandProperties.width == undefined ) 
+			{
+			   this.expandProperties.width = ms.width;
+			}
+			if (this.expandProperties.height <= 0|| this.expandProperties.height == undefined ) 
+			{
+			   this.expandProperties.height = ms.height; 
+			}
 			return this.expandProperties;
 		},
 
