@@ -38,20 +38,20 @@ import android.widget.LinearLayout;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 
-import com.adserver.adview.MASTAdLog;
-import com.adserver.adview.MASTAdServerView;
-import com.adserver.adview.InternelBrowser;
-import com.adserver.adview.MASTAdServerViewCore.MASTOnAdClickListener;
-import com.adserver.adview.MASTAdServerViewCore.MASTOnAdDownload;
-import com.adserver.adview.MASTAdServerViewCore.MASTOnOrmmaListener;
-import com.adserver.adview.MASTAdServerViewCore.MASTOnThirdPartyRequest;
-import com.adserver.adview.ormma.OrmmaDisplayController;
+import com.MASTAdView.InternelBrowser;
+import com.MASTAdView.MASTAdLog;
+import com.MASTAdView.MASTAdView;
+import com.MASTAdView.MASTAdViewCore.MASTOnAdClickListener;
+import com.MASTAdView.MASTAdViewCore.MASTOnAdDownload;
+import com.MASTAdView.MASTAdViewCore.MASTOnOrmmaListener;
+import com.MASTAdView.MASTAdViewCore.MASTOnThirdPartyRequest;
+import com.MASTAdView.ormma.OrmmaDisplayController;
 
 public class MainAdvanced extends Activity {
     /** Called when the activity is first created. */
 	private Context context;
 	private LinearLayout linearLayout;
-	MASTAdServerView adserverView;
+	MASTAdView adserverView;
 	byte[] array = new byte[2*1024*1024]; 
 	Handler handler = new Handler();
 	
@@ -79,8 +79,8 @@ public class MainAdvanced extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				MASTAdServerView interstitialView = 
-						new MASTAdServerView(context, 8061, 20249);//16112);
+				MASTAdView interstitialView = 
+						new MASTAdView(context, 8061, 20249);//16112);
 						//new AdServerInterstitialView(context, "10359", "21505");
 					//interstitialView.setAdserverURL("http://192.168.1.162/new_mcn/request.php");
 					//interstitialView.setSite(8061);
@@ -111,7 +111,7 @@ public class MainAdvanced extends Activity {
         //adserverView.setTrack(true);
 
 
-        adserverView = new MASTAdServerView(this, 8061, 20249);//Default mOcean ad
+        adserverView = new MASTAdView(this, 8061, 20249);//Default mOcean ad
         //adserverView = new MASTAdServerView(this, 8061, 54731);
         
 //adserverView.setBackgroundResource(R.drawable.icon);
@@ -133,7 +133,7 @@ public class MainAdvanced extends Activity {
 //        adserverView = new AdServerView(this, "10113", "20991");
 //        adserverView = new AdServerView(this, "8061", "14");
         adserverView.setOnThirdPartyRequest(new MASTOnThirdPartyRequest() {
-			public void event(MASTAdServerView sender, HashMap<String, String> params) {
+			public void event(MASTAdView sender, HashMap<String, String> params) {
 				
 			}
 		});
@@ -150,19 +150,19 @@ public class MainAdvanced extends Activity {
 		adserverView.setOnAdDownload(new MASTOnAdDownload() {
 			
 			@Override
-			public void error(MASTAdServerView sender, String error) {
+			public void error(MASTAdView sender, String error) {
 				// TODO Auto-generated method stub
 				
 			}
 			
 			@Override
-			public void end(MASTAdServerView sender) {
+			public void end(MASTAdView sender) {
 				// TODO Auto-generated method stub
 				
 			}
 			
 			@Override
-			public void begin(MASTAdServerView sender) {
+			public void begin(MASTAdView sender) {
 				// TODO Auto-generated method stub
 				
 			}

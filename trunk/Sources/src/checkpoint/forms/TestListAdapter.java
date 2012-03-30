@@ -9,13 +9,13 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 
-import com.adserver.adview.MASTAdServerView;
+import com.MASTAdView.MASTAdView;
 
 public class TestListAdapter extends BaseAdapter {
 	protected LayoutInflater mInflater;
 	Context context;
 	int maxCount = 1000;
-	ArrayList<MASTAdServerView> ads = new ArrayList<MASTAdServerView>(maxCount);
+	ArrayList<MASTAdView> ads = new ArrayList<MASTAdView>(maxCount);
 	
 	public TestListAdapter(Context context) {
 		mInflater = LayoutInflater.from(context);
@@ -42,10 +42,10 @@ public class TestListAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int arg0, View arg1, ViewGroup arg2) {
-		MASTAdServerView adserverView;
+		MASTAdView adserverView;
 		if(ads.get(arg0)==null)
 		{
-			adserverView = new MASTAdServerView(context, 8061, 20249);
+			adserverView = new MASTAdView(context, 8061, 20249);
 		    adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
 			//adserverView.setLayoutParams(new ViewGroup.LayoutParams(320, 50));
 			adserverView.update();
