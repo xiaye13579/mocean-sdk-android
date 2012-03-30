@@ -72,66 +72,6 @@ public class AdserverRequest {
 		setPremium(MASTAdServerViewCore.PREMIUM_STATUS_BOTH);
 	}
 
-	/*public AdserverRequest(Integer site, Integer zone) {
-		setSite(site);
-		setZone(zone);		
-	}*/
-	
-    /*private static String sID = null;
-    private static final String INSTALLATION = "INSTALLATION";
-    public synchronized static String id(Context context) {
-    	if (sID == null) {
-    		File installation = new File(context.getFilesDir(), INSTALLATION);
-    		try {                
-    			if (!installation.exists())
-    				writeInstallationFile(installation);
-    			sID = readInstallationFile(installation);
-    			} catch (Exception e) {
-    				//throw new RuntimeException(e);
-    				sID="1234567890";
-    				}
-    			}
-    	return sID;
-    }
-    private static String readInstallationFile(File installation) throws IOException {
-    	RandomAccessFile f = new RandomAccessFile(installation, "r");
-    	byte[] bytes = new byte[(int) f.length()];
-    	f.readFully(bytes);
-    	f.close();
-    	return new String(bytes);
-    }
-    private static void writeInstallationFile(File installation) throws IOException {
-    	FileOutputStream out = new FileOutputStream(installation);
-    	String id = UUID.randomUUID().toString();
-    	out.write(id.getBytes());
-    	out.close();
-    }*/
-	
-	/*void InitDefaultParameters(Context context)
-	{
-		String deviceId;
-		
-		TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-		String temp = tm.getDeviceId();
-		if (null !=  temp) deviceId = temp;
-		else {
-			temp = Secure.getString(context.getContentResolver(),Secure.ANDROID_ID); ;
-			if (null != temp) deviceId = temp;
-			else deviceId = "";
-		}
-		
-		if(deviceId==null)
-		{
-			AdLog.log(AdLog.LOG_LEVEL_2,AdLog.LOG_TYPE_WARNING,"getDeviceId","not avalable");
-			deviceId = id(context);
-		}
-		String deviceIdMD5 = Utils.md5(deviceId);
-		AdLog.log(AdLog.LOG_LEVEL_2,AdLog.LOG_TYPE_INFO,"deviceIdMD5",deviceIdMD5);
-		
-		if((deviceIdMD5 != null) && (deviceIdMD5.length() > 0)) {
-			parameters.put(parameter_device_id, deviceIdMD5);			
-		}
-	}*/
 	/**
 	 * Get URL of ad server.
 	 * @return
@@ -368,24 +308,6 @@ public class AdserverRequest {
 		}
 		return this;
 	}
-	
-	/*public AdserverRequest setMCC(String mcc) {
-		if(mcc != null) {
-			synchronized(parameters) {
-				parameters.put(parameter_mcc, mcc);
-			}
-		}
-		return this;
-	}
-	
-	public AdserverRequest setMNC(String mnc) {
-		if(mnc != null) {
-			synchronized(parameters) {
-				parameters.put(parameter_mnc, mnc);
-			}
-		}
-		return this;
-	}*/
 
 	/**
 	 * Optional.
@@ -401,30 +323,6 @@ public class AdserverRequest {
 		}
 		return this;
 	}
-	
-	/**
-	 * Optional.
-	 * Set Type of advertisement (ADS_TYPE_TEXT_ONLY - text only, 
-	 * ADS_TYPE_IMAGES_ONLY - image only, ADS_TYPE_TEXT_AND_IMAGES - image and text, 
-	 * ADS_TYPE_SMS - SMS ad). SMS will be returned in XML.
-	 * @param adstype
-	 * @return
-	 */
-	/*public AdserverRequest setAdstype(Integer adstype) {
-		if(adstype != null) {
-			switch(adstype)
-			{
-			case 1:case 2:case 3:case 6:
-			synchronized(parameters) {
-				parameters.put(parameter_adstype, String.valueOf(adstype));
-			}
-			break;
-			default:
-			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"adstype="+adstype.toString()+" (valid: 1;2;3;6)");
-			}
-		}
-		return this;
-	}*/
 	
 	/**
 	 * Optional.
@@ -482,15 +380,7 @@ public class AdserverRequest {
 			else
 				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"longitude="+longitude+" (valid: -180<=double<=180)");	
 		}
-		/*if((minSizeY != null)) {
-			if((minSizeY>0))
-			synchronized(parameters) {
-				parameters.put(parameter_min_size_y, String.valueOf(minSizeY));
-			}
-			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, INVALID_PARAM_TITLE,"minSizeY="+minSizeY.toString()+" valid>0");			
-			
-		}*/
+
 		return this;
 	}
 	
@@ -608,8 +498,9 @@ public class AdserverRequest {
 			synchronized(parameters) {
 				if (sizeX < getMinSizeX())
 				{
+					// 2012-03-11: Aron says don't allow max size < min, log and fix request
 					parameters.put(parameter_size_x, parameters.get(parameter_min_size_x));
-					AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"maxSizeX="+sizeX.toString()+" <minSizeX");
+					 AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"maxSizeX="+sizeX.toString()+" <minSizeX");
 				}
 				else
 				{
@@ -634,8 +525,9 @@ public class AdserverRequest {
 			synchronized(parameters) {
 				if (sizeY < getMinSizeY())
 				{
+					// 2012-03-11: Aron says don't allow max size < min, log and fix request
 					parameters.put(parameter_size_y, parameters.get(parameter_min_size_y));
-					AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"maxSizeY="+sizeY.toString()+" <minSizeY");
+					 AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"maxSizeY="+sizeY.toString()+" <minSizeY");
 				}
 				else
 				{
@@ -673,21 +565,6 @@ public class AdserverRequest {
 		if(version != null) {
 			synchronized(parameters) {
 				parameters.put(parameter_version, version);
-			}
-		}
-		return this;
-	}
-
-	/**
-	 * Optional.
-	 * Set connection speed. 0 - low (gprs, edge), 1 - fast (3g, wifi). 
-	 * @param connectionSpeed
-	 * @return
-	 */
-	/*public AdserverRequest setConnectionSpeed(Integer connectionSpeed) {
-		if(connectionSpeed != null) {
-			synchronized(parameters) {
-				parameters.put(parameter_connection_speed, String.valueOf(connectionSpeed));
 			}
 		}
 		return this;
@@ -898,13 +775,6 @@ public class AdserverRequest {
 		}
 	}
 
-	/*public Integer getConnectionSpeed() {
-		synchronized(parameters) {
-			String connectionSpeed = parameters.get(parameter_connection_speed);
-			return getIntParameter(connectionSpeed,null);
-		}
-	}*/
-
 	public Integer getSizeRequired() {
 		synchronized(parameters) {
 			String sizeRequired = parameters.get(parameter_size_required);
@@ -944,12 +814,18 @@ public class AdserverRequest {
 		return this.toString(); 
 	}
 
-	public synchronized String toString() {
+	public String toString() {
 		StringBuilder builderToString = new StringBuilder();
-		String adserverURL = this.adserverURL+"?key=1";	
-		adserverURL += ContentManager.getInstance(null).getAutoDetectParameters();
-		builderToString.append(adserverURL);
-		appendParameters(builderToString, parameters);
+		synchronized(this)
+		{
+			builderToString.append(adserverURL);
+		}
+		builderToString.append("?key=1");
+		builderToString.append(ContentManager.getInstance(null).getAutoDetectParameters());
+		synchronized(parameters)
+		{
+			appendParameters(builderToString, parameters);
+		}
 		appendParameters(builderToString, customParameters);
 		if ((getSizeX()==0)&&(sizeX>-1))
 			builderToString.append("&"+parameter_size_x+"="+String.valueOf(sizeX));
@@ -978,5 +854,4 @@ public class AdserverRequest {
 			}
 		}
 	}
-
 }
