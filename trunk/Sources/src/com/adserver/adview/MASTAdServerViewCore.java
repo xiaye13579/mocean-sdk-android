@@ -1,4 +1,5 @@
 package com.adserver.adview;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -38,6 +39,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.method.KeyListener;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -70,13 +72,15 @@ import com.adserver.adview.ormma.OrmmaLocationController;
 import com.adserver.adview.ormma.OrmmaNetworkController;
 import com.adserver.adview.ormma.OrmmaSensorController;
 import com.adserver.adview.ormma.OrmmaUtilityController;
+import com.adserver.adview.ormma.listeners.LocListener;
 import com.adserver.adview.ormma.util.OrmmaPlayer;
 import com.adserver.adview.ormma.util.OrmmaUtils;
 
 /**
  * Viewer of advertising.
  */
-public abstract class MASTAdServerViewCore extends WebView {
+public abstract class MASTAdServerViewCore extends WebView
+{
 	
 	/*static final int ID_CLOSE = 1;
 	
@@ -122,12 +126,12 @@ public abstract class MASTAdServerViewCore extends WebView {
 	private MASTOnActivityHandler onActivityHandler;
 	private Long adReloadPeriod;
 	private Integer visibleMode;
-	private Integer advertiserId; 
-	private String groupCode;
+	//private Integer advertiserId; 
+	//private String groupCode;
 	
 	protected Context _context;
 	private LocationManager locationManager;
-	private WhereamiLocationListener listener;	
+	private LocListener listener;
 	
 	private static final int MESSAGE_RESIZE = 1000;
 	private static final int MESSAGE_CLOSE = 1001;
@@ -145,7 +149,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 	protected static final int PLACEHOLDER_ID = 100;
 	public static final int ORMMA_ID = 102;
 	
-	private static final String EXPAND_DIMENSIONS = "exand_initial_dimensions";
+	private static final String EXPAND_DIMENSIONS = "expand_initial_dimensions";
 	private static final String EXPAND_PROPERTIES = "expand_properties";
 	private static final String RESIZE_WIDTH = "resize_width";
 	private static final String RESIZE_HEIGHT = "resize_height";
@@ -176,7 +180,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 	protected boolean isAutoCollapse = true;
 	private static ViewGroup mediaPlayerFrame;
 	private boolean isShowMediaPlayerFrame = false;
-	
+	private Integer locationMinWaitMillis = 5 * 60 * 1000;	// 5 minutes (in millis)
+	private Float locationMinMoveMeters = 1000.0F;			// 1000 meters
 	
 	MASTAdLog adLog = new MASTAdLog(this);
 	Dialog dialog;
@@ -200,6 +205,13 @@ public abstract class MASTAdServerViewCore extends WebView {
 	private int lastY;
 	private ViewGroup parentView = null;
 	private boolean scaleOnDPI = false;
+
+	// Items needs to handle closing expanded/resized view
+	private int mOldHeight;
+	private int mOldWidth;
+	private Drawable mOldExpandBackground;
+	private int mOldExpandBackgroundColor;
+
 	
 	public MASTAdLog getLog()
 	{
@@ -502,7 +514,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 	 * Get Advertiser id (if both AdvertiserId and GroupCode are specified then install notification is enabled).
 	 */
 	public Integer getAdvertiserId() {
-		return advertiserId==null ? 0 : advertiserId;
+		//return advertiserId==null ? 0 : advertiserId;
+		return 0;
 	}
 	
 	/**
@@ -510,6 +523,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 	 * Set Advertiser id (if both AdvertiserId and GroupCode are specified then install notification is enabled).
 	 */
 	public void setAdvertiserId(Integer advertiserId) {
+		/*
 		if(advertiserId!=null)
 		{
 			if(advertiserId>0)
@@ -519,14 +533,18 @@ public abstract class MASTAdServerViewCore extends WebView {
 						String.format(Constants.STR_ADVETTISER_ID_INVALID, advertiserId.toString()));
 						//"advertiserId="+advertiserId.toString()+" (valid: int>0)");
 		}
+		*/
+		
+		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_WARNING, "Advertiser ID", "No longer used.");
 	}
-
+	
 	/**
 	 * Optional.
 	 * Get Group code (if both AdvertiserId and GroupCode are specified then install notification is enabled).
 	 */
 	public String getGroupCode() {
-		return groupCode;
+		//return groupCode;
+		return "";
 	}
 	
 	/**
@@ -534,9 +552,10 @@ public abstract class MASTAdServerViewCore extends WebView {
 	 * Set Group code (if both AdvertiserId and GroupCode are specified then install notification is enabled).
 	 */
 	public void setGroupCode(String groupCode) {
-		this.groupCode = groupCode;
+		//this.groupCode = groupCode;
+		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_WARNING, "Group code", "No longer used.");
 	}
-
+	
 	/**
 	 * Optional.
 	 * Get banner refresh interval (in seconds).
@@ -584,6 +603,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 			if (isContentAligned != null) this.isContentAligned = isContentAligned;
 			
 			Boolean locationDetection= getBooleanParameter(attrs.getAttributeValue(null, "locationDetection"));
+			locationMinWaitMillis = getIntParameter(attrs.getAttributeValue(null, "locationMinWaitMillis"));
+			locationMinMoveMeters = getFloatParameter(attrs.getAttributeValue(null, "locationMinMoveMeters"));
 			Boolean internelBr = getBooleanParameter(attrs.getAttributeValue(null, "internalBrowser")); 
 		
 			Integer textColor = GetColor(attrs.getAttributeValue(null, "textColor"));
@@ -595,8 +616,8 @@ public abstract class MASTAdServerViewCore extends WebView {
 				defaultImage = context.getResources().getIdentifier(image, null, context.getPackageName());
 			//Integer defaultImage = getIntParameter(attrs.getAttributeValue(null, "defaultImage"));
 			
-			this.advertiserId = getIntParameter(attrs.getAttributeValue(null, "advertiserId"));
-			this.groupCode = attrs.getAttributeValue(null, "groupCode");
+			//this.advertiserId = getIntParameter(attrs.getAttributeValue(null, "advertiserId"));
+			//this.groupCode = attrs.getAttributeValue(null, "groupCode");
 			setUpdateTime(getIntParameter(attrs.getAttributeValue(null, "updateTime")));
 			
 			String latitude = attrs.getAttributeValue(null, "latitude");
@@ -839,22 +860,30 @@ public abstract class MASTAdServerViewCore extends WebView {
 		if(getBackgroundColor()==0) invalidate();
 	}
 	
+	private void stopTimer(boolean remove)
+	{
+		if(reloadTimer != null) {
+			try {
+				reloadTimer.cancel();
+				if (remove)
+				{
+					reloadTimer = null;
+				}
+				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "stopTimer", "timer stopped");
+			} catch (Exception e) {
+				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "stopTimer", e.getMessage());				
+			}
+		}
+	}
+	
 	@Override
 	protected void onDetachedFromWindow() {
-		
 		if((locationManager != null) && (listener != null)) {
 			locationManager.removeUpdates(listener);
 		}
 		
 		//removeAllViews();
-		if(reloadTimer != null) {
-			try {
-				reloadTimer.cancel();
-				reloadTimer = null;
-			} catch (Exception e) {
-				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "onDetachedFromWindow", e.getMessage());				
-			}
-		}
+		stopTimer(true);
 		
 		/*if(contentThread != null) {
 			try {
@@ -882,6 +911,11 @@ public abstract class MASTAdServerViewCore extends WebView {
 
 	@Override
 	protected void onSizeChanged(int w, int h, int ow, int oh) {
+		if (((ow > 0) && (w > ow)) ||
+			((oh > 0) && (h > oh)))
+		{
+			stopTimer(false); // expand/resize up, cancel refresh timer
+		}
 		String script = String.format(
 				"Ormma.fireEvent(ORMMA_EVENT_SIZE_CHANGE, {dimensions : {width : %d, height: %d}});", w, h);
 		injectJavaScript(script);
@@ -890,21 +924,73 @@ public abstract class MASTAdServerViewCore extends WebView {
 		adserverRequest.sizeY = h;
 	}
 
+	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-			if (mViewState == ViewState.EXPANDED) {
-				if (expandParent != null) {
-					expandParent.injectJavaScript("ormma.close();");
-				} else {
-					injectJavaScript("ormma.close();");
-				}
+			if (mViewState == ViewState.EXPANDED)
+			{
 				return true;
 			}
         }
+        
 		return super.onKeyDown(keyCode, event);
 	}
 
+	
+	private void onStateChange(ViewState state)
+	{
+		String newState;
+		switch(state)
+		{
+			case EXPANDED:
+				newState = "expanded";
+				break;
+			case HIDDEN:
+				newState = "hidden";
+				break;
+			case RESIZED:
+				newState = "resized";
+				break;
+			default:
+				newState = "default";
+		}
+		
+		String script = String.format("Ormma.fireEvent(ORMMA_EVENT_STATE_CHANGE, \"%s\");", newState); 
+		injectJavaScript(script);
+	}
+	
+	
+	private void closeRunnable(final MASTAdServerViewCore view)
+	{
+		view.handler.post(new Runnable() {
+			@Override
+			public void run() { 
+				closeView(false); // sets view state
+				onStateChange(mViewState); // manually force state change; the close below should trigger this, but it doesn't reliably happen
+				view.injectJavaScript("ormma.close(); ormma.show();"); // close (all) ad views, then show default again; kind of ugly, but necessary to get back to visible default state
+			}
+		});
+	}
+	
+	
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+			if (mViewState == ViewState.EXPANDED) {
+				if (expandParent != null) {
+					closeRunnable(expandParent);
+				} else {
+					closeRunnable(this);
+				}
+				
+				return true;
+			}
+        }
+		return super.onKeyUp(keyCode, event);
+	}
+	
+	
 	/**
 	 * Immediately update banner contents.
 	 */
@@ -938,75 +1024,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 			}
 		});
 	}
-	
-	/*private class InstallNotificationThread extends Thread {
-		private Context context;
-		private Integer advertiserId;
-		private String groupCode;
-
-		public InstallNotificationThread(Context context, Integer advertiserId, String groupCode) {
-			this.context = context;
-			this.advertiserId = advertiserId;
-			this.groupCode = groupCode;
-		}
-
-		@Override
-		public synchronized void run() {
-			try {
-				if(context != null) {
-					if((advertiserId != null) && (advertiserId > 0)
-							&& (groupCode != null) && (groupCode.length() > 0)) {
-						SharedPreferences settings = context.getSharedPreferences(PREFS_FILE_NAME, 0);
-						boolean isFirstAppLaunch = settings.getBoolean(PREF_IS_FIRST_APP_LAUNCH, true);
-
-						if(isFirstAppLaunch) {
-							String deviceId;
-							TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-							String temp = tm.getDeviceId();
-							if (null !=  temp) deviceId = temp;
-							else {
-								temp = Secure.getString(context.getContentResolver(),Secure.ANDROID_ID); ;
-								if (null != temp) deviceId = temp;
-								else deviceId = "";
-							}
-							
-							String deviceIdMD5 = Utils.md5(deviceId);
-							
-							if((deviceIdMD5 != null) && (deviceIdMD5.length() > 0)) {
-								StringBuilder url = new StringBuilder(FIRST_APP_LAUNCH_URL);
-								url.append("?advertiser_id=" + advertiserId.toString());
-								url.append("&group_code=" + URLEncoder.encode(groupCode));
-								url.append("&"+AdserverRequest.parameter_device_id+"=" + URLEncoder.encode(deviceIdMD5));
-								
-								sendGetRequest(url.toString());
-								
-								SharedPreferences.Editor editor = settings.edit();
-								editor.putBoolean(PREF_IS_FIRST_APP_LAUNCH, false);
-								editor.commit();
-							}
-						}
-					}
-				}
-			} catch (Exception e) {
-				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "InstallNotificationThread", e.getMessage());
-			}
-		}
-	}
-	
-	/*private class ContentThread extends Thread {
-		private Context context;
-
-		public ContentThread(Context context, WebView webView) {
-			this.context = context;
-			view = webView;
-		}
-
-		@Override
-		public void run() {
-			_contentThreadAction(context, view);
-		}
-	}*/
-	
+		
 	void StartLoadContent(Context context, WebView view)
 	{
 		if(reloadTask!=null)
@@ -1015,7 +1033,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 			reloadTask = null;
 		}
 		
-		ContentManager.getInstance(this).installNotification( advertiserId, groupCode);
+		//ContentManager.getInstance(this).installNotification( advertiserId, groupCode);
 		
 		if(ContentManager.getInstance(this).getAutoDetectParameters().equals(""))
 		{
@@ -1108,6 +1126,59 @@ public abstract class MASTAdServerViewCore extends WebView {
 		});
 	}
 	
+	
+	final public static int SCALE_VIEWPORT_NEW  = 0; // customer suggestion
+	final static public int SCALE_VIEWPORT_LIKE_29  = 1;
+	final static public int SCALE_VIEWPORT_LIKE_210 = 2;
+	
+	
+	// Create viewport for showing ad; version 2.9 and earlier had a "bug" which caused
+	// ad creative to be scaled on device to the device dpi; version 2.10 introduced a fix
+	// for this, but the change in behavior caused some issues. A deprecated flag allowed
+	// reverting to the old behavior. Per a client suggestion, another fix is being introduced.
+	private String setupViewport(int scaleOption, boolean isAligned, String body)
+	{
+		StringBuffer data = new StringBuffer("<html><head>");
+		
+		data.append("<style>*{margin:0;padding:0}</style>");
+		data.append("<script src=\"file://");
+		data.append(mScriptPath);
+		data.append("\" type=\"text/javascript\"></script>");
+		
+		if (scaleOption == SCALE_VIEWPORT_LIKE_29)
+		{
+			// don't set dpi or any special parameters, duplicating legacy behavior
+			data.append("</head>");	
+		}
+		else if (scaleOption == SCALE_VIEWPORT_LIKE_210)
+		{
+			// set target density as in 2.10
+			data.append("<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>");
+		}
+		else
+		{
+			// new/alternate viewport configuration suggested by Gasper/Celtra
+			data.append("<meta name=\"viewport\" content=\"initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\" /></head>");
+		}		
+		
+		if (isAligned)
+		{
+			data.append("<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;\">");
+		}
+		else
+		{
+			data.append("<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">");
+		}
+		
+		if (body != null)
+		{
+			data.append(body);
+		}
+		data.append("</body></html>");
+		return data.toString();
+	}
+	
+	
 	void setResult(String data, String error)
 	{
 		lastResponse=data;
@@ -1136,12 +1207,18 @@ public abstract class MASTAdServerViewCore extends WebView {
 					if(isAutoCollapse) this.setAdVisibility(View.INVISIBLE);
 					else
 					{	
-						data = "<html><head>" +
-								"<style>*{margin:0;padding:0}</style>"+
-								"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
-								"<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>" +
-								"<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">"+"</body></html>";
-					
+						// The scaleOnDPI deprecated parameter allows users to revert to the old
+						// SDK behavior which scaled ads on Android.
+						//
+						if(!scaleOnDPI)
+						{
+							//data = setupViewport(SCALE_VIEWPORT_NEW, isContentAligned, null);
+							data = setupViewport(SCALE_VIEWPORT_LIKE_210, isContentAligned, null);
+						}
+						else
+						{
+							data = setupViewport(SCALE_VIEWPORT_LIKE_29, isContentAligned, null);
+						}					
 						view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 					}
 				}
@@ -1206,36 +1283,31 @@ public abstract class MASTAdServerViewCore extends WebView {
 								String videoUrl = Utils.scrapeIgnoreCase(videoData, "src=\"", "\"");
 								String clickUrl = Utils.scrapeIgnoreCase(data, "href=\"", "\"");
 								handler.post(new SetupVideoAction(context, view, videoUrl, clickUrl));
-								StartTimer(context,view);
+								// StartTimer(context,view); // XXX
+								stopTimer(false);
 							} else {
 								String dataOut="";
-								if(isContentAligned)
+								if(scaleOnDPI)
 								{
-									
-									dataOut = "<html><head>" +
-											"<style>*{margin:0;padding:0}</style>"+
-											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>";
-									if(!scaleOnDPI) dataOut+="<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/>";
-									dataOut+="</head><body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;\">"+
-											data+"</body>";
-
-											//"<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
-												
-								}else
+									dataOut = setupViewport(SCALE_VIEWPORT_LIKE_29, isContentAligned, data);
+								}
+								else
 								{
-									dataOut = "<html><head>" +
-											"<style>*{margin:0;padding:0}</style>"+
-											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>";
-									if(!scaleOnDPI) dataOut+="<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/>";
-									dataOut+="</head><body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">"+data+"</body></html>";
+									//dataOut = setupViewport(SCALE_VIEWPORT_NEW, isContentAligned, data);
+									dataOut = setupViewport(SCALE_VIEWPORT_LIKE_210, isContentAligned, data);
 								}
 								
 								mContent = dataOut;
-								view.loadDataWithBaseURL(null, dataOut, "text/html", "UTF-8", null);
+								
+								// Moved this into runnable posted to UI thread to eliminate webview warning
+								// logged with each invocation with Android 4.0.
+								//view.loadDataWithBaseURL(null, dataOut, "text/html", "UTF-8", null);
+								
 								handler.post(new Runnable() {
 									
 									@Override
 									public void run() {
+										view.loadDataWithBaseURL(null, mContent, "text/html", "UTF-8", null);
 										getLayoutParams().width = lastX;
 										getLayoutParams().height = lastY;
 										requestLayout();
@@ -1261,29 +1333,6 @@ public abstract class MASTAdServerViewCore extends WebView {
 			adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
 			StartTimer(context,view);
 		}
-		
-		/*try {
-			if((result != null) && (result.length() > 0)) {
-				
-				if(isJSON)
-				{
-					if(autoCollapse) handler.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							setVisibility(View.VISIBLE);							
-						}
-					});
-					adLayoutVector.addBanner(result,onAdEventHandler);
-					//ff if (onAdEventHandler!=null) onAdEventHandler.refresh(this);					
-				}
-				autoCollapse = false;
-				StartTimer(getContext(),view,Constants.UPDATE_TIME_INTERVAL*1000);
-			}
-		} catch (Exception e) {
-			adLog.log(AdLog.LOG_LEVEL_CRITICAL, AdLog.LOG_TYPE_ERROR, "setResult", e.getMessage());
-			StartTimer(getContext(),view,Constants.UPDATE_TIME_INTERVAL*1000);
-		}*/
 	}
 	
 	private void StartTimer(Context context, WebView view)
@@ -1335,189 +1384,6 @@ public abstract class MASTAdServerViewCore extends WebView {
 		}
 	}
 		
-	/*private void _contentThreadAction(Context context, WebView view) {
-		if (isExpanded) return;
-			
-		InstallNotificationThread installNotificationThread = 
-			new InstallNotificationThread(context, advertiserId, groupCode);
-		installNotificationThread.start();
-
-		setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-
-		boolean isRequestAd, isRefreshAd;
-		
-		adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "contentThreadAction", "");
-		
-		boolean isShownView = view.isShown() || isFirstTime || IsManualUpdate;//&&isScreenOn;
-		
-		IsManualUpdate = false;		
-		
-		if((getSite()==0) || (getZone()==0))
-		{
-			StartTimer(context,view);
-			adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_WARNING, "contentThreadAction", "site=0 or zone=0");
-			return;
-		}
-		
-		if(visibleMode == null) {
-			visibleMode = VISIBLE_MODE_CASE2;
-		}
-		
-    	switch (visibleMode) {
-		case VISIBLE_MODE_CASE1:
-			isRequestAd = true;
-			isRefreshAd = true;
-			break;
-		case VISIBLE_MODE_CASE2:
-			isRequestAd = isShownView;
-			isRefreshAd = isShownView;
-			break;
-		case VISIBLE_MODE_CASE3:
-			isRequestAd = true;
-			isRefreshAd = isShownView;
-			break;
-		default:
-			isRequestAd = true;
-			isRefreshAd = true;
-			break;
-		}
-		
-		String data = "";
-		
-		if ((defaultImageResource!=null) && (getBackground()==null))
-		{
-			try {
-				handler.post(new SetBackgroundResourceAction(view, defaultImageResource));
-			} catch (Exception e) {
-				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "contentThreadAction", e.getMessage());
-			}
-		}
-		
-		InterceptOnAdDownload interceptOnAdDownload = new InterceptOnAdDownload(context,view);
-		
-		if(isRequestAd || isFirstTime) {
-			try {
-				if(mViewState != ViewState.EXPANDED) {
-					if(adserverRequest != null) {
-						interceptOnAdDownload.begin((AdServerView)this);
-						
-						adserverRequest.setExcampaigns(getExcampaignsString());
-						data = requestGet(adserverRequest.createURL());						
-					}
-				}
-			} catch (Exception e) {
-				adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "contentThreadAction.requestGet", e.getMessage());
-				interceptOnAdDownload.error((AdServerView)this,e.getMessage());				
-			}
-		}
-		
-		try {
-			if((data != null) && (data.length() > 0)) {
-				String dataToLowercase = data.toLowerCase();
-				if ((dataToLowercase.contains("invalid params")) || (dataToLowercase.contains("error: -1")))
-				{	
-					InterstitialClose();
-					StartTimer(context,view);
-					if(adDownload!= null) adDownload.error((AdServerView)this, "invalid params");
-				}else
-				{
-					if(isRefreshAd || isFirstTime) {
-						handler.post(new RemoveAllChildViews(view));
-						String externalCampaignData = Utils.scrapeIgnoreCase(data, "<external_campaign", "</external_campaign>");
-	
-						if((externalCampaignData != null) && (externalCampaignData.length() > 0)) {
-							String type = Utils.scrapeIgnoreCase(externalCampaignData, "<type>", "</type>");
-							String campaignId = Utils.scrapeIgnoreCase(externalCampaignData, "<campaign_id>", "</campaign_id>");
-							String trackUrl = Utils.scrapeIgnoreCase(externalCampaignData, "<track_url>", "</track_url>");
-							String externalParams = Utils.scrapeIgnoreCase(externalCampaignData, "<external_params>", "</external_params>");
-							interceptOnAdDownload.SetCampaingId(campaignId);
-							
-							if(onThirdPartyRequest!=null)
-							{
-								try
-								{
-									HashMap<String, String> params = new HashMap<String, String>();
-									params.put("type", type);
-									params.put("campaignId", campaignId);
-									params.put("trackUrl", trackUrl);
-									String[] args = externalParams.split("</param>");
-									for(int x=0;x<args.length;x++)
-									{
-										String[] vals = args[x].split("\">");
-										String val = vals.length>1 ? vals[1] : "";
-										String arg = vals[0].split("\"")[1];
-										params.put(arg, val);
-									}
-									
-									onThirdPartyRequest.event((AdServerView) this, params);
-								}catch (Exception e) {
-									adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "onThirdPartyRequest", e.getMessage());										
-								}
-									StartTimer(context, view);
-							} else RestartExcampaings(campaignId,context,view);							
-						} else {
-							handler.post(new RemoveAllChildViews(view));
-							String videoData = Utils.scrapeIgnoreCase(data, "<video", "/>");
-							
-							if((videoData != null) && (videoData.length() > 0)) {
-								String videoUrl = Utils.scrapeIgnoreCase(videoData, "src=\"", "\"");
-								String clickUrl = Utils.scrapeIgnoreCase(data, "href=\"", "\"");
-								handler.post(new SetupVideoAction(context, view, videoUrl, clickUrl));
-								StartTimer(context,view);
-							} else {
-								if(isContentAligned)
-								{
-									data = "<html><head>" +
-											"<style>*{margin:0;padding:0}</style>"+
-											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
-											"</head>" +
-											"<body style=\"background-color:#"+getBackgroundColor()+
-											";margin: 0px; padding: 0px; width: 100%; height: 100%\"><table height=\"100%\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td style=\"text-align:center;vertical-align:middle;\">" + data + "</td></tr></table></body></html>";
-												
-								}else
-									data = "<html><head>" +
-											"<style>*{margin:0;padding:0}</style>"+
-											"<script src=\"file://" + mScriptPath + "\" type=\"text/javascript\"></script>" +
-											"</head>" +
-											"<body style=\"background-color:#"+getBackgroundColor()+";margin: 0px; padding: 0px; width: 100%; height: 100%\">"+data+"</body></html>";
-								
-								mContent = data;
-								view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
-								handler.post(new Runnable() {
-									
-									@Override
-									public void run() {
-										getLayoutParams().width = lastX;
-										getLayoutParams().height = lastY;
-										requestLayout();
-									}
-								});	
-								StartTimer(context,view);
-							}							
-						}
-					}
-				}
-			}else
-			{
-				adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_WARNING, "contentThreadAction", "data = null isShownView="+Boolean.toString(isShownView));
-				
-				if(isShownView)
-				{
-					InterstitialClose();
-					if(adDownload!= null) adDownload.error((AdServerView)this,"empty server respons");
-				}
-				StartTimer(context,view);
-			}
-		} catch (Exception e) {
-			adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "contentThreadAction", e.getMessage());
-			StartTimer(context,view);
-		}
-		isFirstTime = false;
-		
-	}*/
-	
-	
-	
 	void InterstitialClose()
 	{
 		
@@ -1885,36 +1751,19 @@ public abstract class MASTAdServerViewCore extends WebView {
 	
 	static int RequestCounter = 0;
 	
-	/*private String requestGet(String url) throws IOException {
-		lastRequest = url;
-		
-		RequestCounter++;
-		int rcounterLocal = RequestCounter;
-		
-		adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "requestGet["+String.valueOf(rcounterLocal)+"]" , url);
-		
-		DefaultHttpClient client = new DefaultHttpClient();
-		HttpGet get = new HttpGet(url);
-		HttpResponse response = client.execute(get);
-		HttpEntity entity = response.getEntity();
-		InputStream inputStream = entity.getContent();
-		BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream,8192);
-		String responseValue = readInputStream(bufferedInputStream);
-		bufferedInputStream.close();
-		inputStream.close();
-		adLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_INFO, "requestGet result["+String.valueOf(rcounterLocal)+"]", responseValue);
-		lastResponse=responseValue;
-		return responseValue;
+	Float getFloatParameter(String stringValue)
+	{
+		if(stringValue != null) {
+			try
+			{
+				return  Float.parseFloat(stringValue);
+			}catch (Exception e) {
+				return null;
+			}
+		} else {
+			return null;
+		}
 	}
-	
-	private static String readInputStream(BufferedInputStream in) throws IOException {
-	    StringBuffer out = new StringBuffer();
-	    byte[] buffer = new byte[8192];
-	    for (int n; (n = in.read(buffer)) != -1;) {
-	        out.append(new String(buffer, 0, n));
-	    }
-	    return out.toString();
-	}*/
 	
 	Integer getIntParameter(String stringValue) {
 		if(stringValue != null) {
@@ -1940,9 +1789,11 @@ public abstract class MASTAdServerViewCore extends WebView {
 	public void injectJavaScript(String str) {
 		try
 		{
+			//System.out.println("inject javascript: " + str);
 			super.loadUrl("javascript:" + str);
 		}catch (Exception e) {
-//			Log.e("injectJavaScript", e.getMessage()+" "+str);
+			//Log.e("injectJavaScript", e.getMessage()+" "+str);
+			//System.out.println("injectJavaScript: " + e.getMessage()+" "+str);
 		}
 	}
 
@@ -1950,18 +1801,63 @@ public abstract class MASTAdServerViewCore extends WebView {
 		return mViewState.toString().toLowerCase();
 	}
 
-	private Handler mHandler = new Handler() {
-		private int mOldHeight;
-		private int mOldWidth;
-		private Drawable mOldExpandBackground;
-		private int mOldExpandBackgroundColor;
+	
+	private boolean closeView(boolean inject)
+	{
+		buttonClose.setVisibility(View.INVISIBLE);
+		ViewGroup.LayoutParams lp = getLayoutParams();
+		
+		switch (mViewState) {
+		case RESIZED:
+			ormmaEvent("close","viewState=resized");
 
+			lp.height = mOldHeight;
+			lp.width = mOldWidth;
+			requestLayout();
+			mViewState = ViewState.DEFAULT;
+			StartTimer(getContext(), view);
+			return true;
+		case EXPANDED:
+			if (inject)
+			{
+				if (expandParent != null) {
+					expandParent.injectJavaScript("ormma.close();");
+				} else {
+					injectJavaScript("ormma.close();");
+				}
+			}
+
+			if (parentView != null) {
+				mExpandedFrame.removeAllViews();
+				view.setBackgroundColor(mOldExpandBackgroundColor);
+				view.setBackgroundDrawable(mOldExpandBackground);
+				parentView.addView(view, new LinearLayout.LayoutParams(mOldWidth, mOldHeight));
+				parentView = null;
+			}
+			if (mExpandedFrame != null) {
+				ormmaEvent("close","viewState=expanded");
+				closeExpanded(mExpandedFrame);
+				mViewState = ViewState.DEFAULT;
+			}
+			lp.height = mOldHeight;
+			lp.width = mOldWidth;
+			requestLayout();
+			StartTimer(getContext(), view);
+			return true;		
+		};
+		
+		return false;
+	}
+	
+	
+	private Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
 			Bundle data = msg.getData();
 			switch (msg.what) {
 				case MESSAGE_RESIZE: {
 					if (mViewState == ViewState.DEFAULT) {
+						stopTimer(false); // stop ad refresh timer
 						int x = lastX;
 						int y = lastY;
 						mViewState = ViewState.RESIZED;
@@ -1982,35 +1878,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 					break;
 				}				
 				case MESSAGE_CLOSE: {
-					buttonClose.setVisibility(View.INVISIBLE);
-					ViewGroup.LayoutParams lp = getLayoutParams();
-					switch (mViewState) {
-					case RESIZED:
-						ormmaEvent("close","viewState=resized");
-						
-						lp.height = mOldHeight;
-						lp.width = mOldWidth;						
-						requestLayout();
-						mViewState = ViewState.DEFAULT;
-						break;
-					case EXPANDED:
-						if (parentView != null) {
-							mExpandedFrame.removeAllViews();
-							view.setBackgroundColor(mOldExpandBackgroundColor);
-							view.setBackgroundDrawable(mOldExpandBackground);
-							parentView.addView(view, new LinearLayout.LayoutParams(mOldWidth, mOldHeight));
-							parentView = null;
-						}
-						if (mExpandedFrame != null) {
-							ormmaEvent("close","viewState=expanded");
-							closeExpanded(mExpandedFrame);
-							mViewState = ViewState.DEFAULT;
-						}
-						lp.height = mOldHeight;
-						lp.width = mOldWidth;
-						requestLayout();
-						break;					
-					};		
+					closeView(false);
 					break;
 				}
 				case MESSAGE_HIDE: {
@@ -2029,6 +1897,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 				}
 				case MESSAGE_EXPAND: {
 					if (mViewState == ViewState.DEFAULT) {
+						stopTimer(false); // stop ad refresh timer
 						ViewGroup.LayoutParams lp = getLayoutParams();
 						mOldHeight = lp.height;
 						mOldWidth = lp.width;
@@ -2044,11 +1913,13 @@ public abstract class MASTAdServerViewCore extends WebView {
 					break;
 				}
 				case MESSAGE_PLAY_AUDIO: {
+					stopTimer(false); // stop ad refresh timer
 					ormmaEvent("playaudio","");
 					handler.post(new SetupOrmmaAudioPlayer(data));
 					break;
 				}
 				case MESSAGE_PLAY_VIDEO: {
+					stopTimer(false); // stop ad refresh timer
 					ormmaEvent("playvideo","fulscreen=false");
 					handler.post(new SetupOrmmaPlayer(view, data));
 					break;
@@ -2187,7 +2058,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 				public void onClick(View v) {
 					handler.post(new Runnable() {
 						@Override
-						public void run() {						
+						public void run() {
 							injectJavaScript("ormma.close();");						
 						}
 					});
@@ -2793,7 +2664,7 @@ public abstract class MASTAdServerViewCore extends WebView {
 			return null;
 		}
 	}
-
+	
 	public void setLogLevel(int logLevel)
 	{
 		adLog.setLogLevel(logLevel);
@@ -2804,11 +2675,52 @@ public abstract class MASTAdServerViewCore extends WebView {
 		internalBrowser = value;
 	}
 	
+	/**
+	 * Optional.
+	 * Set minimum distance (in meters) location must change for app to be notified of new location from the GPS system.
+	 * Use 0 (the default) if no distance based updates are desired (legacy behavior.)
+	 * @param Float distance in meters
+	 */
+	public void setLocationMoveDistance(float meters)
+	{
+		locationMinMoveMeters = meters;
+	}
+	
+	/**
+	 * Optional.
+	 * Get minimum distance (in meters) location must change for app to be notified of new location.
+	 */
+	public float getLocationMoveDistance()
+	{
+		return locationMinMoveMeters;
+	}
+	
+	/**
+	 * Optional.
+	 * Set minimum time between location updates from the GPS system. 
+	 * Use 0 (the default) if recurring time updates are not desired (legacy behavior.)
+	 * @param Integer repeat time in milliseconds
+	 */
+	public void setLocationMinWait(int millis)
+	{
+		locationMinWaitMillis = millis;
+	}
+	
+	public int getLocationMinWait()
+	{
+		return locationMinWaitMillis;
+	}
+	
 	public void setLocationDetection(boolean detect)
 	{
 		if(detect)
 		{
-			AutoDetectParameters autoDetectParameters = AutoDetectParameters.getInstance();
+			final AutoDetectParameters autoDetectParameters = AutoDetectParameters.getInstance();
+	
+			if (locationMinWaitMillis == null)
+				locationMinWaitMillis = 0;
+			if (locationMinMoveMeters == null)
+				locationMinMoveMeters = 0.0F;
 			
 			if((adserverRequest.getLatitude() == null) || (adserverRequest.getLongitude() == null)) {
 				if((autoDetectParameters.getLatitude() == null) || (autoDetectParameters.getLongitude() == null)) {
@@ -2819,8 +2731,32 @@ public abstract class MASTAdServerViewCore extends WebView {
 						boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 		
 						if(isGpsEnabled) {
-							listener = new WhereamiLocationListener(locationManager, autoDetectParameters); 
-							locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener, Looper.getMainLooper());
+							listener = new LocListener(this.getContext(), locationMinWaitMillis.intValue(), locationMinMoveMeters.floatValue(), LocationManager.GPS_PROVIDER, Looper.getMainLooper(), adLog)
+							{
+								public void fail(String m)
+								{
+									// Nothing (legacy)
+								}
+								
+								public void success(Location location)
+								{
+									try {
+										double latitude = location.getLatitude();
+										double longitude = location.getLongitude();
+										
+										adserverRequest.setLatitude(Double.toString(latitude));
+										adserverRequest.setLongitude(Double.toString(longitude));
+										autoDetectParameters.setLatitude(Double.toString(latitude));
+										autoDetectParameters.setLongitude(Double.toString(longitude));
+										adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "GPSLocationChanged=", "("+autoDetectParameters.getLatitude()+";"+autoDetectParameters.getLongitude()+")");
+										
+						    		} catch (Exception e) {
+						    			adLog.log(MASTAdLog.LOG_LEVEL_2,MASTAdLog.LOG_TYPE_ERROR,"GPSLocationChanged",e.getMessage());
+						    		}									
+								}
+							};
+							//locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, locationMinWaitMillis.intValue(), locationMinMoveMeters.floatValue(), listener, Looper.getMainLooper());
+							listener.start();
 						}else
 						{
 							adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_WARNING, "AutoDetectParameters.Gps", "not avalable");
@@ -2834,50 +2770,31 @@ public abstract class MASTAdServerViewCore extends WebView {
 			}
 		}
 	}
-	
-	private class WhereamiLocationListener implements LocationListener {
-		private LocationManager locationManager;
-		private AutoDetectParameters autoDetectParameters;
 		
-		public WhereamiLocationListener(LocationManager locationManager, 
-				AutoDetectParameters autoDetectParameters) {
-			this.locationManager = locationManager;
-			this.autoDetectParameters = autoDetectParameters;
-		}
-
-		public void onLocationChanged(Location location) {
-			locationManager.removeUpdates(this);
-			
-			try {
-				double latitude = location.getLatitude();
-				double longitude = location.getLongitude();
-				
-				
-				adserverRequest.setLatitude(Double.toString(latitude));
-				adserverRequest.setLongitude(Double.toString(longitude));
-				autoDetectParameters.setLatitude(Double.toString(latitude));
-				autoDetectParameters.setLongitude(Double.toString(longitude));
-				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "GPSLocationChanged=", "("+autoDetectParameters.getLatitude()+";"+autoDetectParameters.getLongitude()+")");
-				
-    		} catch (Exception e) {
-    			adLog.log(MASTAdLog.LOG_LEVEL_2,MASTAdLog.LOG_TYPE_ERROR,"GPSLocationChanged",e.getMessage());
-    		}
-	    }
-
-		@Override
-		public void onProviderDisabled(String provider) {
-		}
-
-		@Override
-		public void onProviderEnabled(String provider) {
-		}
-
-		@Override
-		public void onStatusChanged(String provider, int status, Bundle extras) {
-		}
+	public boolean getUseSystemDeviceId()
+	{
+		return ContentManager.getInstance(this).getUseSystemDeviceId();
 	}
-
-
+	
+	
+	public void setUseSystemDeviceId(boolean value)
+	{
+		ContentManager.getInstance(this).setUseSystemDeviceId(value);
+	}
+	
+	
+	public void setDeviceId(String value)
+	{
+		ContentManager.getInstance(this).setDeviceId(value);
+	}
+	
+	
+	public String getDeviceId()
+	{
+		return ContentManager.getInstance(this).getDeviceId();
+	}
+	
+	
 	/**
 	 * Play video
 	 * 
