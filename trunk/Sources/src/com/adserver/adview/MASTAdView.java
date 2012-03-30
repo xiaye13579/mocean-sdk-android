@@ -1,4 +1,4 @@
-package com.adserver.adview;
+package com.MASTAdView;
 
 import java.security.SignedObject;
 import java.util.Hashtable;
@@ -44,7 +44,7 @@ import android.widget.RelativeLayout;
  * country - Country of visitor (for example: US). 
  * ua - The browser user agent of the device making the request.
  */
-public class MASTAdServerView extends MASTAdServerViewCore {
+public class MASTAdView extends MASTAdViewCore {
 	
 	private Integer showCloseButtonTime; 
 	private Integer autoCloseInterstitialTime;
@@ -57,7 +57,7 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 	 * @param site - The id of the publisher site.
 	 * @param zone - The id of the zone of publisher site.
 	 */
-	public MASTAdServerView(Context context, Integer site, Integer zone) {
+	public MASTAdView(Context context, Integer site, Integer zone) {
 		super(context, site, zone);
 	}
 	
@@ -67,7 +67,7 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 	 * @param attrs
 	 * @param defStyle
 	 */
-	public MASTAdServerView(Context context, AttributeSet attrs, int defStyle) {
+	public MASTAdView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 	}
 
@@ -76,7 +76,7 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 	 * @param context
 	 * @param attrs
 	 */
-	public MASTAdServerView(Context context, AttributeSet attrs) {
+	public MASTAdView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		AutoDetectParameters(context);
 	}
@@ -85,12 +85,12 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 	 * Creation of advanced viewer of advertising. It is used for element creation in a XML template.
 	 * @param context
 	 */
-	public MASTAdServerView(Context context) {
+	public MASTAdView(Context context) {
 		super(context);
 	}
 	
 
-	protected MASTAdServerView(Context context, boolean expanded, MASTAdServerViewCore expandParent) {
+	protected MASTAdView(Context context, boolean expanded, MASTAdViewCore expandParent) {
 		super(context, expanded, expandParent);
 	}
 	
@@ -129,7 +129,7 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 	
 	private static void openInterstitialForm(Context context,
 			Integer showCloseButtonTime, Integer autoCloseInterstitialTime,
-			Boolean isShowPhoneStatusBar, MASTAdServerView adServerView, Button closeButton) {
+			Boolean isShowPhoneStatusBar, MASTAdView adServerView, Button closeButton) {
 		if((showCloseButtonTime == null) || (showCloseButtonTime < 0)) {
 			showCloseButtonTime = 0;
 		}
@@ -308,7 +308,7 @@ public class MASTAdServerView extends MASTAdServerViewCore {
 	@Override
 	void AutoDetectParameters(Context context) {
 		super.AutoDetectParameters(context);
-		MASTAdServerViewCore adserverView = this;
+		MASTAdViewCore adserverView = this;
 		if(adserverRequest != null) {
 			AutoDetectParameters autoDetectParameters = AutoDetectParameters.getInstance();
 			
