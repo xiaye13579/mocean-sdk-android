@@ -13,7 +13,8 @@ import com.adserver.adview.ormma.listeners.LocListener;
 public class OrmmaLocationController extends OrmmaController {
 	private LocationManager mLocationManager;
 	private boolean hasPermission = false;
-	final int INTERVAL = 1000;
+	final int INTERVAL = 5 * 60 * 1000; // 1000;
+	final float DISTANCE = 1000.0F;
 	private LocListener mGps;
 	private LocListener mNetwork;
 	private int mLocListenerCount;
@@ -23,10 +24,34 @@ public class OrmmaLocationController extends OrmmaController {
 
 		try{
 			mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-			if (mLocationManager.getProvider(LocationManager.GPS_PROVIDER) != null)
-				mGps = new LocListener(context, INTERVAL, this, LocationManager.GPS_PROVIDER);
-			if (mLocationManager.getProvider(LocationManager.NETWORK_PROVIDER) != null)
-				mNetwork = new LocListener(context, INTERVAL, this, LocationManager.NETWORK_PROVIDER);
+			if (mLocationManager.getProvider(LocationManager.GPS_PROVIDER) != null) {
+				mGps = new LocListener(context, INTERVAL, DISTANCE, LocationManager.GPS_PROVIDER, null)
+				{
+					public void fail(String m)
+					{
+						onFail(m);
+					}
+					
+					public void success(Location l)
+					{
+						onSuccess(l);
+					}
+				};
+			}
+			if (mLocationManager.getProvider(LocationManager.NETWORK_PROVIDER) != null) {
+				mNetwork = new LocListener(context, INTERVAL, DISTANCE, LocationManager.NETWORK_PROVIDER, null)
+				{
+					public void fail(String m)
+					{
+						onFail(m);
+					}
+					
+					public void success(Location l)
+					{
+						onSuccess(l);
+					}
+				};
+			}
 			hasPermission = true;
 		} catch (SecurityException e){
 			mOrmmaView.injectJavaScript("Ormma.fireError(\"location\",\"Security error\")");
@@ -35,8 +60,10 @@ public class OrmmaLocationController extends OrmmaController {
 
 	public String getLocation() {
 		if(!hasPermission){
+			onFail("Security error");
 			return null;
 		}
+		
 		List<String> providers = mLocationManager.getProviders(true);
 		Iterator<String> provider = providers.iterator();
 		Location lastKnown = null;
@@ -56,6 +83,11 @@ public class OrmmaLocationController extends OrmmaController {
 	}
 	
 	public void startLocationListener() {
+		if(!hasPermission){
+			onFail("Security error");
+			return;
+		}
+		
 		if(mLocListenerCount == 0) {
 			if(mNetwork != null)
 				mNetwork.start();
@@ -77,15 +109,14 @@ public class OrmmaLocationController extends OrmmaController {
 			}
 		}
 	}
-
-	public void success(Location loc) {
+	
+	public void onSuccess(Location loc) {
 		String ret = "{ \"lat\": " + loc.getLatitude() + ", " + "\"lon\": " + 
 			loc.getLongitude() + ", " + "\"acc\": " + loc.getAccuracy() + "}";
 		mOrmmaView.injectJavaScript("Ormma.locationChanged(" + ret + ")");
 	}
 	
-	public void fail(String description) {
+	public void onFail(String description) {
 		mOrmmaView.injectJavaScript("Ormma.fireError(\"location\"," + description + ")");
 	}
-	
 }
