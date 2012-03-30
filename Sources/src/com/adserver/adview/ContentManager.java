@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
@@ -29,6 +31,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 import android.webkit.WebView;
@@ -40,7 +43,8 @@ public class ContentManager {
 	private static ContentManager instance;
 	private static boolean isSimAvailable;
 	private HashMap<MASTAdServerViewCore, ContentParameters> senderParameters = new HashMap<MASTAdServerViewCore, ContentParameters>();
-	private static String id = null;
+	private String id = null;
+	private boolean useSystemDeviceId = false;
 	private Context context;
 
 	static public ContentManager getInstance(WebView webView) {
@@ -53,6 +57,11 @@ public class ContentManager {
 	private ContentManager(WebView webView) {
 		userAgent = webView.getSettings().getUserAgentString();
 		this.context = webView.getContext().getApplicationContext();
+		runInitDefaultParameters();
+	}
+	
+	private void runInitDefaultParameters()
+	{
 		Thread thread = new Thread() {
 			@Override
 			public void run() {
@@ -128,67 +137,6 @@ public class ContentManager {
 			senderParameters.get(sender).sender = null;
 			senderParameters.get(sender).cTh.cancel();
 			senderParameters.remove(sender);
-		}
-	}
-
-	public void installNotification(Integer advertiserId, String groupCode)
-	{	
-		InstallNotificationThread installNotificationThread = 
-			new InstallNotificationThread(context, advertiserId, groupCode);
-		installNotificationThread.start();
-	}
-	
-	private class InstallNotificationThread extends Thread {
-		private Context context;
-		private Integer advertiserId;
-		private String groupCode;
-
-		public InstallNotificationThread(Context context, Integer advertiserId, String groupCode) {
-			this.context = context;
-			this.advertiserId = advertiserId;
-			this.groupCode = groupCode;
-		}
-
-		@Override
-		public synchronized void run() {
-			try {
-				if(context != null) {
-					if((advertiserId != null) && (advertiserId > 0)
-							&& (groupCode != null) && (groupCode.length() > 0)) {
-						SharedPreferences settings = context.getSharedPreferences(Constants.PREFS_FILE_NAME, 0);
-						boolean isFirstAppLaunch = settings.getBoolean(Constants.PREF_IS_FIRST_APP_LAUNCH, true);
-
-						if(isFirstAppLaunch) {
-							String deviceId;
-							TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-							String temp = tm.getDeviceId();
-							if (null !=  temp) deviceId = temp;
-							else {
-								temp = Secure.getString(context.getContentResolver(),Secure.ANDROID_ID); ;
-								if (null != temp) deviceId = temp;
-								else deviceId = "";
-							}
-							
-							String deviceIdMD5 = Utils.md5(deviceId);
-							
-							if((deviceIdMD5 != null) && (deviceIdMD5.length() > 0)) {
-								StringBuilder url = new StringBuilder(Constants.FIRST_APP_LAUNCH_URL);
-								url.append("?advertiser_id=" + advertiserId.toString());
-								url.append("&group_code=" + URLEncoder.encode(groupCode));
-								url.append("&"+AdserverRequest.parameter_device_id+"=" + URLEncoder.encode(deviceIdMD5));
-								
-								sendImpr(url.toString());
-								
-								SharedPreferences.Editor editor = settings.edit();
-								editor.putBoolean(Constants.PREF_IS_FIRST_APP_LAUNCH, false);
-								editor.commit();
-							}
-						}
-					}
-				}
-			} catch (Exception e) {
-				//adLog.log(AdLog.LOG_LEVEL_1, AdLog.LOG_TYPE_ERROR, "InstallNotificationThread", e.getMessage());
-			}
 		}
 	}
 	
@@ -273,29 +221,52 @@ public class ContentManager {
 		}
 	}
 
-	private void initDefaultParameters() {
-		String deviceId;
-		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-		isSimAvailable = tm.getSimState() > TelephonyManager.SIM_STATE_ABSENT;
-		String tempDeviceId = tm.getDeviceId();
-
-		if (null != tempDeviceId) {
-			deviceId = tempDeviceId;
-		} else {
-			tempDeviceId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
-
+	
+	public String getDeviceId()
+	{
+		return getDeviceId((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
+	}
+	
+	// Return user-specified device ID value if any, otherwise unique device ID from
+	// phone if that option has been enabled.
+	private String getDeviceId(TelephonyManager tm)
+	{
+		if (id != null)
+		{
+			return id;
+		}
+		
+		String deviceId = null;
+		if (useSystemDeviceId)
+		{
+			String tempDeviceId = tm.getDeviceId();
+	
 			if (null != tempDeviceId) {
 				deviceId = tempDeviceId;
 			} else {
-				deviceId = null;
+				tempDeviceId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+	
+				if (null != tempDeviceId) {
+					deviceId = tempDeviceId;
+				} else {
+					deviceId = makeDeviceId(context);
+				}
 			}
 		}
 
-		if (deviceId == null) {
-			deviceId = getId(context);
+		id = deviceId;
+		return deviceId;
+	}
+	
+	private void initDefaultParameters() {
+		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		isSimAvailable = tm.getSimState() > TelephonyManager.SIM_STATE_ABSENT;
+		String deviceId = getDeviceId(tm);
+		String deviceIdMd5 = null;
+		if (deviceId != null)
+		{
+			deviceIdMd5 = Utils.md5(deviceId);
 		}
-		
-		String deviceIdMd5 = Utils.md5(deviceId);
 		
 		autoDetectParameters = "";
 		
@@ -362,7 +333,7 @@ public class ContentManager {
 		autoDetectParameters += "&deviceosversion=" + URLEncoder.encode(android.os.Build.VERSION.RELEASE);*/
 	}
 
-	private synchronized static String getId(Context context) {
+	private synchronized String makeDeviceId(Context context) {
 		if (id == null) {
 			File installation = new File(context.getFilesDir(), INSTALLATION);
 			try {
@@ -373,9 +344,48 @@ public class ContentManager {
 				id = "1234567890";
 			}
 		}
+		
 		return id;
 	}
 
+	
+	public boolean getUseSystemDeviceId()
+	{
+		return useSystemDeviceId;
+	}
+	
+	
+	public void setUseSystemDeviceId(boolean value)
+	{
+		boolean changed = false;
+		if (useSystemDeviceId != value)
+		{
+			changed = true;
+		}
+		useSystemDeviceId = value;
+		
+		if (changed)
+		{
+			runInitDefaultParameters();
+		}
+	}
+	
+	
+	public void setDeviceId(String value)
+	{
+		boolean changed = false;
+		if ((id != null) && (id.compareTo(value) != 0))
+		{
+			changed = true;
+		}
+		id = value;
+		
+		if (changed)
+		{
+			runInitDefaultParameters();
+		}
+	}
+	
 	private static String readInstallationFile(File installationFile) throws IOException {
 		RandomAccessFile f = new RandomAccessFile(installationFile, "r");
 		byte[] bytes = new byte[(int) f.length()];
@@ -390,5 +400,4 @@ public class ContentManager {
 		out.write(id.getBytes());
 		out.close();
 	}
-
 }
