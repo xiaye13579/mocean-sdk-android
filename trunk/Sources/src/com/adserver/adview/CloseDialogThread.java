@@ -1,4 +1,4 @@
-package com.adserver.adview;
+package com.MASTAdView;
 
 import android.app.Dialog;
 import android.os.Handler;

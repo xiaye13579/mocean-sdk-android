@@ -1,6 +1,6 @@
-package com.adserver.adview.ormma.util;
+package com.MASTAdView.ormma.util;
 
-import com.adserver.adview.ormma.OrmmaController.PlayerProperties;
+import com.MASTAdView.ormma.OrmmaController.PlayerProperties;
 
 import android.content.Context;
 import android.graphics.Color;

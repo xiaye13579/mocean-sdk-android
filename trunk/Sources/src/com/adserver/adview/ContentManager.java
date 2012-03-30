@@ -1,4 +1,4 @@
-package com.adserver.adview;
+package com.MASTAdView;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -42,7 +42,7 @@ public class ContentManager {
 	private String userAgent = "";
 	private static ContentManager instance;
 	private static boolean isSimAvailable;
-	private HashMap<MASTAdServerViewCore, ContentParameters> senderParameters = new HashMap<MASTAdServerViewCore, ContentParameters>();
+	private HashMap<MASTAdViewCore, ContentParameters> senderParameters = new HashMap<MASTAdViewCore, ContentParameters>();
 	private String id = null;
 	private boolean useSystemDeviceId = false;
 	private Context context;
@@ -114,7 +114,7 @@ public class ContentManager {
 		thread.start();
 	}
 
-	public void startLoadContent(MASTAdServerViewCore sender, String url/*, String w, String h*/) {
+	public void startLoadContent(MASTAdViewCore sender, String url/*, String w, String h*/) {
 		if (senderParameters.containsKey(sender))
 			stopLoadContent(sender);
 
@@ -132,7 +132,7 @@ public class ContentManager {
 		cTh.start();
 	}
 
-	public void stopLoadContent(MASTAdServerViewCore sender) {
+	public void stopLoadContent(MASTAdViewCore sender) {
 		if (senderParameters.containsKey(sender)) {
 			senderParameters.get(sender).sender = null;
 			senderParameters.get(sender).cTh.cancel();
@@ -144,7 +144,7 @@ public class ContentManager {
 		public String url;
 		//public String w;
 		//public String h;
-		public MASTAdServerViewCore sender;
+		public MASTAdViewCore sender;
 		ContentThread cTh;
 	};
 

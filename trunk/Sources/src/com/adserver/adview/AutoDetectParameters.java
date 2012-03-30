@@ -1,4 +1,4 @@
-package com.adserver.adview;
+package com.MASTAdView;
 
 public class AutoDetectParameters {
 	private static AutoDetectParameters instance;

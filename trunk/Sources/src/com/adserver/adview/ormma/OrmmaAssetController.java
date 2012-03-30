@@ -1,5 +1,5 @@
 
-package com.adserver.adview.ormma;
+package com.MASTAdView.ormma;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,13 +31,13 @@ import android.view.View;
 import android.view.Window;
 import android.webkit.URLUtil;
 
-import com.adserver.adview.MASTAdServerViewCore;
-import com.adserver.adview.ormma.util.FileComparatorByDate;
+import com.MASTAdView.MASTAdViewCore;
+import com.MASTAdView.ormma.util.FileComparatorByDate;
 
 public class OrmmaAssetController extends OrmmaController {
 	private static final String ASSETS_DIRECTORY = "ormma_assets";
 
-	public OrmmaAssetController(MASTAdServerViewCore adView, Context c) {
+	public OrmmaAssetController(MASTAdViewCore adView, Context c) {
 		super(adView, c);
 	}
 

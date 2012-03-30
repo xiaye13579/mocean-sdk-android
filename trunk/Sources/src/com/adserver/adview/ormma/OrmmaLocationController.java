@@ -1,4 +1,4 @@
-package com.adserver.adview.ormma;
+package com.MASTAdView.ormma;
 
 import java.util.Iterator;
 import java.util.List;
@@ -7,8 +7,8 @@ import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 
-import com.adserver.adview.MASTAdServerViewCore;
-import com.adserver.adview.ormma.listeners.LocListener;
+import com.MASTAdView.MASTAdViewCore;
+import com.MASTAdView.ormma.listeners.LocListener;
 
 public class OrmmaLocationController extends OrmmaController {
 	private LocationManager mLocationManager;
@@ -19,7 +19,7 @@ public class OrmmaLocationController extends OrmmaController {
 	private LocListener mNetwork;
 	private int mLocListenerCount;
 
-	public OrmmaLocationController(MASTAdServerViewCore adView, Context context) {
+	public OrmmaLocationController(MASTAdViewCore adView, Context context) {
 		super(adView, context);
 
 		try{

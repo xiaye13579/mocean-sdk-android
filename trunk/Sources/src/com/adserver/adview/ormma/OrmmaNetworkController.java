@@ -1,5 +1,5 @@
 
-package com.adserver.adview.ormma;
+package com.MASTAdView.ormma;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -9,9 +9,9 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import com.adserver.adview.MASTAdServerViewCore;
-import com.adserver.adview.Base64;
-import com.adserver.adview.ormma.util.OrmmaNetworkBroadcastReceiver;
+import com.MASTAdView.Base64;
+import com.MASTAdView.MASTAdViewCore;
+import com.MASTAdView.ormma.util.OrmmaNetworkBroadcastReceiver;
 
 public class OrmmaNetworkController extends OrmmaController {
 	private ConnectivityManager mConnectivityManager;
@@ -20,7 +20,7 @@ public class OrmmaNetworkController extends OrmmaController {
 	private IntentFilter mFilter;
 	private Hashtable<String, String> requests;
 
-	public OrmmaNetworkController(MASTAdServerViewCore adView, Context context) {
+	public OrmmaNetworkController(MASTAdViewCore adView, Context context) {
 		super(adView, context);
 		mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		requests = new Hashtable<String, String>();

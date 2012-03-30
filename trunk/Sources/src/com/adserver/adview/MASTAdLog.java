@@ -1,4 +1,4 @@
-package com.adserver.adview;
+package com.MASTAdView;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,7 @@ public class MASTAdLog {
 	int CurrentLogLevel = 0;
 	String AppName="";
 	
-	MASTAdServerViewCore adView;
+	MASTAdViewCore adView;
 	
 	private static int DefaultLevel = LOG_LEVEL_NONE;
 	
@@ -44,7 +44,7 @@ public class MASTAdLog {
 		}
 	}
 	
-	public MASTAdLog(MASTAdServerViewCore adView)
+	public MASTAdLog(MASTAdViewCore adView)
 	{
 		this.adView =  adView;
 		setLogLevel(DefaultLevel);

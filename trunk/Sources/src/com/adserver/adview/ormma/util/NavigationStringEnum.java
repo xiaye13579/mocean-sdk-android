@@ -1,5 +1,5 @@
 
-package com.adserver.adview.ormma.util;
+package com.MASTAdView.ormma.util;
 
 public enum NavigationStringEnum {
 

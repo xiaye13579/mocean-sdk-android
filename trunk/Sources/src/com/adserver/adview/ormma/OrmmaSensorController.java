@@ -1,4 +1,4 @@
-package com.adserver.adview.ormma;
+package com.MASTAdView.ormma;
 
 import java.util.List;
 
@@ -6,8 +6,8 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 
-import com.adserver.adview.MASTAdServerViewCore;
-import com.adserver.adview.ormma.listeners.AccelListener;
+import com.MASTAdView.MASTAdViewCore;
+import com.MASTAdView.ormma.listeners.AccelListener;
 
 public class OrmmaSensorController extends OrmmaController{
 	final int INTERVAL = 1000;
@@ -16,7 +16,7 @@ public class OrmmaSensorController extends OrmmaController{
 	private float mLastY = 0;
 	private float mLastZ = 0;
 
-	public OrmmaSensorController(MASTAdServerViewCore adView, Context context) {
+	public OrmmaSensorController(MASTAdViewCore adView, Context context) {
 		super(adView, context);
 		mAccel = new AccelListener(context, this);
 	}

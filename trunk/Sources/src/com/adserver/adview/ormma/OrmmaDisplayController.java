@@ -1,5 +1,5 @@
 
-package com.adserver.adview.ormma;
+package com.MASTAdView.ormma;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,9 +19,9 @@ import android.view.WindowManager;
 import android.webkit.URLUtil;
 
 
-import com.adserver.adview.MASTAdLog;
-import com.adserver.adview.MASTAdServerViewCore;
-import com.adserver.adview.ormma.util.OrmmaConfigurationBroadcastReceiver;
+import com.MASTAdView.MASTAdLog;
+import com.MASTAdView.MASTAdViewCore;
+import com.MASTAdView.ormma.util.OrmmaConfigurationBroadcastReceiver;
 
 public class OrmmaDisplayController extends OrmmaController {
 	private WindowManager mWindowManager;
@@ -32,7 +32,7 @@ public class OrmmaDisplayController extends OrmmaController {
 	private Dimensions defaultPosition;
 	private static final String LOG_TAG = "OrmmaDisplayController";
 
-	public OrmmaDisplayController(MASTAdServerViewCore adView, Context c) {
+	public OrmmaDisplayController(MASTAdViewCore adView, Context c) {
 		super(adView, c);
 		DisplayMetrics metrics = new DisplayMetrics();
 		((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(metrics);

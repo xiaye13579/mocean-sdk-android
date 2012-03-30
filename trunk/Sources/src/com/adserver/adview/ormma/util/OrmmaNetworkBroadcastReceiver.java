@@ -1,11 +1,11 @@
-package com.adserver.adview.ormma.util;
+package com.MASTAdView.ormma.util;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 
-import com.adserver.adview.ormma.OrmmaNetworkController;
+import com.MASTAdView.ormma.OrmmaNetworkController;
 
 public class OrmmaNetworkBroadcastReceiver extends BroadcastReceiver {
 	private OrmmaNetworkController mOrmmaNetworkController;
