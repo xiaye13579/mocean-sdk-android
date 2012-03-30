@@ -1,10 +1,10 @@
-package com.adserver.adview.ormma.util;
+package com.MASTAdView.ormma.util;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.adserver.adview.ormma.OrmmaDisplayController;
+import com.MASTAdView.ormma.OrmmaDisplayController;
 
 
 public class OrmmaConfigurationBroadcastReceiver extends BroadcastReceiver {

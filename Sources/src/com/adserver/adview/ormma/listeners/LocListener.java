@@ -1,5 +1,5 @@
 
-package com.adserver.adview.ormma.listeners;
+package com.MASTAdView.ormma.listeners;
 
 import android.content.Context;
 import android.location.Location;
@@ -9,8 +9,8 @@ import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.Looper;
 
-import com.adserver.adview.MASTAdLog;
-import com.adserver.adview.ormma.OrmmaLocationController;
+import com.MASTAdView.MASTAdLog;
+import com.MASTAdView.ormma.OrmmaLocationController;
 
 public class LocListener implements LocationListener {
 	//OrmmaLocationController mOrmmaLocationController;

@@ -1,4 +1,4 @@
-package com.adserver.adview;
+package com.MASTAdView;
 
 /**
 * A Base64 Encoder/Decoder.

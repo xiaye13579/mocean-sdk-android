@@ -1,5 +1,5 @@
 
-package com.adserver.adview.ormma.listeners;
+package com.MASTAdView.ormma.listeners;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import com.adserver.adview.ormma.OrmmaSensorController;
+import com.MASTAdView.ormma.OrmmaSensorController;
 
 public class AccelListener implements SensorEventListener {
 	private static final int FORCE_THRESHOLD = 1000;

@@ -1,5 +1,5 @@
 
-package com.adserver.adview.ormma;
+package com.MASTAdView.ormma;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -11,13 +11,13 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.adserver.adview.MASTAdServerViewCore;
-import com.adserver.adview.ormma.util.NavigationStringEnum;
-import com.adserver.adview.ormma.util.TransitionStringEnum;
+import com.MASTAdView.MASTAdViewCore;
+import com.MASTAdView.ormma.util.NavigationStringEnum;
+import com.MASTAdView.ormma.util.TransitionStringEnum;
 
 public class OrmmaController {
 
-	protected MASTAdServerViewCore mOrmmaView;
+	protected MASTAdViewCore mOrmmaView;
 
 	private static final String STRING_TYPE = "class java.lang.String";
 	private static final String INT_TYPE = "int";
@@ -99,7 +99,7 @@ public class OrmmaController {
 		public boolean isModal;
 	}
 
-	public OrmmaController(MASTAdServerViewCore adView, Context context) {
+	public OrmmaController(MASTAdViewCore adView, Context context) {
 		mOrmmaView = adView;
 		mContext = context;
 	}

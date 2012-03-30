@@ -1,4 +1,4 @@
-package com.adserver.adview;
+package com.MASTAdView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -69,7 +69,7 @@ public class AdserverRequest {
 	
 	public AdserverRequest(MASTAdLog AdLog) {
 		this.AdLog = AdLog;
-		setPremium(MASTAdServerViewCore.PREMIUM_STATUS_BOTH);
+		setPremium(MASTAdViewCore.PREMIUM_STATUS_BOTH);
 	}
 
 	/**
@@ -606,7 +606,7 @@ public class AdserverRequest {
 	public Integer getPremium() {
 		synchronized(parameters) {
 			String premium = parameters.get(parameter_premium);
-			return getIntParameter(premium,MASTAdServerViewCore.PREMIUM_STATUS_BOTH);
+			return getIntParameter(premium,MASTAdViewCore.PREMIUM_STATUS_BOTH);
 		}
 	}
 	

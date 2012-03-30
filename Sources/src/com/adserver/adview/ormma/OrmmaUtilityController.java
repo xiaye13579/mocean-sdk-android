@@ -1,5 +1,5 @@
 
-package com.adserver.adview.ormma;
+package com.MASTAdView.ormma;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -19,13 +19,13 @@ import android.text.TextUtils;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 
-import com.adserver.adview.MASTAdServerViewCore;
+import com.MASTAdView.MASTAdViewCore;
 
 public class OrmmaUtilityController extends OrmmaController {
 
 	static HashMap<String, Boolean> mFeatureMap = null;
 
-	public OrmmaUtilityController(MASTAdServerViewCore adView, Context context) {
+	public OrmmaUtilityController(MASTAdViewCore adView, Context context) {
 		super(adView, context);
 		setFeatureMap();
 	}
