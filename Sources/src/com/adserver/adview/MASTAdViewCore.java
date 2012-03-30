@@ -1,4 +1,4 @@
-package com.adserver.adview;
+package com.MASTAdView;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -63,23 +63,23 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.VideoView;
 
-import com.adserver.adview.ormma.OrmmaAssetController;
-import com.adserver.adview.ormma.OrmmaController.Dimensions;
-import com.adserver.adview.ormma.OrmmaController.PlayerProperties;
-import com.adserver.adview.ormma.OrmmaController.Properties;
-import com.adserver.adview.ormma.OrmmaDisplayController;
-import com.adserver.adview.ormma.OrmmaLocationController;
-import com.adserver.adview.ormma.OrmmaNetworkController;
-import com.adserver.adview.ormma.OrmmaSensorController;
-import com.adserver.adview.ormma.OrmmaUtilityController;
-import com.adserver.adview.ormma.listeners.LocListener;
-import com.adserver.adview.ormma.util.OrmmaPlayer;
-import com.adserver.adview.ormma.util.OrmmaUtils;
+import com.MASTAdView.ormma.OrmmaAssetController;
+import com.MASTAdView.ormma.OrmmaDisplayController;
+import com.MASTAdView.ormma.OrmmaLocationController;
+import com.MASTAdView.ormma.OrmmaNetworkController;
+import com.MASTAdView.ormma.OrmmaSensorController;
+import com.MASTAdView.ormma.OrmmaUtilityController;
+import com.MASTAdView.ormma.OrmmaController.Dimensions;
+import com.MASTAdView.ormma.OrmmaController.PlayerProperties;
+import com.MASTAdView.ormma.OrmmaController.Properties;
+import com.MASTAdView.ormma.listeners.LocListener;
+import com.MASTAdView.ormma.util.OrmmaPlayer;
+import com.MASTAdView.ormma.util.OrmmaUtils;
 
 /**
  * Viewer of advertising.
  */
-public abstract class MASTAdServerViewCore extends WebView
+public abstract class MASTAdViewCore extends WebView
 {
 	
 	/*static final int ID_CLOSE = 1;
@@ -168,7 +168,7 @@ public abstract class MASTAdServerViewCore extends WebView
 	private OrmmaNetworkController mNetworkController;
 	private OrmmaSensorController mSensorController;
 	private ViewState mViewState = ViewState.DEFAULT;
-	private MASTAdServerViewCore mParentAd = null;
+	private MASTAdViewCore mParentAd = null;
 	private static ViewGroup mExpandedFrame;
 	public String mDataToInject = null;
 	private static String mScriptPath = null;
@@ -200,7 +200,7 @@ public abstract class MASTAdServerViewCore extends WebView
 
 	private boolean internalBrowser = false;
 	private boolean isExpanded = false;
-	private MASTAdServerViewCore expandParent;
+	private MASTAdViewCore expandParent;
 	private int lastX;
 	private int lastY;
 	private ViewGroup parentView = null;
@@ -224,7 +224,7 @@ public abstract class MASTAdServerViewCore extends WebView
 	 * @param site - The id of the publisher site.
 	 * @param zone - The id of the zone of publisher site.
 	 */
-	public MASTAdServerViewCore(Context context, Integer site, Integer zone) {
+	public MASTAdViewCore(Context context, Integer site, Integer zone) {
 		super(context);
 		AutoDetectParameters(context);
 		//isFirstTime =true;
@@ -242,7 +242,7 @@ public abstract class MASTAdServerViewCore extends WebView
 	 * @param attrs
 	 * @param defStyle
 	 */
-	public MASTAdServerViewCore(Context context, AttributeSet attrs, int defStyle) {
+	public MASTAdViewCore(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		AutoDetectParameters(context);
 		initialize(context, attrs);
@@ -253,7 +253,7 @@ public abstract class MASTAdServerViewCore extends WebView
 	 * @param context
 	 * @param attrs
 	 */
-	public MASTAdServerViewCore(Context context, AttributeSet attrs) {
+	public MASTAdViewCore(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		AutoDetectParameters(context);
 		initialize(context, attrs);
@@ -263,13 +263,13 @@ public abstract class MASTAdServerViewCore extends WebView
 	 * Creation of viewer of advertising. It is used for element creation in a XML template.
 	 * @param context
 	 */
-	public MASTAdServerViewCore(Context context) {
+	public MASTAdViewCore(Context context) {
 		super(context);
 		AutoDetectParameters(context);
 		initialize(context, null);
 	}
 	
-	public MASTAdServerViewCore(Context context, boolean expanded, MASTAdServerViewCore expandParent) {
+	public MASTAdViewCore(Context context, boolean expanded, MASTAdViewCore expandParent) {
 		super(context);
 		isExpanded =expanded;
 		this.expandParent = expandParent;
@@ -387,15 +387,15 @@ public abstract class MASTAdServerViewCore extends WebView
 	 * The interface for advertising opening in an internal browser.
 	 */
 	public interface MASTOnAdClickListener {
-		public void click(MASTAdServerView sender, String url);
+		public void click(MASTAdView sender, String url);
 	}
 	
 	public interface MASTOnOrmmaListener {
-		public void event(MASTAdServerView sender, String name, String params);
+		public void event(MASTAdView sender, String name, String params);
 	}
 	
 	public interface MASTOnThirdPartyRequest {
-		public void event(MASTAdServerView sender, HashMap<String,String> params);
+		public void event(MASTAdView sender, HashMap<String,String> params);
 	}
 
 	/**
@@ -405,20 +405,20 @@ public abstract class MASTAdServerViewCore extends WebView
 		/**
 		 * This event is fired before banner download begins. 
 		 */
-		public void begin(MASTAdServerView sender);
+		public void begin(MASTAdView sender);
 		/**
 		 * This event is fired after banner content fully downloaded. 
 		 */
-		public void end(MASTAdServerView sender);
+		public void end(MASTAdView sender);
 		/**
 		 * This event is fired after fail to download content. 
 		 */
-		public void error(MASTAdServerView sender, String error);
+		public void error(MASTAdView sender, String error);
 	}
 
 	public interface MASTOnActivityHandler {
-		public void onAttachedToActivity(MASTAdServerView sender);
-		public void onDetachedFromActivity(MASTAdServerView sender);
+		public void onAttachedToActivity(MASTAdView sender);
+		public void onDetachedFromActivity(MASTAdView sender);
 	}
 	
 	/**
@@ -855,7 +855,7 @@ public abstract class MASTAdServerViewCore extends WebView
 		super.onAttachedToWindow();
 		
 		if(onActivityHandler != null) {
-			onActivityHandler.onAttachedToActivity((MASTAdServerView)this);
+			onActivityHandler.onAttachedToActivity((MASTAdView)this);
 		}	
 		if(getBackgroundColor()==0) invalidate();
 	}
@@ -905,7 +905,7 @@ public abstract class MASTAdServerViewCore extends WebView
 		super.onDetachedFromWindow();
 		
 		if(onActivityHandler != null) {
-			onActivityHandler.onDetachedFromActivity((MASTAdServerView)this);
+			onActivityHandler.onDetachedFromActivity((MASTAdView)this);
 		}							
 	}
 
@@ -961,7 +961,7 @@ public abstract class MASTAdServerViewCore extends WebView
 	}
 	
 	
-	private void closeRunnable(final MASTAdServerViewCore view)
+	private void closeRunnable(final MASTAdViewCore view)
 	{
 		view.handler.post(new Runnable() {
 			@Override
@@ -1097,7 +1097,7 @@ public abstract class MASTAdServerViewCore extends WebView
 			try {
 				if(mViewState != ViewState.EXPANDED) {
 					if(adserverRequest != null) {
-						interceptOnAdDownload.begin((MASTAdServerView)this);
+						interceptOnAdDownload.begin((MASTAdView)this);
 						
 						adserverRequest.setExcampaigns(getExcampaignsString());
 						String url = adserverRequest.createURL();
@@ -1109,7 +1109,7 @@ public abstract class MASTAdServerViewCore extends WebView
 				}//else StartTimer(context, view);
 			} catch (Exception e) {
 				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "StartLoadContent.requestGet", e.getMessage());
-				interceptOnAdDownload.error((MASTAdServerView)this,e.getMessage());				
+				interceptOnAdDownload.error((MASTAdView)this,e.getMessage());				
 			}
 		}
 		
@@ -1187,7 +1187,7 @@ public abstract class MASTAdServerViewCore extends WebView
 		{
 			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, "requestGet result["+String.valueOf(RequestCounter)+"][ERROR]", error);
 			//if(onAdEventHandler!= null)onAdEventHandler.error(this, error);
-			if(adDownload!= null) adDownload.error((MASTAdServerView)this,error);
+			if(adDownload!= null) adDownload.error((MASTAdView)this,error);
 			StartTimer(getContext(),view);
 			
 			
@@ -1237,7 +1237,7 @@ public abstract class MASTAdServerViewCore extends WebView
 				{	
 					InterstitialClose();
 					StartTimer(getContext(),view);
-					if(adDownload!= null) adDownload.error((MASTAdServerView)this, "invalid params");
+					if(adDownload!= null) adDownload.error((MASTAdView)this, "invalid params");
 				}else
 				{
 					//if(isRefreshAd || isFirstTime) 
@@ -1268,7 +1268,7 @@ public abstract class MASTAdServerViewCore extends WebView
 										params.put(arg, val);
 									}
 									
-									onThirdPartyRequest.event((MASTAdServerView) this, params);
+									onThirdPartyRequest.event((MASTAdView) this, params);
 								}catch (Exception e) {
 									adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "onThirdPartyRequest", e.getMessage());										
 								}
@@ -1325,7 +1325,7 @@ public abstract class MASTAdServerViewCore extends WebView
 				//if(isShownView)
 				{
 					InterstitialClose();
-					if(adDownload!= null) adDownload.error((MASTAdServerView)this,Constants.STR_EMPTY_SERVER_RESPONS);
+					if(adDownload!= null) adDownload.error((MASTAdView)this,Constants.STR_EMPTY_SERVER_RESPONS);
 				}
 				StartTimer(context,view);
 			}
@@ -1421,19 +1421,19 @@ public abstract class MASTAdServerViewCore extends WebView
 		
 		
 		@Override
-		public void begin(MASTAdServerView sender) {
+		public void begin(MASTAdView sender) {
 			if(adDownload!= null) adDownload.begin(sender);			
 		}
 
 		@Override
-		public void end(MASTAdServerView sender) {
+		public void end(MASTAdView sender) {
 			view.loadDataWithBaseURL(null, "", "text/html", "UTF-8", null);
 			StartTimer(context, view);			
 			if(adDownload!= null) adDownload.end(sender);
 		}
 
 		@Override
-		public void error(MASTAdServerView sender, String error) {
+		public void error(MASTAdView sender, String error) {
 			if(campaignId != null)
 				RestartExcampaings(campaignId,context, view);
 			else StartTimer(context, view);
@@ -1561,7 +1561,7 @@ public abstract class MASTAdServerViewCore extends WebView
 			{
 				adLog.log(MASTAdLog.LOG_LEVEL_2,MASTAdLog.LOG_TYPE_INFO,"OverrideUrlLoading",url);
 				if(adClickListener != null) {
-						adClickListener.click((MASTAdServerView)view, url);
+						adClickListener.click((MASTAdView)view, url);
 				}else {
 			    	int isAccessNetworkState = context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE);
 			    	
@@ -1593,12 +1593,12 @@ public abstract class MASTAdServerViewCore extends WebView
 
 		@Override
 		public void onPageFinished(WebView view, String url) {
-			((MASTAdServerViewCore) view).onPageFinished();
+			((MASTAdViewCore) view).onPageFinished();
 			
 			if(isAutoCollapse) setAdVisibility(View.VISIBLE);
 			
 			if(adDownload != null) {
-				adDownload.end((MASTAdServerView)view);
+				adDownload.end((MASTAdView)view);
 			}
 		}
 
@@ -1607,7 +1607,7 @@ public abstract class MASTAdServerViewCore extends WebView
 				String description, String failingUrl) {
 			super.onReceivedError(view, errorCode, description, failingUrl);
 			if(adDownload != null) {
-				adDownload.error((MASTAdServerView)view, description);
+				adDownload.error((MASTAdView)view, description);
 			}
 		}
 	}
@@ -1657,11 +1657,11 @@ public abstract class MASTAdServerViewCore extends WebView
 	}	
 	
 	private class OpenUrlThread extends Thread {
-		MASTAdServerViewCore ad;
+		MASTAdViewCore ad;
 		Context context;
 		String url;
 		
-		public OpenUrlThread(Context context,MASTAdServerViewCore ad, String url) {
+		public OpenUrlThread(Context context,MASTAdViewCore ad, String url) {
 			this.ad = ad;
 			this.context =context;
 			this.url = url;
@@ -1966,10 +1966,10 @@ public abstract class MASTAdServerViewCore extends WebView
 	{
 		if(ormmaListener!=null)
 		{	
-			if(!ormaEnabled) ormmaListener.event((MASTAdServerView)this, "ormmaenabled", "");
+			if(!ormaEnabled) ormmaListener.event((MASTAdView)this, "ormmaenabled", "");
 			ormaEnabled = true;
 			if(params!=null) params = params.replace(";", "&");
-			ormmaListener.event((MASTAdServerView)this, name, params); 
+			ormmaListener.event((MASTAdView)this, name, params); 
 		}
 	}
 	
@@ -2032,7 +2032,7 @@ public abstract class MASTAdServerViewCore extends WebView
 			this.useCloseButton(!properties.useCustomClose);
 			requestFocus();
 		} else {
-			MASTAdServerView expandedView = new MASTAdServerView(getContext(), true, this);
+			MASTAdView expandedView = new MASTAdView(getContext(), true, this);
 			setExpandBackgroundColor(properties, expandedView);
 			expandedView.setAutoCollapse(false);
 			expandedView.setVisibility(View.VISIBLE);
@@ -2089,7 +2089,7 @@ public abstract class MASTAdServerViewCore extends WebView
 		}
 	}
 	
-	private void loadExpandedUrl(String Url, MASTAdServerViewCore parentAd, ViewGroup expandedFrame, boolean dontLoad) {
+	private void loadExpandedUrl(String Url, MASTAdViewCore parentAd, ViewGroup expandedFrame, boolean dontLoad) {
 		mParentAd = parentAd;
 		mExpandedFrame = expandedFrame;
 		mViewState = ViewState.EXPANDED;
