@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AdMobileSamples</string>
+    <string name="app_id">764f0842b9025416f78b6b99891cb70302bd8c50</string>
+    <string name="use_test_servers">true</string>
+    <string name="refresh">Refresh</string>
+    <string name="site">site:</string>
+	<string name="zone">zone:</string>
+	<string name="dimensions">Dimensions</string>
+    <string name="width">width: %d</string>
+    <string name="height">height: %d</string>
+	<string name="x">x: %d</string>
+	<string name="y">y: %d</string>
+	<string name="ok">OK</string>
+	<string name="show">Show</string>
+	<string name="requests_responses_errors">Request: %1$d   Content: %2$d   Errors: %3$d</string>
+	<string name="request">Request</string>
+	<string name="response">Response</string>
+	<string name="error">Error</string>
+</resources>
