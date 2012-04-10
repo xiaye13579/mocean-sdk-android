@@ -26,8 +26,12 @@ public class OpenGL extends Activity {
         frame.addView(mGLView);
         
         MASTAdView adserverView = new MASTAdView(this, 19829, 88269);
-        adserverView.setMinSizeX(320);
-	    adserverView.setMinSizeY(50);
+     
+        // Min size can be useful, but if you don't have ads large enough for all devices, it
+		// can result in no ad being shown, so use it sparingly.
+        //adserverView.setMinSizeX(metrics.widthPixels);
+        //adserverView.setMinSizeY(height);
+		
 	    adserverView.setMaxSizeX(320);
 	    adserverView.setMaxSizeY(50);
         adserverView.setId(1);

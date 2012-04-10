@@ -99,8 +99,11 @@ public class Default extends Activity {
 			adserverView.setLayoutParams(lp);
 		}
 		
+		// Min size can be useful, but if you don't have ads large enough for all devices, it
+		// can result in no ad being shown, so use it sparingly.
         //adserverView.setMinSizeX(metrics.widthPixels);
         //adserverView.setMinSizeY(height);
+		
         adserverView.setMaxSizeX(metrics.widthPixels);
         adserverView.setMaxSizeY(height);
 		adserverView.requestLayout();

@@ -37,7 +37,7 @@ public class RequestAndResponse extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 88269;
+	private int zone = 102238; // all ads on rotation, images and rich media
 	private RadioGroup rgTypes;
 	private RadioButton rbtnRequest;
 	private RadioButton rbtnResponse;
@@ -197,8 +197,11 @@ public class RequestAndResponse extends Activity {
 			adserverView.setLayoutParams(lp);
 		}
 		
+		// Min size can be useful, but if you don't have ads large enough for all devices, it
+		// can result in no ad being shown, so use it sparingly.
         //adserverView.setMinSizeX(metrics.widthPixels);
         //adserverView.setMinSizeY(height);
+		
         adserverView.setMaxSizeX(metrics.widthPixels);
         adserverView.setMaxSizeY(height);
 		adserverView.requestLayout();

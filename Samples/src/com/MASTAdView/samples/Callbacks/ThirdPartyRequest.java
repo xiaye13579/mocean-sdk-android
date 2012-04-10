@@ -34,7 +34,8 @@ public class ThirdPartyRequest extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 90038;
+	private int zone = 90039; // 50/50 third party
+	
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,16 +67,18 @@ public class ThirdPartyRequest extends Activity {
         adserverView = new MASTAdView(this, site, zone);
         adserverView.setId(1);
         setAdLayoutParams();
-        adserverView.setOnThirdPartyRequest(new UserOnThirdPartyRequest());
+        adserverView.setOnThirdPartyRequest(new UserOnThirdPartyRequest()); XXX
         linearLayout.addView(adserverView);
         adserverView.setContentAlignment(true);
-        adserverView.setAutoCollapse(false);
+        //adserverView.setAutoCollapse(false);
 		adserverView.update();
         
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);
         BitmapDrawable background = (BitmapDrawable)getResources().getDrawable(R.drawable.repeat_bg);
         background.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
         frameMain.setBackgroundDrawable(background);
+        
+        
     }
     
 	@Override
@@ -143,8 +146,9 @@ public class ThirdPartyRequest extends Activity {
 			adserverView.setLayoutParams(lp);
 		}
 		
-        adserverView.setMinSizeX(metrics.widthPixels);
-        adserverView.setMinSizeY(height);
+        //adserverView.setMinSizeX(metrics.widthPixels);
+        //adserverView.setMinSizeY(height);
+        
         adserverView.setMaxSizeX(metrics.widthPixels);
         adserverView.setMaxSizeY(height);
 		adserverView.requestLayout();

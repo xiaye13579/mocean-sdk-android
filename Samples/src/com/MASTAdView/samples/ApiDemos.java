@@ -63,6 +63,9 @@ public class ApiDemos extends ListActivity {
                 android.R.layout.simple_list_item_1, new String[] { "title" },
                 new int[] { android.R.id.text1 }));
         getListView().setTextFilterEnabled(true);
+        
+        MASTAdLog.setDefaultLogLevel(MASTAdLog.LOG_LEVEL_3);
+        
     }
 
 	@Override
@@ -90,9 +93,9 @@ public class ApiDemos extends ListActivity {
         } else {
             prefixPath = prefix.split("/");
         }
-        
+       
         int len = list.size();
-        
+       
         Map<String, Boolean> entries = new HashMap<String, Boolean>();
 
         for (int i = 0; i < len; i++) {        	
@@ -105,16 +108,20 @@ public class ApiDemos extends ListActivity {
             
             if ((prefix.length() == 0 || label.startsWith(prefix)) && 
             		info.activityInfo.applicationInfo.packageName.equals( "com.MASTAdView.samples")) {
-                
+            	
+            	//System.out.println(label);    
                 String[] labelPath = label.split("/");
 
                 String nextLabel = prefixPath == null ? labelPath[0] : labelPath[prefixPath.length];
-
-                if ((prefixPath != null ? prefixPath.length : 0) == labelPath.length - 1) {
+                
+                if ((prefixPath != null ? prefixPath.length : 0) == labelPath.length - 1)
+                {
                     addItem(myData, nextLabel, activityIntent(
                             info.activityInfo.applicationInfo.packageName,
                             info.activityInfo.name));
-                } else {
+                }
+                else 
+                {
                     if (entries.get(nextLabel) == null) {
                         addItem(myData, nextLabel, browseIntent(prefix.equals("") ? nextLabel : prefix + "/" + nextLabel));
                         entries.put(nextLabel, true);
