@@ -17,6 +17,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
 
 public class AdserverRequest {
 	
@@ -67,9 +69,12 @@ public class AdserverRequest {
 	private Hashtable<String, String> customParameters;
 	
 	MASTAdLog AdLog;
+	private Context appContext;
 	
-	public AdserverRequest(MASTAdLog AdLog) {
+	
+	public AdserverRequest(MASTAdLog AdLog, Context appContext) {
 		this.AdLog = AdLog;
+		this.appContext = appContext;
 		setPremium(MASTAdViewCore.PREMIUM_STATUS_BOTH);
 	}
 
@@ -453,6 +458,10 @@ public class AdserverRequest {
 			else
 			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"minSizeX="+minSizeX.toString()+" valid>0");			
 		}
+		else
+		{
+			parameters.remove(parameter_min_size_x);
+		}
 		return this;	
 	}
 
@@ -469,8 +478,11 @@ public class AdserverRequest {
 				parameters.put(parameter_min_size_y, String.valueOf(minSizeY));
 			}
 			else
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"minSizeY="+minSizeY.toString()+" valid>0");			
-			
+				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, Constants.STR_INVALID_PARAM,"minSizeY="+minSizeY.toString()+" valid>0");				
+		}
+		else
+		{
+			parameters.remove(parameter_min_size_y);
 		}
 		return this;	
 	}
@@ -751,17 +763,45 @@ public class AdserverRequest {
 	}
 
 	public Integer getSizeX() {
+		String sizeX = null;
+		
 		synchronized(parameters) {
-			String sizeX = parameters.get(parameter_size_x);
+			sizeX = parameters.get(parameter_size_x);
+		}
+		if (sizeX != null)
+		{
 			return getIntParameter(sizeX,0);
 		}
+	
+		/*
+		DisplayMetrics metrics = new DisplayMetrics();
+		WindowManager windowManager = (WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE);
+		windowManager.getDefaultDisplay().getMetrics(metrics);
+		return new Integer(metrics.widthPixels);
+		*/
+		return new Integer(0);
 	}
 
 	public Integer getSizeY() {
+		String sizeY;
+		
 		synchronized(parameters) {
-			String sizeY = parameters.get(parameter_size_y);
+			sizeY = parameters.get(parameter_size_y);
+		}
+		
+		if (sizeY != null)
+		{
 			return getIntParameter(sizeY,0);
 		}
+		
+		/*
+		DisplayMetrics metrics = new DisplayMetrics();
+		WindowManager windowManager = (WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE);
+		windowManager.getDefaultDisplay().getMetrics(metrics);
+		return new Integer(metrics.heightPixels);
+		*/
+		
+		return new Integer(0);
 	}
 	
 	public String getExcampaigns() {
@@ -828,9 +868,9 @@ public class AdserverRequest {
 			appendParameters(builderToString, parameters);
 		}
 		appendParameters(builderToString, customParameters);
-		if ((getSizeX()==0)&&(sizeX>-1))
+		if ((getSizeX()<=0)&&(sizeX>-1))
 			builderToString.append("&"+parameter_size_x+"="+String.valueOf(sizeX));
-		if ((getSizeY()==0)&&(sizeY>-1))
+		if ((getSizeY()<=0)&&(sizeY>-1))
 			builderToString.append("&"+parameter_size_y+"="+String.valueOf(sizeY));
 		builderToString.append("&"+parameter_Ad_Call_Timeout+"="+String.valueOf(timeout));
 		return  builderToString.toString();//builderToString.toString().equals(adserverURL) ?  this.adserverURL : builderToString.toString();

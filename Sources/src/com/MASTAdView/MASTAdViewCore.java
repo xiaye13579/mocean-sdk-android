@@ -126,8 +126,6 @@ public abstract class MASTAdViewCore extends WebView
 	private MASTOnActivityHandler onActivityHandler;
 	private Long adReloadPeriod;
 	private Integer visibleMode;
-	//private Integer advertiserId; 
-	//private String groupCode;
 	
 	protected Context _context;
 	private LocationManager locationManager;
@@ -345,7 +343,7 @@ public abstract class MASTAdViewCore extends WebView
 	void AutoDetectParameters(Context context)
 	{
 		_context = context;
-		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog);
+		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog, context);
 	}
 	
 	public MASTOnThirdPartyRequest getOnThirdPartyRequest() {
@@ -511,53 +509,6 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Get Advertiser id (if both AdvertiserId and GroupCode are specified then install notification is enabled).
-	 */
-	public Integer getAdvertiserId() {
-		//return advertiserId==null ? 0 : advertiserId;
-		return 0;
-	}
-	
-	/**
-	 * Optional.
-	 * Set Advertiser id (if both AdvertiserId and GroupCode are specified then install notification is enabled).
-	 */
-	public void setAdvertiserId(Integer advertiserId) {
-		/*
-		if(advertiserId!=null)
-		{
-			if(advertiserId>0)
-				this.advertiserId = advertiserId;
-			else
-				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, Constants.STR_INVALID_PARAM,
-						String.format(Constants.STR_ADVETTISER_ID_INVALID, advertiserId.toString()));
-						//"advertiserId="+advertiserId.toString()+" (valid: int>0)");
-		}
-		*/
-		
-		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_WARNING, "Advertiser ID", "No longer used.");
-	}
-	
-	/**
-	 * Optional.
-	 * Get Group code (if both AdvertiserId and GroupCode are specified then install notification is enabled).
-	 */
-	public String getGroupCode() {
-		//return groupCode;
-		return "";
-	}
-	
-	/**
-	 * Optional.
-	 * Set Group code (if both AdvertiserId and GroupCode are specified then install notification is enabled).
-	 */
-	public void setGroupCode(String groupCode) {
-		//this.groupCode = groupCode;
-		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_WARNING, "Group code", "No longer used.");
-	}
-	
-	/**
-	 * Optional.
 	 * Get banner refresh interval (in seconds).
 	 */
 	public Integer getUpdateTime() {
@@ -616,8 +567,6 @@ public abstract class MASTAdViewCore extends WebView
 				defaultImage = context.getResources().getIdentifier(image, null, context.getPackageName());
 			//Integer defaultImage = getIntParameter(attrs.getAttributeValue(null, "defaultImage"));
 			
-			//this.advertiserId = getIntParameter(attrs.getAttributeValue(null, "advertiserId"));
-			//this.groupCode = attrs.getAttributeValue(null, "groupCode");
 			setUpdateTime(getIntParameter(attrs.getAttributeValue(null, "updateTime")));
 			
 			String latitude = attrs.getAttributeValue(null, "latitude");
@@ -650,7 +599,7 @@ public abstract class MASTAdViewCore extends WebView
 				this.visibleMode = visibleMode;
 			}
 			
-			if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog);
+			if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog, context);
 			if(adserverURL!=null) setAdserverURL(adserverURL);
 			if(city!=null)setCity(city);
 			if(area!=null)setArea(area);
@@ -743,7 +692,7 @@ public abstract class MASTAdViewCore extends WebView
 		
 		if(isAutoCollapse) this.setVisibility(View.INVISIBLE);
 		view = this;
-		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog);
+		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog, context);
 		//adserverRequest.InitDefaultParameters(context);
 		adserverRequest.setUa(ua);
 		adserverRequest.setCount(1);
@@ -1032,8 +981,6 @@ public abstract class MASTAdViewCore extends WebView
 			reloadTask.cancel();
 			reloadTask = null;
 		}
-		
-		//ContentManager.getInstance(this).installNotification( advertiserId, groupCode);
 		
 		if(ContentManager.getInstance(this).getAutoDetectParameters().equals(""))
 		{
