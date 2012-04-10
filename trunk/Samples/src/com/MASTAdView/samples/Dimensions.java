@@ -1,4 +1,4 @@
-package com.MASTAdView.samples.advanced;
+package com.MASTAdView.samples;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -24,6 +25,11 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.MASTAdView.MASTAdView;
 import com.MASTAdView.samples.R;
+import com.MASTAdView.samples.R.drawable;
+import com.MASTAdView.samples.R.id;
+import com.MASTAdView.samples.R.layout;
+import com.MASTAdView.samples.R.menu;
+import com.MASTAdView.samples.R.string;
 
 
 public class Dimensions extends Activity {
@@ -38,7 +44,12 @@ public class Dimensions extends Activity {
     private int dimensionsHeight = 0;
     private int dimensionsX = 0;
     private int dimensionsY = 0;
-	
+    private int dimensionsMinWidth = -1;
+    private int dimensionsMinHeight = -1;
+    private boolean isContentAligned = false;
+    private boolean useInternalBrowser = false;
+    
+    
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -58,6 +69,7 @@ public class Dimensions extends Activity {
 			        zone = Integer.parseInt(inpZone.getText().toString());
 			        adserverView.setSite(site);
 			        adserverView.setZone(zone);
+			        setAdLayoutParams();
 					adserverView.update();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -105,35 +117,60 @@ public class Dimensions extends Activity {
         	int maxWidth = linearLayout.getWidth();
         	int maxHeight = linearLayout.getHeight();
 
-        	TextView lbWidth = (TextView)dialog.findViewById(R.id.lbWidth);
-        	lbWidth.setText(getString(R.string.width, dimensionsWidth));
-        	TextView lbHeight = (TextView)dialog.findViewById(R.id.lbHeight);
-        	lbHeight.setText(getString(R.string.height, dimensionsHeight));
-        	TextView lbX = (TextView)dialog.findViewById(R.id.lbX);
-        	lbX.setText(getString(R.string.x, dimensionsX));
-        	TextView lbY = (TextView)dialog.findViewById(R.id.lbY);
-        	lbY.setText(getString(R.string.y, dimensionsY));
+        	//TextView lbWidth = (TextView)dialog.findViewById(R.id.lbWidth);
+        	//lbWidth.setText(getString(R.string.width, dimensionsWidth));
+        	//TextView lbHeight = (TextView)dialog.findViewById(R.id.lbHeight);
+        	//lbHeight.setText(getString(R.string.height, dimensionsHeight));
+        	//TextView lbX = (TextView)dialog.findViewById(R.id.lbX);
+        	//lbX.setText(getString(R.string.x, dimensionsX));
+        	//TextView lbY = (TextView)dialog.findViewById(R.id.lbY);
+        	//lbY.setText(getString(R.string.y, dimensionsY));
         	
+        	final EditText sbWidth = (EditText)dialog.findViewById(R.id.sbWidth);
+        	sbWidth.setText("" + dimensionsWidth);
+        	/*
         	SeekBar sbWidth = (SeekBar)dialog.findViewById(R.id.sbWidth);
         	sbWidth.setMax(maxWidth);
         	sbWidth.setProgress(dimensionsWidth);
         	sbWidth.setOnSeekBarChangeListener(new CustomOnSeekBarChangeListener(lbWidth, R.string.width));
+        	*/
         	
+        	final EditText sbHeight = (EditText)dialog.findViewById(R.id.sbHeight);
+        	sbHeight.setText("" + dimensionsHeight);
+        	/*
         	SeekBar sbHeight = (SeekBar)dialog.findViewById(R.id.sbHeight);
         	sbHeight.setMax(maxHeight);
         	sbHeight.setProgress(dimensionsHeight);
         	sbHeight.setOnSeekBarChangeListener(new CustomOnSeekBarChangeListener(lbHeight, R.string.height));
+        	*/
         	
+        	final EditText sbMinWidth = (EditText)dialog.findViewById(R.id.sbMinWidth);
+        	//sbWidth.setText("" + dimensionsMinWidth);
+        	
+        	final EditText sbMinHeight = (EditText)dialog.findViewById(R.id.sbMinHeight);
+        	//sbHeight.setText("" + dimensionsMinHeight);
+        	
+        	final EditText sbX = (EditText)dialog.findViewById(R.id.sbX);
+        	sbX.setText("" + dimensionsX);
+        	/*
         	SeekBar sbX = (SeekBar)dialog.findViewById(R.id.sbX);
         	sbX.setMax(maxWidth - 50);
         	sbX.setProgress(dimensionsX);
         	sbX.setOnSeekBarChangeListener(new CustomOnSeekBarChangeListener(lbX, R.string.x));
+        	*/
         	
+        	final EditText sbY = (EditText)dialog.findViewById(R.id.sbY);
+        	sbY.setText("" + dimensionsY);
+        	/*
         	SeekBar sbY = (SeekBar)dialog.findViewById(R.id.sbY);
         	sbY.setMax(maxHeight - 50);
         	sbY.setProgress(dimensionsY);
         	sbY.setOnSeekBarChangeListener(new CustomOnSeekBarChangeListener(lbY, R.string.y));
-
+			*/
+        
+        	final CheckBox cbIsAligned = (CheckBox)dialog.findViewById(R.id.cbIsAligned);
+        	final CheckBox cbUseInternal = (CheckBox)dialog.findViewById(R.id.cbUseInternal);
+        	
         	Button btnOk = (Button)dialog.findViewById(R.id.btnOk);
         	btnOk.setOnClickListener(new OnClickListener() {
 				@Override
@@ -141,10 +178,63 @@ public class Dimensions extends Activity {
 					dialog.cancel();
 					
 					ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams)adserverView.getLayoutParams();
+					
+					int val = Integer.parseInt(sbWidth.getText().toString());
+					dimensionsWidth = val;
 					lp.width = dimensionsWidth;
+					
+					val = Integer.parseInt(sbHeight.getText().toString());
+					dimensionsHeight = val;
 					lp.height = dimensionsHeight;
+					
+					String s = sbMinWidth.getText().toString();
+					if ((s != null) && (s.length() > 0))
+					{
+						val = Integer.parseInt(s);
+						dimensionsMinWidth = val;
+					}
+					else
+					{
+						dimensionsMinWidth = -1;
+					}
+					
+					s = sbMinHeight.getText().toString();
+					if ((s != null) && (s.length() > 0))
+					{
+						val = Integer.parseInt(s);
+						dimensionsMinHeight = val;
+					}
+					else
+					{
+						dimensionsMinHeight = -1;
+					}
+					
+					if (cbIsAligned.isChecked())
+					{
+						isContentAligned = true;
+					}
+					else
+					{
+						isContentAligned = false;
+					}
+					
+					if (cbUseInternal.isChecked())
+					{
+						useInternalBrowser = true;
+					}
+					else
+					{
+						useInternalBrowser = false;
+					}
+					
+					val = Integer.parseInt(sbX.getText().toString());
+					dimensionsX = val;
 					lp.leftMargin = dimensionsX;
+					
+					val = Integer.parseInt(sbY.getText().toString());
+					dimensionsY = val;
 					lp.topMargin = dimensionsY;
+					
 					linearLayout.requestLayout();
 				}
 			});
@@ -153,42 +243,9 @@ public class Dimensions extends Activity {
         }
         return false;
     }
-	
-    private class CustomOnSeekBarChangeListener implements OnSeekBarChangeListener {
-    	TextView label;
-    	int textRes;
-    	
-		public CustomOnSeekBarChangeListener(TextView label, int textRes) {
-			this.label = label;
-			this.textRes = textRes;
-		}
-
-		@Override
-		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-			if (textRes == R.string.width) {
-				dimensionsWidth = progress;
-			} else if (textRes == R.string.height) {
-				dimensionsHeight = progress;
-			} else if (textRes == R.string.x) {
-				dimensionsX = progress;
-			} else if (textRes == R.string.y) {
-				dimensionsY = progress;
-			}
-			label.setText(getString(textRes, progress));
-		}
-
-		@Override
-		public void onStartTrackingTouch(SeekBar seekBar) {
-			
-		}
-
-		@Override
-		public void onStopTrackingTouch(SeekBar seekBar) {
-			
-		}
-    }
     
-	private void setAdLayoutParams() {
+	private void setAdLayoutParams()
+	{
 		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 		DisplayMetrics metrics = new DisplayMetrics();
 		windowManager.getDefaultDisplay().getMetrics(metrics);
@@ -213,11 +270,33 @@ public class Dimensions extends Activity {
 			adserverView.setLayoutParams(lp);
 		}
 		
-        adserverView.setMinSizeX(metrics.widthPixels);
-        adserverView.setMinSizeY(height);
+		// Only set min width/height if value >= 0 provided by user
+		if (dimensionsMinWidth >= 0)
+		{
+			adserverView.setMinSizeX(dimensionsMinWidth);
+		}
+		else
+		{
+			adserverView.setMinSizeX(null);
+		}
+		if (dimensionsMinHeight >= 0)
+		{
+			adserverView.setMinSizeY(dimensionsMinHeight);
+		}
+		else
+		{
+			adserverView.setMinSizeY(null);
+		}
+		
+
+		// Set aligned and internal browser properties form checkbox values
+		adserverView.setInternalBrowser(useInternalBrowser);
+		adserverView.setContentAlignment(isContentAligned);
+		
         adserverView.setMaxSizeX(metrics.widthPixels);
         adserverView.setMaxSizeY(height);
-		adserverView.requestLayout();
+
+        adserverView.requestLayout();
 	}
 	
 }

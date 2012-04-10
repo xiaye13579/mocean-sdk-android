@@ -13,10 +13,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.MASTAdView.MASTAdView;
 import com.MASTAdView.samples.R;
@@ -28,8 +30,8 @@ public class AdsList extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 88269;
-	private Vector<MASTAdView> adserverViews;
+	private int zone = 102238; // all ads on rotation, images and rich media
+	private Vector<View> adserverViews;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,11 +51,15 @@ public class AdsList extends Activity {
 					site = Integer.parseInt(inpSite.getText().toString());
 			        zone = Integer.parseInt(inpZone.getText().toString());
 			        
-			        for (MASTAdView adserverView : adserverViews) {
-				        adserverView.setSite(site);
-				        adserverView.setZone(zone);
-				        adserverView.setContentAlignment(true);
-						adserverView.update();
+			        for (View view : adserverViews) {
+			        	if (view instanceof MASTAdView)
+			        	{
+			        		MASTAdView adserverView = (MASTAdView)view;
+			        		adserverView.setSite(site);
+			        		adserverView.setZone(zone);
+			        		adserverView.setContentAlignment(true);
+			        		adserverView.update();
+			        	}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -61,14 +67,33 @@ public class AdsList extends Activity {
 			}
 		});
         
-        adserverViews = new Vector<MASTAdView>();
+        adserverViews = new Vector<View>();
+        int[] textColors = { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF };
+        int[] bgColors = { 0xFF202020, 0xFF404040, 0xFF606060 };
         
-        for (int i = 0; i < 10; i++) {
-        	MASTAdView adserverView = new MASTAdView(this, site, zone);
-        	adserverView.setId(i+1);
-        	setAdLayoutParams(adserverView);
-	        adserverView.setContentAlignment(true);
-        	adserverViews.add(adserverView);
+        int max = 20;
+        for (int i = 0; i < max; i++)
+        {
+        	// 3 elements should be ad views, the rest simple labels with varying colors
+        	if ((i % 7) == 1)
+        	{
+	        	MASTAdView adserverView = new MASTAdView(this, site, zone);
+	        	adserverView.setId(i+1);
+	        	setAdLayoutParams(adserverView);
+		        adserverView.setContentAlignment(true);
+	        	adserverViews.add(adserverView);
+        	}
+        	else
+        	{
+        		TextView label = new TextView(this);
+        		label.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT)); 
+        		label.setId(i + 1);
+        		label.setText("List view # " + (i+1) + " of " + max);
+        		label.setVisibility(View.VISIBLE);
+        		label.setBackgroundColor(bgColors[i % 3]);
+        		label.setTextColor(textColors[i % 3]);
+        		adserverViews.add(label);
+        	}
 		}
         
         AdsListAdapter listAdapter = new AdsListAdapter(this, adserverViews);
@@ -84,10 +109,14 @@ public class AdsList extends Activity {
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		
-        for (MASTAdView adserverView : adserverViews) {
-    		setAdLayoutParams(adserverView);
-	        adserverView.setContentAlignment(true);
-			adserverView.update();
+        for (View view : adserverViews) {
+        	if (view instanceof MASTAdView)
+        	{
+        		MASTAdView adserverView = (MASTAdView)view;
+        		setAdLayoutParams(adserverView);
+        		adserverView.setContentAlignment(true);
+				adserverView.update();
+        	}
 		}
 	}
 	
@@ -116,8 +145,11 @@ public class AdsList extends Activity {
 			adserverView.setLayoutParams(lp);
 		}
 		
-        adserverView.setMinSizeX(metrics.widthPixels);
-        adserverView.setMinSizeY(height);
+		// Min size can be useful, but if you don't have ads large enough for all devices, it
+		// can result in no ad being shown, so use it sparingly.
+        //adserverView.setMinSizeX(metrics.widthPixels);
+        //adserverView.setMinSizeY(height);
+		
         adserverView.setMaxSizeX(metrics.widthPixels);
         adserverView.setMaxSizeY(height);
 		adserverView.requestLayout();

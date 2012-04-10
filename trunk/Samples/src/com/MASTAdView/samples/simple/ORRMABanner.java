@@ -25,7 +25,7 @@ public class ORRMABanner extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 90045;
+	private int zone = 102238; // all ads in rotation, includes images and rich media
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,8 +99,11 @@ public class ORRMABanner extends Activity {
 			adserverView.setLayoutParams(lp);
 		}
 		
-        adserverView.setMinSizeX(metrics.widthPixels);
-        adserverView.setMinSizeY(height);
+		// Min size can be useful, but if you don't have ads large enough for all devices, it
+		// can result in no ad being shown, so use it sparingly.
+        //adserverView.setMinSizeX(metrics.widthPixels);
+        //adserverView.setMinSizeY(height);
+		
         adserverView.setMaxSizeX(metrics.widthPixels);
         adserverView.setMaxSizeY(height);
 		adserverView.requestLayout();

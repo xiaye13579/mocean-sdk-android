@@ -80,8 +80,8 @@
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
-        <activity android:label="Advanced/Dimensions (use menu)" 
-            android:name=".advanced.Dimensions"
+        <activity android:label="Custom Ad Request (use menu to set)" 
+            android:name=".Dimensions"
 			android:screenOrientation="sensor"
 			android:configChanges="keyboardHidden|orientation">
             <intent-filter>
@@ -162,7 +162,7 @@
             </intent-filter>
         </activity>
         <activity android:label="Callbacks/ThirdPartyRequest" 
-            android:name=".Callbacks.ThirdPartyRequestacks.ThirdPartyRequestacks.ThirdPartyRequest"
+            android:name=".Callbacks.ThirdPartyRequest"
 			android:screenOrientation="sensor"
 			android:configChanges="keyboardHidden|orientation">
             <intent-filter>

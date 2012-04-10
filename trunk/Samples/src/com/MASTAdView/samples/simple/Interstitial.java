@@ -66,6 +66,7 @@ public class Interstitial extends Activity {
         adserverView = new MASTAdView(this, site, zone);
         adserverView.setId(1);
         setAdLayoutParams();
+        adserverView.setAutoCloseInterstitialTime(15);
         adserverView.setContentAlignment(true);
         adserverView.update();
 		adserverView.show();
@@ -89,8 +90,11 @@ public class Interstitial extends Activity {
 		DisplayMetrics metrics = new DisplayMetrics();
 		windowManager.getDefaultDisplay().getMetrics(metrics);
 
-        adserverView.setMinSizeX(metrics.widthPixels);
-        adserverView.setMinSizeY(metrics.heightPixels - statusBarHeight);
+		// Min size can be useful, but if you don't have ads large enough for all devices, it
+		// can result in no ad being shown, so use it sparingly.
+        //adserverView.setMinSizeX(metrics.widthPixels);
+        //adserverView.setMinSizeY(height);
+		
         adserverView.setMaxSizeX(metrics.widthPixels);
         adserverView.setMaxSizeY(metrics.heightPixels - statusBarHeight);
         adserverView.requestLayout();

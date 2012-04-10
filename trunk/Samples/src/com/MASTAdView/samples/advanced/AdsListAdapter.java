@@ -16,11 +16,11 @@ import com.MASTAdView.samples.R;
 
 public class AdsListAdapter extends BaseAdapter {
 	protected Context context;
-    protected List<MASTAdView> contentItems = new Vector<MASTAdView>();
+    protected List<View> contentItems = null;
     protected LayoutInflater mInflater;
     protected int itemResourceId;
 
-	public AdsListAdapter(Context context, Vector<MASTAdView> contentItems) {
+	public AdsListAdapter(Context context, Vector<View> contentItems) {
 		this.context = context;
         mInflater = LayoutInflater.from(context);
         itemResourceId = R.layout.custom_list_item;
@@ -46,18 +46,18 @@ public class AdsListAdapter extends BaseAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
 
-        if (convertView == null) {
+        //if (convertView == null) {
             convertView = mInflater.inflate(itemResourceId, null);
 
             holder = new ViewHolder();
             holder.frameAdContent = (LinearLayout) convertView.findViewById(R.id.frameAdContent);
 
             convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
+        //} else {
+        //    holder = (ViewHolder) convertView.getTag();
+        //}
 
-        MASTAdView contentItem = (MASTAdView)contentItems.get(position);
+        View contentItem = (View)contentItems.get(position);
         
         LinearLayout viewParent = (LinearLayout)contentItem.getParent();
         if (viewParent != null) {
@@ -65,7 +65,10 @@ public class AdsListAdapter extends BaseAdapter {
 		}
         
         holder.frameAdContent.addView(contentItem);
-        contentItem.update();
+        if (contentItem instanceof MASTAdView)
+        {
+        	((MASTAdView)contentItem).update();
+        }
 		
         return convertView;
 	}

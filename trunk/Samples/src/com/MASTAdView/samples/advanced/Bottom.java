@@ -26,7 +26,7 @@ public class Bottom extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 88269;
+	private int zone = 98465; // zumobi tapdance, 320x50 or 640x100
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,23 +74,23 @@ public class Bottom extends Activity {
 		adserverView.update();
 	}
 	
-	private void setAdLayoutParams() {
+	private void setAdLayoutParams(){
 		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 		DisplayMetrics metrics = new DisplayMetrics();
 		windowManager.getDefaultDisplay().getMetrics(metrics);
+		
 		int height = 50;
+		int width = 320;
 
 		int maxSize = metrics.heightPixels;
 		if (maxSize < metrics.widthPixels) {
 			maxSize = metrics.widthPixels;
 		}
 		
-		if (maxSize <= 480) {
-			height = 50;
-		} else if ((maxSize > 480) && (maxSize <= 800)) {
+		if (maxSize >= 640)
+		{
 			height = 100;
-		} else if (maxSize > 800) {
-			height = 120;
+			width = 640;
 		}
 		
 		ViewGroup.LayoutParams lp = adserverView.getLayoutParams();
@@ -99,11 +99,13 @@ public class Bottom extends Activity {
 			adserverView.setLayoutParams(lp);
 		}
 		
-        adserverView.setMinSizeX(metrics.widthPixels);
-        adserverView.setMinSizeY(height);
+		// Min size can be useful, but if you don't have ads large enough for all devices, it
+		// can result in no ad being shown, so use it sparingly.
+        //adserverView.setMinSizeX(metrics.widthPixels);
+        //adserverView.setMinSizeY(height);
+		
         adserverView.setMaxSizeX(metrics.widthPixels);
         adserverView.setMaxSizeY(height);
 		adserverView.requestLayout();
 	}
-	
 }

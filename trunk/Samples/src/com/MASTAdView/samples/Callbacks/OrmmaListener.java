@@ -140,8 +140,9 @@ public class OrmmaListener extends Activity {
 			adserverView.setLayoutParams(lp);
 		}
 		
-        adserverView.setMinSizeX(metrics.widthPixels);
-        adserverView.setMinSizeY(height);
+        //adserverView.setMinSizeX(metrics.widthPixels);
+        //adserverView.setMinSizeY(height);
+        
         adserverView.setMaxSizeX(metrics.widthPixels);
         adserverView.setMaxSizeY(height);
 		adserverView.requestLayout();

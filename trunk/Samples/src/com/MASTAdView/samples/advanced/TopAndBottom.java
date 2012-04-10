@@ -26,7 +26,7 @@ public class TopAndBottom extends Activity {
 	private EditText inpZoneTop;
 	private Button btnRefreshTop;
 	private int siteTop = 19829;
-	private int zoneTop = 88269;
+	private int zoneTop = 98465; // paso
 
 	private MASTAdView adserverViewBottom;
 	private LinearLayout linearLayoutBottom;
@@ -34,7 +34,7 @@ public class TopAndBottom extends Activity {
 	private EditText inpZoneBottom;
 	private Button btnRefreshBottom;
 	private int siteBottom = 19829;
-	private int zoneBottom = 88269;
+	private int zoneBottom = 98464; // tapdance
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +67,7 @@ public class TopAndBottom extends Activity {
         setAdLayoutParamsTop();
         linearLayoutTop.addView(adserverViewTop);
         adserverViewTop.setContentAlignment(true);
+        //adserverViewTop.setAutoCollapse(false);
 		adserverViewTop.update();
 
 		
@@ -96,6 +97,7 @@ public class TopAndBottom extends Activity {
         setAdLayoutParamsBottom();
         linearLayoutBottom.addView(adserverViewBottom);
         adserverViewBottom.setContentAlignment(true);
+        //adserverViewBottom.setAutoCollapse(false);
 		adserverViewBottom.update();
 		
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);
@@ -119,18 +121,17 @@ public class TopAndBottom extends Activity {
 		DisplayMetrics metrics = new DisplayMetrics();
 		windowManager.getDefaultDisplay().getMetrics(metrics);
 		int height = 50;
-
+		int width = 320;
+		
 		int maxSize = metrics.heightPixels;
 		if (maxSize < metrics.widthPixels) {
 			maxSize = metrics.widthPixels;
 		}
 		
-		if (maxSize <= 480) {
-			height = 50;
-		} else if ((maxSize > 480) && (maxSize <= 800)) {
+		if (maxSize >= 640)
+		{
 			height = 100;
-		} else if (maxSize > 800) {
-			height = 120;
+			width = 640;
 		}
 		
 		ViewGroup.LayoutParams lp = adserverViewTop.getLayoutParams();
@@ -139,8 +140,11 @@ public class TopAndBottom extends Activity {
 			adserverViewTop.setLayoutParams(lp);
 		}
 		
-        adserverViewTop.setMinSizeX(metrics.widthPixels);
-        adserverViewTop.setMinSizeY(height);
+		// Min size can be useful, but if you don't have ads large enough for all devices, it
+		// can result in no ad being shown, so use it sparingly.
+        //adserverView.setMinSizeX(metrics.widthPixels);
+        //adserverView.setMinSizeY(height);
+		
         adserverViewTop.setMaxSizeX(metrics.widthPixels);
         adserverViewTop.setMaxSizeY(height);
 		adserverViewTop.requestLayout();
@@ -151,19 +155,18 @@ public class TopAndBottom extends Activity {
 		DisplayMetrics metrics = new DisplayMetrics();
 		windowManager.getDefaultDisplay().getMetrics(metrics);
 		int height = 50;
-
+		int width = 320;
+		
 		int maxSize = metrics.heightPixels;
 		if (maxSize < metrics.widthPixels) {
 			maxSize = metrics.widthPixels;
 		}
 		
-		if (maxSize <= 480) {
-			height = 50;
-		} else if ((maxSize > 480) && (maxSize <= 800)) {
+		if (maxSize >= 640)
+		{
 			height = 100;
-		} else if (maxSize > 800) {
-			height = 120;
-		}
+			width = 640;
+		}		
 		
 		ViewGroup.LayoutParams lp = adserverViewBottom.getLayoutParams();
 		if (lp == null) {
@@ -174,8 +177,11 @@ public class TopAndBottom extends Activity {
 			adserverViewBottom.setLayoutParams(lp);
 		}
 		
-        adserverViewBottom.setMinSizeX(metrics.widthPixels);
-        adserverViewBottom.setMinSizeY(height);
+		// Min size can be useful, but if you don't have ads large enough for all devices, it
+		// can result in no ad being shown, so use it sparingly.
+        //adserverView.setMinSizeX(metrics.widthPixels);
+        //adserverView.setMinSizeY(height);
+		
         adserverViewBottom.setMaxSizeX(metrics.widthPixels);
         adserverViewBottom.setMaxSizeY(height);
 		adserverViewBottom.requestLayout();
