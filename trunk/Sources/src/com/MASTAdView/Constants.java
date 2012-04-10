@@ -4,7 +4,7 @@ import android.graphics.Color;
 
 public class Constants {
 
-	public static final String SDK_VERSION = "2.11beta1";
+	public static final String SDK_VERSION = "2.11beta2";
 	public static final int DEFAULT_COLOR = 0xFFFFFFFF;
 	
 	public static final int AD_RELOAD_PERIOD = 120000; //in milliseconds
@@ -21,11 +21,11 @@ public class Constants {
 	public static final String STR_IMPRESSION_NOT_SEND  = "Impression is not sent";	
 	public static final String STR_ADVETTISER_ID_INVALID =  "advertiserId=%s (valid: int>0)";
 	public static final String STR_INVALID_PARAM = "invalid param";
-	public static final String STR_EMPTY_SERVER_RESPONS = "empty server respons";
+	public static final String STR_EMPTY_SERVER_RESPONS = "empty server response (no ads)";
 	
-	public static final String STR_ORMMA_ERROR_RESIZE = "Error was happened: (resize: Cannot resize an ad that is not in the default state.)";
-	public static final String STR_ORMMA_ERROR_HIDE = "Error was happened: (hide: Cannot hide an ad that is not in the default state.)";
-	public static final String STR_ORMMA_ERROR_EXPAND = "Error was happened: (expand: Cannot expand an ad that is not in the default state.)";
+	public static final String STR_ORMMA_ERROR_RESIZE = "Error: resize: Cannot resize an ad that is not in the default state.";
+	public static final String STR_ORMMA_ERROR_HIDE = "Error: hide: Cannot hide an ad that is not in the default state.";
+	public static final String STR_ORMMA_ERROR_EXPAND = "Error: expand: Cannot expand an ad that is not in the default state.";
 	public static final String STR_ORMMA_ERROR_OPEN_MAP = "Error: no Google Api or error in parameters";
 	
 }

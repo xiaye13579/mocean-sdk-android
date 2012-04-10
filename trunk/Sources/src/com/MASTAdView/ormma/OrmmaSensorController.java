@@ -15,33 +15,62 @@ public class OrmmaSensorController extends OrmmaController{
 	private float mLastX = 0;
 	private float mLastY = 0;
 	private float mLastZ = 0;
+	//
+	private Context appContext;
+	
 
 	public OrmmaSensorController(MASTAdViewCore adView, Context context) {
 		super(adView, context);
-		mAccel = new AccelListener(context, this);
+		appContext = context;
+		mAccel = null;
+		//mAccel = new AccelListener(context, this);
 	}
 
 	public void startTiltListener(){
+		if (mAccel == null)
+		{
+			mAccel = new AccelListener(appContext, this);
+		}
 		mAccel.startTrackingTilt();
 	}
 
 	public void startShakeListener(){
+		if (mAccel == null)
+		{
+			mAccel = new AccelListener(appContext, this);
+		}
 		mAccel.startTrackingShake();
 	}
 
 	public void stopTiltListener(){
+		if (mAccel == null)
+		{
+			mAccel = new AccelListener(appContext, this);
+		}
 		mAccel.stopTrackingTilt();
 	}
 
 	public void stopShakeListener(){
+		if (mAccel == null)
+		{
+			mAccel = new AccelListener(appContext, this);
+		}
 		mAccel.stopTrackingShake();
 	}
 
 	public void startHeadingListener(){
+		if (mAccel == null)
+		{
+			mAccel = new AccelListener(appContext, this);
+		}
 		mAccel.startTrackingHeading();
 	}
 
 	public void stopHeadingListener(){
+		if (mAccel == null)
+		{
+			mAccel = new AccelListener(appContext, this);
+		}
 		mAccel.stopTrackingHeading();
 	}
 
@@ -70,13 +99,22 @@ public class OrmmaSensorController extends OrmmaController{
 
 	public void injectJavaScript(String js) {
 		mOrmmaView.injectJavaScript(js);
-	}
+	} 
 	
 	public float getHeading(){
+		if (mAccel == null)
+		{
+			mAccel = new AccelListener(appContext, this);
+		}
 		return mAccel.getHeading();
 	}
 
 	public static boolean hasAccelerometer(Context context) {
+		if (isEmulator())
+		{
+			return false;
+		}
+		
 		SensorManager sm = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
 
 		if(sm != null) {
@@ -91,7 +129,26 @@ public class OrmmaSensorController extends OrmmaController{
 		}
 	}
 
+	public static boolean isEmulator()
+	{
+		if(android.os.Build.MODEL.contains("sdk"))
+		{
+			 // emulator
+			return true;
+		}
+		else
+		{
+			 //not emulator
+			return false;
+		}
+	}
+	
 	public static boolean hasMagneticField(Context context) {
+		if (isEmulator())
+		{
+			return false;
+		}
+		
 		SensorManager sm = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
 
 		if(sm != null) {
