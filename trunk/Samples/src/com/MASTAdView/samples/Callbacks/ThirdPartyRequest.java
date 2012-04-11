@@ -67,7 +67,7 @@ public class ThirdPartyRequest extends Activity {
         adserverView = new MASTAdView(this, site, zone);
         adserverView.setId(1);
         setAdLayoutParams();
-        adserverView.setOnThirdPartyRequest(new UserOnThirdPartyRequest()); XXX
+        adserverView.setOnThirdPartyRequest(new UserOnThirdPartyRequest());
         linearLayout.addView(adserverView);
         adserverView.setContentAlignment(true);
         //adserverView.setAutoCollapse(false);
