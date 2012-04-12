@@ -26,7 +26,7 @@ public class Bottom extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 98465; // zumobi tapdance, 320x50 or 640x100
+	private int zone = 98465; // zumobi tapdance, 320x150 or 640x300
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,17 +79,17 @@ public class Bottom extends Activity {
 		DisplayMetrics metrics = new DisplayMetrics();
 		windowManager.getDefaultDisplay().getMetrics(metrics);
 		
-		int height = 50;
+		int height = 100;
 		int width = 320;
 
 		int maxSize = metrics.heightPixels;
-		if (maxSize < metrics.widthPixels) {
+		if (maxSize > metrics.widthPixels) {
 			maxSize = metrics.widthPixels;
 		}
 		
 		if (maxSize >= 640)
 		{
-			height = 100;
+			height = 150;
 			width = 640;
 		}
 		
