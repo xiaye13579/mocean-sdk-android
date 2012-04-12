@@ -26,7 +26,7 @@ public class TopAndBottom extends Activity {
 	private EditText inpZoneTop;
 	private Button btnRefreshTop;
 	private int siteTop = 19829;
-	private int zoneTop = 98465; // paso
+	private int zoneTop = 102238;
 
 	private MASTAdView adserverViewBottom;
 	private LinearLayout linearLayoutBottom;
@@ -34,7 +34,7 @@ public class TopAndBottom extends Activity {
 	private EditText inpZoneBottom;
 	private Button btnRefreshBottom;
 	private int siteBottom = 19829;
-	private int zoneBottom = 98464; // tapdance
+	private int zoneBottom = 98465 ;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +67,7 @@ public class TopAndBottom extends Activity {
         setAdLayoutParamsTop();
         linearLayoutTop.addView(adserverViewTop);
         adserverViewTop.setContentAlignment(true);
+        adserverViewTop.setAd_Call_Timeout(2000);
         //adserverViewTop.setAutoCollapse(false);
 		adserverViewTop.update();
 
@@ -97,6 +98,7 @@ public class TopAndBottom extends Activity {
         setAdLayoutParamsBottom();
         linearLayoutBottom.addView(adserverViewBottom);
         adserverViewBottom.setContentAlignment(true);
+        adserverViewBottom.setAd_Call_Timeout(2000);
         //adserverViewBottom.setAutoCollapse(false);
 		adserverViewBottom.update();
 		
@@ -154,17 +156,17 @@ public class TopAndBottom extends Activity {
 		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 		DisplayMetrics metrics = new DisplayMetrics();
 		windowManager.getDefaultDisplay().getMetrics(metrics);
-		int height = 50;
+		int height = 100;
 		int width = 320;
 		
 		int maxSize = metrics.heightPixels;
-		if (maxSize < metrics.widthPixels) {
+		if (maxSize > metrics.widthPixels) {
 			maxSize = metrics.widthPixels;
 		}
 		
 		if (maxSize >= 640)
 		{
-			height = 100;
+			height = 150;
 			width = 640;
 		}		
 		
