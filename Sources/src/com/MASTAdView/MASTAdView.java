@@ -127,7 +127,7 @@ public class MASTAdView extends MASTAdViewCore {
 				autoCloseInterstitialTime, isShowPhoneStatusBar, this, closeButton);
 	}
 	
-	private static void openInterstitialForm(Context context,
+	private void openInterstitialForm(Context context,
 			Integer showCloseButtonTime, Integer autoCloseInterstitialTime,
 			Boolean isShowPhoneStatusBar, MASTAdView adServerView, Button closeButton) {
 		if((showCloseButtonTime == null) || (showCloseButtonTime < 0)) {
@@ -179,8 +179,6 @@ public class MASTAdView extends MASTAdViewCore {
 		});
 		mainLayout.addView(closeButton);
 
-		Handler handler = new Handler();
-		
 		if(showCloseButtonTime <= 0) {
 			closeButton.setVisibility(View.VISIBLE);
 		} else {
