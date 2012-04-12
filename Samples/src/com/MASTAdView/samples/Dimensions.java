@@ -39,9 +39,9 @@ public class Dimensions extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 88269;
-    private int dimensionsWidth = 0;
-    private int dimensionsHeight = 0;
+	private int zone = 102238;
+    private int dimensionsWidth = -1;
+    private int dimensionsHeight = -1;
     private int dimensionsX = 0;
     private int dimensionsY = 0;
     private int dimensionsMinWidth = -1;
@@ -114,8 +114,8 @@ public class Dimensions extends Activity {
     		dimensionsWidth = adserverView.getWidth();
     		dimensionsHeight = adserverView.getHeight();
         	
-        	int maxWidth = linearLayout.getWidth();
-        	int maxHeight = linearLayout.getHeight();
+        	//int maxWidth = linearLayout.getWidth();
+        	//int maxHeight = linearLayout.getHeight();
 
         	//TextView lbWidth = (TextView)dialog.findViewById(R.id.lbWidth);
         	//lbWidth.setText(getString(R.string.width, dimensionsWidth));
@@ -145,10 +145,16 @@ public class Dimensions extends Activity {
         	*/
         	
         	final EditText sbMinWidth = (EditText)dialog.findViewById(R.id.sbMinWidth);
-        	//sbWidth.setText("" + dimensionsMinWidth);
+        	if (dimensionsMinWidth > 0)
+        	{
+        		sbMinWidth.setText("" + dimensionsMinWidth);
+        	}
         	
         	final EditText sbMinHeight = (EditText)dialog.findViewById(R.id.sbMinHeight);
-        	//sbHeight.setText("" + dimensionsMinHeight);
+        	if (dimensionsMinHeight > 0)
+        	{
+        		sbMinHeight.setText("" + dimensionsMinHeight);
+        	}
         	
         	final EditText sbX = (EditText)dialog.findViewById(R.id.sbX);
         	sbX.setText("" + dimensionsX);
@@ -182,10 +188,12 @@ public class Dimensions extends Activity {
 					int val = Integer.parseInt(sbWidth.getText().toString());
 					dimensionsWidth = val;
 					lp.width = dimensionsWidth;
+					adserverView.setMaxSizeX(dimensionsWidth);
 					
 					val = Integer.parseInt(sbHeight.getText().toString());
 					dimensionsHeight = val;
 					lp.height = dimensionsHeight;
+					adserverView.setMaxSizeY(dimensionsHeight);
 					
 					String s = sbMinWidth.getText().toString();
 					if ((s != null) && (s.length() > 0))
@@ -235,6 +243,7 @@ public class Dimensions extends Activity {
 					dimensionsY = val;
 					lp.topMargin = dimensionsY;
 					
+					adserverView.setLayoutParams(lp);
 					linearLayout.requestLayout();
 				}
 			});
@@ -246,27 +255,31 @@ public class Dimensions extends Activity {
     
 	private void setAdLayoutParams()
 	{
-		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-		DisplayMetrics metrics = new DisplayMetrics();
-		windowManager.getDefaultDisplay().getMetrics(metrics);
-		int height = 50;
-
-		int maxSize = metrics.heightPixels;
-		if (maxSize < metrics.widthPixels) {
-			maxSize = metrics.widthPixels;
-		}
-		
-		if (maxSize <= 480) {
-			height = 50;
-		} else if ((maxSize > 480) && (maxSize <= 800)) {
-			height = 100;
-		} else if (maxSize > 800) {
-			height = 120;
+		if ((dimensionsHeight < 0) || (dimensionsWidth < 0))
+		{
+			WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+			DisplayMetrics metrics = new DisplayMetrics();
+			windowManager.getDefaultDisplay().getMetrics(metrics);
+			int height = 50;
+			
+			int maxSize = metrics.heightPixels;
+			if (maxSize < metrics.widthPixels) {
+				maxSize = metrics.widthPixels;
+			}
+			
+			if ((maxSize > 480) && (maxSize <= 800)) {
+				height = 100;
+			} else if (maxSize > 800) {
+				height = 120;
+			}
+			dimensionsHeight = height;
+			dimensionsWidth = metrics.widthPixels;
 		}
 		
 		ViewGroup.LayoutParams lp = adserverView.getLayoutParams();
 		if (lp == null) {
-			lp = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
+			//lp = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
+			lp = new ViewGroup.MarginLayoutParams(dimensionsWidth, dimensionsHeight);
 			adserverView.setLayoutParams(lp);
 		}
 		
@@ -293,9 +306,12 @@ public class Dimensions extends Activity {
 		adserverView.setInternalBrowser(useInternalBrowser);
 		adserverView.setContentAlignment(isContentAligned);
 		
-        adserverView.setMaxSizeX(metrics.widthPixels);
-        adserverView.setMaxSizeY(height);
-
+        adserverView.setMaxSizeX(dimensionsWidth);
+        lp.width = dimensionsWidth;
+        adserverView.setMaxSizeY(dimensionsHeight);
+        lp.height = dimensionsHeight;
+        
+        adserverView.setLayoutParams(lp);
         adserverView.requestLayout();
 	}
 	
