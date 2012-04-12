@@ -95,6 +95,8 @@ public class RequestAndResponse extends Activity {
         adserverView.setOnAdDownload(new MASTOnAdDownload() {
 			@Override
 			public void error(final MASTAdView sender, final String error) {
+				// Anything that updates UI needs to be run via handler so it is done
+				// on the UI thread.
 				handler.post(new Runnable(){
 					@Override
 					public void run() {
@@ -124,24 +126,38 @@ public class RequestAndResponse extends Activity {
 			}
 			
 			@Override
-			public void end(MASTAdView sender) {
-				countResponses++;
-				lblStatistics.setText(res.getString(R.string.requests_responses_errors, countRequests, countResponses, countErrors));
-				responseText = sender.GetLastResponse();
-				requestText = sender.GetLastRequest();
-
-				if (rbtnRequest.isChecked()) {
-					lblTextRequestResponse.setText(requestText);
-				}
-				if (rbtnResponse.isChecked()) {
-					lblTextRequestResponse.setText(responseText);
-				}
+			public void end(final MASTAdView sender) {
+				// Anything that updates UI needs to be run via handler so it is done
+				// on the UI thread.
+				handler.post(new Runnable(){
+					@Override
+					public void run() {
+						countResponses++;
+						lblStatistics.setText(res.getString(R.string.requests_responses_errors, countRequests, countResponses, countErrors));
+						responseText = sender.GetLastResponse();
+						requestText = sender.GetLastRequest();
+		
+						if (rbtnRequest.isChecked()) {
+							lblTextRequestResponse.setText(requestText);
+						}
+						if (rbtnResponse.isChecked()) {
+							lblTextRequestResponse.setText(responseText);
+						}
+					}
+				});
 			}
 			
 			@Override
-			public void begin(MASTAdView sender) {
-				countRequests++;
-				lblStatistics.setText(res.getString(R.string.requests_responses_errors, countRequests, countResponses, countErrors));
+			public void begin(final MASTAdView sender) {
+				// Anything that updates UI needs to be run via handler so it is done
+				// on the UI thread.
+				handler.post(new Runnable(){
+					@Override
+					public void run() {
+						countRequests++;
+						lblStatistics.setText(res.getString(R.string.requests_responses_errors, countRequests, countResponses, countErrors));
+					}
+				});
 			}
 		});        
         
