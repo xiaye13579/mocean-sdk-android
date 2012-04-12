@@ -26,7 +26,7 @@ public class Table extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 88269;
+	private int zone = 102238;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
