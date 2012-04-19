@@ -44,7 +44,7 @@ public class RequestAndResponse extends Activity {
 	private TextView lblStatistics;
 	private TextView lblTextRequestResponse;
 	private int countRequests = 0;
-	private int countResponses = 0;
+	private int countResponses = -1;
 	private int countErrors = 0;
 	private Resources res;
 	private String requestText;

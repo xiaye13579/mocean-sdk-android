@@ -79,7 +79,7 @@ public class Bottom extends Activity {
 		DisplayMetrics metrics = new DisplayMetrics();
 		windowManager.getDefaultDisplay().getMetrics(metrics);
 		
-		int height = 100;
+		int height = 150;
 		int width = 320;
 
 		int maxSize = metrics.heightPixels;
@@ -89,13 +89,13 @@ public class Bottom extends Activity {
 		
 		if (maxSize >= 640)
 		{
-			height = 150;
+			height = 300;
 			width = 640;
 		}
 		
 		ViewGroup.LayoutParams lp = adserverView.getLayoutParams();
 		if (lp == null) {
-			lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
+			lp = new ViewGroup.LayoutParams(width, height);
 			adserverView.setLayoutParams(lp);
 		}
 		
@@ -104,7 +104,7 @@ public class Bottom extends Activity {
         //adserverView.setMinSizeX(metrics.widthPixels);
         //adserverView.setMinSizeY(height);
 		
-        adserverView.setMaxSizeX(metrics.widthPixels);
+        adserverView.setMaxSizeX(width);
         adserverView.setMaxSizeY(height);
 		adserverView.requestLayout();
 	}

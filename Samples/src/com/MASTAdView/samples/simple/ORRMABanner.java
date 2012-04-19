@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.MASTAdView.MASTAdView;
+import com.MASTAdView.MASTAdViewCore.MASTOnOrmmaListener;
 import com.MASTAdView.samples.R;
 
 public class ORRMABanner extends Activity {
@@ -25,7 +26,7 @@ public class ORRMABanner extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 102238; // all ads in rotation, includes images and rich media
+	private int zone = 98463;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,11 +55,14 @@ public class ORRMABanner extends Activity {
 		});
         
         adserverView = new MASTAdView(this, site, zone);
-        adserverView.setScaleOnDPI(true);
+        
+        // Test custom viewport code suggested by Celtra
+        //adserverView.setInjectionHeaderCode("<meta name=\"viewport\" content=\"initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\" />");
+        
         adserverView.setId(1);
         setAdLayoutParams();
         linearLayout.addView(adserverView);
-        //adserverView.setContentAlignment(true);
+        adserverView.setContentAlignment(true);
 		adserverView.update();
         
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);
@@ -73,29 +77,19 @@ public class ORRMABanner extends Activity {
 		setAdLayoutParams();
 		adserverView.update();
 	}
-	
+		
 	private void setAdLayoutParams() {
 		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 		DisplayMetrics metrics = new DisplayMetrics();
 		windowManager.getDefaultDisplay().getMetrics(metrics);
-		int height = 50;
 
-		int maxSize = metrics.heightPixels;
-		if (maxSize < metrics.widthPixels) {
-			maxSize = metrics.widthPixels;
-		}
-		
-		if (maxSize <= 480) {
-			height = 50;
-		} else if ((maxSize > 480) && (maxSize <= 800)) {
-			height = 100;
-		} else if (maxSize > 800) {
-			height = 120;
-		}
-		
+		int height = 150;
+		int width = metrics.widthPixels;
+
 		ViewGroup.LayoutParams lp = adserverView.getLayoutParams();
 		if (lp == null) {
-			lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
+			//lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
+			lp = new ViewGroup.LayoutParams(width, height);
 			adserverView.setLayoutParams(lp);
 		}
 		
@@ -104,7 +98,8 @@ public class ORRMABanner extends Activity {
         //adserverView.setMinSizeX(metrics.widthPixels);
         //adserverView.setMinSizeY(height);
 		
-        adserverView.setMaxSizeX(metrics.widthPixels);
+        //adserverView.setMaxSizeX(metrics.widthPixels);
+		adserverView.setMaxSizeX(width);
         adserverView.setMaxSizeY(height);
 		adserverView.requestLayout();
 	}
