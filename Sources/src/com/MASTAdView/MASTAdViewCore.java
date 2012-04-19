@@ -49,6 +49,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -202,7 +203,6 @@ public abstract class MASTAdViewCore extends WebView
 	private int lastX;
 	private int lastY;
 	private ViewGroup parentView = null;
-	private boolean scaleOnDPI = false;
 
 	// Items needs to handle closing expanded/resized view
 	private int mOldHeight;
@@ -274,18 +274,6 @@ public abstract class MASTAdViewCore extends WebView
 		AutoDetectParameters(context);
 		initialize(context, null);
 		mViewState = ViewState.EXPANDED;
-	}
-	
-	@java.lang.Deprecated
-	public void setScaleOnDPI(boolean scaleOnDPI)
-	{
-		this.scaleOnDPI = scaleOnDPI;
-	}
-	
-	@java.lang.Deprecated
-	public boolean getScaleOnDPI()
-	{
-		return scaleOnDPI;
 	}
 	
 	public void setAd_Call_Timeout(int timeout)
@@ -745,7 +733,7 @@ public abstract class MASTAdViewCore extends WebView
 		
 		
 		// Pre-load header (empty body) with ormma / mraid javascrpt code
-		String dataOut = setupViewportHeader(SCALE_VIEWPORT_LIKE_210);
+		String dataOut = setupViewport(false, true, null);
 		super.loadDataWithBaseURL(null, dataOut, "text/html", "UTF-8", null);
 		
 		
@@ -790,6 +778,7 @@ public abstract class MASTAdViewCore extends WebView
 		
 		LinearLayout ll = new LinearLayout(context);
 		ll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+		//ll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 		ll.setGravity(Gravity.RIGHT);
 		ll.addView(buttonClose);
 		
@@ -867,8 +856,7 @@ public abstract class MASTAdViewCore extends WebView
 
 	@Override
 	protected void onSizeChanged(int w, int h, int ow, int oh) {
-		if (((ow > 0) && (w > ow)) ||
-			((oh > 0) && (h > oh)))
+		if (mViewState != ViewState.DEFAULT)
 		{
 			stopTimer(false); // expand/resize up, cancel refresh timer
 		}
@@ -964,23 +952,26 @@ public abstract class MASTAdViewCore extends WebView
 		{
 			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "update", "");
 			if(isManual) IsManualUpdate = true;
+			hideVirtualKeyboard();
 			StartLoadContent(getContext(), this);
 		}
 	}
 	
-	public void useCloseButton(final boolean show) {
+	public void useCloseButton(final boolean custom) {
 		handler.post(new Runnable() {			
 			@Override
 			public void run() {
-				if (show) {
+				if (custom) {
 					buttonClose.setVisibility(View.VISIBLE);
 				} else {
-					buttonClose.setVisibility(View.GONE);
+					// per ormma standard, leave transparent clickable region where close button would be
+					buttonClose.setBackgroundColor(Color.TRANSPARENT);
+					buttonClose.setVisibility(View.VISIBLE);
 				}
 			}
 		});
 	}
-		
+	
 	void StartLoadContent(Context context, WebView view)
 	{
 		if(reloadTask!=null)
@@ -1080,90 +1071,113 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	
-	final public static int SCALE_VIEWPORT_NEW  = 0; // customer suggestion
-	final static public int SCALE_VIEWPORT_LIKE_29  = 1;
-	final static public int SCALE_VIEWPORT_LIKE_210 = 2;
+	private String injectionHeaderCode = null;
+	private String injectionBodyCode = null;
+		
+	
+	/**
+	 * Customize the HTML (or javascript) code to be inserted into the HTML HEAD when creating
+	 * webview for ad content. By default this will contain the string:
+	 * 
+	 * <meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/>
+	 * 
+	 * @param value String content to be inserted, or null to use built-in default (same as 2.10)
+	 */
+	public void setInjectionHeaderCode(String value)
+	{
+		injectionHeaderCode = value;
+	}
+	
+	
+	public String getInjectionHeaderCode()
+	{
+		if (injectionHeaderCode != null)
+		{
+			return injectionHeaderCode;
+		}
+		else
+		{
+			// Default fragment as of 2.1 SDK
+			return "<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/>";
+		}
+	}
+	
+
+	/**
+	 * Customize the HTML (or javascript) code to be inserted into the HTML BODY when creating
+	 * webview for ad content. By default this will contain one of the strings below based on
+	 * the isContentAligned property:
+	 * 
+	 * <body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;\">
+	 * or
+	 * <body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">
+	 * 
+	 * @param value String content to be inserted, or null to use built-in default (same as 2.10.) NOTE: This MUST include the HTML <body> tag!
+	 */
+	public void setInjectionBodyCode(String value)
+	{
+		injectionBodyCode = value;
+	}
+	
+	
+	public String getInjectionBodycode()
+	{
+		if (injectionBodyCode != null)
+		{
+			return injectionBodyCode;
+		}
+		else
+		{
+			// Default 2.10 SDK values, with and without content alignment
+			if (isContentAligned)
+			{
+				return "<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;\">";
+			}
+			else
+			{
+				return "<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">";
+			}
+		}
+	}
 	
 	
 	// Create viewport for showing ad; version 2.9 and earlier had a "bug" which caused
 	// ad creative to be scaled on device to the device dpi; version 2.10 introduced a fix
 	// for this, but the change in behavior caused some issues. A deprecated flag allowed
 	// reverting to the old behavior. Per a client suggestion, another fix is being introduced.
-	private String setupViewport(int scaleOption, boolean isAligned, String body)
+	private String setupViewport(boolean isAligned, boolean headerOnly, String body)
 	{
 		StringBuffer data = new StringBuffer("<html><head>");
 		
+		// Insert our javascript bridge library; this is always required
 		data.append("<style>*{margin:0;padding:0}</style>");
 		data.append("<script src=\"file://");
 		data.append(mScriptPath);
 		data.append("\" type=\"text/javascript\"></script>");
 		
-		if (scaleOption == SCALE_VIEWPORT_LIKE_29)
+		data.append(getInjectionHeaderCode());
+	
+		if (headerOnly)
 		{
-			// don't set dpi or any special parameters, duplicating legacy behavior
-			data.append("</head>");	
-		}
-		else if (scaleOption == SCALE_VIEWPORT_LIKE_210)
-		{
-			// set target density as in 2.10
-			data.append("<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>");
+			data.append("</head><body>");
 		}
 		else
 		{
-			// new/alternate viewport configuration suggested by Gasper/Celtra
-			data.append("<meta name=\"viewport\" content=\"initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\" /></head>");
-		}		
-		
-		if (isAligned)
-		{
-			data.append("<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;\">");
-		}
-		else
-		{
-			data.append("<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">");
-		}
-		
-		if (body != null)
-		{
-			data.append(body);
+			data.append("</head>");
+			data.append(getInjectionBodycode());
+			
+			if (body != null)
+			{
+				data.append(body);
+			}
 		}
 		
 		data.append("</body></html>");
 		
-		return data.toString();
-	}
-	
-	// Strippe down version injected into view early so that ormma/mraid code is loaded
-	private String setupViewportHeader(int scaleOption)
-	{
-		StringBuffer data = new StringBuffer("<html><head>");
-		
-		data.append("<style>*{margin:0;padding:0}</style>");
-		data.append("<script src=\"file://");
-		data.append(mScriptPath);
-		data.append("\" type=\"text/javascript\"></script>");
-		
-		if (scaleOption == SCALE_VIEWPORT_LIKE_29)
-		{
-			// don't set dpi or any special parameters, duplicating legacy behavior
-			data.append("</head>");	
-		}
-		else if (scaleOption == SCALE_VIEWPORT_LIKE_210)
-		{
-			// set target density as in 2.10
-			data.append("<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/></head>");
-		}
-		else
-		{
-			// new/alternate viewport configuration suggested by Gasper/Celtra
-			data.append("<meta name=\"viewport\" content=\"initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\" /></head>");
-		}		
-			
-		data.append("<body></body></html>");
+		System.out.println("SetupViewport: final string: " + data.toString());
 		
 		return data.toString();
 	}
-	
 	
 	
 	void setResult(String data, String error)
@@ -1194,18 +1208,7 @@ public abstract class MASTAdViewCore extends WebView
 					if(isAutoCollapse) this.setAdVisibility(View.INVISIBLE);
 					else
 					{	
-						// The scaleOnDPI deprecated parameter allows users to revert to the old
-						// SDK behavior which scaled ads on Android.
-						//
-						if(!scaleOnDPI)
-						{
-							//data = setupViewport(SCALE_VIEWPORT_NEW, isContentAligned, null);
-							data = setupViewport(SCALE_VIEWPORT_LIKE_210, isContentAligned, null);
-						}
-						else
-						{
-							data = setupViewport(SCALE_VIEWPORT_LIKE_29, isContentAligned, null);
-						}					
+						data = setupViewport(isContentAligned, false, null);					
 						//view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 						loadWebViewContent(null, data, null);
 					}
@@ -1276,15 +1279,8 @@ public abstract class MASTAdViewCore extends WebView
 								stopTimer(false);
 							} else {
 								String dataOut="";
-								if(scaleOnDPI)
-								{
-									dataOut = setupViewport(SCALE_VIEWPORT_LIKE_29, isContentAligned, data);
-								}
-								else
-								{
-									//dataOut = setupViewport(SCALE_VIEWPORT_NEW, isContentAligned, data);
-									dataOut = setupViewport(SCALE_VIEWPORT_LIKE_210, isContentAligned, data);
-								}
+								//dataOut = setupViewport(SCALE_VIEWPORT_NEW, isContentAligned, data);
+								dataOut = setupViewport(isContentAligned, false, data);
 								
 								mContent = dataOut;
 								
@@ -1900,6 +1896,7 @@ public abstract class MASTAdViewCore extends WebView
 				case MESSAGE_EXPAND: {
 					if (mViewState == ViewState.DEFAULT) {
 						stopTimer(false); // stop ad refresh timer
+						hideVirtualKeyboard();
 						ViewGroup.LayoutParams lp = getLayoutParams();
 						mOldHeight = lp.height;
 						mOldWidth = lp.width;
@@ -1935,6 +1932,7 @@ public abstract class MASTAdViewCore extends WebView
 					break;
 				}
 			}
+			
 			super.handleMessage(msg);
 		}
 	};
@@ -1999,6 +1997,14 @@ public abstract class MASTAdViewCore extends WebView
 		handler.sendMessage(msg); // mHandler
 	}
 
+	private void hideVirtualKeyboard()
+	{
+
+		// Try to hide virtual keyboard
+		InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE); 
+        imm.hideSoftInputFromWindow(this.getApplicationWindowToken(), 0);
+	}
+	
 	protected void closeExpanded(View expandedFrame) {
 		((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).removeView(expandedFrame);
 		requestLayout();
@@ -2017,7 +2023,7 @@ public abstract class MASTAdViewCore extends WebView
 		//System.out.println("expandInUI: height=" +dimensions.height);
 		
 		if(mExpandedFrame!=null) ((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).removeView(mExpandedFrame);
-		
+		 
 		mExpandedFrame = new RelativeLayout(getContext());
 		android.widget.RelativeLayout.LayoutParams adLp = new RelativeLayout.LayoutParams(
 				dimensions.width, dimensions.height);
