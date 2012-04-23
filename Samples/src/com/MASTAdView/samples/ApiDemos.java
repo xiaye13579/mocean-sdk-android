@@ -35,8 +35,10 @@ public class ApiDemos extends ListActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         
         Intent intent = getIntent();
-        
+
         MASTAdLog.setDefaultLogLevel(MASTAdLog.LOG_LEVEL_3);
+        MASTAdLog.setMaximumLogCount(500); // save up to 500 message in memory for display through app
+        
         String path = intent.getStringExtra("com.MASTAdView.sample.Path");
         
         if (path == null) {

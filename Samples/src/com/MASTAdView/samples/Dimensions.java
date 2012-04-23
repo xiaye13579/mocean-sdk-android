@@ -17,19 +17,12 @@ import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.MASTAdView.MASTAdView;
-import com.MASTAdView.samples.R;
-import com.MASTAdView.samples.R.drawable;
-import com.MASTAdView.samples.R.id;
-import com.MASTAdView.samples.R.layout;
-import com.MASTAdView.samples.R.menu;
-import com.MASTAdView.samples.R.string;
 
 
 public class Dimensions extends Activity {
@@ -104,6 +97,7 @@ public class Dimensions extends Activity {
         return true;
     }
 
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.miShowDialog) {
@@ -113,36 +107,12 @@ public class Dimensions extends Activity {
         	
     		dimensionsWidth = adserverView.getWidth();
     		dimensionsHeight = adserverView.getHeight();
-        	
-        	//int maxWidth = linearLayout.getWidth();
-        	//int maxHeight = linearLayout.getHeight();
 
-        	//TextView lbWidth = (TextView)dialog.findViewById(R.id.lbWidth);
-        	//lbWidth.setText(getString(R.string.width, dimensionsWidth));
-        	//TextView lbHeight = (TextView)dialog.findViewById(R.id.lbHeight);
-        	//lbHeight.setText(getString(R.string.height, dimensionsHeight));
-        	//TextView lbX = (TextView)dialog.findViewById(R.id.lbX);
-        	//lbX.setText(getString(R.string.x, dimensionsX));
-        	//TextView lbY = (TextView)dialog.findViewById(R.id.lbY);
-        	//lbY.setText(getString(R.string.y, dimensionsY));
-        	
-        	final EditText sbWidth = (EditText)dialog.findViewById(R.id.sbWidth);
+    		final EditText sbWidth = (EditText)dialog.findViewById(R.id.sbWidth);
         	sbWidth.setText("" + dimensionsWidth);
-        	/*
-        	SeekBar sbWidth = (SeekBar)dialog.findViewById(R.id.sbWidth);
-        	sbWidth.setMax(maxWidth);
-        	sbWidth.setProgress(dimensionsWidth);
-        	sbWidth.setOnSeekBarChangeListener(new CustomOnSeekBarChangeListener(lbWidth, R.string.width));
-        	*/
         	
         	final EditText sbHeight = (EditText)dialog.findViewById(R.id.sbHeight);
         	sbHeight.setText("" + dimensionsHeight);
-        	/*
-        	SeekBar sbHeight = (SeekBar)dialog.findViewById(R.id.sbHeight);
-        	sbHeight.setMax(maxHeight);
-        	sbHeight.setProgress(dimensionsHeight);
-        	sbHeight.setOnSeekBarChangeListener(new CustomOnSeekBarChangeListener(lbHeight, R.string.height));
-        	*/
         	
         	final EditText sbMinWidth = (EditText)dialog.findViewById(R.id.sbMinWidth);
         	if (dimensionsMinWidth > 0)
@@ -158,25 +128,57 @@ public class Dimensions extends Activity {
         	
         	final EditText sbX = (EditText)dialog.findViewById(R.id.sbX);
         	sbX.setText("" + dimensionsX);
-        	/*
-        	SeekBar sbX = (SeekBar)dialog.findViewById(R.id.sbX);
-        	sbX.setMax(maxWidth - 50);
-        	sbX.setProgress(dimensionsX);
-        	sbX.setOnSeekBarChangeListener(new CustomOnSeekBarChangeListener(lbX, R.string.x));
-        	*/
         	
         	final EditText sbY = (EditText)dialog.findViewById(R.id.sbY);
         	sbY.setText("" + dimensionsY);
-        	/*
-        	SeekBar sbY = (SeekBar)dialog.findViewById(R.id.sbY);
-        	sbY.setMax(maxHeight - 50);
-        	sbY.setProgress(dimensionsY);
-        	sbY.setOnSeekBarChangeListener(new CustomOnSeekBarChangeListener(lbY, R.string.y));
-			*/
-        
+        	
         	final CheckBox cbIsAligned = (CheckBox)dialog.findViewById(R.id.cbIsAligned);
         	final CheckBox cbUseInternal = (CheckBox)dialog.findViewById(R.id.cbUseInternal);
         	
+        	final CheckBox cbFillWidth = (CheckBox) dialog.findViewById(R.id.cbFillParentWidth);
+        	cbFillWidth.setOnCheckedChangeListener(new OnCheckedChangeListener()
+        	{
+        	    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+        	    {
+        	        if ( isChecked )
+        	        {
+        	        	WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        				DisplayMetrics metrics = new DisplayMetrics();
+        				windowManager.getDefaultDisplay().getMetrics(metrics);
+        				sbWidth.setText("" + metrics.widthPixels);
+        				
+        	        	sbWidth.setEnabled(false);
+        	        }
+        	        else
+        	        {
+        	        	sbWidth.setEnabled(true);
+        	        }
+
+        	    }
+        	});
+        	
+        	final CheckBox cbFillHeight = (CheckBox) dialog.findViewById(R.id.cbFillParentHeight);
+        	cbFillHeight.setOnCheckedChangeListener(new OnCheckedChangeListener()
+        	{
+        	    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+        	    {
+        	        if ( isChecked )
+        	        {
+        	        	WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        				DisplayMetrics metrics = new DisplayMetrics();
+        				windowManager.getDefaultDisplay().getMetrics(metrics);
+        				sbHeight.setText("" + metrics.heightPixels);
+        				
+        				sbHeight.setEnabled(false);
+        	        }
+        	        else
+        	        {
+        	        	sbHeight.setEnabled(true);
+        	        }
+
+        	    }
+        	});
+
         	Button btnOk = (Button)dialog.findViewById(R.id.btnOk);
         	btnOk.setOnClickListener(new OnClickListener() {
 				@Override
