@@ -129,12 +129,7 @@ public class TopAndBottom extends Activity {
 		int height = 50;
 		int width = 320;
 		
-		int maxSize = metrics.heightPixels;
-		if (maxSize < metrics.widthPixels) {
-			maxSize = metrics.widthPixels;
-		}
-		
-		if (maxSize >= 640)
+		if (metrics.widthPixels >= 640)
 		{
 			height = 100;
 			width = 640;
@@ -165,12 +160,7 @@ public class TopAndBottom extends Activity {
 		int height = 50;
 		int width = 320;
 		
-		int maxSize = metrics.heightPixels;
-		if (maxSize > metrics.widthPixels) {
-			maxSize = metrics.widthPixels;
-		}
-		
-		if (maxSize >= 640)
+		if (metrics.widthPixels >= 640)
 		{
 			height = 100;
 			width = 640;
