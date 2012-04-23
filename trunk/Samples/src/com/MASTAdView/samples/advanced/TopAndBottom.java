@@ -3,10 +3,12 @@ package com.MASTAdView.samples.advanced;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -26,7 +28,7 @@ public class TopAndBottom extends Activity {
 	private EditText inpZoneTop;
 	private Button btnRefreshTop;
 	private int siteTop = 19829;
-	private int zoneTop = 102238;
+	private int zoneTop = 98466;
 
 	private MASTAdView adserverViewBottom;
 	private LinearLayout linearLayoutBottom;
@@ -42,6 +44,7 @@ public class TopAndBottom extends Activity {
         setContentView(R.layout.top_and_bottom);
         
         linearLayoutTop = (LinearLayout) findViewById(R.id.frameAdContentTop);
+        linearLayoutTop.setGravity(Gravity.CENTER_HORIZONTAL);
         inpSiteTop = (EditText) findViewById(R.id.inpSiteTop);
         inpSiteTop.setText(String.valueOf(siteTop));
         inpZoneTop = (EditText) findViewById(R.id.inpZoneTop);
@@ -66,13 +69,14 @@ public class TopAndBottom extends Activity {
         adserverViewTop.setId(1);
         setAdLayoutParamsTop();
         linearLayoutTop.addView(adserverViewTop);
-        adserverViewTop.setContentAlignment(true);
+        //adserverViewTop.setContentAlignment(true);
         adserverViewTop.setAd_Call_Timeout(2000);
         //adserverViewTop.setAutoCollapse(false);
 		adserverViewTop.update();
 
 		
         linearLayoutBottom = (LinearLayout) findViewById(R.id.frameAdContentBottom);
+        linearLayoutBottom.setGravity(Gravity.CENTER_HORIZONTAL);
         inpSiteBottom = (EditText) findViewById(R.id.inpSiteBottom);
         inpSiteBottom.setText(String.valueOf(siteBottom));
         inpZoneBottom = (EditText) findViewById(R.id.inpZoneBottom);
@@ -97,7 +101,7 @@ public class TopAndBottom extends Activity {
         adserverViewBottom.setId(1);
         setAdLayoutParamsBottom();
         linearLayoutBottom.addView(adserverViewBottom);
-        adserverViewBottom.setContentAlignment(true);
+        //adserverViewBottom.setContentAlignment(true);
         adserverViewBottom.setAd_Call_Timeout(2000);
         //adserverViewBottom.setAutoCollapse(false);
 		adserverViewBottom.update();
@@ -138,7 +142,7 @@ public class TopAndBottom extends Activity {
 		
 		ViewGroup.LayoutParams lp = adserverViewTop.getLayoutParams();
 		if (lp == null) {
-			lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
+			lp = new ViewGroup.LayoutParams(width, height);
 			adserverViewTop.setLayoutParams(lp);
 		}
 		
@@ -147,8 +151,10 @@ public class TopAndBottom extends Activity {
         //adserverView.setMinSizeX(metrics.widthPixels);
         //adserverView.setMinSizeY(height);
 		
-        adserverViewTop.setMaxSizeX(metrics.widthPixels);
+        adserverViewTop.setMaxSizeX(width);
         adserverViewTop.setMaxSizeY(height);
+        //adserverViewTop.setContentAlignment(true);
+        adserverViewTop.setBackgroundColor(Color.TRANSPARENT);
 		adserverViewTop.requestLayout();
 	}
 
@@ -156,7 +162,7 @@ public class TopAndBottom extends Activity {
 		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 		DisplayMetrics metrics = new DisplayMetrics();
 		windowManager.getDefaultDisplay().getMetrics(metrics);
-		int height = 100;
+		int height = 50;
 		int width = 320;
 		
 		int maxSize = metrics.heightPixels;
@@ -166,13 +172,13 @@ public class TopAndBottom extends Activity {
 		
 		if (maxSize >= 640)
 		{
-			height = 150;
+			height = 100;
 			width = 640;
 		}		
 		
 		ViewGroup.LayoutParams lp = adserverViewBottom.getLayoutParams();
 		if (lp == null) {
-			lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, height);
+			lp = new ViewGroup.LayoutParams(width, height);
 			adserverViewBottom.setLayoutParams(lp);
 		} else {
 			lp.height = height;
@@ -184,8 +190,9 @@ public class TopAndBottom extends Activity {
         //adserverView.setMinSizeX(metrics.widthPixels);
         //adserverView.setMinSizeY(height);
 		
-        adserverViewBottom.setMaxSizeX(metrics.widthPixels);
+        adserverViewBottom.setMaxSizeX(width);
         adserverViewBottom.setMaxSizeY(height);
+        adserverViewBottom.setBackgroundColor(Color.TRANSPARENT);
 		adserverViewBottom.requestLayout();
 	}
 	

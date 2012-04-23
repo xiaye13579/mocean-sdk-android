@@ -32,7 +32,7 @@ public class OrmmaListener extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 102238;
+	private int zone = 98463;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

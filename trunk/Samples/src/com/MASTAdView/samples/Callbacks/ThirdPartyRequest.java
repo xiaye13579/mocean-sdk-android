@@ -34,7 +34,7 @@ public class ThirdPartyRequest extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 90039; // 50/50 third party
+	private int zone = 90038;
 	
 	
     public void onCreate(Bundle savedInstanceState) {

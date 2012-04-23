@@ -170,5 +170,14 @@
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
+        <activity android:label="View Application Logs" 
+            android:name=".LogViewer"
+			android:screenOrientation="sensor"
+			android:configChanges="keyboardHidden|orientation">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
