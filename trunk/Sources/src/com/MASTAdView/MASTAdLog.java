@@ -2,6 +2,7 @@ package com.MASTAdView;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Vector;
 
 import android.app.ActivityManager;
 import android.app.Application;
@@ -28,6 +29,15 @@ public class MASTAdLog {
 	
 	private static int DefaultLevel = LOG_LEVEL_NONE;
 	
+	// Maximum number of messages to keep in memory for review access through the app;
+	// keep this small by default to conserve memory usage. When debugging apps, callers
+	// can increase this value.
+	private static int maximumInMemoryLogCount = 200;
+	
+	// Store all diag info in private internal vector of strings
+    private static Vector<String> inMemoryLog = null;
+    
+    
 	public static void setDefaultLogLevel(int logLevel)
 	{
 		DefaultLevel = logLevel;
@@ -52,7 +62,7 @@ public class MASTAdLog {
 			Runtime.getRuntime().exec(cmd);
 			loggingToFile = true;
 			//log(LOG_LEVEL_1,LOG_TYPE_INFO,"SetFileLog","Logging to file: " + fileName);
-			System.out.println("Logging to file: " + fileName);
+			//System.out.println("Logging to file: " + fileName);
 		} catch (IOException e) { 
 				e.printStackTrace(); 
 		}
@@ -77,6 +87,8 @@ public class MASTAdLog {
 			default:
 				Log.i(resultTag, msg+' ');
 			}
+			
+			logInternal(resultTag + msg);
 		}
 	}
 
@@ -95,6 +107,52 @@ public class MASTAdLog {
 		if ((logLevel > 0) && (loggingToFile == false))
 		{
 			setFileLog(defaultLogFileName); // log to default file
+		}
+	}
+	
+
+	private void logInternal(String message)
+	{
+		if (inMemoryLog == null)
+		{
+			inMemoryLog = new Vector<String>();
+		}
+		
+		if (message != null)
+        {
+			inMemoryLog.addElement(message);
+        }
+		
+		int currentSize = inMemoryLog.size();
+        while (currentSize >= maximumInMemoryLogCount)
+        {
+            // Need to clean up some old messages first.
+        	inMemoryLog.removeElementAt(0);
+        	currentSize--;
+        }
+	}
+
+	public static int getMaximumlogCount()
+	{
+		return maximumInMemoryLogCount;
+	}
+	
+	public static void setMaximumLogCount(int value)
+	{
+		maximumInMemoryLogCount = value;
+	}
+	
+	public static Vector<String> getInternalLogs()
+	{
+		return inMemoryLog;
+	}
+
+	
+	public static void clearInternalLogs()
+	{
+		if (inMemoryLog != null)
+		{
+			inMemoryLog.clear();
 		}
 	}
 }

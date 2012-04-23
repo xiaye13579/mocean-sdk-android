@@ -41,6 +41,7 @@ public class AdserverRequest {
 	private final String parameter_city = "city";
 	private final String parameter_area = "area";
 	private final String parameter_metro = "metro";
+	private final String parameter_dma = "dma";
 	private final String parameter_zip = "zip";
 	//private final String parameter_adstype = "adstype";
 	private final String parameter_latitude = "lat";
@@ -302,19 +303,39 @@ public class AdserverRequest {
 
 	/**
 	 * Optional.
-	 * Set Metro code of a user. For US only. 
+	 * Set Metro code of a user. For US only.
+	 * NOTE: Deprecated, use setDma instead.
+	 *  
 	 * @param metro
 	 * @return
 	 */
+	@Deprecated
 	public AdserverRequest setMetro(String metro) {
 		if(metro != null) {
 			synchronized(parameters) {
-				parameters.put(parameter_metro, metro);
+				parameters.put(parameter_dma, metro);
 			}
 		}
 		return this;
 	}
 
+	/**
+	 * Optional.
+	 * Set Dma code of a user. For US only.
+	 *  
+	 * @param marketting zone name
+	 * @return
+	 */
+	public AdserverRequest setDma(String dma) {
+		if(dma != null) {
+			synchronized(parameters) {
+				parameters.put(parameter_dma, dma);
+			}
+		}
+		return this;
+	}
+	
+	
 	/**
 	 * Optional.
 	 * Set Zip/Postal code of user. For US only. 
@@ -682,12 +703,19 @@ public class AdserverRequest {
 		}
 	}
 
+	@Deprecated
 	public String getMetro() {
 		synchronized(parameters) {
-			return parameters.get(parameter_metro);
+			return parameters.get(parameter_dma);
 		}
 	}
 
+	public String getDma() {
+		synchronized(parameters) {
+			return parameters.get(parameter_dma);
+		}
+	}
+	
 	public String getZip() {
 		synchronized(parameters) {
 			return parameters.get(parameter_zip);
