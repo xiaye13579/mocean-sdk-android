@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AdMobileSamples</string>
-    <string name="app_id">764f0842b9025416f78b6b99891cb70302bd8c50</string>
-    <string name="use_test_servers">true</string>
     <string name="refresh">Refresh</string>
     <string name="site">site:</string>
 	<string name="zone">zone:</string>

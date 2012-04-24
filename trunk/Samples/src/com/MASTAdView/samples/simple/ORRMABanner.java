@@ -56,9 +56,6 @@ public class ORRMABanner extends Activity {
         
         adserverView = new MASTAdView(this, site, zone);
         
-        // Test custom viewport code suggested by Celtra
-        //adserverView.setInjectionHeaderCode("<meta name=\"viewport\" content=\"initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\" />");
-        
         adserverView.setId(1);
         setAdLayoutParams();
         linearLayout.addView(adserverView);
@@ -101,6 +98,15 @@ public class ORRMABanner extends Activity {
         //adserverView.setMaxSizeX(metrics.widthPixels);
 		adserverView.setMaxSizeX(width);
         adserverView.setMaxSizeY(height);
+        
+        
+        // Test custom viewport code suggested by Celtra
+        //adserverView.setInjectionHeaderCode("<meta name=\"viewport\" content=\"initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\" />");
+        
+        // Another viewport test
+        //adserverView.setInjectionHeaderCode("<meta name=\"viewport\" content=\"target-densitydpi=device-dpi, width=ADVIEWWIDTH\" />");
+        
+        
 		adserverView.requestLayout();
 	}
 	

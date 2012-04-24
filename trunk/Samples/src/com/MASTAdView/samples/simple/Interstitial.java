@@ -97,6 +97,7 @@ public class Interstitial extends Activity {
 		
         adserverView.setMaxSizeX(metrics.widthPixels);
         adserverView.setMaxSizeY(metrics.heightPixels - statusBarHeight);
+        //System.out.println("setAdLayout: using width,height: " + metrics.widthPixels + ", " + metrics.heightPixels);
         adserverView.requestLayout();
 	}
 	
