@@ -866,6 +866,8 @@ public abstract class MASTAdViewCore extends WebView
 		super.onSizeChanged(w, h, ow, oh);
 		adserverRequest.sizeX = w;
 		adserverRequest.sizeY = h;
+		
+		//System.out.println("onSizeChanged: w=" + w + ", h=" + h + ", ow=" + ow + ", oh=" + oh);
 	}
 
 	
@@ -1174,8 +1176,7 @@ public abstract class MASTAdViewCore extends WebView
 		
 		data.append("</body></html>");
 		
-		System.out.println("SetupViewport: final string: " + data.toString());
-		
+		//System.out.println("SetupViewport: final string: " + data.toString());
 		return data.toString();
 	}
 	
@@ -1214,7 +1215,7 @@ public abstract class MASTAdViewCore extends WebView
 					}
 				}
 
-			return;
+			return; // end error case
 		}
 		
 		//isFirstTime = false;
