@@ -873,7 +873,9 @@ public abstract class MASTAdViewCore extends WebView
 		// is smaller than the previous, then this is the result of a configuration change (rotate) event;
 		// in this case, the initial resize from Android will be constrained by the old screen geometry,
 		// so we need to force a follow-up event to correct for it and allow the expanded view to fill
-		// the screen again.
+		// the screen again. Note that we can't just change the size parameters and continue along in this
+		// function because Android calls this late in the process of sizing and laying out components
+		// on the screen.
 		if ((mViewState == ViewState.EXPANDED) && (mExpandedFrame != null)) 
 		{
 			if ((w <= ow) && (h <= oh))
