@@ -41,6 +41,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.method.KeyListener;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -209,7 +210,8 @@ public abstract class MASTAdViewCore extends WebView
 	private int mOldWidth;
 	private Drawable mOldExpandBackground;
 	private int mOldExpandBackgroundColor;
-
+	private DisplayMetrics metrics;
+	
 	
 	public MASTAdLog getLog()
 	{
@@ -332,6 +334,11 @@ public abstract class MASTAdViewCore extends WebView
 	{
 		_context = context;
 		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog, context);
+		
+		// Save original screen dimensions for later use
+		WindowManager windowManager = (WindowManager) ((Activity)context).getSystemService(Context.WINDOW_SERVICE);
+		metrics = new DisplayMetrics();
+		windowManager.getDefaultDisplay().getMetrics(metrics);
 	}
 	
 	public MASTOnThirdPartyRequest getOnThirdPartyRequest() {
@@ -855,19 +862,72 @@ public abstract class MASTAdViewCore extends WebView
 	}
 
 	@Override
-	protected void onSizeChanged(int w, int h, int ow, int oh) {
+	protected void onSizeChanged(int w, int h, final int ow, final int oh) {
 		if (mViewState != ViewState.DEFAULT)
 		{
 			stopTimer(false); // expand/resize up, cancel refresh timer
 		}
+		
+		
+		// If view state is expanded and the containing frame is not null and the new width and/or height
+		// is smaller than the previous, then this is the result of a configuration change (rotate) event;
+		// in this case, the initial resize from Android will be constrained by the old screen geometry,
+		// so we need to force a follow-up event to correct for it and allow the expanded view to fill
+		// the screen again.
+		if ((mViewState == ViewState.EXPANDED) && (mExpandedFrame != null)) 
+		{
+			if ((w <= ow) && (h <= oh))
+			{
+				final View adView = this;
+					
+				handler.post(new Runnable() {
+					@Override
+					public void run() {				
+						ViewGroup.LayoutParams lp = getLayoutParams();
+						lp.width = ViewGroup.LayoutParams.FILL_PARENT;
+						lp.height = ViewGroup.LayoutParams.FILL_PARENT;
+						adView.setLayoutParams(lp);
+						adView.requestLayout();
+						
+						int nw = adView.getWidth();
+						int nh = adView.getHeight();
+			
+						// if original (default view) width was full screen, update it to still use full
+						// screen width after close now that we have rotated.
+						if ((mOldWidth == metrics.widthPixels) && (mOldWidth != adView.getWidth()))
+						{
+							mOldWidth = adView.getWidth();
+							
+							WindowManager windowManager = (WindowManager) ((Activity)_context).getSystemService(Context.WINDOW_SERVICE);
+							windowManager.getDefaultDisplay().getMetrics(metrics);
+						}
+						
+						onSizeChanged(nw, nh, ow, oh);
+					}
+				});
+				
+				return;
+			}
+			else
+			{
+				// if original (default view) width was full screen, update it to still use full
+				// screen width after close now that we have rotated.
+				if ((mOldWidth == metrics.widthPixels) && (mOldWidth != this.getWidth()))
+				{
+					mOldWidth = this.getWidth();
+					
+					WindowManager windowManager = (WindowManager) ((Activity)_context).getSystemService(Context.WINDOW_SERVICE);
+					windowManager.getDefaultDisplay().getMetrics(metrics);
+				}
+			}
+		}
+		
 		String script = String.format(
 				"Ormma.fireEvent(ORMMA_EVENT_SIZE_CHANGE, {dimensions : {width : %d, height: %d}});", w, h);
 		injectJavaScript(script);
 		super.onSizeChanged(w, h, ow, oh);
 		adserverRequest.sizeX = w;
 		adserverRequest.sizeY = h;
-		
-		//System.out.println("onSizeChanged: w=" + w + ", h=" + h + ", ow=" + ow + ", oh=" + oh);
 	}
 
 	
@@ -2022,6 +2082,14 @@ public abstract class MASTAdViewCore extends WebView
 		//System.out.println("expandInUI: width=" +dimensions.width);
 		dimensions.height = dimensions.height == 0 ? ViewGroup.LayoutParams.FILL_PARENT : dimensions.height;
 		//System.out.println("expandInUI: height=" +dimensions.height);
+
+		
+		// Is the size information wrong? Test cases where javascript is not updated.
+		if (dimensions.width < metrics.widthPixels)
+		{
+			dimensions.width = metrics.widthPixels;
+		}
+		
 		
 		if(mExpandedFrame!=null) ((ViewGroup)((Activity) getContext()).getWindow().getDecorView()).removeView(mExpandedFrame);
 		 
