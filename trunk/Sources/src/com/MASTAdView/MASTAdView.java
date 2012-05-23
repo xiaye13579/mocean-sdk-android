@@ -36,8 +36,13 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 
 /**
- * Viewer of advertising.
- * Following parametres are defined automatically, if they are equal NULL:
+ * Ad view object, extending & customizing a standard web view control. This is the main object developers
+ * use when integrating the SDK into an application. The ad publisher site and zone must be configured to
+ * fetch and display an ad. Ads can range from simple text up to rich media ads with Ormma or MRAID javascript
+ * content. A variety of optional properties can be set that assist the back-end in delivering content
+ * targeted to the app user.
+ * 
+ * Following parameters are defined automatically, if they are equal NULL:
  * latitude - Latitude. 
  * longitude - Longitude.
  * carrier - Carrier name.
@@ -51,8 +56,8 @@ public class MASTAdView extends MASTAdViewCore {
 	private Boolean isShowPhoneStatusBar;
 	private Button closeButton;	
 	
-		/**
-	 * Creation of viewer of advertising.
+	/**
+	 * Creation of viewer of advertising. This signature is used when creating an ad view in java code.
 	 * @param context - The reference to the context of Activity.
 	 * @param site - The id of the publisher site.
 	 * @param zone - The id of the zone of publisher site.
@@ -62,7 +67,7 @@ public class MASTAdView extends MASTAdViewCore {
 	}
 	
 	/**
-	 * Creation of advanced viewer of advertising. It is used for element creation in a XML template.
+	 * Creation of advanced viewer of advertising. This signature is used when creating an ad view from an XML template.
 	 * @param context
 	 * @param attrs
 	 * @param defStyle
@@ -72,7 +77,7 @@ public class MASTAdView extends MASTAdViewCore {
 	}
 
 	/**
-	 * Creation of advanced viewer of advertising. It is used for element creation in a XML template.
+	 * Creation of advanced viewer of advertising. This signature is used when creating an ad view from an XML template.
 	 * @param context
 	 * @param attrs
 	 */
@@ -82,7 +87,7 @@ public class MASTAdView extends MASTAdViewCore {
 	}
 
 	/**
-	 * Creation of advanced viewer of advertising. It is used for element creation in a XML template.
+	 * Creation of advanced viewer of advertising. This signature is used when creating an ad view from an XML template.
 	 * @param context
 	 */
 	public MASTAdView(Context context) {
@@ -90,6 +95,12 @@ public class MASTAdView extends MASTAdViewCore {
 	}
 	
 
+	/**
+	 * Create ad view for internal use.
+	 * @param context
+	 * @param expanded
+	 * @param expandParent
+	 */
 	protected MASTAdView(Context context, boolean expanded, MASTAdViewCore expandParent) {
 		super(context, expanded, expandParent);
 	}
@@ -119,7 +130,7 @@ public class MASTAdView extends MASTAdViewCore {
 	}
 	
 	/*
-	 *  Show interstitial advertising.
+	 *  Show interstitial ad.
 	 */
 	public void show() {
 		this.isInterstitial = true;
@@ -206,11 +217,19 @@ public class MASTAdView extends MASTAdViewCore {
 		//adServerView.update();
 	}
 	
+	/**
+	 * Set user agent parameter to a custom value. By default this is filled in automatically.
+	 * @param ua String value for user-agent string. Only change this if you are sure of what you are doing.
+	 */
 	public void setUA(String ua)
 	{
 		adserverRequest.setUa(ua);
 	}
 	
+	/**
+	 * Get current user-agent setting.
+	 * @return String sent to back-end on ad requests to the back-end.
+	 */
 	public String getUA()
 	{
 		return adserverRequest.getUa();
@@ -282,7 +301,7 @@ public class MASTAdView extends MASTAdViewCore {
 	}
 	
 	@Override
-	void InterstitialClose() {
+	protected void InterstitialClose() {
 		if(isInterstitial)			
 			handler.post(new Runnable() {
 				public void run() {
@@ -304,7 +323,7 @@ public class MASTAdView extends MASTAdViewCore {
 	}*/
 	
 	@Override
-	void AutoDetectParameters(Context context) {
+	protected void AutoDetectParameters(Context context) {
 		super.AutoDetectParameters(context);
 		MASTAdViewCore adserverView = this;
 		if(adserverRequest != null) {
@@ -355,6 +374,9 @@ public class MASTAdView extends MASTAdViewCore {
 	Matrix matrix;
 	Paint clear;
 	
+	/**
+	 * Override webview onTouchEvent method.
+	 */
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
 		try

@@ -1,6 +1,11 @@
 package com.MASTAdView;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -51,6 +56,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.ConsoleMessage;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -79,7 +85,7 @@ import com.MASTAdView.ormma.util.OrmmaPlayer;
 import com.MASTAdView.ormma.util.OrmmaUtils;
 
 /**
- * Viewer of advertising.
+ * Base ad view class, extending Android web view. Must be derived & extended (see MASTAdView).
  */
 public abstract class MASTAdViewCore extends WebView
 {
@@ -94,22 +100,27 @@ public abstract class MASTAdViewCore extends WebView
 	 * Premium type: premium and non-premium.
 	 */
 	public static final int PREMIUM_STATUS_BOTH = 2;
+	
 	/**
 	 * Premium type: premium only.
 	 */
 	public static final int PREMIUM_STATUS_PREMIUM = 1;
+	
 	/**
 	 * Premium type: non-premium.
 	 */
 	public static final int PREMIUM_STATUS_NON_PREMIUM = 0;
+	
 	/**
 	 * Make server requests no matter if ad viewer is visible to user or not. Default case.
 	 */
 	public static final int VISIBLE_MODE_CASE1 = 1; 
+	
 	/**
 	 * Make server requests and refresh enable only if ad viewer is visible to user.
 	 */
 	public static final int VISIBLE_MODE_CASE2 = 2; 
+	
 	/**
 	 * Make server requests no matter if ad viewer is visible to user or not. However refresh is disabled to the ads that are not visible.
 	 */
@@ -147,7 +158,7 @@ public abstract class MASTAdViewCore extends WebView
 	// layout constants
 	protected static final int BACKGROUND_ID = 101;
 	protected static final int PLACEHOLDER_ID = 100;
-	public static final int ORMMA_ID = 102;
+	private static final int ORMMA_ID = 102;
 	
 	private static final String EXPAND_DIMENSIONS = "expand_initial_dimensions";
 	private static final String EXPAND_PROPERTIES = "expand_properties";
@@ -155,11 +166,11 @@ public abstract class MASTAdViewCore extends WebView
 	private static final String RESIZE_HEIGHT = "resize_height";
 	private static final String ERROR_MESSAGE = "message";
 	private static final String ERROR_ACTION = "action";
-	public static final String DIMENSIONS = "expand_dimensions";
-	public static final String ACTION_KEY = "action";
-	public static final String PLAYER_PROPERTIES = "player_properties";
-	public static final String EXPAND_URL = "expand_url";
-	public enum ACTION {PLAY_AUDIO, PLAY_VIDEO}
+	private static final String DIMENSIONS = "expand_dimensions";
+	private static final String ACTION_KEY = "action";
+	private static final String PLAYER_PROPERTIES = "player_properties";
+	private static final String EXPAND_URL = "expand_url";
+	private enum ACTION {PLAY_AUDIO, PLAY_VIDEO}
 	private enum ViewState {DEFAULT, RESIZED, EXPANDED, HIDDEN}
 	private OrmmaAssetController mAssetController;
 	private OrmmaDisplayController mDisplayController;
@@ -170,7 +181,7 @@ public abstract class MASTAdViewCore extends WebView
 	private ViewState mViewState = ViewState.DEFAULT;
 	private MASTAdViewCore mParentAd = null;
 	private static ViewGroup mExpandedFrame;
-	public String mDataToInject = null;
+	private String mDataToInject = null;
 	private static String mScriptPath = null;
 	private String mContent;
 	private HashSet<String> excampaigns = new HashSet<String>();
@@ -180,16 +191,16 @@ public abstract class MASTAdViewCore extends WebView
 	protected boolean isAutoCollapse = true;
 	private static ViewGroup mediaPlayerFrame;
 	private boolean isShowMediaPlayerFrame = false;
-	private Integer locationMinWaitMillis = 5 * 60 * 1000;	// 5 minutes (in millis)
-	private Float locationMinMoveMeters = 1000.0F;			// 1000 meters
+	private Integer locationMinWaitMillis = Constants.DEFAULT_LOCATION_REPEAT_WAIT;   // 5 minutes
+	private Float locationMinMoveMeters = Constants.DEFAULT_LOCATION_REPEAT_DISTANCE; // 1000 meters
 	
-	MASTAdLog adLog = new MASTAdLog(this);
-	Dialog dialog;
+	protected MASTAdLog adLog = new MASTAdLog(this);
+	protected Dialog dialog;
 	private static OrmmaPlayer player;
 	private WebView view;
 
 	//protected boolean isFirstTime;
-	ReloadTask reloadTask;
+	protected ReloadTask reloadTask;
 	//private ContentThread contentThread;
 	private OpenUrlThread openUrlThread;
 	private Timer reloadTimer;
@@ -213,13 +224,20 @@ public abstract class MASTAdViewCore extends WebView
 	private DisplayMetrics metrics;
 	
 	
+	/**
+	 * Provide access to the diagnostic log object created internal to this view
+	 * 
+	 * @return MASTAdLog usable for diagnostics debug logging
+	 */
 	public MASTAdLog getLog()
 	{
 		return adLog;
 	}
 		
+	
 	/**
-	 * Creation of viewer of advertising.
+	 * Create view for ad for a specific site/zone combination. 
+	 * 
 	 * @param context - The reference to the context of Activity.
 	 * @param site - The id of the publisher site.
 	 * @param zone - The id of the zone of publisher site.
@@ -242,7 +260,7 @@ public abstract class MASTAdViewCore extends WebView
 	 * @param attrs
 	 * @param defStyle
 	 */
-	public MASTAdViewCore(Context context, AttributeSet attrs, int defStyle) {
+	protected MASTAdViewCore(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		AutoDetectParameters(context);
 		initialize(context, attrs);
@@ -253,7 +271,7 @@ public abstract class MASTAdViewCore extends WebView
 	 * @param context
 	 * @param attrs
 	 */
-	public MASTAdViewCore(Context context, AttributeSet attrs) {
+	protected MASTAdViewCore(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		AutoDetectParameters(context);
 		initialize(context, attrs);
@@ -263,13 +281,19 @@ public abstract class MASTAdViewCore extends WebView
 	 * Creation of viewer of advertising. It is used for element creation in a XML template.
 	 * @param context
 	 */
-	public MASTAdViewCore(Context context) {
+	protected MASTAdViewCore(Context context) {
 		super(context);
 		AutoDetectParameters(context);
 		initialize(context, null);
 	}
 	
-	public MASTAdViewCore(Context context, boolean expanded, MASTAdViewCore expandParent) {
+	/**
+	 * Creation of viewer of advertising. It is used for element creation in a XML template.
+	 * @param context
+	 * @param expanded
+	 * @param expandParent
+	 */
+	protected MASTAdViewCore(Context context, boolean expanded, MASTAdViewCore expandParent) {
 		super(context);
 		isExpanded =expanded;
 		this.expandParent = expandParent;
@@ -278,48 +302,80 @@ public abstract class MASTAdViewCore extends WebView
 		mViewState = ViewState.EXPANDED;
 	}
 	
+	/**
+	 * Set timeout for ad request calls to the ad server. Default 3000.
+	 * @param timeout Timeout value (in milliseconds, from 1000 to 3000)
+	 */
 	public void setAd_Call_Timeout(int timeout)
 	{
 		if((timeout>=1000)&&(timeout<=3000))
 		adserverRequest.timeout = timeout;
 	}
+	
+	/**
+	 * Get ad request timeout value.
+	 * @return Current timeout for requests to ad server in milliseconds.
+	 */
 	public int getAd_Call_Timeout()
 	{
 		return adserverRequest.timeout;
 	}
 	
+	/**
+	 * Set auto-collapse property
+	 * @param value True if ad view should automatically close once the data is loaded.
+	 */
 	public void setAutoCollapse(boolean value)
 	{
 		isAutoCollapse = value;
 	}
 	
+	/**
+	 * Get the auto-collapse property value
+	 * @return True if ad should auto-collapse.
+	 */
 	public boolean getAutoCollapse()
 	{
 		return isAutoCollapse;
 	}
 	
+	/**
+	 * Set the show previous ad on error property.
+	 * @param value True if previous ad content should be displayed if loading a new ad encounters an error.
+	 */
 	public void SetShowPreviousAdOnError(boolean value)
 	{
 		isShowPreviousAdOnError = value;
 	}
 	
+	/**
+	 * Get show previous ad on error property value.
+	 * @return True if previous ad should be shown when an error occurs loading a new ad.
+	 */
 	public boolean GetShowPreviousAdOnError()
 	{
 		return isShowPreviousAdOnError;
 	}
 	
+	/**
+	 * Override webview method to set layout parameters so that local copy of widt/height can be saved.
+	 */
 	public void setLayoutParams(ViewGroup.LayoutParams params) {
 		lastX = params.width;
 		lastY = params.height;
 		super.setLayoutParams(params);
 	}
 	
+	/**
+	 * Is the ad view showing an interstitial view?
+	 * @return True if interstitial (or expanded) view is showing.
+	 */
 	public boolean isInterstitial()
 	{
 		return isExpanded || isInterstitial;
 	}
 	
-	void AutoDetectParameters(Context context)
+	protected void AutoDetectParameters(Context context)
 	{
 		_context = context;
 		if(adserverRequest==null) adserverRequest = new AdserverRequest(adLog, context);
@@ -330,35 +386,69 @@ public abstract class MASTAdViewCore extends WebView
 		windowManager.getDefaultDisplay().getMetrics(metrics);
 	}
 	
+	/**
+	 * Get on third party ad request handler.
+	 * @return Object implmenting custom on third party request interface.
+	 */
 	public MASTOnThirdPartyRequest getOnThirdPartyRequest() {
 		return onThirdPartyRequest;
 	}
 	
+	/**
+	 * Set custom on third party ad request handler.
+	 * @param onThirdPartyRequest Object implementing custom on third party request interface. 
+	 */
 	public void setOnThirdPartyRequest(MASTOnThirdPartyRequest onThirdPartyRequest) {
 		this.onThirdPartyRequest = onThirdPartyRequest;
 	}
-	
+
+	/**
+	 * Interface for third party ad requests, with an event() method invoked when
+	 * third party ad requests are being handled. The originating ad view and
+	 * associated parameter hashmap are passed to the event handler method. The
+	 * parameters will include name/value pairs for the "type", "campaign" and
+	 * "track_url" standard items, plus any additional data received in the
+	 * ad response.
+	 */
+	public interface MASTOnThirdPartyRequest {
+		public void event(MASTAdView sender, HashMap<String,String> params);
+	}
+
+	/**
+	 * Get custom on activity handler, if any.
+	 * @return Object implementing the MASTOnActivityHandler interface, or null if none.
+	 */
 	public MASTOnActivityHandler getOnActivityHandler() {
 		return onActivityHandler;
 	}
 
+	/**
+	 * Set custom handler for ad view activity.
+	 * @param onActivityHandler Object implementing custom on activity handler interface.
+	 */
 	public void setOnActivityHandler(MASTOnActivityHandler onActivityHandler) {
 		this.onActivityHandler = onActivityHandler;
 	}
 
-		/**
-	 * Get interface for advertising opening.
+	/**
+	 * Interface which supports custom callbacks to be invoked with ad view is attached to
+	 * or detached from an activity (window.) The ad view from which the event originated
+	 * is passed as a parameter.
+	 */
+	public interface MASTOnActivityHandler {
+		public void onAttachedToActivity(MASTAdView sender);
+		public void onDetachedFromActivity(MASTAdView sender);
+	}
+	
+	/**
+	 * Get interface for ad view with a click() method which will be invoked when loading a URL.
 	 */
 	public MASTOnAdClickListener getOnAdClickListener() {
 		return adClickListener;
 	}
 	
-	public MASTOnOrmmaListener getOnOrmmaListener() {
-		return ormmaListener;
-	}
-
 	/**
-	 * Set interface for advertising opening.
+	 * Set interface for ad view with a click() method which will be invoked when loading a URL.
 	 * @param adClickListener
 	 */
 	public void setOnAdClickListener(MASTOnAdClickListener adClickListener) {
@@ -366,22 +456,45 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	/**
-	 * The interface for advertising opening in an internal browser.
+	 * The interface for ad view which will be invoked when loading a URL.
 	 */
 	public interface MASTOnAdClickListener {
 		public void click(MASTAdView sender, String url);
 	}
 	
+	/**
+	 * Get any registered Ormma event listener
+	 * @return Object implementing the Ormma event listener interface, if registered, or null otherwise.
+	 */
+	public MASTOnOrmmaListener getOnOrmmaListener() {
+		return ormmaListener;
+	}
+
+	/**
+	 * Interface for Ormma event listener. One method, event, is invoked when Ormma
+	 * events (such as a resize, expand, close, etc.) The source ad view of the event,
+	 * event name, and associated parameters are passed to the event() method.
+	 *
+	 */
 	public interface MASTOnOrmmaListener {
 		public void event(MASTAdView sender, String name, String params);
 	}
 	
-	public interface MASTOnThirdPartyRequest {
-		public void event(MASTAdView sender, HashMap<String,String> params);
+	/**
+	 * Setup a listener to be notified when Ormma events occur, as described in the
+	 * Ormma event listener interface.
+	 * @param ormmaListener Object implementing the Ormma event listener interface
+	 */
+	public void setOnOrmmaListener(MASTOnOrmmaListener ormmaListener) {
+		this.ormmaListener = ormmaListener;
 	}
 
 	/**
-	 * The interface for advertising downloading.
+	 * The interface for ad download events. During normal processing begin() and end()
+	 * will be invoked. If an error occurs, the error() method will be invoked. All methods are
+	 * passed the ad view from which the events originated, and for the error case a string error
+	 * message is provided. For example, if the server does not return an ad, the error method will
+	 * be invoked and the error string will contain the message defined in Constants.STR_EMPTY_SERVER_RESPONS.
 	 */
 	public interface MASTOnAdDownload {
 		/**
@@ -397,35 +510,26 @@ public abstract class MASTAdViewCore extends WebView
 		 */
 		public void error(MASTAdView sender, String error);
 	}
-
-	public interface MASTOnActivityHandler {
-		public void onAttachedToActivity(MASTAdView sender);
-		public void onDetachedFromActivity(MASTAdView sender);
-	}
 	
 	/**
-	 * Get interface for advertising downloading.
+	 * Get object for handling ad download events.
 	 */
 	public MASTOnAdDownload getOnAdDownload() {
 		return adDownload;
 	}
 
 	/**
-	 * Set interface for advertising downloading.
-	 * @param adDownload
+	 * Set handler for ad download events.
+	 * @param adDownload Object implementing custom ad download interface.
 	 */
 	public void setOnAdDownload(MASTOnAdDownload adDownload) {
 		this.adDownload = adDownload;
 	}
-	
-	public void setOnOrmmaListener(MASTOnOrmmaListener ormmaListener) {
-		this.ormmaListener = ormmaListener;
-	}
 
 	/**
 	 * Optional.
-	 * Get Custom Parameters.
-	 * @param customParameters
+	 * Get Custom Parameters, to be passed to back-end server to help with ad selection. No default.
+	 * @param customParameters Hashtable of custom parameter key/values.
 	 */
 	public Hashtable<String, String> getCustomParameters() {
 		if(adserverRequest != null) {
@@ -438,7 +542,7 @@ public abstract class MASTAdViewCore extends WebView
 	/**
 	 * Optional.
 	 * Set Custom Parameters.
-	 * @param customParameters
+	 * @param customParameters Hashtable of custom parameter key/values.
 	 */
 	public void setCustomParameters(Hashtable<String, String> customParameters) {
 		if(adserverRequest != null) {
@@ -460,32 +564,47 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	/**
+	 * Get track setting. 
+	 * @return Boolean setting, if true tracking impressions are being sent to back-end.
+	 */
+	public Boolean getTrack() {
+		if(adserverRequest != null) {
+			return adserverRequest.getTrack() == null? null : adserverRequest.getTrack()==1;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
 	 * Optional.
-	 * Get image resource which will be shown during advertising loading if there is no advertising in a cache.
+	 * Get image resource identifier which will be shown during ad loading if there is no ad content in cache.
 	 */
 	public Integer getDefaultImage() {
 		return defaultImageResource==null ? 0 : defaultImageResource;
 	}
 	
-	public Integer getType() {
-		if(adserverRequest != null) {
-			return adserverRequest.getType();
-		}else return null;
-	}
-	
 	/**
 	 * Optional.
-	 * Set image resource which will be shown during advertising loading if there is no advertising in a cache.
+	 * Set image resource which will be shown during ad loading if there is no ad content in cache.
+	 * @param defaultImage Resource identifier for default image.
 	 */
 	public void setDefaultImage(Integer defaultImage) {
 		defaultImageResource = defaultImage;
 	}
 
+	/**
+	 * Get the last request string sent to the back-end to retrieve an ad. 
+	 * @return Last string sent to ad server.
+	 */
 	public String GetLastRequest()
 	{
 		return lastRequest;
 	}
 	
+	/**
+	 * Get the last response string received from the back-end when retrieving an ad.
+	 * @return Last response received from ad server.
+	 */
 	public String GetLastResponse()
 	{
 		return lastResponse;
@@ -504,8 +623,9 @@ public abstract class MASTAdViewCore extends WebView
 	}
 
 	/**
-	 * Optional.
-	 * Set banner refresh interval (in seconds).
+	 * Set banner refresh interval (in seconds). Once an ad has finished loading, the timer starts
+	 * and a new ad will be loaded after this amount of time has elapsed. Default 120 seconds.
+	 * If 0, ads are not updated automatically (use the update() method for a manual update.)
 	 */
 	public void setUpdateTime(Integer updateTime) {
 		if(updateTime != null) {
@@ -533,8 +653,6 @@ public abstract class MASTAdViewCore extends WebView
 			Integer maxSizeY = getIntParameter(attrs.getAttributeValue(null, "maxSizeY"));
 			Integer paramBG = GetColor(attrs.getAttributeValue(null, "backgroundColor"));
 			Integer type = getIntParameter(attrs.getAttributeValue(null, "type"));
-			
-			Boolean isContentAligned = getBooleanParameter(attrs.getAttributeValue(null, "isContentAligned"));
 			
 			Boolean locationDetection= getBooleanParameter(attrs.getAttributeValue(null, "locationDetection"));
 			locationMinWaitMillis = getIntParameter(attrs.getAttributeValue(null, "locationMinWaitMillis"));
@@ -588,7 +706,7 @@ public abstract class MASTAdViewCore extends WebView
 			if(city!=null)setCity(city);
 			if(area!=null)setArea(area);
 			//if(metro!=null)setMetro(metro);
-			if (dma != null)setDma(dma);
+			if(dma!=null)setDma(dma);
 			if(zip!=null)setZip(zip);
 			if(locationDetection!=null) setLocationDetection(locationDetection);
 			if(internelBr != null) setInternalBrowser(internelBr);
@@ -732,6 +850,8 @@ public abstract class MASTAdViewCore extends WebView
 		// Pre-load header (empty body) with ormma / mraid javascrpt code
 		String dataOut = setupViewport(true, null);
 		super.loadDataWithBaseURL(null, dataOut, "text/html", "UTF-8", null);
+		//injectJavaScriptFromFile(mScriptPath); 
+		
 		
 		
 				
@@ -922,7 +1042,9 @@ public abstract class MASTAdViewCore extends WebView
 		adserverRequest.sizeY = h;
 	}
 
-	
+	/**
+	 * Override the default webview onKeyDown() method. 
+	 */
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -971,7 +1093,9 @@ public abstract class MASTAdViewCore extends WebView
 		});
 	}
 	
-	
+	/**
+	 * Override the default webview onKeyUp() method. 
+	 */
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -990,7 +1114,7 @@ public abstract class MASTAdViewCore extends WebView
 	
 	
 	/**
-	 * Immediately update banner contents.
+	 * Immediately update ad view contents.
 	 */
 	public void update()
 	{
@@ -1001,9 +1125,10 @@ public abstract class MASTAdViewCore extends WebView
 		update(true);
 	}
 	
-	void update(boolean isManual) {
+	private void update(boolean isManual) {
 		if(isShown() || isManual) 
 		{
+			
 			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "update", "");
 			if(isManual) IsManualUpdate = true;
 			hideVirtualKeyboard();
@@ -1011,6 +1136,12 @@ public abstract class MASTAdViewCore extends WebView
 		}
 	}
 	
+	/**
+	 * Property controlling display of standard or custom close button when ad view is expanded.
+	 * NOTE: even if a custom close is displayed by the ad (in any location), per the ormma standard
+	 * the upper right hand corner will have a transparent close region that is still active.
+	 * @param custom True if a custom button will be provided by ad, false if standard SDK button to be used.
+	 */
 	public void useCloseButton(final boolean custom) {
 		handler.post(new Runnable() {			
 			@Override
@@ -1026,7 +1157,7 @@ public abstract class MASTAdViewCore extends WebView
 		});
 	}
 	
-	void StartLoadContent(Context context, WebView view)
+	private void StartLoadContent(Context context, WebView view)
 	{
 		if(reloadTask!=null)
 		{
@@ -1095,12 +1226,13 @@ public abstract class MASTAdViewCore extends WebView
 		if(isRequestAd ) {
 			try {
 				if(mViewState != ViewState.EXPANDED) {
-					if(adserverRequest != null) {
+					if(adserverRequest != null) {				
 						if (mViewState == ViewState.RESIZED)
 						{
 							// Ad view is going to reload & resize to default state; we need our state to match that
 							mViewState = ViewState.DEFAULT;
 						}
+
 						interceptOnAdDownload.begin((MASTAdView)this);
 						adserverRequest.setExcampaigns(getExcampaignsString());
 						String url = adserverRequest.createURL();
@@ -1112,13 +1244,17 @@ public abstract class MASTAdViewCore extends WebView
 				}//else StartTimer(context, view);
 			} catch (Exception e) {
 				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "StartLoadContent.requestGet", e.getMessage());
-				interceptOnAdDownload.error((MASTAdView)this,e.getMessage());				
+				interceptOnAdDownload.error((MASTAdView)this,e.getMessage());
 			}
 		}
 		
 	}
 	
-	void setAdVisibility(final int visibility)
+	/**
+	 * Set the visibility of the ad view to one of the standard Android visibility values.
+	 * @param visibility Int parameter, one of standard values: View.VISIBLE, View.INVISIBLE or View.GONE.
+	 */
+	public void setAdVisibility(final int visibility)
 	{
 		handler.post(new Runnable() {
 			
@@ -1135,7 +1271,7 @@ public abstract class MASTAdViewCore extends WebView
 		
 	
 	/**
-	 * Customize the HTML (or javascript) code to be inserted into the HTML HEAD when creating
+	 * Customize the "HTML" (or javascript/css) code to be inserted into the HTML HEAD when creating
 	 * webview for ad content. By default this will contain the string:
 	 * 
 	 * <meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/>
@@ -1148,6 +1284,10 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	
+	/**
+	 * Get current injection header code string.
+	 * @return Current injection header value.
+	 */
 	public String getInjectionHeaderCode()
 	{
 		if (injectionHeaderCode != null)
@@ -1163,9 +1303,9 @@ public abstract class MASTAdViewCore extends WebView
 	
 
 	/**
-	 * Customize the HTML (or javascript) code to be inserted into the HTML BODY when creating
-	 * webview for ad content. By default this will contain:
-	 * 
+	 * Customize the "HTML" (or javascript/css) code to be inserted into the HTML BODY when creating
+	 * webview for ad content. By default this will contain the string:
+	 *  
 	 * <body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">
 	 * 
 	 * @param value String content to be inserted, or null to use built-in default (same as 2.10.) NOTE: This MUST include the HTML <body> tag!
@@ -1176,6 +1316,10 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	
+	/**
+	 * Get current injection body code string.
+	 * @return Current injection body value.
+	 */
 	public String getInjectionBodycode()
 	{
 		if (injectionBodyCode != null)
@@ -1193,7 +1337,8 @@ public abstract class MASTAdViewCore extends WebView
 	// Create viewport for showing ad; version 2.9 and earlier had a "bug" which caused
 	// ad creative to be scaled on device to the device dpi; version 2.10 introduced a fix
 	// for this, but the change in behavior caused some issues. A deprecated flag allowed
-	// reverting to the old behavior. Per a client suggestion, another fix is being introduced.
+	// reverting to the old behavior. Per a client suggestion, another fix is being introduced
+	// which allows the app developer to customer the header and/or body code to be injected.
 	private String setupViewport(boolean headerOnly, String body)
 	{
 		StringBuffer data = new StringBuffer("<html><head>");
@@ -1228,7 +1373,7 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	
-	void setResult(String data, String error)
+	protected void setResult(String data, String error)
 	{
 		lastResponse=data;
 		
@@ -1327,7 +1472,6 @@ public abstract class MASTAdViewCore extends WebView
 								stopTimer(false);
 							} else {
 								String dataOut="";
-								//dataOut = setupViewport(SCALE_VIEWPORT_NEW, isContentAligned, data);
 								dataOut = setupViewport(false, data);
 								
 								mContent = dataOut;
@@ -1418,7 +1562,7 @@ public abstract class MASTAdViewCore extends WebView
 		}
 	}
 		
-	void InterstitialClose()
+	protected void InterstitialClose()
 	{
 		
 	}
@@ -1446,6 +1590,7 @@ public abstract class MASTAdViewCore extends WebView
 			}
 		});
 	}
+	
 	
 	private class InterceptOnAdDownload implements MASTOnAdDownload
 	{
@@ -1658,9 +1803,10 @@ public abstract class MASTAdViewCore extends WebView
 		}
 	}
 	
-	WebChromeClient mWebChromeClient = new WebChromeClient() {
+	private WebChromeClient mWebChromeClient = new WebChromeClient() {
 		@Override
 		public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
+			// Handle alert message from javascript
 			return super.onJsAlert(view, url, message, result);
 		}
 	};
@@ -1797,7 +1943,7 @@ public abstract class MASTAdViewCore extends WebView
 	
 	static int RequestCounter = 0;
 	
-	Float getFloatParameter(String stringValue)
+	private Float getFloatParameter(String stringValue)
 	{
 		if(stringValue != null) {
 			try
@@ -1811,7 +1957,7 @@ public abstract class MASTAdViewCore extends WebView
 		}
 	}
 	
-	Integer getIntParameter(String stringValue) {
+	private Integer getIntParameter(String stringValue) {
 		if(stringValue != null) {
 			try
 			{
@@ -1832,6 +1978,11 @@ public abstract class MASTAdViewCore extends WebView
 		}
 	}
 
+	/**
+	 * Inject string into webview for execution as javascript.
+	 * NOTE: Handle carefully, this has security implications! 
+	 * @param str Code string to be run; javascript: prefix will be prepended automatically.
+	 */
 	public void injectJavaScript(String str) {
 		try
 		{
@@ -1843,6 +1994,31 @@ public abstract class MASTAdViewCore extends WebView
 		}
 	}
 
+	/*
+	public void injectJavaScriptFromFile(String path)
+	{
+		if ((path == null) || (path.length() < 1))
+		{
+			return;
+		}
+		
+		try
+		{
+			//System.out.println("inject javascript from path: " + path);
+			//super.loadUrl("javascript:" + str);
+			String dataOut = "(" + readFile(path) + ")";
+			super.loadData(dataOut, "text/javascript", "ASCII"); 
+		}catch (Exception e) {
+			//Log.e("injectJavaScript", e.getMessage()+" "+str);
+			//System.out.println("injectJavaScript: " + e.getMessage()+" "+str);
+		}
+	}
+	*/
+	
+	/**
+	 * Get view state name.
+	 * @return One of the string: DEFAULT, RESIZED, EXPANDED, HIDDEN.
+	 */
 	public String getState(){
 		return mViewState.toString().toLowerCase();
 	}
@@ -1880,15 +2056,19 @@ public abstract class MASTAdViewCore extends WebView
 				parentView.addView(view, new LinearLayout.LayoutParams(mOldWidth, mOldHeight));
 				parentView = null;
 			}
+			
 			if (mExpandedFrame != null) {
 				ormmaEvent("close","viewState=expanded");
 				closeExpanded(mExpandedFrame);
 				mViewState = ViewState.DEFAULT;
 			}
+			
 			lp.height = mOldHeight;
 			lp.width = mOldWidth;
+			
 			requestLayout();
 			StartTimer(getContext(), view);
+			
 			return true;		
 		};
 		
@@ -1948,15 +2128,15 @@ public abstract class MASTAdViewCore extends WebView
 						ViewGroup.LayoutParams lp = getLayoutParams();
 						mOldHeight = lp.height;
 						mOldWidth = lp.width;
-						
+						mOldExpandBackground = getBackground();
+						mOldExpandBackgroundColor = getBackgroundColor();
+
 						if (mOldHeight == ViewGroup.LayoutParams.WRAP_CONTENT)
 						{
 							// Can't restore view to minimized size with wrap content; lock current size in place.
 							mOldHeight = getHeight();
 						}
 						
-						mOldExpandBackground = getBackground();
-						mOldExpandBackgroundColor = getBackgroundColor();
 						ormmaEvent("expand","");
 						mViewState = ViewState.EXPANDED;
 						expandInUIThread((Dimensions) data.getParcelable(EXPAND_DIMENSIONS), data.getString(EXPAND_URL),
@@ -1992,7 +2172,11 @@ public abstract class MASTAdViewCore extends WebView
 		}
 	};
 	
-	
+	/**
+	 * Signal an condition, and invoke handler code to run on the main UI thread.
+	 * @param strMsg Error message
+	 * @param action Action string
+	 */
 	public void raiseError(String strMsg, String action){
 		
 		Message msg = handler.obtainMessage(MESSAGE_RAISE_ERROR); // mHandler
@@ -2004,7 +2188,11 @@ public abstract class MASTAdViewCore extends WebView
 		handler.sendMessage(msg); // mHandler
 	}
 
-	
+	/**
+	 * Signal a resize event for the ad view, and invoke handler code to run on the main UI thread.
+	 * @param width View width in pixels. 
+	 * @param height View height in pixels.
+	 */
 	public void resize(int width, int height) {
 		Message msg = handler.obtainMessage(MESSAGE_RESIZE); // mHandler
 
@@ -2016,10 +2204,16 @@ public abstract class MASTAdViewCore extends WebView
 		handler.sendMessage(msg); // mHandler
 	}
 	
-	boolean ormaEnabled = false;
+	private boolean ormaEnabled = false;
 	
+	/**
+	 * Signal an ormma event to the ormma listener.
+	 * @param name String event name
+	 * @param params String event parameters
+	 */
 	public void ormmaEvent(String name, String params)
 	{
+		//System.out.println("ormma event: " + name + ": " + params);
 		if(ormmaListener!=null)
 		{	
 			if(!ormaEnabled) ormmaListener.event((MASTAdView)this, "ormmaenabled", "");
@@ -2029,19 +2223,38 @@ public abstract class MASTAdViewCore extends WebView
 		}
 	}
 	
+	/**
+	 * Send a close message to the ad view message handler, which will invoke the close logic
+	 * on the main UI thread, including injecting an Ormma close event if appropriate.
+	 */
 	public void close() {
 		handler.sendEmptyMessage(MESSAGE_CLOSE); // mHandler		
 	}
 
+	/**
+	 * Send a hide message to the ad view message handler, which will invoke the hide logic
+	 * on the main UI thread, including injecting an Ormma hide event if appropriate.
+	 */
 	public void hide() { 
 		handler.sendEmptyMessage(MESSAGE_HIDE); // mHandler
 		if(isInterstitial() && !isExpanded) InterstitialClose();
 	}
 
+	/**
+	 * Send a show message to the ad view message handler, which will invoke the show logic
+	 * on the main UI thread, including injecting an Ormma show event if appropriate.
+	 */
 	public void showAdView() {
 		handler.sendEmptyMessage(MESSAGE_SHOW); // mHandler
 	}
 
+	/**
+	 * Send an expand message to the ad view message handler, which will invoke the expand logic
+	 * on the main UI thread, including injecting an Ormma expand event if appropriate.
+	 * @param dimensions Dimensions to which the view should expand
+	 * @param URL URL for content to show in expanded view, if not included in ad
+	 * @param properties Ormma expand properties
+	 */
 	public void expand(Dimensions dimensions, String URL, Properties properties) {
 		Message msg = handler.obtainMessage(MESSAGE_EXPAND); // mHandler
 		Bundle data = new Bundle();
@@ -2170,6 +2383,12 @@ public abstract class MASTAdViewCore extends WebView
 		loadUrl(Url, dontLoad, mDataToInject);
 	}
 	
+	/**
+	 * Load content into ad view from a URL or from a string of data. 
+	 * @param url URL to load, or to set as source of data if loading from string.
+	 * @param dontLoad Boolean flag, if true use content string rather than fetching URL content.
+	 * @param dataToInject String of data to inject into webview instead of loading from URL, if dontLoad flag is set.
+	 */
 	public void loadUrl(String url, boolean dontLoad, String dataToInject) {
 		mDataToInject = dataToInject;
 		if (!dontLoad) {
@@ -2205,16 +2424,18 @@ public abstract class MASTAdViewCore extends WebView
 		}
 	}
 
+	/**
+	 * Set content of ad view.
+	 * @param content String data to load into webview.
+	 */
 	public void setContent(String content) {
 		mContent = content;
 		if (isExpanded) loadDataWithBaseURL(null, mContent, "text/html", "UTF-8", null);
 	}
 
 	/**
-	 * Required.
-	 * Set the id of the publisher site. 
-	 * @param site
-	 *            Id of the site assigned by Adserver
+	 * Set the id of the publisher site, used when sending request for ads to back-end. REQUIRED.
+	 * @param site Id of the ad publisher site to use when retrieving ads.
 	 */
 	public void setSite(Integer site) {
 		if(adserverRequest != null) {
@@ -2223,7 +2444,7 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	/**
-	 * Get the id of the publisher site. 
+	 * Get the id of the publisher site used when retrieving ads from server.
 	 */
 	public Integer getSite() {
 		if(adserverRequest != null) {
@@ -2234,9 +2455,8 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	/**
-	 * Required.
-	 * Set the id of the zone of publisher site.
-	 * @param zone
+	 * Set the id of the zone to send to back-end when retrieving ads. REQURIED.
+	 * @param zone Int id of zone to send to server.
 	 */
 	public void setZone(Integer zone) {
 		if(adserverRequest != null) {
@@ -2245,7 +2465,7 @@ public abstract class MASTAdViewCore extends WebView
 	}
 
 	/**
-	 * Get the id of the zone of publisher site.
+	 * Get the id of the zone sent to back-end when retrieving ads.
 	 */
 	public Integer getZone() {
 		if(adserverRequest != null) {
@@ -2304,17 +2524,9 @@ public abstract class MASTAdViewCore extends WebView
 		}
 	}
 	
-	public Boolean getTrack() {
-		if(adserverRequest != null) {
-			return adserverRequest.getTrack() == null? null : adserverRequest.getTrack()==1;
-		} else {
-			return null;
-		}
-	}
-	
 	/**
 	 * Optional.
-	 * Set Keywords to search ad delimited by commas.
+	 * Set Keywords to search ad, delimited by commas, to be passed to back-end server to help with ad selection. No default.
 	 * @param keywords
 	 */
 	public void setKeywords(String keywords) {
@@ -2337,8 +2549,9 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Set minimum width of advertising. 
-	 * @param minSizeX
+	 * Set minimum width of ad to request from back-end. Should be equal to or less than maximum value.
+	 * If they are equal, the back-end may not find a suitable ad to fit in the available space. 
+	 * @param minSizeX Int minimum pixel size of ad to request.
 	 */
 	public void setMinSizeX(Integer minSizeX) {
 		if((adserverRequest != null)) {
@@ -2348,7 +2561,7 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Get minimum width of advertising. 
+	 * Get minimum width of ad to request from server. 
 	 */
 	public Integer getMinSizeX() {
 		if(adserverRequest != null) {
@@ -2360,8 +2573,9 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Set minimum height of advertising. 
-	 * @param minSizeY
+	 * Set minimum height of ad to request from back-end. Should be equal to or less than maximum value.
+	 * If they are equal, the back-end may not find a suitable ad to fit in the available space.
+	 * @param minSizeY Int minimum pixel size to request.
 	 */
 	public void setMinSizeY(Integer minSizeY) {
 		if((adserverRequest != null)) {
@@ -2371,7 +2585,7 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Get minimum height of advertising. 
+	 * Get minimum height of ad to be requested from server.
 	 */
 	public Integer getMinSizeY() {
 		if(adserverRequest != null) {
@@ -2383,8 +2597,9 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Set maximum width of advertising. 
-	 * @param maxSizeX
+	 * Set maximum width of ad to request from back-end. Should be equal to or greater than minimum value.
+	 * If they are equal, the back-end may not find a suitable ad to fit in the available space.
+	 * @param maxSizeX Int pixel width to send in ad request.
 	 */
 	public void setMaxSizeX(Integer maxSizeX) {
 		if((adserverRequest != null)) {
@@ -2394,7 +2609,7 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Get maximum width of advertising. 
+	 * Get maximum width of ad to be requested from server.
 	 */
 	public Integer getMaxSizeX() {
 		if(adserverRequest != null) {
@@ -2406,8 +2621,9 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Set maximum height of advertising. 
-	 * @param maxSizeY
+	 * Set maximum height of ad to request from back-end. Should be equal to or greater than minimum value.
+	 * If they are equal, the back-end may not find a suitable ad to fit in the available space.
+	 * @param maxSizeY Int pixel height to send in ad request.
 	 */
 	public void setMaxSizeY(Integer maxSizeY) {
 		if((adserverRequest != null) ) {
@@ -2417,7 +2633,7 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Get maximum height of advertising. 
+	 * Get maximum height of ad to be requested from server. 
 	 */
 	public Integer getMaxSizeY() {
 		if(adserverRequest != null) {
@@ -2431,8 +2647,10 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Set Background color of advertising in HEX.
-	 * @param backgroundColor
+	 * Set Background color of ad view. Can use named color values defined by app or android (such as Color.BLACK)
+	 * or number value with or without alpha (such as 0x0000FF - opaque blue, or 0xA00000FF - partly transparent blue.)
+	 * 
+	 * @param backgroundColor Int color value for background.
 	 */
 	@Override
 	public void setBackgroundColor(int backgroundColor) {
@@ -2451,7 +2669,7 @@ public abstract class MASTAdViewCore extends WebView
 
 	/**
 	 * Optional.
-	 * Get Background color of advertising in HEX.
+	 * Get Background color of ad view. Default is opaque white.
 	 */
 	public int getBackgroundColor() {
 		if(adserverRequest != null) {
@@ -2463,7 +2681,8 @@ public abstract class MASTAdViewCore extends WebView
 
 	/**
 	 * Optional.
-	 * Set Text color of links in HEX.
+	 * Set Text color of links. Can use named color values defined by app or android (such as Color.BLACK)
+	 * or number value with or without alpha (such as 0x0000FF - opaque blue, or 0xA00000FF - partly transparent blue.)
 	 * @param textColor
 	 */
 	public void setTextColor(int textColor) {
@@ -2474,7 +2693,7 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Get Text color of links in HEX.
+	 * Get Text color value for links.
 	 */
 	public int getTextColor() {
 		if(adserverRequest != null) {
@@ -2485,9 +2704,10 @@ public abstract class MASTAdViewCore extends WebView
 	}
 
 	/**
-	 * Optional.
-	 * Overrides the URL of ad server.
-	 * @param adserverURL
+	 * Optional (and for advanced users only.)
+	 * Overrides the URL of ad server SDK will communicate with. Only change this if you are certain of what you are doing.
+	 * 
+	 * @param adserverURL String value for ad server. Default is: "http://ads.mocean.mobi/ad".
 	 */
 	public void setAdserverURL(String adserverURL) {
 		if(adserverRequest != null) {
@@ -2497,7 +2717,7 @@ public abstract class MASTAdViewCore extends WebView
 
 	/**
 	 * Optional.
-	 * Get URL of ad server.
+	 * Get URL of ad server this ad view will use when communicating with back end.
 	 */
 	public String getAdserverURL() {
 		if(adserverRequest != null) {
@@ -2509,8 +2729,9 @@ public abstract class MASTAdViewCore extends WebView
 
 	/**
 	 * Optional.
-	 * Set user location latitude value (given in degrees.decimal degrees).
-	 * @param latitude
+	 * Set user location latitude value (given in degrees.decimal degrees). No default value. If location
+	 * detection is enabled, the specified value will be overridden after the next device location fix.
+	 * @param latitude Latitude in degrees.decimal format.
 	 */
 	public void setLatitude(String latitude) {
 		if((adserverRequest != null) && (latitude != null)) {
@@ -2538,8 +2759,9 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Set user location longtitude value (given in degrees.decimal degrees).
-	 * @param longitude
+	 * Set user location longtitude value (given in degrees.decimal degrees). No default value. If location
+	 * detection is enabled, the specified value will be overridden after the next device location fix.
+	 * @param longitude Longitude value (given in degrees.decimal degrees).
 	 */
 	public void setLongitude(String longitude) {
 		if((adserverRequest != null) && (longitude != null)) {
@@ -2566,9 +2788,10 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	/**
-	 * Optional.
-	 * Set Country of visitor. 
-	 * @param country
+	 * Set Country of ad viewer, to be passed to back-end server to help with ad selection; use ISO 3166 format.
+	 * By default no value is sent and the back-end uses the IP address to detect the country of the caller.
+	 * 
+	 * @param country String name of country.
 	 */
 	public void setCountry(String country) {
 		if(adserverRequest != null) {
@@ -2578,7 +2801,7 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Get Country of visitor.
+	 * Get Country of ad viewer.
 	 */
 	public String getCountry() {
 		if(adserverRequest != null) {
@@ -2590,8 +2813,10 @@ public abstract class MASTAdViewCore extends WebView
 
 	/**
 	 * Optional.
-	 * Set Region of visitor. 
-	 * @param region
+	 * Set Region of viewer, to be passed to back-end server to help with ad selection. No default.
+	 * ISO 3166-2 is used for United States and Canada and FIBS 10-4 is used for other countries.
+	 *  
+	 * @param region String region name.
 	 */
 	public void setRegion(String region) {
 		if(adserverRequest != null) {
@@ -2601,7 +2826,7 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Get Region of visitor.
+	 * Get Region of ad viewer.
 	 */
 	public String getRegion() {
 		if(adserverRequest != null) {
@@ -2612,8 +2837,8 @@ public abstract class MASTAdViewCore extends WebView
 	}
 
 	/**
-	 * Optional.
-	 * Set City of the device user (with state). For US only. 
+	 * Optional, for US only.
+	 * Set City of the device user (with state), to be passed to back-end server to help with ad selection. No default.
 	 * @param city
 	 */
 	public void setCity(String city) {
@@ -2623,11 +2848,24 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	/**
+	 * Optional, for US only.
+	 * Get City of the device user (with state). 
+	 */
+	public String getCity() {
+		if(adserverRequest != null) {
+			return adserverRequest.getCity();
+		} else {
+			return null;
+		}
+	}
+		
+	/**
 	 * Optional.
 	 * Type of ads to be returned (1 - text, 2 - image, 4 - richmedia ad). 
 	 * You can set different combinations with these values. 
-	 * For example, 3 = 1 + 2 (text + image), 7 = 1 + 2 + 4 (text + image + richmedia)  
-	 * @param type
+	 * For example, 3 = 1 + 2 (text + image), 7 = 1 + 2 + 4 (text + image + richmedia)
+	 *   
+	 * @param type Int ad type, default: 3 (text or image)
 	 */
 	public void setType(Integer type) {
 		if(adserverRequest != null) {
@@ -2637,20 +2875,20 @@ public abstract class MASTAdViewCore extends WebView
 
 	/**
 	 * Optional.
-	 * Get City of the device user (with state). For US only. 
+	 * Return the type of ad to be returned for display.
+	 * 
+	 * @return Int ad type, which can be be a combination of these values: 1 - text, 2 - image, 4 - richmedia.
 	 */
-	public String getCity() {
+	public Integer getType() {
 		if(adserverRequest != null) {
-			return adserverRequest.getCity();
-		} else {
-			return null;
-		}
+			return adserverRequest.getType();
+		}else return null;
 	}
 	
 	/**
-	 * Optional.
-	 * Set Area code of a user. For US only. 
-	 * @param area
+	 * Optional, for US only.
+	 * Set Area code of a user. 
+	 * @param area String area code value.
 	 */
 	public void setArea(String area) {
 		if(adserverRequest != null) {
@@ -2659,8 +2897,8 @@ public abstract class MASTAdViewCore extends WebView
 	}
 
 	/**
-	 * Optional.
-	 * Get Area code of a user. For US only. 
+	 * Optional, for US only.
+	 * Get Area code of a user. 
 	 */
 	public String getArea() {
 		if(adserverRequest != null) {
@@ -2671,33 +2909,36 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	/**
-	 * Deprecated. Use Dma instead.
-	 * Set Metro code of a user. For US only. 
+	 * Optional, for US only.
+	 * Set Metro code of a user.
+	 * DEPRECATED - use DMS instead. 
 	 * @param metro
 	 */
 	@Deprecated
 	public void setMetro(String metro) {
 		if(adserverRequest != null) {
-			adserverRequest.setDma(metro);
+			adserverRequest.setMetro(metro);
 		}
 	}
 	
 	/**
-	 * Deprecated. Use Dma instead.
-	 * Get Metro code of a user. For US only. 
+	 * Optional, for US only.
+	 * Get Metro code of a user.
+	 * DEPRECATED - use DMS instead. 
 	 */
 	@Deprecated
 	public String getMetro() {
 		if(adserverRequest != null) {
-			return adserverRequest.getDma();
+			return adserverRequest.getMetro();
 		} else {
 			return null;
 		}
 	}
-
+	
 	/**
-	 * Set Dma code of a user. For US only. Replaces Metro attribute. 
-	 * @param metro
+	 * Optional, for US only.
+	 * Set Dma code of a user, to be passed to back-end server to help with ad selection. REPLACES METRO. 
+	 * @param dma
 	 */
 	public void setDma(String dma) {
 		if(adserverRequest != null) {
@@ -2706,7 +2947,8 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	/**
-	 * Get Dma code of a user. For US only.  Replaces Metro attribute.
+	 * Optional, for US only.
+	 * Get Dma code of a user. REPLACES METRO. 
 	 */
 	public String getDma() {
 		if(adserverRequest != null) {
@@ -2715,10 +2957,10 @@ public abstract class MASTAdViewCore extends WebView
 			return null;
 		}
 	}
-
+	
 	/**
-	 * Optional.
-	 * Set Zip/Postal code of user. For US only. 
+	 * Optional, for US only.
+	 * Set Zip/Postal code of user, to be passed to back-end server to help with ad selection. 
 	 * @param zip
 	 */
 	public void setZip(String zip) {
@@ -2728,8 +2970,8 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	/**
-	 * Optional.
-	 * Get Zip/Postal code of user. For US only. 
+	 * Optional, for US only.
+	 * Get Zip/Postal code of user. 
 	 */
 	public String getZip() {
 		if(adserverRequest != null) {
@@ -2741,8 +2983,9 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Set User carrier.
-	 * @param carrier
+	 * Set User carrier name, to be passed to back-end server to help with ad selection.
+	 * 
+	 * @param carrier String name of carrier. No default value.
 	 */
 	public void setCarrier(String carrier) {
 		if(adserverRequest != null) {
@@ -2752,7 +2995,8 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * Optional.
-	 * Get User carrier.
+	 * 
+	 * Get User carrier name.
 	 */
 	public String getCarrier() {
 		if(adserverRequest != null) {
@@ -2762,14 +3006,35 @@ public abstract class MASTAdViewCore extends WebView
 		}
 	}
 	
+	/**
+	 * Set log level to one of the log level values defined in he MASTAdLog class
+     * (corresponding to errors, errors + warnings, or everything including server traffic.)
+     * 
+	 * @param logLevel Int log level to control which messages will be sent to the logs.
+	 */
 	public void setLogLevel(int logLevel)
 	{
 		adLog.setLogLevel(logLevel);
 	}
 	
+	/**
+	 * Set flag controlling use of internal browser field when opening ad URLs.
+	 * 
+	 * @param value True to open URL with internal browser, false to launch full standard browser.
+	 */
 	public void setInternalBrowser(boolean value)
 	{
 		internalBrowser = value;
+	}
+
+	/**
+	 * Get current setting for internal browser usage.
+	 * 
+	 * @return True if ad URLs will be opened in internal browser, false if standard browser will be launched.
+	 */
+	public boolean getInternalBrowser()
+	{
+		return internalBrowser;
 	}
 	
 	/**
@@ -2803,11 +3068,22 @@ public abstract class MASTAdViewCore extends WebView
 		locationMinWaitMillis = millis;
 	}
 	
+	/**
+	 * Get minimum wait time between location updates from the GPS system. If 0, only one location update is performed.
+	 * @return Int wait value, in milliseconds.
+	 */
 	public int getLocationMinWait()
 	{
 		return locationMinWaitMillis;
 	}
 	
+	/**
+	 * Turn location detection on or off. If enabled, the device GPS location capabilities will be used to obtain
+	 * a position fix at least one. Ongoing location updates may continue depending on the minimum wait and minimum
+	 * distance settings. If user-specified latitude and/or longitude values have been set, and location detection
+	 * is enabled, the detected location will override preset values.
+	 * @param detect If true, location detection is enabled.
+	 */
 	public void setLocationDetection(boolean detect)
 	{
 		if(detect)
@@ -2868,24 +3144,37 @@ public abstract class MASTAdViewCore extends WebView
 		}
 	}
 		
+	/**
+	 * Get setting indicating use of device ID is allowed or not.
+	 * @return True if device ID can be used, false otherwise.
+	 */
 	public boolean getUseSystemDeviceId()
 	{
 		return ContentManager.getInstance(this).getUseSystemDeviceId();
 	}
 	
-	
+	/**
+	 * Set flag indicating if device ID can be used (sent to back-end) or not.
+	 * @param value True if system device ID can be used, false otherwise.
+	 */
 	public void setUseSystemDeviceId(boolean value)
 	{
 		ContentManager.getInstance(this).setUseSystemDeviceId(value);
 	}
 	
-	
+	/**
+	 * Set value to send to back-end as device ID (instead of detected system ID value.)
+	 * @param value String to send to server.
+	 */
 	public void setDeviceId(String value)
 	{
 		ContentManager.getInstance(this).setDeviceId(value);
 	}
 	
-	
+	/**
+	 * Return device ID value currently being used with ad requests.
+	 * @return String value for device ID.
+	 */
 	public String getDeviceId()
 	{
 		return ContentManager.getInstance(this).getDeviceId();
@@ -3086,7 +3375,7 @@ public abstract class MASTAdViewCore extends WebView
 		return new ViewGroup.LayoutParams(sizeDrawableWidth, sizeDrawablehHeight);
 	}
 
-	OrmmaPlayer getPlayer() {
+	private OrmmaPlayer getPlayer() {
 		if(player != null) player.releasePlayer();
 		player = new OrmmaPlayer(getContext());	
 		return player;
@@ -3140,6 +3429,7 @@ public abstract class MASTAdViewCore extends WebView
 			handler.sendMessage(msg); // mHandler
 		}
 	}
+	
 	private class SetupOrmmaAudioPlayer implements Runnable {
 		private Bundle data;
 		
@@ -3271,4 +3561,35 @@ public abstract class MASTAdViewCore extends WebView
 				adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_ERROR, "openMap", Constants.STR_ORMMA_ERROR_OPEN_MAP);
 			}
 	}
+	
+	protected static String readFile(String path)
+    {
+		StringBuffer result = new StringBuffer();
+		
+    	try
+    	{
+    		File ifile = new File(path);
+    		FileInputStream fIn = new FileInputStream(ifile);
+    		//System.out.println("copy: from " + input + ", size=" + ifile.length() + " to " + output);
+    		BufferedReader buffer = new BufferedReader(new InputStreamReader(fIn));
+    		String line;
+			while ((line = buffer.readLine()) != null)
+			{
+				result.append(line);
+			}
+			buffer.close();
+			fIn.close(); 
+    	}
+    	catch(Exception ex)
+    	{
+    		//DiagnosticsLog.addMessage("Exception copying file: " + input, "add_draft_media", DiagnosticsLog.logLevelError);
+    		//DiagnosticsLog.addMessage("Message: " + ex.getMessage(), "add_draft_media", DiagnosticsLog.logLevelError);
+    		//ex.printStackTrace();
+    		System.out.println("Exception reading file: " + path);
+    		return null;
+    	}
+ 
+    	System.out.println("readFile: " + result.toString());
+    	return result.toString();
+    }
 }

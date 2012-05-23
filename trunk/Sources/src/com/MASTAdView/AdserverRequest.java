@@ -20,12 +20,25 @@ import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
+/**
+ * Class encapsulating all of the data and parameters associated with an ad server request.
+ */
 public class AdserverRequest {
 	
-	
+	/**
+	 * Max sex X to send to server
+	 */
 	public int sizeX=-1;
+	
+	/**
+	 * Max size X to send to server
+	 */
 	public int sizeY=-1;
-	public int timeout = 1000;
+	
+	/**
+	 * Server side timeout value
+	 */
+	public int timeout = Constants.DEFAULT_AD_SERVER_TIMEOUT;
 	
 	private Map<String, String> parameters = new HashMap<String, String>();
 	private final String parameter_site = "site";
@@ -61,18 +74,26 @@ public class AdserverRequest {
 	//private final String parameter_mnc = "mnc";
 	private final String parameter_type = "type";
 	//private final String parameter_debug = "debug";
+	private final static String parameter_Ad_Call_Timeout = "timeout";
+	
+	/**
+	 * Device ID paramter name
+	 */
 	public final static String parameter_device_id = "udid";
-	public final static String parameter_Ad_Call_Timeout = "timeout"; 
-
 	
 	private String adserverURL = "http://ads.mocean.mobi/ad"; 
 	
 	private Hashtable<String, String> customParameters;
 	
-	MASTAdLog AdLog;
+	private MASTAdLog AdLog;
 	private Context appContext;
 	
 	
+	/**
+	 * Construct an ad server request object
+	 * @param AdLog Logging object for diagnostic information
+	 * @param appContext Application context
+	 */
 	public AdserverRequest(MASTAdLog AdLog, Context appContext) {
 		this.AdLog = AdLog;
 		this.appContext = appContext;
@@ -508,6 +529,13 @@ public class AdserverRequest {
 		return this;	
 	}
 
+	/**
+	 * Type of ads to be returned (1 - text, 2 - image, 4 - richmedia ad). 
+	 * You can set different combinations with these values. 
+	 * For example, 3 = 1 + 2 (text + image), 7 = 1 + 2 + 4 (text + image + richmedia)
+	 * @param type Int ad type, default: 3 (text or image)
+	 * @return Reference to update ad server request object
+	 */
 	public AdserverRequest setType(Integer type) {
 		if(type != null) {
 			if((type>0)&&(type<8))
@@ -618,7 +646,7 @@ public class AdserverRequest {
 		}
 		return this;
 	}
-	
+
 	public Integer getSite() {
 		synchronized(parameters) {
 			return getIntParameter(parameters.get(parameter_site),0);
@@ -786,7 +814,7 @@ public class AdserverRequest {
 	public Integer getType() {
 		synchronized(parameters) {
 			String type = parameters.get(parameter_type);
-			return getIntParameter(type,3);
+			return getIntParameter(type, Constants.DEFAULT_AD_TYPE);
 		}
 	}
 
