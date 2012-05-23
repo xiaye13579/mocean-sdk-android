@@ -12,20 +12,47 @@ import android.os.Environment;
 import android.util.Log;
 
 public class MASTAdLog {
+	
+	/**
+	 * Log level value to turn logging off. The default.
+	 */
 	public static final int LOG_LEVEL_NONE =0;
+	
+	/**
+	 * Log level value to log errors only.
+	 */
 	public static final int LOG_LEVEL_1 =1;
+	
+	/**
+	 * Log level value to log errors and warnings.
+	 */
 	public static final int LOG_LEVEL_2 =2;
+	
+	/**
+	 * Log level value to log errors, warnings and server traffic.
+	 */
 	public static final int LOG_LEVEL_3 =3;
 	
+	/**
+	 * Log value associated with errors.
+	 */
 	public static final int LOG_TYPE_ERROR =1;
+	
+	/**
+	 * Log value associated with warnings. 
+	 */
 	public static final int LOG_TYPE_WARNING =2;
+	
+	/**
+	 * Log value associated with misc. diagnostics information (server traffic, etc.)
+	 */
 	public static final int LOG_TYPE_INFO =3;
 	
-	int CurrentLogLevel = 0;
-	String AppName="";
+	private int CurrentLogLevel = 0;
+	private String AppName="";
 	private static String defaultLogFileName =  Environment.getExternalStorageDirectory().getAbsolutePath() + "/mOcean-sample-log.txt";
 	private static boolean loggingToFile = false;
-	MASTAdViewCore adView;
+	private MASTAdViewCore adView;
 	
 	private static int DefaultLevel = LOG_LEVEL_NONE;
 	
@@ -38,6 +65,12 @@ public class MASTAdLog {
     private static Vector<String> inMemoryLog = null;
     
     
+    /**
+     * Set default log level to one of the log level values defined in he MASTAdLog class
+     * (corresponding to errors, errors + warnings, or everything including server traffic.)
+     * 
+     * @param logLevel Int log level to set as the default value (initially NONE).
+     */
 	public static void setDefaultLogLevel(int logLevel)
 	{
 		DefaultLevel = logLevel;
@@ -47,6 +80,10 @@ public class MASTAdLog {
 		}
 	}
 	
+	/**
+	 * Enable debug logging to the named file.
+	 * @param fileName String file name, must be a full pathname to a writable file.
+	 */
 	public static void setFileLog(String fileName)
 	{
 		if ((fileName == null) || (fileName.length() < 1))
@@ -67,13 +104,24 @@ public class MASTAdLog {
 				e.printStackTrace(); 
 		}
 	}
-	
+
+	/**
+	 * Construct logging object.
+	 * @param adView Base view object associated with logging
+	 */
 	public MASTAdLog(MASTAdViewCore adView)
 	{
 		this.adView =  adView;
 		setLogLevel(DefaultLevel);
 	}
 	
+	/**
+	 * Log a message
+	 * @param Level Int logging level, from 0 (none) to 3 (errors, warnings and server traffic)
+	 * @param Type Log Int message type, 1 (error, 2 (warning) or 3 (info) 
+	 * @param tag String log message tag
+	 * @param msg String log message detail
+	 */
 	public void log(int Level, int Type, String tag, String msg)
 	{		
 		String resultTag = "["+Integer.toHexString(adView.hashCode())+"]"+ tag;
@@ -92,6 +140,10 @@ public class MASTAdLog {
 		}
 	}
 
+	/**
+	 * Set log message level to be recorded; log events at a higher level are ignored.
+	 * @param logLevel Int log level to be recorded
+	 */
 	public void setLogLevel(int logLevel)
 	{
 		CurrentLogLevel = logLevel;
@@ -132,22 +184,36 @@ public class MASTAdLog {
         }
 	}
 
+	/**
+	 * Get maximum number of messages to keep in memory
+	 * @return Current count setting
+	 */
 	public static int getMaximumlogCount()
 	{
 		return maximumInMemoryLogCount;
 	}
 	
+	/**
+	 * Set maximum number of messages to keep in memory
+	 * @param value Maximum message count
+	 */
 	public static void setMaximumLogCount(int value)
 	{
 		maximumInMemoryLogCount = value;
 	}
 	
+	/**
+	 * Get reference to in-memory log informatoin
+	 * @return Vector of log message strings
+	 */
 	public static Vector<String> getInternalLogs()
 	{
 		return inMemoryLog;
 	}
 
-	
+	/**
+	 * Clear internal log messages
+	 */
 	public static void clearInternalLogs()
 	{
 		if (inMemoryLog != null)
