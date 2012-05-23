@@ -308,17 +308,6 @@ public abstract class MASTAdViewCore extends WebView
 		return isShowPreviousAdOnError;
 	}
 	
-	boolean isContentAligned;
-	public void setContentAlignment(boolean isContentAligned)
-	{
-		this.isContentAligned = isContentAligned;
-	}
-	
-	public boolean getContentAlignment()
-	{
-		return isContentAligned;
-	}
-	
 	public void setLayoutParams(ViewGroup.LayoutParams params) {
 		lastX = params.width;
 		lastY = params.height;
@@ -546,7 +535,6 @@ public abstract class MASTAdViewCore extends WebView
 			Integer type = getIntParameter(attrs.getAttributeValue(null, "type"));
 			
 			Boolean isContentAligned = getBooleanParameter(attrs.getAttributeValue(null, "isContentAligned"));
-			if (isContentAligned != null) this.isContentAligned = isContentAligned;
 			
 			Boolean locationDetection= getBooleanParameter(attrs.getAttributeValue(null, "locationDetection"));
 			locationMinWaitMillis = getIntParameter(attrs.getAttributeValue(null, "locationMinWaitMillis"));
@@ -570,7 +558,8 @@ public abstract class MASTAdViewCore extends WebView
 			String region = attrs.getAttributeValue(null, "region");
 			String city = attrs.getAttributeValue(null, "city");
 			String area = attrs.getAttributeValue(null, "area");
-			String metro = attrs.getAttributeValue(null, "metro");
+			//String metro = attrs.getAttributeValue(null, "metro");
+			String dma = attrs.getAttributeValue(null, "dma");
 			String zip = attrs.getAttributeValue(null, "zip");
 			String carrier = attrs.getAttributeValue(null, "carrier");
 			
@@ -598,7 +587,8 @@ public abstract class MASTAdViewCore extends WebView
 			if(adserverURL!=null) setAdserverURL(adserverURL);
 			if(city!=null)setCity(city);
 			if(area!=null)setArea(area);
-			if(metro!=null)setMetro(metro);
+			//if(metro!=null)setMetro(metro);
+			if (dma != null)setDma(dma);
 			if(zip!=null)setZip(zip);
 			if(locationDetection!=null) setLocationDetection(locationDetection);
 			if(internelBr != null) setInternalBrowser(internelBr);
@@ -740,7 +730,7 @@ public abstract class MASTAdViewCore extends WebView
 		
 		
 		// Pre-load header (empty body) with ormma / mraid javascrpt code
-		String dataOut = setupViewport(false, true, null);
+		String dataOut = setupViewport(true, null);
 		super.loadDataWithBaseURL(null, dataOut, "text/html", "UTF-8", null);
 		
 		
@@ -1106,6 +1096,11 @@ public abstract class MASTAdViewCore extends WebView
 			try {
 				if(mViewState != ViewState.EXPANDED) {
 					if(adserverRequest != null) {
+						if (mViewState == ViewState.RESIZED)
+						{
+							// Ad view is going to reload & resize to default state; we need our state to match that
+							mViewState = ViewState.DEFAULT;
+						}
 						interceptOnAdDownload.begin((MASTAdView)this);
 						adserverRequest.setExcampaigns(getExcampaignsString());
 						String url = adserverRequest.createURL();
@@ -1161,7 +1156,7 @@ public abstract class MASTAdViewCore extends WebView
 		}
 		else
 		{
-			// Default fragment as of 2.1 SDK
+			// Default fragment as of 2.10 SDK
 			return "<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/>";
 		}
 	}
@@ -1169,11 +1164,8 @@ public abstract class MASTAdViewCore extends WebView
 
 	/**
 	 * Customize the HTML (or javascript) code to be inserted into the HTML BODY when creating
-	 * webview for ad content. By default this will contain one of the strings below based on
-	 * the isContentAligned property:
+	 * webview for ad content. By default this will contain:
 	 * 
-	 * <body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;\">
-	 * or
 	 * <body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">
 	 * 
 	 * @param value String content to be inserted, or null to use built-in default (same as 2.10.) NOTE: This MUST include the HTML <body> tag!
@@ -1192,15 +1184,8 @@ public abstract class MASTAdViewCore extends WebView
 		}
 		else
 		{
-			// Default 2.10 SDK values, with and without content alignment
-			if (isContentAligned)
-			{
-				return "<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;\">";
-			}
-			else
-			{
-				return "<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">";
-			}
+			// Default 2.10 SDK value
+			return "<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">";
 		}
 	}
 	
@@ -1209,7 +1194,7 @@ public abstract class MASTAdViewCore extends WebView
 	// ad creative to be scaled on device to the device dpi; version 2.10 introduced a fix
 	// for this, but the change in behavior caused some issues. A deprecated flag allowed
 	// reverting to the old behavior. Per a client suggestion, another fix is being introduced.
-	private String setupViewport(boolean isAligned, boolean headerOnly, String body)
+	private String setupViewport(boolean headerOnly, String body)
 	{
 		StringBuffer data = new StringBuffer("<html><head>");
 		
@@ -1271,7 +1256,7 @@ public abstract class MASTAdViewCore extends WebView
 					if(isAutoCollapse) this.setAdVisibility(View.INVISIBLE);
 					else
 					{	
-						data = setupViewport(isContentAligned, false, null);					
+						data = setupViewport(false, null);					
 						//view.loadDataWithBaseURL(null, data, "text/html", "UTF-8", null);
 						loadWebViewContent(null, data, null);
 					}
@@ -1338,12 +1323,12 @@ public abstract class MASTAdViewCore extends WebView
 								String videoUrl = Utils.scrapeIgnoreCase(videoData, "src=\"", "\"");
 								String clickUrl = Utils.scrapeIgnoreCase(data, "href=\"", "\"");
 								handler.post(new SetupVideoAction(context, view, videoUrl, clickUrl));
-								// StartTimer(context,view); // XXX
+								// StartTimer(context,view);
 								stopTimer(false);
 							} else {
 								String dataOut="";
 								//dataOut = setupViewport(SCALE_VIEWPORT_NEW, isContentAligned, data);
-								dataOut = setupViewport(isContentAligned, false, data);
+								dataOut = setupViewport(false, data);
 								
 								mContent = dataOut;
 								
@@ -1963,6 +1948,13 @@ public abstract class MASTAdViewCore extends WebView
 						ViewGroup.LayoutParams lp = getLayoutParams();
 						mOldHeight = lp.height;
 						mOldWidth = lp.width;
+						
+						if (mOldHeight == ViewGroup.LayoutParams.WRAP_CONTENT)
+						{
+							// Can't restore view to minimized size with wrap content; lock current size in place.
+							mOldHeight = getHeight();
+						}
+						
 						mOldExpandBackground = getBackground();
 						mOldExpandBackgroundColor = getBackgroundColor();
 						ormmaEvent("expand","");
@@ -2679,28 +2671,51 @@ public abstract class MASTAdViewCore extends WebView
 	}
 	
 	/**
-	 * Optional.
+	 * Deprecated. Use Dma instead.
 	 * Set Metro code of a user. For US only. 
 	 * @param metro
 	 */
+	@Deprecated
 	public void setMetro(String metro) {
 		if(adserverRequest != null) {
-			adserverRequest.setMetro(metro);
+			adserverRequest.setDma(metro);
 		}
 	}
 	
 	/**
-	 * Optional.
+	 * Deprecated. Use Dma instead.
 	 * Get Metro code of a user. For US only. 
 	 */
+	@Deprecated
 	public String getMetro() {
 		if(adserverRequest != null) {
-			return adserverRequest.getMetro();
+			return adserverRequest.getDma();
 		} else {
 			return null;
 		}
 	}
+
+	/**
+	 * Set Dma code of a user. For US only. Replaces Metro attribute. 
+	 * @param metro
+	 */
+	public void setDma(String dma) {
+		if(adserverRequest != null) {
+			adserverRequest.setDma(dma);
+		}
+	}
 	
+	/**
+	 * Get Dma code of a user. For US only.  Replaces Metro attribute.
+	 */
+	public String getDma() {
+		if(adserverRequest != null) {
+			return adserverRequest.getDma();
+		} else {
+			return null;
+		}
+	}
+
 	/**
 	 * Optional.
 	 * Set Zip/Postal code of user. For US only. 
