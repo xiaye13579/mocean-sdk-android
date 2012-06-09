@@ -457,9 +457,11 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/**
 	 * The interface for ad view which will be invoked when loading a URL.
+	 * @return Boolean True if ALL click behavior has been handled and the default SDK processing
+	 * should be skipped, false if default SDK logic to show URL in browser should still run.
 	 */
 	public interface MASTOnAdClickListener {
-		public void click(MASTAdView sender, String url);
+		public boolean click(MASTAdView sender, String url);
 	}
 	
 	/**
@@ -1745,26 +1747,44 @@ public abstract class MASTAdViewCore extends WebView
 		public AdWebViewClient(Context context) {
 			this.context = context;
 		}
+
 		
+		// Default logic for an ad click event
+		protected void defaultOnAdClickHandler(MASTAdView view, String url)
+		{
+			Context context = view.getContext();
+			int isAccessNetworkState = context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE);	
+	    	if (isAccessNetworkState == PackageManager.PERMISSION_GRANTED)
+	    	{
+				if (isInternetAvailable(context))
+				{
+					openUrlInExternalBrowser(context, url);
+				}
+				else 
+				{
+					Toast.makeText(context, "Internet is not available", Toast.LENGTH_LONG).show();
+				}
+	    	}
+	    	else if (isAccessNetworkState == PackageManager.PERMISSION_DENIED)
+	    	{
+				openUrlInExternalBrowser(context, url);
+	    	}
+		}
+		
+
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			try
 			{
 				adLog.log(MASTAdLog.LOG_LEVEL_2,MASTAdLog.LOG_TYPE_INFO,"OverrideUrlLoading",url);
 				if(adClickListener != null) {
-						adClickListener.click((MASTAdView)view, url);
+					if (adClickListener.click((MASTAdView)view, url) == false)
+					{
+						// If click() method returns false, continue with default logic
+						defaultOnAdClickHandler((MASTAdView)view, url);
+					}
 				}else {
-			    	int isAccessNetworkState = context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE);
-			    	
-			    	if(isAccessNetworkState == PackageManager.PERMISSION_GRANTED) {
-						if(isInternetAvailable(context)) {
-							openUrlInExternalBrowser(context, url);
-						} else {
-		    				Toast.makeText(context, "Internet is not available", Toast.LENGTH_LONG).show();
-						}
-			    	} else if(isAccessNetworkState == PackageManager.PERMISSION_DENIED) {
-						openUrlInExternalBrowser(context, url);
-			    	}
+					defaultOnAdClickHandler((MASTAdView)view, url);
 				}
 			}catch(Exception e){
 				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "shouldOverrideUrlLoading", e.getMessage());
