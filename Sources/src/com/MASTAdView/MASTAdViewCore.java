@@ -496,7 +496,7 @@ public abstract class MASTAdViewCore extends WebView
 	 * will be invoked. If an error occurs, the error() method will be invoked. All methods are
 	 * passed the ad view from which the events originated, and for the error case a string error
 	 * message is provided. For example, if the server does not return an ad, the error method will
-	 * be invoked and the error string will contain the message defined in Constants.STR_EMPTY_SERVER_RESPONS.
+	 * be invoked and the error string will contain the message defined in Constants.STR_EMPTY_SERVER_RESPONSE.
 	 */
 	public interface MASTOnAdDownload {
 		/**
@@ -1267,18 +1267,27 @@ public abstract class MASTAdViewCore extends WebView
 		});
 	}
 	
+	/** Default viewport string injected into ad view **/
+	public static final String defaultViewportDefinition =
+		"<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/>";
 	
+	/** Default body style css injected into ad view **/
+	public static final String defaultBodyStyle =
+		"<style>body{margin: 0px; padding: 0px; width: 100%; height: 100%; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;}</style>";
+	
+	// Custom injection string; if any has been set by user
 	private String injectionHeaderCode = null;
-	private String injectionBodyCode = null;
 		
 	
 	/**
 	 * Customize the "HTML" (or javascript/css) code to be inserted into the HTML HEAD when creating
-	 * webview for ad content. By default this will contain the string:
+	 * webview for ad content. This is used to setup the viewport for the web view and to define the
+	 * style to be applied to the body (for centering, etc.) By default this will contain the string:
 	 * 
-	 * <meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/>
+	 * <meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/> \
+	 * <style>body{margin: 0px; padding: 0px; width: 100%; height: 100%; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;}</style>
 	 * 
-	 * @param value String content to be inserted, or null to use built-in default (same as 2.10)
+	 * @param value String content to be inserted, or null to use built-in default.
 	 */
 	public void setInjectionHeaderCode(String value)
 	{
@@ -1298,74 +1307,33 @@ public abstract class MASTAdViewCore extends WebView
 		}
 		else
 		{
-			// Default fragment as of 2.10 SDK
-			return "<meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/>";
+			// Default fragment, new for 2.12 SDK
+			return defaultViewportDefinition + defaultBodyStyle;
 		}
 	}
 	
-
-	/**
-	 * Customize the "HTML" (or javascript/css) code to be inserted into the HTML BODY when creating
-	 * webview for ad content. By default this will contain the string:
-	 *  
-	 * <body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">
-	 * 
-	 * @param value String content to be inserted, or null to use built-in default (same as 2.10.) NOTE: This MUST include the HTML <body> tag!
-	 */
-	public void setInjectionBodyCode(String value)
-	{
-		injectionBodyCode = value;
-	}
-	
-	
-	/**
-	 * Get current injection body code string.
-	 * @return Current injection body value.
-	 */
-	public String getInjectionBodycode()
-	{
-		if (injectionBodyCode != null)
-		{
-			return injectionBodyCode;
-		}
-		else
-		{
-			// Default 2.10 SDK value
-			return "<body style=\"margin: 0px; padding: 0px; width: 100%; height: 100%\">";
-		}
-	}
-	
-	
+		
 	// Create viewport for showing ad; version 2.9 and earlier had a "bug" which caused
 	// ad creative to be scaled on device to the device dpi; version 2.10 introduced a fix
 	// for this, but the change in behavior caused some issues. A deprecated flag allowed
 	// reverting to the old behavior. Per a client suggestion, another fix is being introduced
-	// which allows the app developer to customer the header and/or body code to be injected.
+	// which allows the app developer to customer the header code to be injected.
 	private String setupViewport(boolean headerOnly, String body)
 	{
 		StringBuffer data = new StringBuffer("<html><head>");
 		
 		// Insert our javascript bridge library; this is always required
-		data.append("<style>*{margin:0;padding:0}</style>");
+		//data.append("<style>*{margin:0;padding:0}</style>");
 		data.append("<script src=\"file://");
 		data.append(mScriptPath);
 		data.append("\" type=\"text/javascript\"></script>");
 		
 		data.append(getInjectionHeaderCode());
-	
-		if (headerOnly)
+		data.append("</head><body>");
+		
+		if (!headerOnly && (body != null))
 		{
-			data.append("</head><body>");
-		}
-		else
-		{
-			data.append("</head>");
-			data.append(getInjectionBodycode());
-			
-			if (body != null)
-			{
-				data.append(body);
-			}
+			data.append(body);
 		}
 		
 		data.append("</body></html>");
@@ -1505,7 +1473,7 @@ public abstract class MASTAdViewCore extends WebView
 				//if(isShownView)
 				{
 					InterstitialClose();
-					if(adDownload!= null) adDownload.error((MASTAdView)this,Constants.STR_EMPTY_SERVER_RESPONS);
+					if(adDownload!= null) adDownload.error((MASTAdView)this,Constants.STR_EMPTY_SERVER_RESPONSE);
 				}
 				StartTimer(context,view);
 			}
