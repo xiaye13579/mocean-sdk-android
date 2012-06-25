@@ -66,7 +66,7 @@ public class OrmmaListener extends Activity {
         setAdLayoutParams();
         adserverView.setOnOrmmaListener(new UserOnOrmmaListener());
         linearLayout.addView(adserverView);
-        adserverView.setContentAlignment(true);
+        //adserverView.setContentAlignment(true);
 		adserverView.update();
         
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);

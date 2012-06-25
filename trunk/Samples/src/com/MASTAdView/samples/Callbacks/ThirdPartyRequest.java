@@ -69,7 +69,7 @@ public class ThirdPartyRequest extends Activity {
         setAdLayoutParams();
         adserverView.setOnThirdPartyRequest(new UserOnThirdPartyRequest());
         linearLayout.addView(adserverView);
-        adserverView.setContentAlignment(true);
+        //adserverView.setContentAlignment(true);
         //adserverView.setAutoCollapse(false);
 		adserverView.update();
         

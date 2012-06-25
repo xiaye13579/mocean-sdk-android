@@ -88,7 +88,7 @@ public class RequestAndResponse extends Activity {
     	
         adserverView = new MASTAdView(this, site, zone);
         adserverView.setId(1);
-        adserverView.setContentAlignment(true);
+        //adserverView.setContentAlignment(true);
         setAdLayoutParams();
         
         

@@ -67,7 +67,7 @@ public class AdDownload extends Activity {
         setAdLayoutParams();
         adserverView.setOnAdDownload(new UserAdDownload());
         linearLayout.addView(adserverView);
-        adserverView.setContentAlignment(true);
+        //adserverView.setContentAlignment(true);
 		adserverView.update();
         
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);

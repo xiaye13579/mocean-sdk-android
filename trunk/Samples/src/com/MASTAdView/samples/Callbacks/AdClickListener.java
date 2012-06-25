@@ -66,7 +66,7 @@ public class AdClickListener extends Activity {
         setAdLayoutParams();
         adserverView.setOnAdClickListener(new UserOnAdClickListener());
         linearLayout.addView(adserverView);
-        adserverView.setContentAlignment(true);
+        //adserverView.setContentAlignment(true);
 		adserverView.update();
         
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);
@@ -86,8 +86,9 @@ public class AdClickListener extends Activity {
     class UserOnAdClickListener implements MASTOnAdClickListener {
 
 		@Override
-		public void click(MASTAdView arg0, String arg1) {
+		public boolean click(MASTAdView arg0, String arg1) {
 			updateUi(mUpdateResults, "Click url = "+ arg1);
+			return false; // let SDK continue click processing
 		}
 		
 		private void updateUi(Runnable mUpdateResults, String string) {

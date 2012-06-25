@@ -37,7 +37,7 @@ public class OpenGL extends Activity {
         adserverView.setId(1);
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ApiDemos.BANNER_HEIGHT));
         frame.addView(adserverView);
-        adserverView.setContentAlignment(true);
+        //adserverView.setContentAlignment(true);
         adserverView.update();
         base.addView(frame);
         

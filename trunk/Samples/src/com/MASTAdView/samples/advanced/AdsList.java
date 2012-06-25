@@ -57,7 +57,7 @@ public class AdsList extends Activity {
 			        		MASTAdView adserverView = (MASTAdView)view;
 			        		adserverView.setSite(site);
 			        		adserverView.setZone(zone);
-			        		adserverView.setContentAlignment(true);
+			        		//adserverView.setContentAlignment(true);
 			        		adserverView.update();
 			        	}
 					}
@@ -80,7 +80,7 @@ public class AdsList extends Activity {
 	        	MASTAdView adserverView = new MASTAdView(this, site, zone);
 	        	adserverView.setId(i+1);
 	        	setAdLayoutParams(adserverView);
-		        adserverView.setContentAlignment(true);
+		        //adserverView.setContentAlignment(true);
 	        	adserverViews.add(adserverView);
         	}
         	else
@@ -114,7 +114,7 @@ public class AdsList extends Activity {
         	{
         		MASTAdView adserverView = (MASTAdView)view;
         		setAdLayoutParams(adserverView);
-        		adserverView.setContentAlignment(true);
+        		//adserverView.setContentAlignment(true);
 				adserverView.update();
         	}
 		}
