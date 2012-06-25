@@ -143,7 +143,7 @@ public class MainAdvanced extends Activity {
         adserverView.setLayoutParams(new ViewGroup.LayoutParams(320, 300));
         //adserverView.setAutoCollapse(false);
 		adserverView.update();
-		adserverView.setContentAlignment(true);
+		//adserverView.setContentAlignment(true);
 		//adserverView.setBackgroundColor(0);
 		
 		adserverView.setOnAdDownload(new MASTOnAdDownload() {
@@ -151,7 +151,6 @@ public class MainAdvanced extends Activity {
 			@Override
 			public void error(MASTAdView sender, String error) {
 				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
