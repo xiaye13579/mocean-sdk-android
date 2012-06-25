@@ -1273,7 +1273,7 @@ public abstract class MASTAdViewCore extends WebView
 	
 	/** Default body style css injected into ad view **/
 	public static final String defaultBodyStyle =
-		"<style>body{margin: 0px; padding: 0px; width: 100%; height: 100%; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;}</style>";
+		"<style>body{margin: 0px; padding: 0px; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;}</style>";
 	
 	// Custom injection string; if any has been set by user
 	private String injectionHeaderCode = null;
@@ -1285,7 +1285,7 @@ public abstract class MASTAdViewCore extends WebView
 	 * style to be applied to the body (for centering, etc.) By default this will contain the string:
 	 * 
 	 * <meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/> \
-	 * <style>body{margin: 0px; padding: 0px; width: 100%; height: 100%; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;}</style>
+	 * <style>body{margin: 0px; padding: 0px; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;}</style>
 	 * 
 	 * @param value String content to be inserted, or null to use built-in default.
 	 */
@@ -1443,7 +1443,7 @@ public abstract class MASTAdViewCore extends WebView
 							} else {
 								String dataOut="";
 								dataOut = setupViewport(false, data);
-								
+								adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "setResult: final data:", dataOut);
 								mContent = dataOut;
 								
 								// Moved this into runnable posted to UI thread to eliminate webview warning
