@@ -42,7 +42,6 @@ public class Dimensions extends Activity {
     private int dimensionsY = 0;
     private int dimensionsMinWidth = -1;
     private int dimensionsMinHeight = -1;
-    private boolean isContentAligned = false;
     private boolean useInternalBrowser = false;
     private int injectionCodeVariation = 0;
     
@@ -90,7 +89,6 @@ public class Dimensions extends Activity {
 		
         setAdLayoutParams();
         linearLayout.addView(adserverView);
-        //adserverView.setContentAlignment(true);
 		adserverView.update();
         
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);
@@ -164,7 +162,6 @@ public class Dimensions extends Activity {
         	final EditText sbY = (EditText)dialog.findViewById(R.id.sbY);
         	sbY.setText("" + dimensionsY);
         	
-        	final CheckBox cbIsAligned = (CheckBox)dialog.findViewById(R.id.cbIsAligned);
         	final CheckBox cbUseInternal = (CheckBox)dialog.findViewById(R.id.cbUseInternal);
         	
         	final CheckBox cbFillWidth = (CheckBox) dialog.findViewById(R.id.cbFillParentWidth);
@@ -263,15 +260,6 @@ public class Dimensions extends Activity {
 						dimensionsMinHeight = -1;
 					}
 					
-					if (cbIsAligned.isChecked())
-					{
-						isContentAligned = true;
-					}
-					else
-					{
-						isContentAligned = false;
-					}
-					
 					if (cbUseInternal.isChecked())
 					{
 						useInternalBrowser = true;
@@ -357,9 +345,8 @@ public class Dimensions extends Activity {
 		}
 		
 
-		// Set aligned and internal browser properties form checkbox values
+		// Set internal browser properties form checkbox values
 		adserverView.setInternalBrowser(useInternalBrowser);
-		//adserverView.setContentAlignment(isContentAligned);
 		
         adserverView.setMaxSizeX(dimensionsWidth);
         lp.width = dimensionsWidth;
