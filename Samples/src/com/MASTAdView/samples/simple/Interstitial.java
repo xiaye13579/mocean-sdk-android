@@ -54,7 +54,7 @@ public class Interstitial extends Activity {
 			        adserverView.setSite(site);
 			        adserverView.setZone(zone);
 					setAdLayoutParams();
-			        adserverView.setContentAlignment(true);
+			        //adserverView.setContentAlignment(true);
 			        adserverView.update();
 					adserverView.show();
 				} catch (Exception e) {
@@ -67,7 +67,7 @@ public class Interstitial extends Activity {
         adserverView.setId(1);
         setAdLayoutParams();
         adserverView.setAutoCloseInterstitialTime(15);
-        adserverView.setContentAlignment(true);
+        //adserverView.setContentAlignment(true);
         adserverView.update();
 		adserverView.show();
         

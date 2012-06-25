@@ -15,14 +15,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.MASTAdView.MASTAdView;
+import com.MASTAdView.MASTAdViewCore;
 
 
 public class Dimensions extends Activity {
@@ -41,6 +44,14 @@ public class Dimensions extends Activity {
     private int dimensionsMinHeight = -1;
     private boolean isContentAligned = false;
     private boolean useInternalBrowser = false;
+    private int injectionCodeVariation = 0;
+    
+    
+    // Custom viewport options
+    private static final String miniViewport = "<meta name = \"viewport\" content = \"initial-scale = 1.0, user-scalable = no\">";
+    public static final int INJECTION_CODE_VARIATION_DEFAULT 	= 0;
+    public static final int INJECTION_CODE_VARIATION_NONE		= 1;
+    public static final int INJECTION_CODE_VARIATION_VIEWPORT	= 2;
     
     
     public void onCreate(Bundle savedInstanceState) {
@@ -69,12 +80,17 @@ public class Dimensions extends Activity {
 				}
 			}
 		});
+    
         
         adserverView = new MASTAdView(this, site, zone);
         adserverView.setId(1);
+
+		// Set viewport code
+		setInjectionCode();
+		
         setAdLayoutParams();
         linearLayout.addView(adserverView);
-        adserverView.setContentAlignment(true);
+        //adserverView.setContentAlignment(true);
 		adserverView.update();
         
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);
@@ -97,9 +113,25 @@ public class Dimensions extends Activity {
         return true;
     }
 
+    private void setInjectionCode()
+    {
+    	if (injectionCodeVariation == INJECTION_CODE_VARIATION_DEFAULT)
+        {
+        	adserverView.setInjectionHeaderCode(null);
+        }
+        else if (injectionCodeVariation == INJECTION_CODE_VARIATION_NONE)
+        {
+        	adserverView.setInjectionHeaderCode("");
+        }
+        else if (injectionCodeVariation == INJECTION_CODE_VARIATION_VIEWPORT)
+        {
+        	adserverView.setInjectionHeaderCode(miniViewport + MASTAdViewCore.defaultBodyStyle);
+        }
+    }
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+    	
         if (item.getItemId() == R.id.miShowDialog) {
         	final Dialog dialog = new Dialog(this);
         	dialog.setContentView(R.layout.dimensions_dialog);
@@ -179,6 +211,14 @@ public class Dimensions extends Activity {
         	    }
         	});
 
+            String[] spinnerNames = { "Default", "No injection", "Initial-scale=1.0" };
+            ArrayAdapter<String>adapter =
+            	new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinnerNames);
+    		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    		final Spinner viewportSpinner = (Spinner)dialog.findViewById(R.id.viewportSpinner);
+    		viewportSpinner.setAdapter(adapter);
+    		viewportSpinner.setSelection(injectionCodeVariation);
+
         	Button btnOk = (Button)dialog.findViewById(R.id.btnOk);
         	btnOk.setOnClickListener(new OnClickListener() {
 				@Override
@@ -247,6 +287,9 @@ public class Dimensions extends Activity {
 					
 					adserverView.setLayoutParams(lp);
 					linearLayout.requestLayout();
+					
+					injectionCodeVariation = viewportSpinner.getSelectedItemPosition();
+					setInjectionCode();
 				}
 			});
         	
@@ -306,7 +349,7 @@ public class Dimensions extends Activity {
 
 		// Set aligned and internal browser properties form checkbox values
 		adserverView.setInternalBrowser(useInternalBrowser);
-		adserverView.setContentAlignment(isContentAligned);
+		//adserverView.setContentAlignment(isContentAligned);
 		
         adserverView.setMaxSizeX(dimensionsWidth);
         lp.width = dimensionsWidth;

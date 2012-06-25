@@ -22,4 +22,5 @@
 	<string name="settings">Settings</string>
 	<string name="fill_parent_width">fill parent width?</string>
 	<string name="fill_parent_height">fill parent height?</string>
+	<string name="choose_viewport">Viewport setting:</string>
 </resources>

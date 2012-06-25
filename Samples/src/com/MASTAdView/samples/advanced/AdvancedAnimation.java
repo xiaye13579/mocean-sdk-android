@@ -69,7 +69,7 @@ public class AdvancedAnimation extends Activity {
         adserverView.setId(1);
         setAdLayoutParams();
         linearLayout.addView(adserverView);
-        adserverView.setContentAlignment(true);
+        //adserverView.setContentAlignment(true);
 		adserverView.update();
 		
         adserverView.setOnAdDownload(new MASTOnAdDownload() {
