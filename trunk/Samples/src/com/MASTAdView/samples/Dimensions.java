@@ -48,7 +48,7 @@ public class Dimensions extends Activity {
     
     
     // Custom viewport options
-    private static final String miniViewport = "<meta name = \"viewport\" content = \"initial-scale = 1.0, user-scalable = no\">";
+    private static final String miniViewport = "<meta name = \"viewport\" content = \"initial-scale = 1.0, user-scalable = no, target-densitydpi=medium-dpi\">";
     public static final int INJECTION_CODE_VARIATION_DEFAULT 	= 0;
     public static final int INJECTION_CODE_VARIATION_NONE		= 1;
     public static final int INJECTION_CODE_VARIATION_VIEWPORT	= 2;
@@ -219,6 +219,7 @@ public class Dimensions extends Activity {
     		viewportSpinner.setAdapter(adapter);
     		viewportSpinner.setSelection(injectionCodeVariation);
 
+    		final Activity thisActivity = this;
         	Button btnOk = (Button)dialog.findViewById(R.id.btnOk);
         	btnOk.setOnClickListener(new OnClickListener() {
 				@Override
@@ -227,15 +228,18 @@ public class Dimensions extends Activity {
 					
 					ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams)adserverView.getLayoutParams();
 					
+					MASTAdView newAdserverView = new MASTAdView(thisActivity, site, zone);
+					newAdserverView.setId(1);
+			        
 					int val = Integer.parseInt(sbWidth.getText().toString());
 					dimensionsWidth = val;
 					lp.width = dimensionsWidth;
-					adserverView.setMaxSizeX(dimensionsWidth);
+					newAdserverView.setMaxSizeX(dimensionsWidth);
 					
 					val = Integer.parseInt(sbHeight.getText().toString());
 					dimensionsHeight = val;
 					lp.height = dimensionsHeight;
-					adserverView.setMaxSizeY(dimensionsHeight);
+					newAdserverView.setMaxSizeY(dimensionsHeight);
 					
 					String s = sbMinWidth.getText().toString();
 					if ((s != null) && (s.length() > 0))
@@ -285,11 +289,17 @@ public class Dimensions extends Activity {
 					dimensionsY = val;
 					lp.topMargin = dimensionsY;
 					
-					adserverView.setLayoutParams(lp);
-					linearLayout.requestLayout();
+					newAdserverView.setLayoutParams(lp);
 					
 					injectionCodeVariation = viewportSpinner.getSelectedItemPosition();
+					
+					int index = linearLayout.indexOfChild(adserverView);
+					linearLayout.removeView(adserverView);
+					adserverView = newAdserverView;
 					setInjectionCode();
+					adserverView.update();
+					linearLayout.addView(adserverView, index);
+					linearLayout.requestLayout();
 				}
 			});
         	
