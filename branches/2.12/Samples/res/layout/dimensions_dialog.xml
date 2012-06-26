@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" xmlns:android="http://schemas.android.com/apk/res/android">
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/frameMainDialog"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" 
+	android:layout_margin="10dp">
+	
+	<TableLayout 
+		android:layout_height="wrap_content" 
+		android:layout_width="fill_parent"
+	    android:stretchColumns="0"
+	>
+		<TableRow 
+			android:layout_height="wrap_content" 
+			android:layout_width="fill_parent"
+			android:gravity="center_vertical"
+		>
+		    <TextView
+		        android:id="@+id/lbWidth"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:text="@string/width"
+			/>
+		    <EditText 
+				android:id="@+id/sbWidth" 
+				android:layout_height="wrap_content" 
+				android:layout_width="100dp"
+				android:singleLine="true"
+				android:text="0"
+				android:inputType="number"/>
+	    </TableRow>
+
+		    
+  		<TableRow 
+			android:layout_height="wrap_content" 
+			android:layout_width="fill_parent"
+			android:gravity="center_vertical"
+		>
+		    <TextView
+		        android:id="@+id/lbFillParentWidth"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_marginLeft="10dp"
+		        android:text="@string/fill_parent_width" 
+			/>
+
+		    <CheckBox
+		        android:id="@+id/cbFillParentWidth"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="" 
+	        />
+	    </TableRow>
+		    
+  		    		    
+		<TableRow 
+			android:layout_height="wrap_content" 
+			android:layout_width="fill_parent"
+			android:gravity="center_vertical"
+		>
+		    <TextView
+		        android:id="@+id/lbHeight"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:text="@string/height" 
+			/>
+		    <EditText 
+				android:id="@+id/sbHeight" 
+				android:layout_height="wrap_content" 
+				android:layout_width="100dp"
+				android:singleLine="true"
+				android:text="0"
+				android:inputType="number"
+			/>
+	    </TableRow>
+
+		    
+	    <TableRow 
+			android:layout_height="wrap_content" 
+			android:layout_width="fill_parent"
+			android:gravity="center_vertical"
+		>
+		    <TextView
+		        android:id="@+id/lbFillParentHeight"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_marginLeft="10dp"
+		        android:text="@string/fill_parent_height" 
+			/>
+
+		    <CheckBox
+		        android:id="@+id/cbFillParentHeight"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="" 
+	        />
+	    </TableRow>
+		    
+		        		    
+		<TableRow 
+			android:layout_height="wrap_content" 
+			android:layout_width="fill_parent"
+			android:gravity="center_vertical"
+		>
+		    <TextView
+		        android:id="@+id/lbMinHeight"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:text="@string/min_height" 
+			/>
+		    <EditText 
+				android:id="@+id/sbMinHeight" 
+				android:layout_height="wrap_content" 
+				android:layout_width="100dp"
+				android:singleLine="true"
+				android:text=""
+				android:inputType="number"
+			/>
+	    </TableRow>		
+		    
+		<TableRow 
+			android:layout_height="wrap_content" 
+			android:layout_width="fill_parent"
+			android:gravity="center_vertical"
+		>
+		    <TextView
+		        android:id="@+id/lbMinWidth"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:text="@string/min_width" 
+			/>
+		    <EditText 
+				android:id="@+id/sbMinWidth" 
+				android:layout_height="wrap_content" 
+				android:layout_width="100dp"
+				android:singleLine="true"
+				android:text=""
+				android:inputType="number"
+			/>
+	    </TableRow>
+		    
+		<TableRow 
+			android:layout_height="wrap_content" 
+			android:layout_width="fill_parent"
+			android:gravity="center_vertical"
+		>
+		    <TextView
+		        android:id="@+id/lbX"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:text="@string/x" 
+			/>
+   		    <EditText 
+				android:id="@+id/sbX" 
+				android:layout_height="wrap_content" 
+				android:layout_width="100dp"
+				android:singleLine="true"
+				android:text="0"
+				android:inputType="number"
+			/>
+	    </TableRow>
+		    		    
+		<TableRow 
+			android:layout_height="wrap_content" 
+			android:layout_width="fill_parent"
+			android:gravity="center_vertical"
+		>
+		    <TextView
+		        android:id="@+id/lbY"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:text="@string/y" 
+			/>
+		  	<EditText 
+				android:id="@+id/sbY" 
+				android:layout_height="wrap_content" 
+				android:layout_width="100dp"
+				android:singleLine="true"
+				android:text="0"
+				android:inputType="number"
+			/>
+	    </TableRow>
+	    
+  		<TableRow 
+			android:layout_height="wrap_content" 
+			android:layout_width="fill_parent"
+			android:gravity="center_vertical"
+		>
+		    <TextView
+		        android:id="@+id/lbUseInternal"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:text="@string/use_internal_browser" 
+			/>
+
+		    <CheckBox
+		        android:id="@+id/cbUseInternal"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="" 
+	        />
+	    </TableRow>
+	    
+	    <TableRow 
+			android:layout_height="wrap_content" 
+			android:layout_width="fill_parent"
+			android:gravity="center_vertical"
+		>	
+		
+	        <TextView
+		        android:id="@+id/lbChooseViewport"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:text="@string/choose_viewport" 
+			/>
+
+	        <Spinner
+	            android:id="@+id/viewportSpinner"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content" />
+	        
+        </TableRow>
+	</TableLayout>
+		    		    
+    <Button
+        android:id="@+id/btnOk"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/ok" android:layout_marginLeft="10dp">
+    </Button>
+
+</LinearLayout>
+
+</ScrollView>
