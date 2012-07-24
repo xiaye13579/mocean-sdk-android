@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#000000">
+
+    <ListView
+        android:id="@+id/bookmarkListview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.0" >
+    </ListView>
+
+    <com.MASTAdView.MASTAdView
+        xmlns:android="http://schemas.android.com/apk/res/android"   
+   		android:id="@+id/bookmarkBanner"
+    	android:layout_width="fill_parent"
+    	android:layout_height="300px"
+    	site="23814"
+    	zone="112076"
+    	updateTime="60"
+    	android:visibility="visible" />
+        
+</LinearLayout>

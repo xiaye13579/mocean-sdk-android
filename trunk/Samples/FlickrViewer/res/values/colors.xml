@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="CUSTOM_BUTTON_GRADIENT_START_COLOR">#0000FF</color>
+    <color name="CUSTOM_BUTTON_GRADIENT_END_COLOR">#0000A0</color>
+    <color name="CUSTOM_BUTTON_BORDER_COLOR">#000000</color>
+
+    
+</resources>

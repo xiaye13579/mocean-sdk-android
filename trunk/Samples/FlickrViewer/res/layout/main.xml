@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainManager"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:background="#000000">
+
+    <com.MASTAdView.MASTAdView
+        xmlns:android="http://schemas.android.com/apk/res/android"   
+   		android:id="@+id/mainTopAdView"
+    	android:layout_width="fill_parent"
+    	android:layout_height="100px"
+    	android:layout_gravity="center_horizontal"
+    	site="23814"
+    	zone="112073"
+    	updateTime="60"
+    	android:visibility="gone" />
+    
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ 		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/attributeManager"
+		android:orientation="horizontal"
+		android:background="#000000">
+	
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        	android:layout_width="0dp"
+        	android:layout_height="wrap_content"
+        	android:layout_weight="0.7"
+        	android:id="@+id/contentTitle"
+        	android:text="Title" android:layout_gravity="left" android:ellipsize="end" android:maxLines="1"/>
+        
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        	android:layout_width="0dp"
+        	android:layout_height="wrap_content"
+        	android:layout_weight="0.1"
+        	android:id="@+id/contentSpacer2"
+        	android:text="" />
+            
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        	android:layout_width="0dp"
+        	android:layout_height="wrap_content"
+        	android:layout_weight="0.2"
+        	android:id="@+id/contentCounter"
+        	android:text="0/0" android:layout_gravity="right" android:layout_marginRight="5dp" android:layout_marginLeft="5dp" android:gravity="right"/>
+            
+    </LinearLayout>
+        
+    <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/contentImage" 
+        android:visibility="visible"  
+        android:layout_height="0dp" 
+        android:layout_width="fill_parent"
+        android:layout_weight="100.0" 
+        android:layout_gravity="center_horizontal" android:scaleType="centerCrop"/>
+    	<!--  fitCenter is good & no crop; centeCrop looks the best but crops part of image  -->
+    
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	   	android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:id="@+id/attributeManager"
+    	android:orientation="horizontal"
+    	android:background="#000000">
+    		
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+       		android:layout_width="0dp"
+       		android:layout_height="wrap_content"
+       		android:layout_weight="0.6"
+       		android:id="@+id/contentAuthor"
+       		android:text="Author" android:layout_gravity="left" android:layout_marginLeft="5dp" android:ellipsize="end" android:maxLines="1"/>
+            
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+       		android:layout_width="0dp"
+       		android:layout_height="wrap_content"
+       		android:layout_weight="0.1"
+       		android:id="@+id/contentSpacer"
+       		android:text="" />
+            
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+       		android:layout_width="0dp"
+       		android:layout_height="wrap_content"
+       		android:layout_weight="0.3"
+       		android:id="@+id/contentDate"
+       		android:text="Date" android:layout_gravity="right" android:layout_marginRight="5dp" android:gravity="right" android:maxLines="1" android:ellipsize="end"/>
+            
+    </LinearLayout>
+    	            
+    <com.MASTAdView.MASTAdView
+        xmlns:android="http://schemas.android.com/apk/res/android"   
+   		android:id="@+id/mainBottomAdView"
+    	android:layout_width="fill_parent"
+    	android:layout_height="100px"
+    	android:layout_gravity="center_horizontal"
+    	site="23814"
+    	zone="112067"
+    	updateTime="60"
+    	android:visibility="gone" />
+    
+</LinearLayout>
