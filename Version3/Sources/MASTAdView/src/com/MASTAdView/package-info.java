@@ -5,7 +5,7 @@
  * MRAID 2.0 based SDK. The specification, this code, and the overall feature set is not yet final. Comments and feedback
  * are welcome.
  * <P>
- * YOU SHOULD NOT DELIVER PRODUCTS BASED ON THIS ALPHA SDK!
+ * YOU MUST NOT DELIVER PRODUCTS BASED ON THIS ALPHA SDK!
  * </B></I><P>
  * For more information, please visit: 
  * <A HREF="http://developer.moceanmobile.com/SDK_Pre-release_Pending_Changing">http://developer.moceanmobile.com/SDK_Pre-release_Pending_Changing</A>
