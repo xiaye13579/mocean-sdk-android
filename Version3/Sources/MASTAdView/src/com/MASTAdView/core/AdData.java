@@ -38,7 +38,7 @@ public class AdData
 	public String 				richContent 				= null;
 	public String 				error 						= null;
 	public List<NameValuePair>	externalCampaignProperties	= null;
-	//public String 			responseData 				= null;
+	public String 				responseData 				= null;
 	
 	
 	public boolean hasContent()

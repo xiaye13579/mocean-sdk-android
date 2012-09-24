@@ -4,14 +4,10 @@
 package com.MASTAdView.core;
 
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
 
 import android.app.Activity;
@@ -24,13 +20,10 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.MASTAdView.MASTAdConstants;
 import com.MASTAdView.MASTAdLog;
-import com.MASTAdView.core.AdDialogFactory.DialogOptions;
-import com.MASTAdView.core.MraidInterface.RESIZE_CUSTOM_CLOSE_POSITION;
+import com.MASTAdView.MASTAdView;
 
 
 public class AdSizeUtilities
@@ -98,7 +91,7 @@ public class AdSizeUtilities
 	{
 		if (parentContainer.adDelegate.getAdActivityEventHandler() != null)
 		{
-			parentContainer.adDelegate.getAdActivityEventHandler().onAdExpanded(parentContainer, height, width);
+			parentContainer.adDelegate.getAdActivityEventHandler().onAdExpanded((MASTAdView)parentContainer, height, width);
 		}
 	}
 	
@@ -315,7 +308,6 @@ public class AdSizeUtilities
 	
 	
 	// Move ad web view to new / larger contain in front of app content, and display
-	@SuppressWarnings("deprecation")
 	public String resizeWorker(int toWidth, int toHeight, String closePosition, int offsetX, int offsetY, boolean allowOffScreen)
 	{
 		String invalidMessage = resizePropertiesValid(toWidth, toHeight, closePosition, offsetX, offsetY, allowOffScreen);
@@ -429,7 +421,7 @@ public class AdSizeUtilities
 			
 			if (parentContainer.adDelegate.getAdActivityEventHandler() != null)
 			{
-				parentContainer.adDelegate.getAdActivityEventHandler().onAdClosed(parentContainer);
+				parentContainer.adDelegate.getAdActivityEventHandler().onAdClosed((MASTAdView)parentContainer);
 			}
 		}	
 	}

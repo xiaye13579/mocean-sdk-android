@@ -94,7 +94,6 @@ public class FileUtils
 	
 	public static String writeToDisk(InputStream in, File writeFile) throws IllegalStateException, IOException 
 	{
-		int i = 0;
 		byte buff[] = new byte[1024];
 		FileOutputStream out = new FileOutputStream(writeFile);
 
@@ -107,7 +106,6 @@ public class FileUtils
 					break;
 	
 				out.write(buff, 0, numread);
-				i++;
 			}
 			while (true);
 			

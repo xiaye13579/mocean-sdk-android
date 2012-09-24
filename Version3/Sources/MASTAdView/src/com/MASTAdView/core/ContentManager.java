@@ -27,8 +27,6 @@ import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 
 import com.MASTAdView.MASTAdConstants;
-import com.MASTAdView.MASTAdLog;
-import com.MASTAdView.MASTAdRequest;
 
 public class ContentManager
 {
@@ -41,7 +39,6 @@ public class ContentManager
 	private String id = null;
 	private boolean useSystemDeviceId = false;
 	private Context context;
-	private static boolean useBuiltinTestAds = false;
 	private AdParser parser = new AdParser();
 
 	
@@ -61,22 +58,6 @@ public class ContentManager
 		public Context getContext();
 		public boolean setResult(AdData ad);
 	}
-	
-
-	/*
-	public static boolean setUseBuiltinTestAds(Boolean flag)
-	{
-		if (flag == null)
-		{
-			return useBuiltinTestAds;
-		}
-		else
-		{
-			useBuiltinTestAds = flag;
-			return flag;
-		}
-	}
-	*/
 	
 	
 	//private ContentManager(WebView webView) {
@@ -243,6 +224,11 @@ public class ContentManager
 				{
 					ad.error = "Canceled";
 				}
+				else
+				{
+					ad.responseData = responseValue;
+				}
+				
 				if (parameters.sender != null)
 				{
 					parameters.sender.setResult(ad);
@@ -332,13 +318,7 @@ public class ContentManager
 	{
 		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 		isSimAvailable = tm.getSimState() > TelephonyManager.SIM_STATE_ABSENT;
-		String deviceId = getDeviceId(tm);
-		String deviceIdMd5 = null;
-		if (deviceId != null)
-		{
-			deviceIdMd5 = FileUtils.md5(deviceId);
-		}
-		
+
 		autoDetectParameters = "";
 		
 		if (tm != null) 

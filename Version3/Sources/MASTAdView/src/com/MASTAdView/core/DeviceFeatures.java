@@ -4,20 +4,14 @@
 package com.MASTAdView.core;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
-//import android.provider.CalendarContract.Events;
-import android.text.format.DateFormat;
 
 public class DeviceFeatures
 {

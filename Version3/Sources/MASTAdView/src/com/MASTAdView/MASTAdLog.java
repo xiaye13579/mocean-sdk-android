@@ -56,7 +56,7 @@ public class MASTAdLog {
 	public static final int LOG_TYPE_INFO =3;
 	
 	private int CurrentLogLevel = 0;
-	private String AppName="";
+	//private String AppName="";
 	private static String defaultLogFileName =  Environment.getExternalStorageDirectory().getAbsolutePath() + "/mOcean-sample-log.txt";
 	private static boolean loggingToFile = false;
 	private View adView;

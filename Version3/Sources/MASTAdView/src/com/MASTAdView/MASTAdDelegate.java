@@ -5,8 +5,6 @@ package com.MASTAdView;
 
 import java.util.HashMap;
 
-import com.MASTAdView.core.AdViewContainer;
-
 /**
  * The delegate class defines interfaces developers can use to extend and/or interact with
  * feature and functions of the SDK ad handling, including:
@@ -162,14 +160,14 @@ public class MASTAdDelegate
 		 * This event is fired before ad download begins.
 		 * @param sender The ad view from which the event originates.
 		 */
-		public void onDownloadBegin(AdViewContainer sender);
+		public void onDownloadBegin(MASTAdView sender);
 		
 		/**
 		 * This event is fired after ad content has been fully downloaded. It will NOT be invoked
 		 * if an error occurs, instead the error() method will be triggered.
 		 * @param sender The ad view from which the event originates. 
 		 */
-		public void onDownloadEnd(AdViewContainer sender);
+		public void onDownloadEnd(MASTAdView sender);
 		
 		/**
 		 * This event is fired in the case of a failure to download content.
@@ -178,7 +176,7 @@ public class MASTAdDelegate
 		 * the error method will be invoked and the error string will contain the message defined
 		 * in Constants.STR_EMPTY_SERVER_RESPONSE. 
 		 */
-		public void onDownloadError(AdViewContainer sender, String error);
+		public void onDownloadError(MASTAdView sender, String error);
 	}
 
 
@@ -211,7 +209,7 @@ public class MASTAdDelegate
 		 * <P>
 		 * See the sample application source code for complete source for this use case.
 		 */
-		public void onMraidEvent(AdViewContainer sender, String name, String params);
+		public void onMraidEvent(MASTAdView sender, String name, String params);
 	}
 
 	
@@ -246,7 +244,7 @@ public class MASTAdDelegate
 		 * <P>
 		 * See the sample application source code for complete source for this use case.
 		 */
-		public boolean onClickEvent(AdViewContainer sender, String url);
+		public boolean onClickEvent(MASTAdView sender, String url);
 	}
 	
 	
@@ -262,14 +260,14 @@ public class MASTAdDelegate
 		 * onAttachedToWindow documentation for more information.
 		 * @param sender The ad view from which the event originated is passed as a parameter.
 		 */
-		public void onAdAttachedToActivity(AdViewContainer sender);
+		public void onAdAttachedToActivity(MASTAdView sender);
 		
 		/**
 		 * This is called when the view is detached to a window. See the underlying web view
 		 * onDetachedToWindow documentation for more information.
 		 * @param sender The ad view from which the event originated is passed as a parameter.
 		 */
-		public void onAdDetachedFromActivity(AdViewContainer sender);
+		public void onAdDetachedFromActivity(MASTAdView sender);
 		
 		
 		/**
@@ -279,7 +277,7 @@ public class MASTAdDelegate
 		 * @param height Height of "expanded" view.
 		 * @param width Width of "expanded" view.
 		 */
-		public void onAdExpanded(AdViewContainer sender, int height, int width);
+		public void onAdExpanded(MASTAdView sender, int height, int width);
 		
 		
 		/**
@@ -287,7 +285,7 @@ public class MASTAdDelegate
 		 * "gone" for interstitial ads.
 		 * @param sender The ad view from which the event originated is passed as a parameter.
 		 */
-		public void onAdClosed(AdViewContainer sender);
+		public void onAdClosed(MASTAdView sender);
 	}
 	
 	
@@ -319,7 +317,7 @@ public class MASTAdDelegate
 		 * <P>
 		 * See the sample application source code for complete source for this use case.
 		 */
-		public void onThirdPartyEvent(AdViewContainer sender, HashMap<String,String> params);
+		public void onThirdPartyEvent(MASTAdView sender, HashMap<String,String> params);
 	}
 	
 	
@@ -339,7 +337,7 @@ public class MASTAdDelegate
 		 * @param url String URL of image that will be downloaded and stored, if approved.
 		 * @return True to allow picture storage, false otherwise.
 		 */
-		public boolean onStorePictureEvent(AdViewContainer sender, String url);
+		public boolean onStorePictureEvent(MASTAdView sender, String url);
 		
 		/**
 		 * Invoked when an ad intends to create an event in the users' calendar. Return boolean
@@ -349,6 +347,6 @@ public class MASTAdDelegate
 		 * @param sender The originating ad view where the event was triggered.
 		 * @return True to allow picture storage, false otherwise.
 		 */
-		public boolean onAddCalendarEntryEvent(AdViewContainer sender);
+		public boolean onAddCalendarEntryEvent(MASTAdView sender);
 	}
 }

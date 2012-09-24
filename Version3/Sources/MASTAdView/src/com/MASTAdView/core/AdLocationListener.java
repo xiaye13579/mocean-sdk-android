@@ -4,9 +4,7 @@
 package com.MASTAdView.core;
 
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -25,7 +23,6 @@ public class AdLocationListener implements LocationListener
 	private long mInterval;
 	private float mDistance;
 	private Looper listenerLooper;
-	private Context context;
 	private MASTAdLog adLog;
 	
 	
@@ -41,7 +38,6 @@ public class AdLocationListener implements LocationListener
 	
 	public AdLocationListener(Context c, Integer interval, Float distance, String provider, MASTAdLog logger)
 	{
-		context = c;
 		mLocationManager = (LocationManager) c.getSystemService(Context.LOCATION_SERVICE);
 		mProvider = provider;
 		setRestrictions(interval, distance);
@@ -51,7 +47,6 @@ public class AdLocationListener implements LocationListener
 	
 	public AdLocationListener(Context c, Integer interval, Float distance, String provider, Looper looper, MASTAdLog logger)
 	{
-		context = c;
 		mLocationManager = (LocationManager) c.getSystemService(Context.LOCATION_SERVICE);
 		mProvider = provider;
 		setRestrictions(interval, distance);

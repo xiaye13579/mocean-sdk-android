@@ -143,7 +143,7 @@ public class MraidInterface
 	// Tell ad that an SDK side error has occurred; message describes error, action optionally indicates name of action causing error
 	public void fireErrorEvent(String message, String action)
 	{
-		String name = get_EVENTS_name(EVENTS.ERROR);
+		//String name = get_EVENTS_name(EVENTS.ERROR);
 		webView.injectJavaScript("mraid.fireErrorEvent(\"" + message + "\",\"" + action + "\");");
 	}
 	
@@ -158,32 +158,11 @@ public class MraidInterface
 		webView.injectJavaScript("mraid.fireEvent(\"" + name + "\");");
 	}
 	
-	
-	// Tell ad that a state change has been triggered by the app environment
-	// ??? but should you be invoking setState instead ??? 
-	private void fireStateChangeEvent(STATES toState)
-	{
-		String name = get_EVENTS_name(EVENTS.STATE_CHANGE);
-		String stateName = get_STATES_name(toState);
-		webView.injectJavaScript("mraid.fireChangeEvent(\"" + name + "\", \"" + stateName + "\");");
-		setStateInternal(toState);
-	}
-	
-	
-	// Tell ad that a viewable change has been triggered by the app environment
-	// ??? but should you be invoking setViewable instead ???
-	private void fireViewableChangeEvent(Boolean isViewable)
-	{
-		String name = get_EVENTS_name(EVENTS.VIEWABLE_CHANGE);
-		String stateName = isViewable.toString();
-		webView.injectJavaScript("mraid.fireChangeEvent(\"" + name + "\", " + stateName + ");");
-	}
-	
-	
+		
 	// Tell ad that view size has changed, e.g. after an orientation change
 	public void fireSizeChangeEvent(int width, int height)
 	{
-		String name = get_EVENTS_name(EVENTS.SIZE_CHANGE);
+		//String name = get_EVENTS_name(EVENTS.SIZE_CHANGE);
 		width = AdSizeUtilities.devicePixelToMraidPoint(width, context);
 		height = AdSizeUtilities.devicePixelToMraidPoint(height, context);
 		webView.injectJavaScript("mraid.fireSizeChangeEvent(" + width + ", " + height + ");");

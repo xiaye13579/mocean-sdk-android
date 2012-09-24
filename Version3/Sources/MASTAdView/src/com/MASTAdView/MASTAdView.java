@@ -216,8 +216,26 @@ public class MASTAdView extends AdViewContainer
 	{
 		return adDelegate;
 	}
-	
 
+	
+	/**
+	 * Get URL string used to request the last ad from back-end.
+	 */
+	public String getLastRequest()
+	{
+		return super.getLastRequest();
+	}
+	
+	
+	/**
+	 * Return response data (body) returned for the last ad received from the back-end.
+	 */
+	public String getLastResponse()
+	{
+		return super.getLastResponse();
+	}
+
+	
 	/**
 	 * Set ad placement value which rich media ads can use to determine if they are operating in a banner (inline)
 	 * or interstitial (full screen transitional) context. Use true for interstitial, false for banner. Default is false

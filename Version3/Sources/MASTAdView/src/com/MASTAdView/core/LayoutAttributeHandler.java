@@ -32,13 +32,11 @@ public class LayoutAttributeHandler
 	public static final String xml_layout_attribute_customParameters		= "customParameters";
 	
 	
-	private Context context;
 	private AdViewContainer container;
 	
 	
 	public LayoutAttributeHandler(Context c, AdViewContainer v)
 	{
-		context = c;
 		container = v;
 	}
 	
@@ -82,7 +80,7 @@ public class LayoutAttributeHandler
 			if (longitude != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_longitude, longitude);
 			
 			String ua = attributes.getAttributeValue(null, xml_layout_attribute_ua);
-			if (longitude != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_longitude, longitude);
+			if (ua != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_userAgent, ua);
 			
 			String customParameters = attributes.getAttributeValue(null, xml_layout_attribute_customParameters);
 			Hashtable<String, String> cp = null;

@@ -4,7 +4,6 @@
 package com.MASTAdView.core;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.apache.http.NameValuePair;
@@ -34,6 +33,7 @@ import com.MASTAdView.MASTAdConstants;
 import com.MASTAdView.MASTAdDelegate;
 import com.MASTAdView.MASTAdLog;
 import com.MASTAdView.MASTAdRequest;
+import com.MASTAdView.MASTAdView;
 
 
 public class AdViewContainer extends RelativeLayout implements ContentManager.ContentConsumer
@@ -58,7 +58,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	private MASTAdLog 								adLog = new MASTAdLog(this);
 
 	protected MASTAdRequest							adserverRequest;
-	//private String 									lastRequest;
+	private String 									lastRequest;
 	private AdData 									lastResponse;
 	
 	private DisplayMetrics							metrics = null;
@@ -198,7 +198,6 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 	
 	
-	@SuppressWarnings("deprecation")
 	private TextView createTextView(Context context)
 	{
 		TextView v = new TextView(context);
@@ -217,7 +216,6 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 
 	
-	@SuppressWarnings("deprecation")
 	private ImageView createImageView(Context context)
 	{
 		ImageView v = new ImageView(context);
@@ -261,7 +259,6 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 
 	
-	@SuppressWarnings("deprecation")
 	private RelativeLayout.LayoutParams createAdLayoutParameters()
 	{
 		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
@@ -628,11 +625,11 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 				// if delegate defined, invoke 
 				if (adDelegate.getAdDownloadHandler() != null)
 				{
-					adDelegate.getAdDownloadHandler().onDownloadBegin(this);
+					adDelegate.getAdDownloadHandler().onDownloadBegin((MASTAdView)this);
 				}
 				
 				String url = adserverRequest.toString(MASTAdConstants.AD_REQUEST_TYPE_XML);
-				//lastRequest = url;
+				lastRequest = url;
 				requestCounter++;
 				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "requestGet["+String.valueOf(requestCounter)+"]" , url);
 				ContentManager.getInstance(this).startLoadContent(this, url);
@@ -654,7 +651,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 
 		if (adDelegate.getAdDownloadHandler() != null)
 		{
-			adDelegate.getAdDownloadHandler().onDownloadError(this, ad.error);
+			adDelegate.getAdDownloadHandler().onDownloadError((MASTAdView)this, ad.error);
 		}
 		
 		adReloadTimer.startTimer();
@@ -752,7 +749,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 					}
 				}
 	
-				adDelegate.getThirdPartyRequestHandler().onThirdPartyEvent((AdViewContainer) this, params);
+				adDelegate.getThirdPartyRequestHandler().onThirdPartyEvent((MASTAdView) this, params);
 			}
 			catch (Exception e)
 			{
@@ -1329,6 +1326,18 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 
 	
+	public String getLastRequest()
+	{
+		return lastRequest;
+	}
+	
+	
+	public String getLastResponse()
+	{
+		return lastResponse.responseData;
+	}
+	
+	
 	public void setAdPlacementInterstitial(boolean isInterstitial)
 	{
 		if (isInterstitial)
@@ -1377,7 +1386,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 
 		if (adDelegate.getAdActivityEventHandler() != null)
 		{
-			adDelegate.getAdActivityEventHandler().onAdAttachedToActivity(this);
+			adDelegate.getAdActivityEventHandler().onAdAttachedToActivity((MASTAdView)this);
 		}
 
 		// ??? If the ad content was downloaded while the view was not attached to a window
@@ -1427,7 +1436,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		
 		if (adDelegate.getAdActivityEventHandler() != null)
 		{
-			adDelegate.getAdActivityEventHandler().onAdDetachedFromActivity(this);
+			adDelegate.getAdActivityEventHandler().onAdDetachedFromActivity((MASTAdView)this);
 		}
 		
 		// Notify ad that viewable state has changed
@@ -1626,7 +1635,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	{
 		if (adDelegate.getMraidEventHandler() != null)
 		{
-			adDelegate.getMraidEventHandler().onMraidEvent(this, method, parameter);
+			adDelegate.getMraidEventHandler().onMraidEvent((MASTAdView)this, method, parameter);
 		}
 	}
 }

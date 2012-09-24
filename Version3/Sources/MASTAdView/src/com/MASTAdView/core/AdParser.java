@@ -5,7 +5,6 @@ package com.MASTAdView.core;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -17,8 +16,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.MASTAdView.MASTAdConstants;
-
-import android.os.Message;
 
 public class AdParser
 {

@@ -17,16 +17,14 @@ import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.LinearLayout;
 
-import com.MASTAdView.MASTAdDelegate;
 import com.MASTAdView.MASTAdLog;
+import com.MASTAdView.MASTAdView;
 
 public class AdWebView extends WebView
 {
@@ -271,7 +269,7 @@ public class AdWebView extends WebView
 				adLog.log(MASTAdLog.LOG_LEVEL_2,MASTAdLog.LOG_TYPE_INFO,"OverrideUrlLoading",url);
 				if (adViewContainer.adDelegate.getAdClickEventHandler() != null)
 				{
-					if (adViewContainer.adDelegate.getAdClickEventHandler().onClickEvent(adViewContainer, url) == false)
+					if (adViewContainer.adDelegate.getAdClickEventHandler().onClickEvent((MASTAdView)adViewContainer, url) == false)
 					{
 						// If click() method returns false, continue with default logic
 						defaultOnAdClickHandler((AdWebView)view, url);
@@ -371,7 +369,7 @@ public class AdWebView extends WebView
 				// XXX move this to when the ad is successfully received, before the content is injected??
 				// and only inject content if the ad view is attached to an activity already, otherwise save
 				// it for the on attached callback? XXX
-				adViewContainer.adDelegate.getAdDownloadHandler().onDownloadEnd(adViewContainer);
+				adViewContainer.adDelegate.getAdDownloadHandler().onDownloadEnd((MASTAdView)adViewContainer);
 			}
 
 			if (supportMraid)
@@ -425,7 +423,7 @@ public class AdWebView extends WebView
 		
 			if (adViewContainer.adDelegate.getAdDownloadHandler() != null)
 			{
-				adViewContainer.adDelegate.getAdDownloadHandler().onDownloadError(adViewContainer, description);
+				adViewContainer.adDelegate.getAdDownloadHandler().onDownloadError((MASTAdView)adViewContainer, description);
 			}
 		}
 	}

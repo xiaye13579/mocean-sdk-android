@@ -6,17 +6,14 @@ package com.MASTAdView.core;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.content.Context;
+
 import com.MASTAdView.MASTAdConstants;
 import com.MASTAdView.MASTAdLog;
 
 
-import android.content.Context;
-import android.webkit.WebView;
-
-
 public class AdReloadTimer
 {
-	private Context context;
 	private AdViewContainer adContainer;
 	private MASTAdLog adLog;
 	
@@ -28,7 +25,6 @@ public class AdReloadTimer
 	
 	public AdReloadTimer(Context context, AdViewContainer container, MASTAdLog logger)
 	{
-		this.context = context;
 		adContainer = container;
 		adLog = logger;
 	}

@@ -7,19 +7,14 @@ package com.MASTAdView.core;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.http.NameValuePair;
-
 import android.content.Context;
 import android.view.Display;
 import android.view.OrientationEventListener;
-import android.view.View;
 
 
 public class OrientationChangeListener extends OrientationEventListener
 {
 	private Context context;
-	//private AdWebView adWebView;
-	private Display activeDisplay;
 	private static OrientationChangeListener instance = null;
 	private int lastOrientation = ORIENTATION_UNKNOWN;
 	private ArrayList<AdViewContainer> observedViews;
@@ -31,8 +26,6 @@ public class OrientationChangeListener extends OrientationEventListener
 		super.enable();
 		
 		this.context = context;
-		activeDisplay = display;
-		//adWebView = ad;
 		observedViews = new ArrayList<AdViewContainer>();
 	}
 	

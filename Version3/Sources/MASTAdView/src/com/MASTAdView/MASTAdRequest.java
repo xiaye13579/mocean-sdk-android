@@ -4,27 +4,15 @@
 package com.MASTAdView;
 
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-
-import com.MASTAdView.core.ContentManager;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.provider.Settings.Secure;
-import android.telephony.TelephonyManager;
-import android.util.DisplayMetrics;
-import android.view.WindowManager;
+
+import com.MASTAdView.core.ContentManager;
 
 /**
  * Class encapsulating all of the data and parameters associated with an ad server request. The key parameters needed
@@ -127,7 +115,6 @@ public class MASTAdRequest
 	
 	
 	private MASTAdLog AdLog;
-	private Context appContext;
 	private String adserverURL = MASTAdConstants.adserverURL;
 	
 	
@@ -139,7 +126,6 @@ public class MASTAdRequest
 	public MASTAdRequest(MASTAdLog AdLog, Context appContext)
 	{
 		this.AdLog = AdLog;
-		this.appContext = appContext;
 	}
 
 	
@@ -152,7 +138,7 @@ public class MASTAdRequest
 	{
 		if ((name == null) || (name.length() < 1))
 		{
-			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
+			AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
 			return null; // can't work with unnamed parameter
 		}
 		
@@ -253,7 +239,7 @@ public class MASTAdRequest
 	{
 		if ((name == null) || (name.length() < 1))
 		{
-			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
+			AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
 			return false;
 		}
 		
@@ -276,7 +262,7 @@ public class MASTAdRequest
 	{
 		if ((name == null) || (name.length() < 1))
 		{
-			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
+			AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
 			return false;
 		}
 		
@@ -300,7 +286,7 @@ public class MASTAdRequest
 	{
 		if ((name == null) || (name.length() < 1))
 		{
-			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
+			AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
 			return false;
 		}
 		
@@ -330,7 +316,7 @@ public class MASTAdRequest
 	{
 		if ((name == null) || (name.length() < 1))
 		{
-			AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
+			AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
 			return false;
 		}
 		
@@ -380,7 +366,7 @@ public class MASTAdRequest
 		{
 			if ((value == null) || (value.length() < 1))
 			{
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_not_empty);
+				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_not_empty);
 				return false;
 			}
 		}
@@ -388,7 +374,7 @@ public class MASTAdRequest
 		{
 			if (value == null)
 			{
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_not_null);
+				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_not_null);
 				return false;
 			}
 		}
@@ -406,7 +392,7 @@ public class MASTAdRequest
 				
 				if ((lon < -90) || (lon > 90))
 				{
-					AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": valid: -90<=double<=90");
+					AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": valid: -90<=double<=90");
 					return false;
 				}
 			}
@@ -422,7 +408,7 @@ public class MASTAdRequest
 		{
 			if ((value == null) || (value < 1))
 			{
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
+				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
 				return false;
 			}
 		}
@@ -430,7 +416,7 @@ public class MASTAdRequest
 		{
 			if ((value == null) || (value < 1))
 			{
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
+				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
 				return false;
 			}
 		}
@@ -438,7 +424,7 @@ public class MASTAdRequest
 		{
 			if ((value == null) || (value < 1))
 			{
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
+				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
 				return false;
 			}
 		}
@@ -446,7 +432,7 @@ public class MASTAdRequest
 		{
 			if ((value == null) || (value < 0) || (value > 8))
 			{
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": valid: 1<=int<=7, 1 - text, 2 - image, 4 - richmedia ad, set combinations as sum of this values");
+				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": valid: 1<=int<=7, 1 - text, 2 - image, 4 - richmedia ad, set combinations as sum of this values");
 				return false;
 			}
 		}
@@ -454,7 +440,7 @@ public class MASTAdRequest
 		{
 			if ((value != null) && (value < 1))
 			{
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
+				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
 				return false;
 			}
 		}
@@ -462,7 +448,7 @@ public class MASTAdRequest
 		{
 			if ((value != null) && (value < 1))
 			{
-				AdLog.log(AdLog.LOG_LEVEL_3, AdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
+				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
 				return false;
 			}
 		}

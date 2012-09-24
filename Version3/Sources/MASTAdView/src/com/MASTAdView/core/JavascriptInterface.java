@@ -7,7 +7,6 @@ package com.MASTAdView.core;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -15,6 +14,8 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
+
+import com.MASTAdView.MASTAdView;
 
 import android.content.Context;
 import android.media.MediaScannerConnection;
@@ -324,7 +325,7 @@ public class JavascriptInterface
 			if (adView.adDelegate.getUserApprovalRequestHandler() != null)
 			{
 				// XXX move this to UI thread???
-				approved = adView.adDelegate.getUserApprovalRequestHandler().onAddCalendarEntryEvent(adView);
+				approved = adView.adDelegate.getUserApprovalRequestHandler().onAddCalendarEntryEvent((MASTAdView)adView);
 			}
 			
 			if (approved)
@@ -397,7 +398,7 @@ public class JavascriptInterface
 			if (adView.adDelegate.getUserApprovalRequestHandler() != null)
 			{
 				// XXX move this to UI thread???
-				approved = adView.adDelegate.getUserApprovalRequestHandler().onStorePictureEvent(adView, uri);
+				approved = adView.adDelegate.getUserApprovalRequestHandler().onStorePictureEvent((MASTAdView)adView, uri);
 			}
 			
 			if (approved)
@@ -458,28 +459,6 @@ public class JavascriptInterface
 	//
 	// Support functions
 	//
-	
-	
-	private HashMap<Object, Object> createMapFromList(List<NameValuePair> list)
-	{
-		HashMap<Object, Object> map = new HashMap<Object, Object>();
-		if (list != null)
-		{
-			Iterator<NameValuePair> i = list.iterator();
-			NameValuePair nvp;
-			while (i.hasNext())
-			{
-				nvp = i.next();
-				if ((nvp != null) && (nvp.getName() != null))
-				{
-					System.out.println("createMapFromList: name=" + nvp.getName() + ", value=" + nvp.getValue());
-					map.put(nvp.getName(), nvp.getValue());
-				}
-			}
-		}
-		
-		return map;
-	}
 	
 	
 	// Convert a name value pair list to a name/value data bundle for passing through the handler interface
