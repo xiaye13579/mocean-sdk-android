@@ -8,6 +8,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -18,11 +19,13 @@ public class AdDialogFactory
 {
 	private Context context;
 	private Dialog  dialog;
+	private Handler handler;
 	
 	
 	public AdDialogFactory(Context context)
 	{
 		this.context = context;
+		handler = new Handler();
 	}
 	
 	
@@ -87,15 +90,17 @@ public class AdDialogFactory
 		// Put ad in new container, and use all available space
 		ad.setLayoutParams(createAdLayoutParameters(options));
 		adContainer.addView(ad);
-
+		
+		final Button closeButton;
 		if ((options != null) && (options.noClose != null) && (options.noClose == true))
 		{
 			// skip close setup (for MRAID open method)
+			closeButton = null;
 		}
 		else
 		{
 			// Setup close button
-			Button closeButton = new Button(context);
+			closeButton = new Button(context);
 			
 			// Mraid spec requires min. 50 pixel height and width for close area
 			closeButton.setMinHeight(50);
@@ -117,7 +122,32 @@ public class AdDialogFactory
 				closeButton.setBackgroundColor(Color.TRANSPARENT);
 			}
 			
-			closeButton.setVisibility(View.VISIBLE);
+			if ((options != null) && (options.showCloseDelay != null) && (options.showCloseDelay > 0))
+			{
+				closeButton.setVisibility(View.INVISIBLE);
+				Thread closeThread = new Thread()
+				{
+					public void run()
+					{
+						try { Thread.sleep(options.showCloseDelay * 1000); } catch(Exception e) { }
+						handler.post(new Runnable()
+						{
+							public void run()
+							{
+								closeButton.setVisibility(View.VISIBLE);
+							}
+						});
+					}
+				};
+				closeThread.setName("[AdDialogFactory] showCloseDelay");
+				closeThread.start();
+			}
+			else
+			{
+				closeButton.setVisibility(View.VISIBLE);
+			}
+			
+			
 			closeButton.setLayoutParams(createCloseLayoutParameters(options));
 			
 			adContainer.addView(closeButton);
@@ -164,6 +194,26 @@ public class AdDialogFactory
 			}
 		});		
 
+		if ((options != null) && (options.autoCloseDelay != null) && (options.autoCloseDelay > 0))
+		{
+			Thread closeThread = new Thread()
+			{
+				public void run()
+				{
+					try { Thread.sleep(options.autoCloseDelay * 1000); } catch(Exception e) { }
+					handler.post(new Runnable()
+					{
+						public void run()
+						{
+							closeButton.performClick(); // or dialog.dismiss?
+						}
+					});
+				}
+			};
+			closeThread.setName("[AdDialogFactory] autoCloseDelay");
+			closeThread.start();
+		}
+		
 		return dialog;
 	}
 	
@@ -195,5 +245,7 @@ public class AdDialogFactory
 		Boolean  customClose		= null;
 		Boolean  noClose			= null;
 		//Integer  closeLocation		= null;
+		Integer	 showCloseDelay		= null;
+		Integer  autoCloseDelay		= null;
 	};
 }

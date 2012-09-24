@@ -237,6 +237,46 @@ public class MASTAdView extends AdViewContainer
 
 	
 	/**
+	 * Get current delay (in seconds) after which interstitial ad views will automatically close.
+	 * Default is 0, which means do not close automatically.
+	 */
+	public int getAutoCloseInterstitialTime()
+	{
+		return autoCloseInterstitialTime;
+	}
+	
+	
+	/**
+	 * Set a delay (in seconds) after which interstitial ad views will automatically close.
+	 * Default is 0, which means do not close automatically.
+	 */
+	public void setAutoCloseInterstitialTime(int time)
+	{
+		autoCloseInterstitialTime = time;
+	}
+	
+	
+	/**
+	 * Get current delay (in seconds) before which interstitial ad views will show the close button.
+	 * Default is 0, which means do not delay.
+	 */
+	public int getShowCloseInterstitialTime()
+	{
+		return showCloseInterstitialTime;
+	}
+	
+	
+	/**
+	 * Set a delay (in seconds) before which interstitial ad views will show the close button.
+	 * Default is 0, which means do not delay.
+	 */
+	public void setShowCloseInterstitialTime(int time)
+	{
+		showCloseInterstitialTime = time;
+	}
+	
+	
+	/**
 	 * Set ad placement value which rich media ads can use to determine if they are operating in a banner (inline)
 	 * or interstitial (full screen transitional) context. Use true for interstitial, false for banner. Default is false
 	 * for banner ads.

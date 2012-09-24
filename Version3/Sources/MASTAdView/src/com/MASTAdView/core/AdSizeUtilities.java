@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 
 import com.MASTAdView.MASTAdLog;
 import com.MASTAdView.MASTAdView;
+import com.MASTAdView.core.AdDialogFactory.DialogOptions;
 
 
 public class AdSizeUtilities
@@ -401,12 +402,16 @@ public class AdSizeUtilities
 
 	
 	// Show interstitial ad view
-	public void showInterstitialDialog()
+	public void showInterstitialDialog(int showCloseDelay, int autoCloseDelay)
 	{
 		expandedCallback(metrics.heightPixels, metrics.widthPixels);
 		
 		// create dialog object for showing interstitial ad
-		Dialog dialog = adDialogFactory.createDialog(parentContainer, null);
+		DialogOptions options = new DialogOptions();
+		options.showCloseDelay = showCloseDelay;
+		options.autoCloseDelay = autoCloseDelay;
+		
+		Dialog dialog = adDialogFactory.createDialog(parentContainer, options);
 		dialog.show();
 	}
 

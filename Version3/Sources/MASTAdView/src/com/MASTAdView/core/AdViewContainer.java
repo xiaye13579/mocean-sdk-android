@@ -54,20 +54,19 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	private boolean									isShowPreviousAdOnError = false;
 	
 	private AdSizeUtilities							adSizeUtilities;
-	
 	private MASTAdLog 								adLog = new MASTAdLog(this);
 
 	protected MASTAdRequest							adserverRequest;
 	private String 									lastRequest;
 	private AdData 									lastResponse;
+	private int 									requestCounter = 0;
 	
 	private DisplayMetrics							metrics = null;
-	
 	protected MASTAdDelegate						adDelegate;
 	
 	protected AdReloadTimer							adReloadTimer;
-	
-	private int 									requestCounter = 0;
+	protected int									showCloseInterstitialTime = 0;
+	protected int	 								autoCloseInterstitialTime = 0;
 	
 	private Handler 								handler;
 	
@@ -937,7 +936,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		}
 		
 		// create dialog object for showing interstitial ad
-		adSizeUtilities.showInterstitialDialog();
+		adSizeUtilities.showInterstitialDialog(showCloseInterstitialTime, autoCloseInterstitialTime);
 	}
 	
 	
@@ -1335,6 +1334,30 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	public String getLastResponse()
 	{
 		return lastResponse.responseData;
+	}
+
+	
+	public int getAutoCloseInterstitialTime()
+	{
+		return autoCloseInterstitialTime;
+	}
+	
+	
+	public void setAutoCloseInterstitialTime(int time)
+	{
+		autoCloseInterstitialTime = time;
+	}
+	
+	
+	public int getShowCloseInterstitialTime()
+	{
+		return showCloseInterstitialTime;
+	}
+	
+	
+	public void setShowCloseInterstitialTime(int time)
+	{
+		showCloseInterstitialTime = time;
 	}
 	
 	
