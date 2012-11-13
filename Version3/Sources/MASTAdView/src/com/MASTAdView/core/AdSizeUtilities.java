@@ -16,27 +16,32 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
+import com.MASTAdView.MASTAdConstants;
+import com.MASTAdView.MASTAdDelegate;
 import com.MASTAdView.MASTAdLog;
 import com.MASTAdView.MASTAdView;
 import com.MASTAdView.core.AdDialogFactory.DialogOptions;
 
 
-public class AdSizeUtilities
+final public class AdSizeUtilities
 {
-	private AdViewContainer 						parentContainer;
-	private MASTAdLog 								adLog;
-	private DisplayMetrics							metrics;
+	final private AdViewContainer 					parentContainer;
+	final private MASTAdLog 						adLog;
+	volatile private DisplayMetrics					metrics;
 	
-	private AdWebView 								expandedAdView = null;
+	volatile private AdWebView 						expandedAdView = null;
 	
-	private AdDialogFactory							adDialogFactory;
-	private Context									context;
+	final private AdDialogFactory					adDialogFactory;
+	final private Context							context;
+	
+	private AdClickHandler 							adClickHandler = null;
 	
 	
 	public AdSizeUtilities(AdViewContainer adContainer, DisplayMetrics metrics)
@@ -48,7 +53,9 @@ public class AdSizeUtilities
 		context = adContainer.getContext();
 		
 		// Setup ad dialog factory for interstitial/exapnded/open use
-		adDialogFactory = new AdDialogFactory(context);
+		adDialogFactory = new AdDialogFactory(context, parentContainer);
+		
+		adClickHandler = new AdClickHandler(parentContainer);
 	}
 
 	
@@ -69,6 +76,12 @@ public class AdSizeUtilities
 			DefaultHttpClient client = new DefaultHttpClient();
 			HttpGet get = new HttpGet(url);
 			get.addHeader("Connection","close");
+
+			
+			
+			// XXX set user agent???
+			
+			
 			
 			HttpResponse response = client.execute(get);
 			if(response.getStatusLine().getStatusCode() == 200)
@@ -80,7 +93,7 @@ public class AdSizeUtilities
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "fetchUrl", e.getMessage());
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "fetchUrl", e.getMessage());
 			responseValue.setLength(0);
 		}
 	
@@ -90,17 +103,22 @@ public class AdSizeUtilities
 	
 	private void expandedCallback(int height, int width)
 	{
-		if (parentContainer.adDelegate.getAdActivityEventHandler() != null)
+		MASTAdDelegate delegate = parentContainer.getAdDelegate();
+		if (delegate != null)
 		{
-			parentContainer.adDelegate.getAdActivityEventHandler().onAdExpanded((MASTAdView)parentContainer, height, width);
+			MASTAdDelegate.AdActivityEventHandler activityHandler = delegate.getAdActivityEventHandler();
+			if (activityHandler != null)
+			{
+				activityHandler.onAdExpanded((MASTAdView)parentContainer, height, width);
+			}
 		}
 	}
 	
 	
 	// Display URL in a (non-MRAID) web view after fetching content using background thread
-	public String openInBackgroundThread(final AdDialogFactory.DialogOptions options, final String url)
+	synchronized public String openInBackgroundThread(final AdDialogFactory.DialogOptions options, final String url)
 	{
-		System.out.println("Open, url=" + url);
+		System.out.println("Open, url=" + url); // XXX
 
 		final StringBuffer responseValue = new StringBuffer();
 		
@@ -112,6 +130,9 @@ public class AdSizeUtilities
 				if (responseValue.length() > 0)
 				{
 					// Now that we have the data, get back on UI thread to display it...
+					adClickHandler.openUrlForBrowsing(parentContainer.getContext(), url);
+					
+					/*
 					parentContainer.getHandler().post(new Runnable()
 					{
 						public void run()
@@ -122,9 +143,10 @@ public class AdSizeUtilities
 							
 							//expandedCallback(options.height, options.width);
 							Dialog dialog = adDialogFactory.createDialog(v, options);
-							dialog.show();		
+							dialog.show();	
 						}
 					});
+					*/
 				}
 			}
 		};
@@ -135,8 +157,109 @@ public class AdSizeUtilities
 	}
 
 	
+	synchronized public String startExpand(Bundle data, AdReloadTimer timer)
+	{
+		// Get all expand parameters from data bundle
+		Integer toWidth 		   = null;
+		Integer toHeight 		   = null;
+		Boolean customClose		   = null;
+		//Boolean isModal			   = null; // this is read only, always true per spec
+		Boolean allowReorientation = null;
+		String  forceOrientation   = null;
+		String  url				   = null;
+		try
+		{
+			String value = data.getString(MraidInterface.get_EXPAND_PROPERTIES_name(MraidInterface.EXPAND_PROPERTIES.WIDTH));
+			if (value != null)
+			{
+				toWidth = Integer.parseInt(value);
+			}
+			else
+			{
+				toWidth = metrics.widthPixels;
+			}
+			
+			value = data.getString(MraidInterface.get_EXPAND_PROPERTIES_name(MraidInterface.EXPAND_PROPERTIES.HEIGHT));
+			if (value != null)
+			{
+				toHeight = Integer.parseInt(value);
+			}
+			else
+			{
+				toHeight = metrics.heightPixels;
+			}	
+			
+			value = data.getString(MraidInterface.get_EXPAND_PROPERTIES_name(MraidInterface.EXPAND_PROPERTIES.USE_CUSTOM_CLOSE));
+			if ((value != null) && (value.equalsIgnoreCase("true")))
+			{
+				customClose = true;
+			}
+			else
+			{
+				customClose = false; // default
+			}
+			
+			value = data.getString(MraidInterface.get_ORIENTATION_PROPERTIES_name(MraidInterface.ORIENTATION_PROPERTIES.ALLOW_ORIENTATION_CHANGE));
+			if ((value != null) && (value.equalsIgnoreCase("false")))
+			{
+				allowReorientation = false;
+			}
+			else
+			{
+				allowReorientation = true; // default
+			}
+			
+			forceOrientation = data.getString(MraidInterface.get_ORIENTATION_PROPERTIES_name(MraidInterface.ORIENTATION_PROPERTIES.FORCE_ORIENTATION));
+			if (forceOrientation == null)
+			{
+				forceOrientation = MraidInterface.get_FORCE_ORIENTATION_PROPERTIES_name(MraidInterface.FORCE_ORIENTATION_PROPERTIES.NONE);
+			}
+			
+			url = data.getString(AdMessageHandler.EXPAND_URL);
+		}
+		catch(Exception ex)
+		{
+			return MASTAdConstants.STR_ORMMA_ERROR_EXPAND; // XXX new, more specific error
+		}
+	
+		// Limit expand size to device width/height at most
+		if ((toWidth < 0) || (toWidth > metrics.widthPixels))
+		{
+			toWidth = metrics.widthPixels; 
+		}
+		if ((toHeight < 0) || (toHeight > metrics.heightPixels))
+		{
+			toHeight = metrics.heightPixels;
+		}
+		System.out.println("startExpand: to h/w = " + toHeight + "/" + toWidth);
+
+		// Pass options for dialog through to creator
+		AdDialogFactory.DialogOptions options = new AdDialogFactory.DialogOptions();
+		options.backgroundColor = Color.BLACK; // XXX setting?
+		options.customClose = customClose;
+		options.height = toHeight;
+		options.width = toWidth;
+		
+		timer.stopTimer(false); // stop ad refresh timer		
+		
+		parentContainer.getAdWebView().getMraidInterface().setState(MraidInterface.STATES.EXPANDED);
+		
+		if ((url == null) || (url.length() < 1) || (url.equalsIgnoreCase("undefined")))
+		{
+			// We are using existing ad view / content, safe to do this on UI thread
+			return expandInUIThread(options, allowReorientation, forceOrientation);
+		}
+		else
+		{
+			// Two part creative, need to fetch new data, must use non-UI thread for that;
+			// after data available will call back to finish on ui thread via handler.
+			return expandInBackgroundThread(options, allowReorientation, forceOrientation, url);
+		}	
+	}
+	
+	
 	// MRAID expand for one-part creative where we use existing ad web view / content (so all done in UI thread)
-	public String expandInUIThread(AdDialogFactory.DialogOptions options, boolean allowReorientation, String forceOrientation)
+	private String expandInUIThread(AdDialogFactory.DialogOptions options, boolean allowReorientation, String forceOrientation)
 	{	
 		expandedCallback(options.height, options.width);
 		
@@ -172,7 +295,7 @@ public class AdSizeUtilities
 	
 	
 	// MRAID expand for two-part creative; fetch content from URL and display in new (MRAID) ad web view
-	public String expandInBackgroundThread(final AdDialogFactory.DialogOptions options, final boolean allowReorientation, final String forceOrientation, final String url)
+	private String expandInBackgroundThread(final AdDialogFactory.DialogOptions options, final boolean allowReorientation, final String forceOrientation, final String url)
 	{
 		/*boolean dontLoad = false;
 		if (URL == null || URL.equals("undefined")) {
@@ -308,10 +431,81 @@ public class AdSizeUtilities
 	}
 	
 	
-	// Move ad web view to new / larger contain in front of app content, and display
-	public String resizeWorker(int toWidth, int toHeight, String closePosition, int offsetX, int offsetY, boolean allowOffScreen)
+	synchronized public String startResize(Bundle data)
 	{
-		String invalidMessage = resizePropertiesValid(toWidth, toHeight, closePosition, offsetX, offsetY, allowOffScreen);
+		// Get all resize parameters from data bundle
+		Integer toWidth 		= null;
+		Integer toHeight 		= null;
+		String  closePosition 	= null;
+		Integer offsetX 		= null;
+		Integer offsetY 		= null;
+		Boolean offScreen 		= null;
+		try
+		{
+			String value = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.WIDTH));
+			if (value != null)
+			{
+				toWidth = Integer.parseInt(value);
+			}
+			else
+			{
+				return MASTAdConstants.STR_ORMMA_ERROR_RESIZE; // XXX new, more specific error for missing width
+			}
+			
+			value = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.HEIGHT));
+			if (value != null)
+			{
+				toHeight = Integer.parseInt(value);
+			}
+			else
+			{
+				return MASTAdConstants.STR_ORMMA_ERROR_RESIZE; // XXX new, more specific error for missing height
+			}	
+				
+			closePosition = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.CUSTOM_CLOSE_POSITION));
+			if (closePosition == null)
+			{
+				closePosition = MraidInterface.get_RESIZE_CUSTOM_CLOSE_POSITION_name(MraidInterface.RESIZE_CUSTOM_CLOSE_POSITION.TOP_RIGHT);
+			}
+			
+			value = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.OFFSET_X));
+			if (value != null)
+			{
+				offsetX = Integer.parseInt(value);
+			}
+			else
+			{
+				offsetX = 0;
+			}
+			
+			value = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.OFFSET_Y));
+			if (value != null)
+			{
+				offsetY = Integer.parseInt(value);
+			}
+			else
+			{
+				offsetY = 0;
+			}
+			
+			value = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.ALLOW_OFF_SCREEN));
+			if ((value != null) && (value.equalsIgnoreCase("false")))
+			{
+				// reposition view if part will go off screen
+				offScreen = false;
+			}
+			else
+			{
+				// do nothing even if part of view will be off screen (default)
+				offScreen = true;
+			}
+		}
+		catch(Exception ex)
+		{
+			return MASTAdConstants.STR_ORMMA_ERROR_RESIZE; // XXX new, more specific error
+		}
+	
+		String invalidMessage = resizePropertiesValid(toWidth, toHeight, closePosition, offsetX, offsetY, offScreen);
 		if (invalidMessage != null)
 		{
 			System.out.println(invalidMessage);
@@ -322,6 +516,13 @@ public class AdSizeUtilities
 			System.out.println("resize validated: h/w = " + toHeight + "/" + toWidth);
 		}
 		
+		return resizeWorker(toWidth, toHeight, closePosition, offsetX, offsetY, offScreen);
+	}
+	
+	
+	// Move ad web view to new / larger contain in front of app content, and display
+	private String resizeWorker(int toWidth, int toHeight, String closePosition, int offsetX, int offsetY, boolean allowOffScreen)
+	{
 		AdWebView adWebView = parentContainer.getAdWebView();
 		adWebView.setLayoutParams(createResizeAdLayoutParameters(toWidth, toHeight));
 		
@@ -395,14 +596,22 @@ public class AdSizeUtilities
 		adWebView.getMraidInterface().fireSizeChangeEvent(toWidth, toHeight);
 		adWebView.getMraidInterface().setState(MraidInterface.STATES.RESIZED);
 	
-		expandedCallback(toHeight, toWidth);
+		MASTAdDelegate delegate = parentContainer.getAdDelegate();
+		if (delegate != null)
+		{
+			MASTAdDelegate.AdActivityEventHandler activityHandler = delegate.getAdActivityEventHandler();
+			if (activityHandler != null)
+			{
+				activityHandler.onAdResized((MASTAdView)parentContainer, toHeight, toWidth);
+			}
+		}
 		
 		return null;
 	}
 
 	
 	// Show interstitial ad view
-	public void showInterstitialDialog(int showCloseDelay, int autoCloseDelay)
+	synchronized public void showInterstitialDialog(int showCloseDelay, int autoCloseDelay)
 	{
 		expandedCallback(metrics.heightPixels, metrics.widthPixels);
 		
@@ -417,16 +626,21 @@ public class AdSizeUtilities
 
 	
 	// Dismiss dialog created via open/expand/show
-	public void dismissDialog()
+	synchronized public void dismissDialog()
 	{
 		Dialog d = adDialogFactory.getDialog();
 		if (d != null)
 		{
 			d.dismiss();
 			
-			if (parentContainer.adDelegate.getAdActivityEventHandler() != null)
+			MASTAdDelegate delegate = parentContainer.getAdDelegate();
+			if (delegate != null)
 			{
-				parentContainer.adDelegate.getAdActivityEventHandler().onAdClosed((MASTAdView)parentContainer);
+				MASTAdDelegate.AdActivityEventHandler eventHandler = delegate.getAdActivityEventHandler();
+				if (eventHandler != null)
+				{
+					eventHandler.onAdCollapsed((MASTAdView)parentContainer);
+				}
 			}
 		}	
 	}
@@ -506,13 +720,13 @@ public class AdSizeUtilities
 	}
 	
 	
-	public AdWebView getExpandedAdView()
+	synchronized public AdWebView getExpandedAdView()
 	{
 		return expandedAdView;
 	}
 	
 	
-	public void clearExpandedAdView()
+	synchronized public void clearExpandedAdView()
 	{
 		expandedAdView = null;
 	}

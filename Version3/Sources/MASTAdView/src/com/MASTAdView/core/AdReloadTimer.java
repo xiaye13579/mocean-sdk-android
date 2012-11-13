@@ -12,10 +12,10 @@ import com.MASTAdView.MASTAdConstants;
 import com.MASTAdView.MASTAdLog;
 
 
-public class AdReloadTimer
+final public class AdReloadTimer
 {
-	private AdViewContainer adContainer;
-	private MASTAdLog adLog;
+	final private AdViewContainer adContainer;
+	final private MASTAdLog adLog;
 	
 	private int adReloadPeriod = MASTAdConstants.AD_RELOAD_PERIOD;
 	
@@ -64,31 +64,31 @@ public class AdReloadTimer
 				@Override
 				public void run()
 				{
-					adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "AdReloadTimer", "refresh from timer task");
+					adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdReloadTimer", "refresh from timer task");
 					adContainer.StartLoadContent(); // trigger reload of existing site/zone
 				}
 			};
 			
 			if (adReloadPeriod > 0) 
 			{
-				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "AdReloadTimer - start: ", String.valueOf(adReloadPeriod/1000));					
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdReloadTimer - start: ", String.valueOf(adReloadPeriod/1000));					
 				reloadTimer.schedule(newReloadTask, adReloadPeriod);
 			}
 			else if (adReloadPeriod < 0)
 			{
 				reloadTimer.schedule(newReloadTask, MASTAdConstants.AD_RELOAD_PERIOD);
-				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "AdReloadTimer", String.valueOf(MASTAdConstants.AD_RELOAD_PERIOD/1000)+" default");
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdReloadTimer", String.valueOf(MASTAdConstants.AD_RELOAD_PERIOD/1000)+" default");
 			}
 			else
 			{
-				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "AdReloadTimer", "stopped");
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdReloadTimer", "stopped");
 			}
 			
 			reloadTask = newReloadTask; 
 		}
 		catch (Exception e)
 		{
-			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, "AdReloadTimer", e.getMessage());
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdReloadTimer", e.getMessage());
 		}
 	}
 	
@@ -99,7 +99,7 @@ public class AdReloadTimer
 		{
 			try
 			{
-				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "AdReloadTimer", "timer stopped");
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdReloadTimer", "timer stopped");
 				reloadTimer.cancel();
 				if (remove)
 				{
@@ -108,7 +108,7 @@ public class AdReloadTimer
 			}
 			catch (Exception e)
 			{
-				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "AdReloadTimer", e.getMessage());				
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "AdReloadTimer", e.getMessage());				
 			}
 		}
 	}
@@ -118,7 +118,7 @@ public class AdReloadTimer
 	{
 		if (reloadTask != null)
 		{
-			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "AdReloadTimer", "timer task cancelled");
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdReloadTimer", "timer task cancelled");
 			reloadTask.cancel();
 			reloadTask = null;
 		}

@@ -27,22 +27,25 @@ import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 
 import com.MASTAdView.MASTAdConstants;
+import com.MASTAdView.MASTAdDelegate;
+import com.MASTAdView.MASTAdLog;
+import com.MASTAdView.MASTAdView;
 
-public class ContentManager
+final public class ContentManager
 {
 	private static final String INSTALLATION = "INSTALLATION";
-	private String autoDetectParameters = "";
+	private volatile String autoDetectParameters = "";
 	private String userAgent = "";
 	private static ContentManager instance;
 	private static boolean isSimAvailable;
-	private HashMap<ContentConsumer, ContentParameters> senderParameters = new HashMap<ContentConsumer, ContentParameters>();
+	final private HashMap<ContentConsumer, ContentParameters> senderParameters = new HashMap<ContentConsumer, ContentParameters>();
 	private String id = null;
 	private boolean useSystemDeviceId = false;
-	private Context context;
-	private AdParser parser = new AdParser();
+	final private Context context;
+	final private AdParser parser;
 
 	
-	static public ContentManager getInstance(ContentConsumer consumer)
+	synchronized static public ContentManager getInstance(ContentConsumer consumer)
 	{
 		if (instance == null)
 			instance = new ContentManager(consumer);
@@ -56,16 +59,17 @@ public class ContentManager
 	{
 		public String getUserAgent();
 		public Context getContext();
+		public boolean prefetchImages();
 		public boolean setResult(AdData ad);
 	}
 	
 	
-	//private ContentManager(WebView webView) {
 	private ContentManager(ContentConsumer consumer)
 	{
 		userAgent = consumer.getUserAgent();
 		this.context = consumer.getContext().getApplicationContext();
 		runInitDefaultParameters();
+		parser = new AdParser(consumer.prefetchImages());
 	}
 
 	
@@ -87,11 +91,6 @@ public class ContentManager
 		return autoDetectParameters;
 	}
 	
-	
-	public String getUserAgent() {
-		return userAgent;
-	}
-
 	
 	public static boolean isSimAvailable()
 	{
@@ -130,7 +129,7 @@ public class ContentManager
 	}
 	
 	
-	private class ContentParameters
+	final private class ContentParameters
 	{
 		public String url;
 		public ContentConsumer sender;
@@ -138,9 +137,9 @@ public class ContentManager
 	};
 
 	
-	private class ContentThread extends Thread
+	final private class ContentThread extends Thread
 	{
-		ContentParameters parameters;
+		final ContentParameters parameters;
 		boolean isCanceled = false;
 		
 		public ContentThread(ContentParameters parameters)
@@ -198,7 +197,7 @@ public class ContentManager
 				HttpConnectionParams.setSoTimeout(get.getParams(), MASTAdConstants.DEFAULT_REQUEST_TIMEOUT);				
 				HttpResponse response = client.execute(get);
 				
-				if(response.getStatusLine().getStatusCode()!=200)
+				if (response.getStatusLine().getStatusCode()!=200)
 				{
 					setErrorResult("Response code = "+String.valueOf(response.getStatusLine().getStatusCode()));
 					stopLoadContent(parameters.sender);
@@ -210,7 +209,7 @@ public class ContentManager
 				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, 1024);				
 				String responseValue="";
 				
-				if(!isCanceled)
+				if (!isCanceled)
 				{
 					responseValue = readInputStream(bufferedInputStream);
 				}
@@ -218,7 +217,6 @@ public class ContentManager
 				bufferedInputStream.close();
 				inputStream.close();
 				
-				//AdParser parser = new AdParser();
 				AdData ad = parser.parseAdData(responseValue);
 				if (isCanceled)
 				{
@@ -249,6 +247,9 @@ public class ContentManager
 		
 		private void setErrorResult(String message)
 		{
+			MASTAdLog logger = new MASTAdLog(null);
+			logger.log(MASTAdLog.LOG_LEVEL_ERROR, "ContentManager", message);
+			
 			if (parameters.sender != null)
 			{
 				AdData error = new AdData();
@@ -285,7 +286,7 @@ public class ContentManager
 	
 	// Return user-specified device ID value if any, otherwise unique device ID from
 	// phone if that option has been enabled.
-	private String getDeviceId(TelephonyManager tm)
+	synchronized private String getDeviceId(TelephonyManager tm)
 	{
 		if (id != null)
 		{
@@ -347,29 +348,30 @@ public class ContentManager
     	ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
     	NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
     	
-		if(networkInfo != null) {
+		if (networkInfo != null) {
 			int type = networkInfo.getType();
 			int subtype = networkInfo.getSubtype();
 			
 			//0 - low (gprs, edge), 1 - fast (3g, wifi)
-			if(type == ConnectivityManager.TYPE_WIFI) {
+			if (type == ConnectivityManager.TYPE_WIFI) {
 				connectionSpeed = 1;
-			} else if(type == ConnectivityManager.TYPE_MOBILE) {
-				if(subtype == TelephonyManager.NETWORK_TYPE_EDGE) {
+			} else if (type == ConnectivityManager.TYPE_MOBILE) {
+				if (subtype == TelephonyManager.NETWORK_TYPE_EDGE) {
 					connectionSpeed = 0;
-				} else if(subtype == TelephonyManager.NETWORK_TYPE_GPRS) {
+				} else if (subtype == TelephonyManager.NETWORK_TYPE_GPRS) {
 					connectionSpeed = 0;
-				} else if(subtype == TelephonyManager.NETWORK_TYPE_UMTS) {
+				} else if (subtype == TelephonyManager.NETWORK_TYPE_UMTS) {
 					connectionSpeed = 1;
 				}
 			}
 		}
 		
-		if(connectionSpeed != null) {
+		if (connectionSpeed != null) {
 			autoDetectParameters += "&connection_speed="+connectionSpeed.toString();
 		}
 	}
 
+	
 	private synchronized String makeDeviceId(Context context) {
 		if (id == null) {
 			File installation = new File(context.getFilesDir(), INSTALLATION);
@@ -386,13 +388,13 @@ public class ContentManager
 	}
 
 	
-	public boolean getUseSystemDeviceId()
+	synchronized public boolean getUseSystemDeviceId()
 	{
 		return useSystemDeviceId;
 	}
 	
 	
-	public void setUseSystemDeviceId(boolean value)
+	synchronized public void setUseSystemDeviceId(boolean value)
 	{
 		boolean changed = false;
 		if (useSystemDeviceId != value)
@@ -408,7 +410,7 @@ public class ContentManager
 	}
 	
 	
-	public void setDeviceId(String value)
+	synchronized public void setDeviceId(String value)
 	{
 		boolean changed = false;
 		if ((id != null) && (id.compareTo(value) != 0))

@@ -14,6 +14,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -31,6 +33,7 @@ import android.widget.TextView;
 
 import com.MASTAdView.MASTAdConstants;
 import com.MASTAdView.MASTAdDelegate;
+import com.MASTAdView.MASTAdDelegate.RichmediaEventHandler;
 import com.MASTAdView.MASTAdLog;
 import com.MASTAdView.MASTAdRequest;
 import com.MASTAdView.MASTAdView;
@@ -41,12 +44,14 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	private Context 								context;
 	
 	private TextView								adTextView;
-	private ImageView								adImageView;
+	//private ImageView								adImageView;
+	private View									adImageView;
 	private AdWebView								adWebView;
 	
 	private Button									bannerCloseButton = null;
+	private Button									customCloseButton = null;
 
-	//private Bitmap 									defaultImage = null;
+	private Integer 								defaultImageResource = null;
 	private int 									defaltBackgroundColor = Color.TRANSPARENT;
 	private int										defaultTextColor = Color.BLACK;
 
@@ -54,19 +59,18 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	private boolean									isShowPreviousAdOnError = false;
 	
 	private AdSizeUtilities							adSizeUtilities;
-	private MASTAdLog 								adLog = new MASTAdLog(this);
+	final private MASTAdLog 						adLog = new MASTAdLog(this);
 
-	protected MASTAdRequest							adserverRequest;
+	private MASTAdRequest							adserverRequest;
 	private String 									lastRequest;
 	private AdData 									lastResponse;
 	private int 									requestCounter = 0;
 	
 	private DisplayMetrics							metrics = null;
-	protected MASTAdDelegate						adDelegate;
+	private MASTAdDelegate							adDelegate;
 	
-	protected AdReloadTimer							adReloadTimer;
-	protected int									showCloseInterstitialTime = 0;
-	protected int	 								autoCloseInterstitialTime = 0;
+	private AdReloadTimer							adReloadTimer;
+	private int										showCloseInterstitialTime = 0;
 	
 	private Handler 								handler;
 	
@@ -74,13 +78,13 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	private AdLocationListener						locationListener = null;
 	
 	// Local notion of placement type, partically duplicating the mraid interface value, needed for non-mraid ads
-	protected MraidInterface.PLACEMENT_TYPES		adPlacementType = MraidInterface.PLACEMENT_TYPES.INLINE;
+	private MraidInterface.PLACEMENT_TYPES			adPlacementType = MraidInterface.PLACEMENT_TYPES.INLINE;
 	
 	// Reference to self
 	private AdViewContainer							self;
 	
 	// Use internal browser or standalone browser?
-	//private boolean 								internalBrowser = false;
+	private boolean 								useInternalBrowser = false;
 	
 	
 	//
@@ -123,8 +127,17 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		
 		initialize(context);
 		
-		LayoutAttributeHandler layoutHandler = new LayoutAttributeHandler(context, this);
+		LayoutAttributeHandler layoutHandler = new LayoutAttributeHandler(this);
 		layoutHandler.processAttributes(attrs);
+
+		// For layout based views, peform an implicit update() as long as site and zone
+		// are set, so that user doesn't need to get a code reference to the veiw just
+		// to start an update.
+		if ((adserverRequest.getProperty(MASTAdRequest.parameter_site) != null) &&
+			(adserverRequest.getProperty(MASTAdRequest.parameter_zone) != null))
+		{
+			update();
+		}
 	}
 
 	
@@ -134,8 +147,17 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		
 		initialize(context);
 		
-		LayoutAttributeHandler layoutHandler = new LayoutAttributeHandler(context, this);
+		LayoutAttributeHandler layoutHandler = new LayoutAttributeHandler(this);
 		layoutHandler.processAttributes(attrs);
+
+		// For layout based views, peform an implicit update() as long as site and zone
+		// are set, so that user doesn't need to get a code reference to the veiw just
+		// to start an update.
+		if ((adserverRequest.getProperty(MASTAdRequest.parameter_site) != null) &&
+			(adserverRequest.getProperty(MASTAdRequest.parameter_zone) != null))
+		{
+			update();
+		}	
 	}
 
 	
@@ -152,6 +174,8 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	//
 	
 	
+	// Common initialization for various constructors; creates ad request object, handler, orientation
+	// listeners, display metrics, ad size helper, delegates, and views.
 	private void initialize(Context c)
 	{
 		context = c;
@@ -178,7 +202,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		
 		// Create views for each ad type
 		adTextView = createTextView(context);
-		adImageView = createImageView(context);
+		adImageView = createImageView(context, true); // create view with gif animation support
 		adWebView = createWebView(context);
 		
 		// Setup auto parameters (such as user agent, etc.)
@@ -197,6 +221,39 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 	
 	
+	public void reset()
+	{
+		// Reset all to initial state
+		removeAllViews();
+
+		// Try to recycle bitmap memory
+		if (adImageView instanceof ImageView)
+		{
+			freeBitmapImageviewResouces((ImageView)adImageView);
+		}
+		
+		bannerCloseButton = null;
+		customCloseButton = null;
+		
+		// If listening for location updates, stop
+		if (locationListener != null)
+		{
+			locationListener.stop();
+			locationListener = null;
+		}
+		
+		defaultImageResource = null;
+		
+		defaltBackgroundColor = Color.TRANSPARENT;
+		defaultTextColor = Color.BLACK;
+
+		isShowCloseOnBanner = false;
+		isShowPreviousAdOnError = false;
+
+		adserverRequest.reset();
+	}
+	
+	
 	private TextView createTextView(Context context)
 	{
 		TextView v = new TextView(context);
@@ -208,51 +265,42 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		v.setBackgroundColor(defaltBackgroundColor);
 		v.setTextColor(defaultTextColor);
 		
-		// Initially start off with view being invisible
-		//v.setVisibility(View.GONE);
-		
 		return v;
 	}
 
 	
-	private ImageView createImageView(Context context)
+	private View createImageView(Context context, boolean withAnimataedGifSupport)
 	{
-		ImageView v = new ImageView(context);
-		
-		// Child will fill the parent container; we manage the size at the parent level
-		v.setLayoutParams(new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		View v;
+		if (withAnimataedGifSupport)
+		{
+			boolean handleClicks = true;
+			v = new AdImageView(this, adLog, metrics, handleClicks);
+			v.setLayoutParams(createAdLayoutParameters());
+		}
+		else
+		{
+			v = new ImageView(context);
+			
+			// Child will fill the parent container; we manage the size at the parent level
+			v.setLayoutParams(new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		}
 		
 		// apply standard properties
 		v.setBackgroundColor(defaltBackgroundColor);
-				
-		// Initially start off with view being invisible
-		//v.setVisibility(View.GONE);
 		
 		return v;
 	}
 	
 	
-	public AdWebView createWebView(Context context)
+	public AdWebView createWebView(final Context context)
 	{
-		AdWebView v = new AdWebView(this, adLog, metrics, true);
-	
-		//ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-		/*
-		// XXX handle margin differently for relative layout container???
-		ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT); 
-		lp.leftMargin = 0;
-		lp.topMargin = 0;
-		*/
-		v.setLayoutParams(createAdLayoutParameters());
-		
+		boolean supportMraid = true;
+		boolean handleClicks = true;
+		AdWebView v = new AdWebView(this, adLog, metrics, supportMraid, handleClicks);
+
+		v.setLayoutParams(createAdLayoutParameters());		
 		v.setBackgroundColor(defaltBackgroundColor);
-				
-		// Initially start off with view being invisible
-		//v.setVisibility(View.GONE);
-		
-		// Pre-load header (empty body) with ormma / mraid javascrpt code
-		//String dataOut = setupViewport(true, null);
-		//v.loadDataWithBaseURL(null, dataOut, "text/html", "UTF-8", null);
 				
 		return v;
 	}
@@ -273,7 +321,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 	
 	
-	public ImageView getAdImageView()
+	public View getAdImageView()
 	{
 		return adImageView;
 	}
@@ -284,7 +332,21 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		return adTextView;
 	}
 	
-
+	
+	public boolean prefetchImages()
+	{
+		// If using an imageview for images, standalone fetch is required,
+		// but if using a webview variation (for animated gif support), no.
+		if (adImageView instanceof ImageView)
+		{
+			return true;
+		}
+		
+		return false;
+	}
+	
+	
+	// remove and leave logic in ad server request
 	public String getUserAgent()
 	{
 		String userAgent = (String)adserverRequest.getProperty(MASTAdRequest.parameter_userAgent);
@@ -327,7 +389,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	@Override
 	public void setLayoutParams(ViewGroup.LayoutParams params)
 	{
-		System.out.println("SetLayoutParams: " + params.toString());
+		//System.out.println("SetLayoutParams: " + params.toString());
 		
 		setVisibility(View.VISIBLE);
 		
@@ -337,89 +399,57 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		super.setLayoutParams(params);
 	}
 
-	
-	/*
-	@Override
-	public void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-	{
-		// If ad view has a specified width, use it, otherwise use the value passed in
-		int width = widthMeasureSpec;
-		//if ((layoutWidth >= 0) && (layoutWidth <= metrics.widthPixels))
-		if (adserverRequest != null)
-		{
-			int maxWidth = adserverRequest.getProperty(MASTAdRequest.parameter_size_x, -1);
-			if (maxWidth >= 0)
-			{
-				width = maxWidth;
-			}
-		}
-		else if (layoutWidth >= 0) 
-		{
-			width = layoutWidth;
-		}
 
-		
-		// If ad view has a specified height, use it, otherwise use the value passed in
-		int height = heightMeasureSpec;
-		//if ((layoutHeight >= 0) && (layoutHeight <= metrics.heightPixels))
-		if (adserverRequest != null)
-		{
-			int maxHeight = adserverRequest.getProperty(MASTAdRequest.parameter_size_y, -1);
-			if (maxHeight >= 0)
-			{
-				height = maxHeight;
-			}
-		}
-		else if (layoutHeight >= 0)
-		{
-			height = layoutHeight;
-		}
-		
-		// Report measured size
-		setMeasuredDimension(width, height);
-	}
-	*/
-	
+	// view being notified of a size change (rotation?)
+	protected void onSizeChanged(int w, int h, int ow, int oh)
+	{
+		adWebView.getMraidInterface().fireSizeChangeEvent(w, h);
+        super.onSizeChanged(w, h, ow, oh);
+    }
+
 	
 	//
 	// Content loaders; NOTE - must call these from a UI thread!!
 	//
 	
 	
-	private void setTextContent(String textData)
+	private void setTextContent(AdData ad)
 	{
 		addView(adTextView);
-		adTextView.setText(textData);
+		adTextView.setText(ad.text);
 		adTextView.setVisibility(View.VISIBLE);
-
+		
+		if (ad.clickUrl != null)
+		{
+			AdClickHandler clickHandler = new AdClickHandler(this, ad);
+			adTextView.setOnClickListener(clickHandler);
+		}
+		
 		//mViewState = Mraid.STATES.DEFAULT;
 		
 		//setBackgroundColor(Color.BLACK);
 	}
 	
 	
-	/*
-	private void setImageContent(String imageData)
-	{
-		// XXX decode data ???
-		//setImageContent(...);
-	}
-	*/
-	
-	
-	/*
-	private void setImageContent(Uri imageuri)
-	{
-		// XXX fetch image data
-		// setImageContent(bitmap);
-	}
-	 */
-	
-	
-	private void setImageContent(Bitmap imageData)
+	private void setImageContent(AdData ad)
 	{
 		addView(adImageView);
-		adImageView.setImageBitmap(imageData);
+		
+		if (adImageView instanceof ImageView)
+		{
+			((ImageView)adImageView).setImageBitmap(ad.imageBitmap);
+			
+			if (ad.clickUrl != null)
+			{
+				AdClickHandler clickHandler = new AdClickHandler(this, ad);
+				adImageView.setOnClickListener(clickHandler);
+			}
+		}
+		else
+		{
+			((AdImageView)adImageView).setImage(ad);
+		}
+		
 		adImageView.setVisibility(View.VISIBLE);
 		
 		//mViewState = Mraid.STATES.DEFAULT;
@@ -428,33 +458,11 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 	
 	
-	/*
-	private void setImageContent(int color)
-	{
-		imageView.setBackgroundColor(color);
-		imageView.setVisibility(View.VISIBLE);
-		
-		// If image content, hide other views
-		textView.setVisibility(View.GONE);
-		webView.setVisibility(View.GONE);
-	}
-	*/
-	
-	
 	private void setWebContent(String webData)
 	{	
 		// If state is not loading, set that before continuing
 		if (adWebView.getMraidInterface().getState() != MraidInterface.STATES.LOADING)
 		{
-			/*
-			// Recreate web view to start fresh for new ad XXX DONT WANT TO DO THIS!!!
-			if (adWebView.getParent() != null)
-			{
-				((ViewGroup)adWebView.getParent()).removeView(adWebView);
-			}
-			adWebView.destroy();
-			adWebView = createWebView(context);
-			*/
 			adWebView.resetForNewAd();
 		}
 				
@@ -464,14 +472,15 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		
 		//webData = "<HTML><HEAD><TITLE>Testing...</TITLE></HEAD><BODY><H1>Testing document...</H1></BODY></HTML>";
 		String dataOut = setupViewport(false, webData);
-		System.out.println("setWebContent: injecting: " + dataOut);
+		//System.out.println("setWebContent: injecting: " + dataOut);
 		
 		
 		adWebView.loadDataWithBaseURL(null, webData, "text/html", "UTF-8", null);
 	}
 	
 	
-	synchronized public void setAdContent(AdData ad)
+	// Display ad content in appropriate view based on ad type
+	synchronized private void setAdContent(AdData ad)
 	{
 		if (ad == null)
 		{
@@ -479,20 +488,35 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		}
 			
 		removeAllViews();
-		if (isShowCloseOnBanner && (bannerCloseButton != null))
+		
+		if (ad.adType != MASTAdConstants.AD_TYPE_IMAGE)
+		{
+			// Try to recycle bitmap memory
+			if (adImageView instanceof ImageView)
+			{
+				freeBitmapImageviewResouces((ImageView)adImageView);
+			}
+		}
+		
+		if (isShowCloseOnBanner)
 		{
 			// put close button back if requested
-			addView(bannerCloseButton);	
+			if  (bannerCloseButton != null)
+			{
+				addView(bannerCloseButton);
+			}
+			
+			showCloseButtonWorker();
 		}
 		
 		if (ad.adType == MASTAdConstants.AD_TYPE_TEXT)
 		{
-			setTextContent(ad.text);
+			setTextContent(ad);
 			sendTrackingImpression(ad);
 		}
 		else if (ad.adType == MASTAdConstants.AD_TYPE_IMAGE)
 		{
-			setImageContent(ad.imageBitmap);
+			setImageContent(ad);
 			sendTrackingImpression(ad);
 		}
 		else // RICHMEDIA or THIRDPARTY (which uses rich media)
@@ -503,6 +527,56 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		//adViewState = MraidInterface.STATES.DEFAULT; already done in ad web view???
 	}
 	
+	
+	private void freeBitmapImageviewResouces(ImageView view)
+    {
+    	//System.out.println("Free image view resources...");
+    	
+    	// Do everything possible to free up memory associated with the ad image;
+		// this can be important because android allocates and handles bitmap memory
+		// differently from application memory, and if you run out your app will crash
+		// with no way chance to resolve it.
+    	if (view != null)
+    	{
+    		Bitmap bm;
+    		Drawable d;
+    		
+    		d = (Drawable)view.getBackground();
+    		if (d != null)
+    		{
+    			d.setCallback(null);
+    			if (d instanceof BitmapDrawable)
+    			{
+    				bm = ((BitmapDrawable)d).getBitmap();
+    				view.setBackgroundDrawable(null);
+    				bm.recycle();
+    				bm = null;
+    			}
+    			else
+    			{
+    				view.setBackgroundDrawable(null);
+    			}
+    		}
+    		
+    		d = (BitmapDrawable)view.getDrawable();
+    		if (d != null)
+    		{
+    			d.setCallback(null);
+    			if (d instanceof BitmapDrawable)
+    			{
+    				bm = ((BitmapDrawable)d).getBitmap();
+    				view.setImageDrawable(null);
+    				bm.recycle();
+    				bm = null;
+    			}
+    			else
+    			{
+    				view.setImageDrawable(null);
+    			}
+    		}
+    	}
+    }
+    
 	
 	private void sendTrackingImpression(AdData ad)
 	{
@@ -544,7 +618,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	{
 		//update(true);
 		
-		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "update", "");
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "update", "");
 		StartLoadContent();
 	}
 	
@@ -554,7 +628,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	{
 		if (isShown() || isManual) 
 		{
-			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "update", "");
+			adLog.log(MASTAdLog.LOG_LEVEL_ALL, MASTAdLog.LOG_TYPE_INFO, "update", "");
 			if (isManual) IsManualUpdate = true;
 			//hideVirtualKeyboard();
 			StartLoadContent();
@@ -571,7 +645,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	 */
 	public void setUpdateTime(int updateTime)
 	{
-		adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_INFO, "setUpdateTime", String.valueOf(updateTime));
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "setUpdateTime", String.valueOf(updateTime));
 		adReloadTimer.setAdReloadPeriod(updateTime);
 	}
 
@@ -581,12 +655,12 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	//
 
 	
-	//private void StartLoadContent(Context context, AdViewContainer view)
+	// start loading an ad from server
 	public void StartLoadContent()
 	{
 		adReloadTimer.cancelTask();
 		
-		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "StartLoadContent", "");
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "StartLoadContent", "");
 		
 		// have to have a valid site & zone to request content 
 		if ((adserverRequest == null) ||
@@ -594,21 +668,21 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		    (adserverRequest.getProperty(MASTAdRequest.parameter_zone, 0) == 0))
 		{
 			adReloadTimer.startTimer();
-			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_WARNING, "StartLoadContent", "site=0 or zone=0");
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "StartLoadContent", "site=0 or zone=0");
 			return;
 		}
 		
-		
-		/*
-		if ((defaultImageResource!=null) && (getBackground()==null))
+		if ((defaultImageResource != null) && (getBackground() == null))
 		{
-			try {
-				handler.post(new SetBackgroundResourceAction(view, defaultImageResource));
-			} catch (Exception e) {
-				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
+			try
+			{
+				handler.post(new SetBackgroundResourceAction(defaultImageResource));
+			} 
+			catch (Exception e)
+			{
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "StartLoadContent", e.getMessage());
 			}
 		}
-		*/
 	
 		// If expanded form of ad is being displayed, we don't load new content
 		if (adWebView.getMraidInterface().getState() != MraidInterface.STATES.EXPANDED)
@@ -621,39 +695,60 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 					adWebView.getMraidInterface().setState(MraidInterface.STATES.DEFAULT);
 				}
 
-				// if delegate defined, invoke 
-				if (adDelegate.getAdDownloadHandler() != null)
+				// if delegate defined, invoke
+				if (adDelegate != null)
 				{
-					adDelegate.getAdDownloadHandler().onDownloadBegin((MASTAdView)this);
+					MASTAdDelegate.AdDownloadEventHandler downloadHandler = adDelegate.getAdDownloadHandler(); 
+					if (downloadHandler != null)
+					{
+						downloadHandler.onDownloadBegin((MASTAdView)this);
+					}
 				}
 				
 				String url = adserverRequest.toString(MASTAdConstants.AD_REQUEST_TYPE_XML);
 				lastRequest = url;
 				requestCounter++;
-				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "requestGet["+String.valueOf(requestCounter)+"]" , url);
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "requestGet["+String.valueOf(requestCounter)+"]" , url);
 				ContentManager.getInstance(this).startLoadContent(this, url);
 			}
 			catch (Exception e)
 			{
-				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "StartLoadContent.requestGet", e.getMessage());
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "StartLoadContent.requestGet", e.getMessage());
 				//interceptOnAdDownload.error(this, e.getMessage());
 				
-				// XXX start timer?
+				// start timer?
 			}
 		}
 	}
 
 
+	// Invoked when retreiving an ad fails
 	private void setErrorResult(AdData ad)
 	{
-		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, "requestGet result["+String.valueOf(requestCounter)+"][ERROR]", ad.error);
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "requestGet result["+String.valueOf(requestCounter)+"][ERROR]", ad.error);
 
-		if (adDelegate.getAdDownloadHandler() != null)
+		if (adDelegate != null)
 		{
-			adDelegate.getAdDownloadHandler().onDownloadError((MASTAdView)this, ad.error);
+			MASTAdDelegate.AdDownloadEventHandler downloadHandler = adDelegate.getAdDownloadHandler(); 
+			if (downloadHandler != null)
+			{
+				downloadHandler.onDownloadError((MASTAdView)this, ad.error);
+			}
 		}
 		
 		adReloadTimer.startTimer();
+
+		if (defaultImageResource != null)
+		{
+			try
+			{
+				handler.post(new SetBackgroundResourceAction(defaultImageResource));
+			}
+			catch (Exception e)
+			{
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "setErrorResult", e.getMessage());
+			}
+		}
 		
 		// If supposed to show previous ad on error, but no previous content, skip out
 		if ((lastResponse !=null) && (lastResponse.hasContent()) && !isShowPreviousAdOnError)
@@ -668,6 +763,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 
 	
+	// handle result ad data after fetch from server
 	synchronized public boolean setResult(final AdData ad)
 	{
 		if (ad == null)
@@ -682,22 +778,30 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			setErrorResult(ad);
 			return false;
 		}
-		else if (this.getParent() == null)
+		else 
 		{
-			// View not currently included in any layout, don't try to show content for now, just save it
-			lastResponse = ad;
-			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "requestGet result["+String.valueOf(requestCounter)+"]", ad.toString());
-			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "setResult", "no parent for ad view, skipping display for now...");
-			return false;
+			// Callback to notify that ad download completed.
+			// if delegate defined, invoke
+			if (adDelegate != null)
+			{
+				MASTAdDelegate.AdDownloadEventHandler downloadHandler = adDelegate.getAdDownloadHandler(); 
+				if (downloadHandler != null)
+				{
+					downloadHandler.onDownloadEnd((MASTAdView)this);
+				}
+			}
+			
+			if (this.getParent() == null)
+			{
+				// View not currently included in any layout, don't try to show content for now, just save it
+				lastResponse = ad;
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "requestGet result["+String.valueOf(requestCounter)+"]", ad.toString());
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "setResult", "no parent for ad view, skipping display for now...");
+				return false;
+			}
+			
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "requestGet result["+String.valueOf(requestCounter)+"]", ad.toString());
 		}
-		else
-		{	
-			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "requestGet result["+String.valueOf(requestCounter)+"]", ad.toString());
-		}
-		
-		//isFirstTime = false;
-		//if(isAutoCollapse) this.setAdVisibility(View.VISIBLE);
-		//final Context context = getContext();
 		
 		try
 		{
@@ -713,7 +817,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		}
 		catch (Exception e)
 		{
-			adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "StartLoadContent", e.getMessage());
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "StartLoadContent", e.getMessage());
 			adReloadTimer.startTimer();
 			return false;
 		}
@@ -725,9 +829,10 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 
 	
+	// Client side third party (SDK) ad "redirect"
 	private void notifyExternalThirdPartyAd(AdData ad)
 	{
-		if ((ad != null) && (adDelegate.getThirdPartyRequestHandler() != null))
+		if ((ad != null) && (adDelegate != null) && (adDelegate.getThirdPartyRequestHandler() != null))
 		{
 			try
 			{
@@ -752,7 +857,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			}
 			catch (Exception e)
 			{
-				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "onThirdPartyRequest", e.getMessage());										
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onThirdPartyRequest", e.getMessage());										
 			}
 		}
 	}
@@ -779,7 +884,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		
 		data.append("</body></html>");
 		
-		System.out.println("SetupViewport: final string: " + data.toString());
+		//System.out.println("SetupViewport: final string: " + data.toString());
 		return data.toString();
 	}
 	
@@ -789,41 +894,23 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	//
 	
 
-	/**
-	 * Provide access to the diagnostic log object created internal to this view
-	 * 
-	 * @return MASTAdLog usable for diagnostics debug logging
-	 */
-	public MASTAdLog getLog()
-	{
-		return adLog;
-	}
-		
-
 	// Called when close() method is invoked from ad view
 	public String close(Bundle data)
 	{	
-		//buttonClose.setVisibility(View.INVISIBLE);
-		
-		//ViewGroup.LayoutParams lp = getLayoutParams();
-		
 		MraidInterface.STATES adState = adWebView.getMraidInterface().getState();
-		if ((adState == MraidInterface.STATES.DEFAULT) && (adPlacementType == MraidInterface.PLACEMENT_TYPES.INTERSTITIAL))
+		if (adPlacementType == MraidInterface.PLACEMENT_TYPES.INTERSTITIAL)
 		{
-			System.out.println("Closing interstitial ad view...");
+			closeInterstitial();	
+			if ((customCloseButton != null) && (customCloseButton.getParent() != null))
+			{
+				((ViewGroup)customCloseButton.getParent()).removeView(customCloseButton);
+			}
 			
-			// dismiss dialog containing interstitial view
-			adSizeUtilities.dismissDialog();
-			
-			// Make view invisible
-			//adWebView.setVisibility(View.GONE);
-			
-			// set state to hidden
-			adWebView.getMraidInterface().setState(MraidInterface.STATES.HIDDEN);
+			// add close button again???
 		}
 		else if (adState == MraidInterface.STATES.EXPANDED)
 		{
-			System.out.println("Closing expanded ad view...");
+			//System.out.println("Closing expanded ad view...");
 			
 			// dismiss dialog containing expanded view
 			adSizeUtilities.dismissDialog();
@@ -840,14 +927,6 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 				}
 							
 				// Reset layout parameters
-				//ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-				/*
-				// XXX handle margin differently for relative layout container???
-				ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams)adWebView.getLayoutParams();
-				lp.width = ViewGroup.LayoutParams.FILL_PARENT;
-				lp.height = ViewGroup.LayoutParams.FILL_PARENT;
-				lp.setMargins(0,  0, 0, 0);
-				*/
 				adWebView.setLayoutParams(createAdLayoutParameters());
 				
 				// Move ad view back to normal container
@@ -861,7 +940,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		}
 		else if (adState == MraidInterface.STATES.RESIZED)
 		{
-			System.out.println("Closing resized ad view...");
+			//System.out.println("Closing resized ad view...");
 			
 			// Remove adview from temporary container
 			ViewGroup parent = (ViewGroup)adWebView.getParent();
@@ -878,14 +957,6 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			}
 	
 			// Reset layout parameters
-			//ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-			/*
-			// XXX handle margin differently for relative layout container???
-			ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams)adWebView.getLayoutParams();
-			lp.width = ViewGroup.LayoutParams.FILL_PARENT;
-			lp.height = ViewGroup.LayoutParams.FILL_PARENT;
-			lp.setMargins(0,  0, 0, 0);
-			*/
 			adWebView.setLayoutParams(createAdLayoutParameters());
 			
 			// Move ad view back to normal container
@@ -904,6 +975,40 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 
 	
+	public void closeInterstitial()
+	{
+		if (adPlacementType == MraidInterface.PLACEMENT_TYPES.INTERSTITIAL)
+		{
+			MraidInterface.STATES adState = adWebView.getMraidInterface().getState();
+			if (adState == MraidInterface.STATES.DEFAULT)
+			{
+				//System.out.println("Closing interstitial ad view...");
+				
+				// dismiss dialog containing interstitial view
+				adSizeUtilities.dismissDialog();
+				
+				// Make view invisible
+				//adWebView.setVisibility(View.GONE);
+				
+				// set state to hidden
+				adWebView.getMraidInterface().setState(MraidInterface.STATES.HIDDEN);
+				
+				// Notify ad that viewable state has changed - already done???
+				adWebView.getMraidInterface().setViewable(false);
+			}
+			else
+			{
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdViewContainer", "Attempt to close interstitial with state not default, ignored");
+			}
+		}
+		else
+		{
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdViewContainer", "Attempt to close interstitial with wrong placement");
+
+		}
+	}
+	
+	
 	// Hide an interstitial ad view
 	public String hide(Bundle data)
 	{ 
@@ -915,17 +1020,17 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			return null;
 		}
 			
-		return "Hide called for ad that is not interstitial"; // XXX
+		return "Hide called for ad that is not interstitial";
 	}
 	
 	
 	// Show interstitial ad view
-	public void show()
+	public void showInterstitial(int withDuration)
 	{
 		if (adPlacementType != MraidInterface.PLACEMENT_TYPES.INTERSTITIAL)
 		{
-			System.out.println("WARNING: Interstitial show() for ad where interstitial placement type not set!");
-			adWebView.getMraidInterface().setPlacementType(MraidInterface.PLACEMENT_TYPES.INTERSTITIAL);
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdViewContainer", "Attempt to show interstitial with wrong placement");
+			return;
 		}
 
 		// Set ad state to default if it is hidden
@@ -936,7 +1041,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		}
 		
 		// create dialog object for showing interstitial ad
-		adSizeUtilities.showInterstitialDialog(showCloseInterstitialTime, autoCloseInterstitialTime);
+		adSizeUtilities.showInterstitialDialog(showCloseInterstitialTime, withDuration);
 	}
 	
 	
@@ -950,7 +1055,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		catch(Exception ex)
 		{
 			String error = "Error getting playback uri for video: " + ex.getMessage();
-			System.out.println(error);
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "AdViewContainer.playVideo", error);
 			return error;
 		}
 		
@@ -961,7 +1066,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		else
 		{
 			String error = "No playback uri for video found, skipping...";
-			System.out.println(error);
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "AdViewContainer.playVideo", error);
 			return error;
 		}
 	}
@@ -993,7 +1098,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			if (start == null)
 			{
 				String error = "Missing calendar event start date/time, cannot continue";
-				System.out.println(error);
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "AdViewContainer.createCalendar", error);
 				return error;
 			}
 			
@@ -1001,7 +1106,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			if (end == null)
 			{
 				String error = "Missing calendar event end date/time, cannot continue";
-				System.out.println(error);
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "AdViewContainer.createCalendar", error);
 				return error;
 			}
 			
@@ -1010,7 +1115,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		catch(Exception ex)
 		{
 			String error = "Error getting parameters for calendar event: " + ex.getMessage();
-			System.out.println(error);
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "AdViewContainer.createCalendar", error);
 			return error;
 		}
 	}
@@ -1027,83 +1132,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			(adWebView.getMraidInterface().getState() == MraidInterface.STATES.RESIZED))
 		{
 			adReloadTimer.stopTimer(false); // stop ad refresh timer
-			
-			// Get all resize parameters from data bundle
-			Integer toWidth 		= null;
-			Integer toHeight 		= null;
-			String  closePosition 	= null;
-			Integer offsetX 		= null;
-			Integer offsetY 		= null;
-			Boolean offScreen 		= null;
-			try
-			{
-				String value = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.WIDTH));
-				if (value != null)
-				{
-					toWidth = Integer.parseInt(value);
-				}
-				else
-				{
-					return MASTAdConstants.STR_ORMMA_ERROR_RESIZE; // XXX new, more specific error for missing width
-				}
-				
-				value = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.HEIGHT));
-				if (value != null)
-				{
-					toHeight = Integer.parseInt(value);
-				}
-				else
-				{
-					return MASTAdConstants.STR_ORMMA_ERROR_RESIZE; // XXX new, more specific error for missing height
-				}	
-					
-				closePosition = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.CUSTOM_CLOSE_POSITION));
-				if (closePosition == null)
-				{
-					closePosition = MraidInterface.get_RESIZE_CUSTOM_CLOSE_POSITION_name(MraidInterface.RESIZE_CUSTOM_CLOSE_POSITION.TOP_RIGHT);
-				}
-				
-				value = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.OFFSET_X));
-				if (value != null)
-				{
-					offsetX = Integer.parseInt(value);
-				}
-				else
-				{
-					offsetX = 0;
-				}
-				
-				value = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.OFFSET_Y));
-				if (value != null)
-				{
-					offsetY = Integer.parseInt(value);
-				}
-				else
-				{
-					offsetY = 0;
-				}
-				
-				value = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.ALLOW_OFF_SCREEN));
-				if ((value != null) && (value.equalsIgnoreCase("false")))
-				{
-					// reposition view if part will go off screen
-					offScreen = false;
-				}
-				else
-				{
-					// do nothing even if part of view will be off screen (default)
-					offScreen = true;
-				}
-			}
-			catch(Exception ex)
-			{
-				return MASTAdConstants.STR_ORMMA_ERROR_RESIZE; // XXX new, more specific error
-			}
-			
-			
-			adSizeUtilities.resizeWorker(toWidth, toHeight, closePosition, offsetX, offsetY, offScreen);		
-			
-			return null;
+			return adSizeUtilities.startResize(data);		
 		} 
 		
 		return MASTAdConstants.STR_ORMMA_ERROR_RESIZE;
@@ -1116,7 +1145,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 
 		// Pass options for dialog through to creator
 		AdDialogFactory.DialogOptions options = new AdDialogFactory.DialogOptions();
-		options.backgroundColor = Color.BLACK; // XXX setting?
+		options.backgroundColor = Color.BLACK;
 		options.noClose = true; // no add-on close function, just browser default
 		
 		return adSizeUtilities.openInBackgroundThread(options, url);
@@ -1129,118 +1158,10 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		if ((adWebView.getMraidInterface().getState() == MraidInterface.STATES.DEFAULT) ||
 			(adWebView.getMraidInterface().getState() == MraidInterface.STATES.EXPANDED))
 		{
-			// Get all expand parameters from data bundle
-			Integer toWidth 		   = null;
-			Integer toHeight 		   = null;
-			Boolean customClose		   = null;
-			//Boolean isModal			   = null; // this is read only, always true per spec
-			Boolean allowReorientation = null;
-			String  forceOrientation   = null;
-			String  url				   = null;
-			try
-			{
-				String value = data.getString(MraidInterface.get_EXPAND_PROPERTIES_name(MraidInterface.EXPAND_PROPERTIES.WIDTH));
-				if (value != null)
-				{
-					toWidth = Integer.parseInt(value);
-				}
-				else
-				{
-					toWidth = metrics.widthPixels;
-				}
-				
-				value = data.getString(MraidInterface.get_EXPAND_PROPERTIES_name(MraidInterface.EXPAND_PROPERTIES.HEIGHT));
-				if (value != null)
-				{
-					toHeight = Integer.parseInt(value);
-				}
-				else
-				{
-					toHeight = metrics.heightPixels;
-				}	
-				
-				value = data.getString(MraidInterface.get_EXPAND_PROPERTIES_name(MraidInterface.EXPAND_PROPERTIES.USE_CUSTOM_CLOSE));
-				if ((value != null) && (value.equalsIgnoreCase("true")))
-				{
-					customClose = true;
-				}
-				else
-				{
-					customClose = false; // default
-				}
-				
-				/*
-				// Always modal, no need for this
-				value = data.getString(MraidInterface.get_EXPAND_PROPERTIES_name(MraidInterface.EXPAND_PROPERTIES.IS_MODAL));
-				if ((value != null) && (value.equalsIgnoreCase("false")))
-				{
-					isModal = false;
-				}
-				else
-				{
-					isModal = true;
-				}
-				*/
-				
-				value = data.getString(MraidInterface.get_ORIENTATION_PROPERTIES_name(MraidInterface.ORIENTATION_PROPERTIES.ALLOW_ORIENTATION_CHANGE));
-				if ((value != null) && (value.equalsIgnoreCase("false")))
-				{
-					allowReorientation = false;
-				}
-				else
-				{
-					allowReorientation = true; // default
-				}
-				
-				forceOrientation = data.getString(MraidInterface.get_ORIENTATION_PROPERTIES_name(MraidInterface.ORIENTATION_PROPERTIES.FORCE_ORIENTATION));
-				if (forceOrientation == null)
-				{
-					forceOrientation = MraidInterface.get_FORCE_ORIENTATION_PROPERTIES_name(MraidInterface.FORCE_ORIENTATION_PROPERTIES.NONE);
-				}
-				
-				url = data.getString(AdMessageHandler.EXPAND_URL);
-			}
-			catch(Exception ex)
-			{
-				return MASTAdConstants.STR_ORMMA_ERROR_EXPAND; // XXX new, more specific error
-			}
-		
-			// Limit expand size to device width/height at most
-			if ((toWidth < 0) || (toWidth > metrics.widthPixels))
-			{
-				toWidth = metrics.widthPixels; 
-			}
-			if ((toHeight < 0) || (toHeight > metrics.heightPixels))
-			{
-				toHeight = metrics.heightPixels;
-			}
-			System.out.println("exapndInUiThread: to h/w = " + toHeight + "/" + toWidth);
-
-			// Pass options for dialog through to creator
-			AdDialogFactory.DialogOptions options = new AdDialogFactory.DialogOptions();
-			options.backgroundColor = Color.BLACK; // XXX setting?
-			options.customClose = customClose;
-			options.height = toHeight;
-			options.width = toWidth;
-			
-			adReloadTimer.stopTimer(false); // stop ad refresh timer		
-			
-			adWebView.getMraidInterface().setState(MraidInterface.STATES.EXPANDED);
-			
-			if ((url == null) || (url.length() < 1) || (url.equalsIgnoreCase("undefined")))
-			{
-				// We are using existing ad view / content, safe to do this on UI thread
-				return adSizeUtilities.expandInUIThread(options, allowReorientation, forceOrientation);
-			}
-			else
-			{
-				// Two part creative, need to fetch new data, must use non-UI thread for that;
-				// after data available will call back to finish on ui thread via handler.
-				return adSizeUtilities.expandInBackgroundThread(options, allowReorientation, forceOrientation, url);
-			}
+			return adSizeUtilities.startExpand(data, adReloadTimer);
 		}
 		
-		return MASTAdConstants.STR_ORMMA_ERROR_EXPAND; // XXX new, more specific error
+		return MASTAdConstants.STR_ORMMA_ERROR_EXPAND; // new, more specific error
 	}
 	
 		
@@ -1250,74 +1171,42 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 
 	
 	/** Default viewport string injected into ad view **/
-	public static final String defaultViewportDefinition =
+	private static final String defaultViewportDefinition =
 		"<meta name=\"viewport\" content=\"user-scalable=no,target-densitydpi=device-dpi\"/>";
 	
 	/** Default body style css injected into ad view **/
-	public static final String defaultBodyStyle =
+	private static final String defaultBodyStyle =
 		"<style>body{margin: 0px; padding: 0px;}</style>";
-	
-	// Custom injection string; if any has been set by user
-	private String injectionHeaderCode = null;
 		
-	
-	/**
-	 * Customize the "HTML" (or javascript/css) code to be inserted into the HTML HEAD when creating
-	 * webview for ad content. This is used to setup the viewport for the web view and to define the
-	 * style to be applied to the body (for centering, etc.) By default this will contain the string:
-	 * 
-	 * <meta name=\"viewport\" content=\"target-densitydpi=device-dpi\"/> \
-	 * <style>body{margin: 0px; padding: 0px; display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;}</style>
-	 * 
-	 * @param value String content to be inserted, or null to use built-in default.
-	 */
-	/*
-	private void setInjectionHeaderCode(String value)
-	{
-		injectionHeaderCode = value;
-	}
-	*/
-	
 	
 	/**
 	 * Get current injection header code string.
 	 * @return Current injection header value.
 	 */
-	public String getInjectionHeaderCode()
+	private String getInjectionHeaderCode()
 	{
-		if (injectionHeaderCode != null)
-		{
-			return injectionHeaderCode;
-		}
-		else
-		{
-			// Default fragment, revised as of 2.12 SDK
-			return defaultViewportDefinition + defaultBodyStyle;
-		}
+		// Default fragment, revised as of 2.12 SDK
+		return defaultViewportDefinition + defaultBodyStyle;
 	}
-
 	
 	
 	
 	//
 	// Misc
 	//
+	
+	
 
-	
 	/**
-	 * Set log level to one of the log level values defined in he MASTAdLog class
-     * (corresponding to errors, errors + warnings, or everything including server traffic.)
-     * The SDK is instrumented with diagnostics logging that can assist with troubleshooting
-     * integration problems. Log messages are sent to the system logging interface (viewable
-     * with logcat) and an in-memory log of recent messages is stored for easy access.
-     * @see MASTAdLog See the MASTAdLog class for more information about logging.
-	 * @param logLevel Int log level to control which messages will be sent to the logs.
+	 * Provide access to the diagnostic log object created internal to this view
+	 * 
+	 * @return MASTAdLog usable for diagnostics debug logging
 	 */
-	public void setLogLevel(int logLevel)
+	public MASTAdLog getLog()
 	{
-		adLog.setLogLevel(logLevel);
+		return adLog;
 	}
-	
+			
 	
 	public Handler getHandler()
 	{
@@ -1337,6 +1226,59 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 
 	
+	public MASTAdRequest getAdRequest()
+	{
+		return adserverRequest;
+	}
+
+	
+	public MASTAdDelegate getAdDelegate()
+	{
+		return adDelegate;
+	}
+
+	
+	public void setDefaultImageResource(Integer resource)
+	{
+		defaultImageResource = resource;
+	}
+	
+	
+	public Integer getDefaultImageResource()
+	{
+		return defaultImageResource;
+	}
+	
+	
+	private class SetBackgroundResourceAction implements Runnable
+	{
+		private Integer backgroundResource;
+		
+		public SetBackgroundResourceAction(Integer backgroundResource)
+		{
+			this.backgroundResource = backgroundResource;
+		}
+		
+		@Override
+		public void run()
+		{
+			try
+			{
+				if(backgroundResource != null)
+				{
+					self.setBackgroundResource(backgroundResource);
+					self.setBackgroundColor(0);					
+				}
+			}
+			catch (Exception e)
+			{
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "SetBackgroundResourceAction", e.getMessage());
+			}
+		}
+	}	
+	
+	
+	/*
 	public int getAutoCloseInterstitialTime()
 	{
 		return autoCloseInterstitialTime;
@@ -1359,47 +1301,12 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	{
 		showCloseInterstitialTime = time;
 	}
+	*/
 	
-	
-	public void setAdPlacementInterstitial(boolean isInterstitial)
-	{
-		if (isInterstitial)
-		{
-			adPlacementType = MraidInterface.PLACEMENT_TYPES.INTERSTITIAL;
-		}
-		else
-		{
-			adPlacementType = MraidInterface.PLACEMENT_TYPES.INLINE;		
-		}
-		adWebView.getMraidInterface().setPlacementType(adPlacementType);
-	}
-	
-	
-	// XXX remove? or use for XML object creation???
-	public boolean setAdPlacementType(String placement)
-	{
-		if (placement.equalsIgnoreCase(MraidInterface.PLACEMENT_TYPES.INLINE.toString()))
-		{
-			adPlacementType = MraidInterface.PLACEMENT_TYPES.INLINE;
-			adWebView.getMraidInterface().setPlacementType(adPlacementType);
-			return true;
-		}
-		else if (placement.equalsIgnoreCase(MraidInterface.PLACEMENT_TYPES.INTERSTITIAL.toString()))
-		{
-			adPlacementType = MraidInterface.PLACEMENT_TYPES.INTERSTITIAL;
-			adWebView.getMraidInterface().setPlacementType(adPlacementType);
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	
-	
+		
 	protected void onAttachedToWindow()
 	{
-		adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_INFO, "Attached to Window", "");
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "Attached to Window", "");
 
 		adReloadTimer.startTimer();
 		
@@ -1407,9 +1314,13 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		
 		super.onAttachedToWindow();
 
-		if (adDelegate.getAdActivityEventHandler() != null)
+		if (adDelegate != null)
 		{
-			adDelegate.getAdActivityEventHandler().onAdAttachedToActivity((MASTAdView)this);
+			MASTAdDelegate.AdActivityEventHandler activityHandler = adDelegate.getAdActivityEventHandler(); 
+			if (activityHandler != null)
+			{
+				activityHandler.onAdAttachedToActivity((MASTAdView)this);
+			}
 		}
 
 		// ??? If the ad content was downloaded while the view was not attached to a window
@@ -1434,7 +1345,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	
 	protected void onDetachedFromWindow()
 	{
-		adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_INFO, "Detached from Window", "");
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "Detached from Window", "");
 		
 		/*
 		if (image!=null)
@@ -1457,9 +1368,22 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 
 		super.onDetachedFromWindow();
 		
-		if (adDelegate.getAdActivityEventHandler() != null)
+		if (adDelegate != null)
 		{
-			adDelegate.getAdActivityEventHandler().onAdDetachedFromActivity((MASTAdView)this);
+			MASTAdDelegate.AdActivityEventHandler activityHandler = adDelegate.getAdActivityEventHandler(); 
+			if (activityHandler != null)
+			{
+				// If the activity is going away, and this callback attempts to do things with the UI
+				// it can fail, so protected against an exception.
+				try 
+				{
+					activityHandler.onAdDetachedFromActivity((MASTAdView)this);
+				}
+				catch (Exception e)
+				{
+					adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onAdDetachedFromActivity - exceptioin", e.getMessage());
+				}
+			}
 		}
 		
 		// Notify ad that viewable state has changed
@@ -1467,7 +1391,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 	
 	
-	public void setLocationDetection(boolean detect, Integer minWaitMillis, Float minMoveMeters)
+	synchronized public void setLocationDetection(boolean detect, Integer minWaitMillis, Float minMoveMeters)
 	{
 		if (detect)
 		{		 	
@@ -1491,30 +1415,30 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 							double longitude = location.getLongitude();
 							adserverRequest.setProperty(MASTAdRequest.parameter_longitude, Double.toString(longitude)); 
 							
-							adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "LocationDetection changed", "("+latitude+";"+longitude+")");								
+							adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "LocationDetection changed", "("+latitude+";"+longitude+")");								
 			    		}
 						catch (Exception e)
 						{
-			    			adLog.log(MASTAdLog.LOG_LEVEL_2,MASTAdLog.LOG_TYPE_ERROR,"LocationDetection",e.getMessage());
+			    			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "LocationDetection",e.getMessage());
 			    		}									
 					}
 				};
 
 		    	if (locationListener.isAvailable())
 		    	{
-		    		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "LocationDetection", "Start listening for location updates");
+		    		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "LocationDetection", "Start listening for location updates");
 		    		locationListener.start();
 		    	}
 		    	else
 		    	{
-		    		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "LocationDetection", "Location updates not available");
+		    		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "LocationDetection", "Location updates not available");
 		    		locationListener.stop();
 		    		locationListener = null;
 		    	}
 			}
 	    	else
 	    	{
-	    		adLog.log(MASTAdLog.LOG_LEVEL_2, MASTAdLog.LOG_TYPE_ERROR, "LocationDetection", "No permission for GPS");
+	    		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "LocationDetection", "No permission for GPS");
 	    	}
     	}
 		else
@@ -1526,13 +1450,79 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 				locationListener = null;
 			}
 			
-			adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "LocationDetection", "Stop listening for location updates");
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "LocationDetection", "Stop listening for location updates");
 		}
+	}
+
+	
+	synchronized public boolean getLocationDetection()
+	{
+		// If listener was successfully created and reports it is available, yes
+		if ((locationListener != null) && (locationListener.isAvailable()))
+		{
+			return true;	
+		}
+		
+		// otherwise, no
+		return false;
+	}
+
+	
+	public void setUseInternalBrowser(boolean flag)
+	{
+		useInternalBrowser = flag;
 	}
 	
 	
-	public void addCloseToBanner(boolean flag)
+	public boolean getUseInternalBrowser()
 	{
+		return useInternalBrowser;
+		
+	}
+	
+	
+	private void showCloseButtonWorker()
+	{
+		Thread closeThread = new Thread()
+		{
+			public void run()
+			{
+				final int visible;
+				if (isShowCloseOnBanner)
+				{
+					visible = View.VISIBLE;
+					try { Thread.sleep(showCloseInterstitialTime * 1000); } catch(Exception e) { }
+				}
+				else
+				{
+					visible = View.GONE;
+				}
+				
+				handler.post(new Runnable()
+				{
+					public void run()
+					{
+						// Create close button for banner
+						if (bannerCloseButton == null)
+						{
+							bannerCloseButton = createCloseButton(context, createCloseClickListener());
+							self.addView(bannerCloseButton);
+						}
+						
+						bannerCloseButton.setVisibility(visible);
+					}
+				});
+			}
+		};
+		closeThread.setName("[AdViewContainer] showCloseButton");
+		closeThread.start();		
+	}
+
+
+	public void showCloseButton(boolean flag, int afterDelay)
+	{
+		showCloseInterstitialTime = afterDelay;
+		
 		boolean change = false;
 		if (flag != isShowCloseOnBanner)
 		{
@@ -1543,51 +1533,14 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 
 		if (change)
 		{
-			final int visible;
-			if (isShowCloseOnBanner)
-			{
-				visible = View.VISIBLE;
-			}
-			else
-			{
-				visible = View.GONE;
-			}
-	
-			handler.post(new Runnable()
-			{			
-				@Override
-				public void run()
-				{
-
-					// Create close button for banner
-					if (bannerCloseButton == null)
-					{
-						bannerCloseButton = createCloseButton(context);
-						self.addView(bannerCloseButton);
-					}
-					
-					bannerCloseButton.setVisibility(visible);
-				}
-			});
+			showCloseButtonWorker();
 		}
 	}
 	
 	
-	protected Button createCloseButton(Context c)
+	private OnClickListener createCloseClickListener()
 	{
-		Button b = new Button(c);
-		b.setMinHeight(50);
-		b.setMinWidth(50);
-		b.setText("Close"); // XXX string, allow customizing
-		b.setVisibility(View.GONE); // default is not present
-		
-		// Position button in upper right
-		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
-		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-		b.setLayoutParams(layoutParams);
-		
-		b.setOnClickListener(new OnClickListener()
+		return new OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -1601,16 +1554,12 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 						// for banner, remove the view (and if
 						// richmedia, set state to hidden?)
 						if (adPlacementType == MraidInterface.PLACEMENT_TYPES.INTERSTITIAL)
-						{
-							System.out.println("Closing interstitial ad view...");
-							
+						{							
 							// dismiss dialog containing interstitial view
 							adSizeUtilities.dismissDialog();
 						}
 						else
-						{
-							System.out.println("Closing banner ad view...");
-							
+						{	
 							// Remove ad container from parent, hiding it
 							ViewGroup parent = (ViewGroup)self.getParent();
 							if (parent != null)
@@ -1622,9 +1571,51 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 					}
 				});
 			}
-		});
+		};
+	}
+	
+	
+	public Button createCloseButton(Context c, View.OnClickListener clickListener)
+	{
+		Button b;
+		
+		if (customCloseButton == null)
+		{
+			b = new Button(c);
+			b.setMinHeight(50);
+			b.setMinWidth(50);
+			b.setVisibility(View.GONE); // default is not present
+			
+			
+			b.setText("Close"); // string, allow customizing
+		}
+		else
+		{
+			b = customCloseButton;
+		}
+		
+		
+		// Position button in upper right
+		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+		b.setLayoutParams(layoutParams);
+		
+		b.setOnClickListener(clickListener);
 		
 		return b;
+	}
+
+	
+	public void setCustomCloseButton(Button closeButton)
+	{
+		customCloseButton = closeButton;
+	}
+
+	
+	public Button getCustomCloseButton()
+	{
+		return customCloseButton;
 	}
 	
 	
@@ -1654,11 +1645,15 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 	
 	
-	public void mraidEvent(String method, String parameter)
+	public void richmediaEvent(String method, String parameter)
 	{
-		if (adDelegate.getMraidEventHandler() != null)
+		if (adDelegate != null)
 		{
-			adDelegate.getMraidEventHandler().onMraidEvent((MASTAdView)this, method, parameter);
+			RichmediaEventHandler handler = adDelegate.getRichmediaEventHandler(); 
+			if (handler != null)
+			{
+				handler.onRichmediaEvent((MASTAdView)this, method, parameter);
+			}
 		}
 	}
 }

@@ -18,12 +18,12 @@ import com.MASTAdView.MASTAdLog;
 
 public class AdLocationListener implements LocationListener
 {
-	private LocationManager mLocationManager;
-	private String mProvider;
+	final private LocationManager mLocationManager;
+	final private String mProvider;
 	private long mInterval;
 	private float mDistance;
-	private Looper listenerLooper;
-	private MASTAdLog adLog;
+	final private Looper listenerLooper;
+	final private MASTAdLog adLog;
 	
 	
 	public void fail(String message)
@@ -56,7 +56,7 @@ public class AdLocationListener implements LocationListener
 	
 	private void setRestrictions(Integer interval, Float distance)
 	{
-		if (interval != null)
+		if ((interval != null) && (interval >= 0))
 		{
 			mInterval = interval;
 		}
@@ -65,7 +65,7 @@ public class AdLocationListener implements LocationListener
 			mInterval = MASTAdConstants.DEFAULT_LOCATION_REPEAT_WAIT;
 		}
 		
-		if (distance != null)
+		if ((distance != null) && (distance >= 0.0))
 		{
 			mDistance = distance;
 		}
@@ -84,7 +84,7 @@ public class AdLocationListener implements LocationListener
 		}
 		catch(Exception ex)
 		{
-			// NA
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "AdLocationListener.isAvailable - exception", ex.getMessage());
 		}
 		
     	return false;
@@ -111,11 +111,11 @@ public class AdLocationListener implements LocationListener
 			mLocationManager.removeUpdates(this);
 			if (adLog != null)
 			{
-				adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "GPSLocation", "Listener stopped after update.");
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdLocationListener", "Listener stopped after update.");
 			}
 		}
 		
-		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "GPSLocation", "Location change called.");
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdLocationListener", "Location change called.");
 		
 		success(location);
 	}
@@ -125,10 +125,11 @@ public class AdLocationListener implements LocationListener
 		try
 		{
 			mLocationManager.removeUpdates(this);
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdLocationListener", "Listener stopped");
 		}
 		catch(Exception ex)
 		{
-			// NA
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "AdLocationListener.stop - exception", ex.getMessage());
 		}
 	}
 
@@ -140,7 +141,7 @@ public class AdLocationListener implements LocationListener
 	public void start()
 	{
 		//mLocMan.requestLocationUpdates(mProvider, 0, 0, this);
-		adLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_INFO, "GPSLocation", "Listener started.");
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdLocationListener", "Listener started.");
 		
 		if (listenerLooper != null)
 		{

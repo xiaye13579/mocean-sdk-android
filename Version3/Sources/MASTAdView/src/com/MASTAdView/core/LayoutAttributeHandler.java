@@ -7,11 +7,10 @@ import java.util.Hashtable;
 
 import com.MASTAdView.MASTAdRequest;
 
-import android.content.Context;
 import android.util.AttributeSet;
 
 
-public class LayoutAttributeHandler
+final public class LayoutAttributeHandler
 {
 	// Attributes we support processing from an XML layout
 	public static final String xml_layout_attribute_logLevel 				= "logLevel";
@@ -30,14 +29,15 @@ public class LayoutAttributeHandler
 	public static final String xml_layout_attribute_longitude				= "longitude";
 	public static final String xml_layout_attribute_ua						= "ua";
 	public static final String xml_layout_attribute_customParameters		= "customParameters";
+	public static final String xml_layout_attribute_internalBrowser			= "useInternalBrowser";
 	
 	
-	private AdViewContainer container;
+	final private AdViewContainer container;
 	
 	
-	public LayoutAttributeHandler(Context c, AdViewContainer v)
+	public LayoutAttributeHandler(AdViewContainer view)
 	{
-		container = v;
+		container = view;
 	}
 	
 	
@@ -47,40 +47,40 @@ public class LayoutAttributeHandler
 		if (attributes != null)
 		{
 			Integer logLevel = getIntParameter(attributes.getAttributeValue(null, xml_layout_attribute_logLevel));
-			if (logLevel!=null) container.setLogLevel(logLevel);
+			if (logLevel!=null) container.getLog().setLogLevel(logLevel);
 			
 			Integer site = getIntParameter(attributes.getAttributeValue(null, xml_layout_attribute_site));
-			if (site != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_site, site);
+			if (site != null) container.getAdRequest().setProperty(MASTAdRequest.parameter_site, site);
 			
 			Integer zone = getIntParameter(attributes.getAttributeValue(null, xml_layout_attribute_zone));
-			if (zone != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_zone, zone);
+			if (zone != null) container.getAdRequest().setProperty(MASTAdRequest.parameter_zone, zone);
 			
 			Boolean isTestModeEnabled = getBooleanParameter(attributes.getAttributeValue(null, xml_layout_attribute_test));
-			if (isTestModeEnabled != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_test, isTestModeEnabled);
+			if (isTestModeEnabled != null) container.getAdRequest().setProperty(MASTAdRequest.parameter_test, isTestModeEnabled);
+			
+			Boolean useInternalBrowser = getBooleanParameter(attributes.getAttributeValue(null, xml_layout_attribute_internalBrowser));
+			if (useInternalBrowser != null) container.setUseInternalBrowser(useInternalBrowser);
 			
 			Integer maxSizeX = getIntParameter(attributes.getAttributeValue(null, xml_layout_attribute_maxSizeX));
-			if (maxSizeX != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_size_x, maxSizeX);
+			if (maxSizeX != null) container.getAdRequest().setProperty(MASTAdRequest.parameter_size_x, maxSizeX);
 			
 			Integer maxSizeY = getIntParameter(attributes.getAttributeValue(null, xml_layout_attribute_maxSizeY));
-			if (maxSizeY != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_size_y, maxSizeY);
-			
-			Integer type = getIntParameter(attributes.getAttributeValue(null, xml_layout_attribute_type));
-			if (type != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_type, type);
+			if (maxSizeY != null) container.getAdRequest().setProperty(MASTAdRequest.parameter_size_y, maxSizeY);
 			
 			String adserverURL = attributes.getAttributeValue(null, xml_layout_attribute_adserverURL);
-			if (adserverURL != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_ad_server_url, adserverURL);
+			if (adserverURL != null) container.getAdRequest().setProperty(MASTAdRequest.parameter_ad_server_url, adserverURL);
 			
 			Integer updateTime = getIntParameter(attributes.getAttributeValue(null, xml_layout_attribute_updateTime));
 			if (updateTime != null) container.setUpdateTime(updateTime);
 			
 			String latitude = attributes.getAttributeValue(null, xml_layout_attribute_latitude);
-			if (latitude != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_latitude, latitude);
+			if (latitude != null) container.getAdRequest().setProperty(MASTAdRequest.parameter_latitude, latitude);
 			
 			String longitude = attributes.getAttributeValue(null, xml_layout_attribute_longitude);
-			if (longitude != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_longitude, longitude);
+			if (longitude != null) container.getAdRequest().setProperty(MASTAdRequest.parameter_longitude, longitude);
 			
 			String ua = attributes.getAttributeValue(null, xml_layout_attribute_ua);
-			if (ua != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_userAgent, ua);
+			if (ua != null) container.getAdRequest().setProperty(MASTAdRequest.parameter_userAgent, ua);
 			
 			String customParameters = attributes.getAttributeValue(null, xml_layout_attribute_customParameters);
 			Hashtable<String, String> cp = null;
@@ -93,7 +93,7 @@ public class LayoutAttributeHandler
 					cp.put(str[x*2], str[x*2+1]);
 				}	
 			}
-			if (cp != null) container.adserverRequest.setProperty(MASTAdRequest.parameter_custom, cp);
+			if (cp != null) container.getAdRequest().setProperty(MASTAdRequest.parameter_ad_request, cp);
 			
 			Boolean locationDetection = getBooleanParameter(attributes.getAttributeValue(null, xml_layout_attribute_locationDetection));
 			Integer locationMinWaitMillis = getIntParameter(attributes.getAttributeValue(null, xml_layout_attribute_locationMinWaitMillis));

@@ -16,8 +16,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.MASTAdView.MASTAdConstants;
+import com.MASTAdView.MASTAdLog;
 
-public class AdParser
+final public class AdParser
 {
 	// XML tags we key off of
 	public static final String TAG_AD 			= "ad";
@@ -43,6 +44,15 @@ public class AdParser
 	public static final String EXTERNAL_THIRD_PARTY_CAMPAIGN_SIGNAL = "client_side_external_campaign";
 	public static final String EXTERNAL_THIRD_PARTY_CAMPAIGN_START	= "<external_campaign";
 	public static final String EXTERNAL_THIRD_PARTY_CAMPAIGN_END	= "</external_campaign>";
+
+	
+	final private boolean prefetchImages;
+	
+	
+	public AdParser(boolean prefetch)
+	{
+		prefetchImages = prefetch;
+	}
 	
 	
 	// Setup for parsing ad data from server
@@ -53,8 +63,6 @@ public class AdParser
         {
             SAXParser parser = factory.newSAXParser();
             AdHandler handler = new AdHandler();
-            System.out.println("Starting parse of ad XML data: " + adContent);
-            //parser.parse(adContent, handler);
             parser.parse(new ByteArrayInputStream(adContent.getBytes()), handler);
             
             // For third party ads, apply extra logic for ad type handling:
@@ -87,8 +95,9 @@ public class AdParser
         }
         catch (Exception e)
         {
-        	System.out.println("Exception parsing ad data: " + e.getMessage());
-            //throw new RuntimeException(e);
+        	MASTAdLog logger = new MASTAdLog(null);
+        	logger.log(MASTAdLog.LOG_LEVEL_ERROR, "AdParser.parseAd - exception", e.getMessage());
+        	logger.log(MASTAdLog.LOG_LEVEL_ERROR, "AdParser.parseAd - from data", adContent);
         	AdData errorAd = new AdData();
         	errorAd.error = "Error parsing ad data: " + e.getMessage();
         	return errorAd;
@@ -97,20 +106,20 @@ public class AdParser
 	
 	
 	// Setup for parsing external third party ad campaign
-	public void parseExternalCampaignProperties(AdData ad, String campaignContent)
+	synchronized public void parseExternalCampaignProperties(AdData ad, String campaignContent)
 	{
 		SAXParserFactory factory = SAXParserFactory.newInstance();
         try 
         {
             SAXParser parser = factory.newSAXParser();
             ExternalCampaignHandler handler = new ExternalCampaignHandler(ad);
-            System.out.println("Starting parse of external campaign XML data: " + campaignContent);
-            //parser.parse(adContent, handler);
             parser.parse(new ByteArrayInputStream(campaignContent.getBytes()), handler);
         }
         catch (Exception e)
         {
-        	System.out.println("Exception parsing external campaign data: " + e.getMessage());
+        	MASTAdLog logger = new MASTAdLog(null);
+        	logger.log(MASTAdLog.LOG_LEVEL_ERROR, "AdParser.parseCampaign - exception", e.getMessage());
+        	logger.log(MASTAdLog.LOG_LEVEL_ERROR, "AdParser.parseCampaign - from data", campaignContent);
             //throw new RuntimeException(e);
         	ad.error = "Error parsing external campaign data: " + e.getMessage();
         } 
@@ -129,10 +138,10 @@ public class AdParser
 	// <response> ..orignal response from mediated server, etc.. </response> 
 	// </ad>
 	// </mojiva>
-	private class AdHandler extends DefaultHandler
+	final private class AdHandler extends DefaultHandler
 	{
-		private AdData currentAd;
-	    private StringBuilder sb;
+		final private AdData currentAd;
+	    final private StringBuilder sb;
 
 	    public AdHandler()
 	    {
@@ -142,38 +151,6 @@ public class AdParser
 	    
 	    public AdData getAd()
 	    {
-	    	System.out.println("AdParser.getAd()");
-	    	/*
-	    	System.out.println("ad type: " + currentAd.getAdTypeName());
-	    	if (currentAd.adType == MASTAdConstants.AD_TYPE_THIRDPARTY)
-	    	{
-	    		if (currentAd.thirdPartyFeed != null)
-	    		{
-	    			System.out.println("third party feed: " + currentAd.thirdPartyFeed);
-	    		}
-	    	}
-	    	if (currentAd.clickUrl != null)
-	    	{
-	    		System.out.println("click url: " + currentAd.clickUrl);
-	    	}
-	    	if (currentAd.text != null)
-	    	{
-	    		System.out.println("text: " + currentAd.text);
-	    	}
-	    	if (currentAd.imageUrl != null)
-	    	{
-	    		System.out.println("image url: " + currentAd.imageUrl);
-	    	}
-	    	if (currentAd.richContent != null)
-	    	{
-	    		System.out.println("content: " + currentAd.richContent);
-	    	}
-	    	if (currentAd.error != null)
-	    	{
-	    		System.out.println("error: " + currentAd.error);
-	    	}
-	    	*/
-	    	
 	    	return currentAd;
 	    }
 	    
@@ -223,7 +200,7 @@ public class AdParser
             }
             else if (localName.equalsIgnoreCase(TAG_IMG))
             {
-                currentAd.setImage(sb.toString());
+                currentAd.setImage(sb.toString(), prefetchImages);
             }
             else if (localName.equalsIgnoreCase(TAG_CONTENT))
             {
@@ -246,10 +223,10 @@ public class AdParser
 
 	// Parse external campaign XML data, such as the following example:
 	// <external_campaign version="1.0"><campaign_id>127374</campaign_id><type>RichMediaLibrary</type><external_params><param name="variables">123456789</param><param name="long">-76.5836</param><param name="lat">36.728195</param></external_params><track_url></track_url></external_campaign>
-	private class ExternalCampaignHandler extends DefaultHandler
+	final private class ExternalCampaignHandler extends DefaultHandler
 	{
-		private AdData currentAd;
-	    private StringBuilder sb;
+		final private AdData currentAd;
+	    final private StringBuilder sb;
 	    private String campaignParamName;
 	    
 	    public ExternalCampaignHandler(AdData ad)
@@ -310,11 +287,10 @@ public class AdParser
 	}
 
 	
-	private void addExternalProperty(AdData ad, String name, String value)
+	synchronized private void addExternalProperty(AdData ad, String name, String value)
 	{
 		if ((ad == null) || (name == null) || (value == null))
 		{
-			System.out.println("AdParser: add external property with null parameter, skipping...");
 			return; // don't try to add with null data
 		}
 		

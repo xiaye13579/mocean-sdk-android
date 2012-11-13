@@ -3,6 +3,8 @@
 //
 package com.MASTAdView.core;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,10 +12,13 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.Window;
@@ -23,24 +28,27 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.MASTAdView.MASTAdDelegate;
 import com.MASTAdView.MASTAdLog;
 import com.MASTAdView.MASTAdView;
 
 public class AdWebView extends WebView
 {
-	private MASTAdLog adLog;
-	private AdViewContainer adViewContainer;
+	final private MASTAdLog adLog;
+	final private AdViewContainer adViewContainer;
 	private JavascriptInterface javascriptInterface;
 	private MraidInterface mraidInterface;
-	private String dataToInject;
 	private String mraidScript;
 	private boolean mraidLoaded = false; // has mraid library been loaded?
-	private StringBuffer defferedJavascript;
+	final private StringBuffer defferedJavascript;
 	private DisplayMetrics metrics;
-	private boolean supportMraid;
+	final private boolean supportMraid;
+	final private boolean launchBrowserOnClicks;
+	private AdClickHandler adClickHandler = null;
 	
 	
-	public AdWebView(AdViewContainer parent, MASTAdLog log, DisplayMetrics metrics, boolean mraid)
+	@SuppressLint("SetJavaScriptEnabled")
+	public AdWebView(AdViewContainer parent, MASTAdLog log, DisplayMetrics metrics, boolean mraid, boolean handleClicks)
 	{
 		super(parent.getContext());
 		
@@ -48,8 +56,9 @@ public class AdWebView extends WebView
 		adLog = log;
 		this.metrics = metrics;
 		supportMraid = mraid;
+		launchBrowserOnClicks = handleClicks;
 		
-		dataToInject = null;
+		//dataToInject = null;
 		defferedJavascript = new StringBuffer();
 		
 		// Customize settings for web view
@@ -76,6 +85,11 @@ public class AdWebView extends WebView
 		}
 		
 		//System.out.println("mread script read: " + mraidScript);
+		
+		if (handleClicks)
+		{
+			adClickHandler = new AdClickHandler(adViewContainer);
+		}
 	}
 	
 	
@@ -91,35 +105,23 @@ public class AdWebView extends WebView
 	}
 	
 	
-	public void resetForNewAd()
+	synchronized public void resetForNewAd()
 	{
-		System.out.println("Reset ad view for new ad...");
 		stopLoading();
 		clearView();
+		defferedJavascript.setLength(0);
 		//mraidInterface.setState(MraidInterface.STATES.LOADING);
 		mraidLoaded = false;
 	}
 	
 	
-	public void setDataToInject(String js)
-	{
-		dataToInject = js;
-	}
-	
-	
-	public String getDataToInject()
-	{
-		return dataToInject;
-	}
-	
-	
-	private class AdWebChromeClient extends WebChromeClient
+	final private class AdWebChromeClient extends WebChromeClient
 	{
 		@Override
 		public boolean onJsAlert(WebView view, String url, String message, JsResult result)
 		{
 			// Handle alert message from javascript
-			System.out.println("JSAlert: " + message); // XXX
+			System.out.println("JSAlert: " + message);
 			return super.onJsAlert(view, url, message, result);
 		}
 	}
@@ -138,25 +140,24 @@ public class AdWebView extends WebView
 			{
 				if (mraidLoaded)
 				{
-					System.out.println("inject javascript: " + str);
+					adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "injectJavascript", str);
 					loadUrl("javascript:" + str);
 				}
 				else
 				{
-					System.out.println("inject javascript (Deferred): " + str);
+					//System.out.println("inject javascript (Deferred): " + str);
 					defferedJavascript.append(str);
 					defferedJavascript.append("\n");
 				}
 			}
 			else
 			{
-				System.out.println("MRAID support disabled, skipping javascript injection...");
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "injectJavascript", "disabled, skipping");
 			}
 		}
 		catch (Exception e)
 		{
-			//Log.e("injectJavaScript", e.getMessage()+" "+str);
-			System.out.println("injectJavaScript exception: " + e.getMessage() + " from " + str);
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "injectJavascript - exception", e.getMessage());
 		}
 	}
 
@@ -189,8 +190,6 @@ public class AdWebView extends WebView
 			return;
 		}
 		
-		System.out.println("Initialize default resize properties");
-		
 		List<NameValuePair> list = new ArrayList<NameValuePair>(2);
 		
 		// Add width
@@ -214,7 +213,7 @@ public class AdWebView extends WebView
 		//nvp = new BasicNameValuePair(name, "" + adWebView.getLeft());
 		list.add(nvp);
 		
-		// Add x offset
+		// Add y offset
 		name = MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.OFFSET_Y);
 		nvp = new BasicNameValuePair(name, "" + AdSizeUtilities.devicePixelToMraidPoint(screenLocation[1], getContext()));
 		//nvp = new BasicNameValuePair(name, "" + adWebView.getTop());
@@ -227,7 +226,10 @@ public class AdWebView extends WebView
 	
 	protected void defaultOnAdClickHandler(AdWebView viev, String url)
 	{
-		// Caller will override this
+		if (adClickHandler != null)
+		{
+			adClickHandler.openUrlForBrowsing(getContext(), url);
+		}
 	}
 	
 	
@@ -250,7 +252,7 @@ public class AdWebView extends WebView
 	}
 	
 	
-	private class AdWebViewClient extends WebViewClient
+	final private class AdWebViewClient extends WebViewClient
 	{
 		private Context context;
 		
@@ -266,12 +268,21 @@ public class AdWebView extends WebView
 		{
 			try
 			{
-				adLog.log(MASTAdLog.LOG_LEVEL_2,MASTAdLog.LOG_TYPE_INFO,"OverrideUrlLoading",url);
-				if (adViewContainer.adDelegate.getAdClickEventHandler() != null)
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "OverrideUrlLoading",url);
+				MASTAdDelegate delegate = adViewContainer.getAdDelegate();
+				if (delegate != null)
 				{
-					if (adViewContainer.adDelegate.getAdClickEventHandler().onClickEvent((MASTAdView)adViewContainer, url) == false)
+					MASTAdDelegate.AdActivityEventHandler clickHandler = delegate.getAdActivityEventHandler(); 
+					if ( clickHandler != null)
 					{
-						// If click() method returns false, continue with default logic
+						if (clickHandler.onAdClicked((MASTAdView)adViewContainer, url) == false)
+						{
+							// If click() method returns false, continue with default logic
+							defaultOnAdClickHandler((AdWebView)view, url);
+						}
+					}
+					else
+					{
 						defaultOnAdClickHandler((AdWebView)view, url);
 					}
 				}
@@ -282,7 +293,7 @@ public class AdWebView extends WebView
 			}
 			catch(Exception e)
 			{
-				adLog.log(MASTAdLog.LOG_LEVEL_1, MASTAdLog.LOG_TYPE_ERROR, "shouldOverrideUrlLoading", e.getMessage());
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "shouldOverrideUrlLoading", e.getMessage());
 			}
 			
 			return true;
@@ -291,7 +302,7 @@ public class AdWebView extends WebView
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon)
 		{
-			System.out.println("AdWebView.onPageStarted: loading mraid js...");
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "loading javascript library");
 			
 			if (supportMraid)
 			{
@@ -315,7 +326,7 @@ public class AdWebView extends WebView
 					}
 					else
 					{
-						System.out.println("Video support enabled, but context is not an activity, so cannot adjust web view window properties for hardware acceleration");
+						adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "Video support enabled, but context is not an activity, so cannot adjust web view window properties for hardware acceleration");
 					}
 				} 
 				
@@ -339,7 +350,7 @@ public class AdWebView extends WebView
 				}
 				catch(Exception ex)
 				{
-					System.out.println("Error setting screen size information.");
+					adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageStarted", "Error setting screen size information.");
 				}
 				
 				// setMaxSize
@@ -352,7 +363,7 @@ public class AdWebView extends WebView
 				}
 				catch(Exception ex)
 				{
-					System.out.println("Error setting max size information.");
+					adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageStarted", "Error setting max size information.");
 				}
 			}
 			
@@ -364,23 +375,18 @@ public class AdWebView extends WebView
 		{	
 			//if(isAutoCollapse) setAdVisibility(View.VISIBLE);
 			
-			if (adViewContainer.adDelegate.getAdDownloadHandler() != null)
+			MASTAdDelegate delegate = adViewContainer.getAdDelegate();
+			if (delegate != null)
 			{
-				// XXX move this to when the ad is successfully received, before the content is injected??
-				// and only inject content if the ad view is attached to an activity already, otherwise save
-				// it for the on attached callback? XXX
-				adViewContainer.adDelegate.getAdDownloadHandler().onDownloadEnd((MASTAdView)adViewContainer);
+				MASTAdDelegate.AdDownloadEventHandler downloadHandler = delegate.getAdDownloadHandler(); 
+				if ( downloadHandler != null)
+				{
+					downloadHandler.onDownloadEnd((MASTAdView)adViewContainer);
+				}
 			}
 
 			if (supportMraid)
-			{
-				// XXX is this ever used?
-				if (dataToInject != null)
-				{
-					// This is used when expanding to a outside URL where we need to load the mraid library?
-					injectJavaScript(dataToInject);
-				}
-		
+			{	
 				// setDefaultPosition
 				try
 				{
@@ -398,7 +404,7 @@ public class AdWebView extends WebView
 				}
 				catch(Exception ex)
 				{
-					System.out.println("Error setting default position information.");
+					adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageStarted", "Error setting default position information.");
 				}
 				
 				// set default resize properties (width/height) 
@@ -421,9 +427,14 @@ public class AdWebView extends WebView
 		{
 			super.onReceivedError(view, errorCode, description, failingUrl);
 		
-			if (adViewContainer.adDelegate.getAdDownloadHandler() != null)
+			MASTAdDelegate delegate = adViewContainer.getAdDelegate();
+			if (delegate != null)
 			{
-				adViewContainer.adDelegate.getAdDownloadHandler().onDownloadError((MASTAdView)adViewContainer, description);
+				MASTAdDelegate.AdDownloadEventHandler downloadHandler = delegate.getAdDownloadHandler();
+				if (downloadHandler != null)
+				{
+					downloadHandler.onDownloadError((MASTAdView)adViewContainer, description);
+				}
 			}
 		}
 	}

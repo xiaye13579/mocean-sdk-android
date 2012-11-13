@@ -5,7 +5,10 @@ package com.MASTAdView;
 
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,7 +36,7 @@ import com.MASTAdView.core.AdWebView;
  * other described in this documentation.
  * <P>
  * In addition, a number of properties control the display and behavior of ad content after it has been delivered to
- * the SDK. These parameters are manipulated through methods in this class itself; examples are the addCloseToBanner()
+ * the SDK. These parameters are manipulated through methods in this class itself; examples are the showCloseButton()
  * method and others documented here. Finally, the developer can obtain references to the actual text, image or web
  * view object that will display ads with the getAdTextView(), getAdImageView() or getAdWebView() methods. With these
  * objects the full range of standard Android view properties are available for manipulation (for advanced developers only!)
@@ -42,7 +45,8 @@ public class MASTAdView extends AdViewContainer
 {
 	/**
 	 * Create ad view/container for displaying ads obtained through this SDK. This is the normal signature
-	 * a developer uses when setting up ad views using a code-only approach.
+	 * a developer uses when setting up inline (banner) ad views using a code-only approach. Use the update()
+	 * method to fetch ad content after the view is configured.
 	 * @param context - The reference to the context of Activity; NOTE a context object will work for most purposes, but some device specific tasks (such as orientation or location handling) only work if this is an actual activity reference.
 	 * @param site - The id of the publisher site (presets the standard ad request site property).
 	 * @param zone - The id of the zone of publisher site  (presets the standard ad request zone property).
@@ -51,14 +55,31 @@ public class MASTAdView extends AdViewContainer
 	{
 		super(context, site, zone);
 	}
+
+	
+	/**
+	 * Create ad view/container for displaying ads obtained through this SDK. This is the normal signature
+	 * a developer uses when setting up interstitial (full screen transitional) ad views using a code-only
+	 * approach. Use the update() method to fetch ad content after the view is configured, and then the
+	 * showInterstitial() method to display the ad.
+	 * @param context - The reference to the context of Activity; NOTE a context object will work for most purposes, but some device specific tasks (such as orientation or location handling) only work if this is an actual activity reference.
+	 * @param site - The id of the publisher site (presets the standard ad request site property).
+	 * @param zone - The id of the zone of publisher site  (presets the standard ad request zone property).
+	 * @param isInterstitial - Flag indicating this will be used for an interstitial ad placement (if true).
+	 */
+	public MASTAdView(Context context, Integer site, Integer zone, boolean isInterstitial)
+	{
+		super(context, site, zone, isInterstitial);
+	}
 	
 	
 	/**
 	 * Create ad view/container for displaying ads obtained through this SDK.
 	 * This signature is used when creating an ad view from an XML template.
-	 * @param context
-	 * @param attrs
-	 * @param defStyle
+	 * It is not necessary to manually invoke update() in this case, the SDK performs an implicit update for ad views created via an XML layout.
+	 * @param context The reference to the context of Activity; NOTE a context object will work for most purposes, but some device specific tasks (such as orientation or location handling) only work if this is an actual activity reference.
+	 * @param attrs XML layout attribute parameter
+	 * @param defStyle XML layout default style parameter
 	 */
 	public MASTAdView(Context context, AttributeSet attrs, int defStyle)
 	{
@@ -69,8 +90,9 @@ public class MASTAdView extends AdViewContainer
 	/**
 	 * Create ad view/container for displaying ads obtained through this SDK.
 	 * This signature is used when creating an ad view from an XML template.
-	 * @param context
-	 * @param attrs
+	 * It is not necessary to manually invoke update() in this case, the SDK performs an implicit update for ad views created via an XML layout.
+	 * @param context The reference to the context of Activity; NOTE a context object will work for most purposes, but some device specific tasks (such as orientation or location handling) only work if this is an actual activity reference.
+	 * @param attrs XML layout attribute parameter
 	 */
 	public MASTAdView(Context context, AttributeSet attrs)
 	{
@@ -81,7 +103,8 @@ public class MASTAdView extends AdViewContainer
 	/**
 	 * Create ad view/container for displaying ads obtained through this SDK.
 	 * This signature is used when creating an ad view from an XML template.
-	 * @param context
+	 * It is not necessary to manually invoke update() in this case, the SDK performs an implicit update for ad views created via an XML layout.
+	 * @param context The reference to the context of Activity; NOTE a context object will work for most purposes, but some device specific tasks (such as orientation or location handling) only work if this is an actual activity reference.
 	 */
 	public MASTAdView(Context context)
 	{
@@ -90,8 +113,9 @@ public class MASTAdView extends AdViewContainer
 
 	
 	/**
-	 * Request new ad content from the back-end. The network transactions will be performed in a background (non-UI)
-	 * thread to prevent slowing down or locking up the application UI, and once new content is available the display
+	 * Request new ad content from the back-end immediately, canceling any outstanding request for content
+	 * from this ad view. The network transactions will be performed in a background (non-UI) thread to
+	 * prevent slowing down or locking up the application UI, and once new content is available the display
 	 * of the ad will automatically run on the UI thread again.
 	 */
 	public void update()
@@ -99,9 +123,23 @@ public class MASTAdView extends AdViewContainer
 		super.update();
 	}
 
-
+	
 	/**
-	 * Set banner refresh interval (in seconds). Once an ad has finished loading, the timer starts
+	 * Request new ad content from the back-end immediately, canceling any outstanding request for content
+	 * from this ad view, and set a refresh interval (in seconds) for fetching new ads if the ad view remains idle.
+	 * The network transactions will be performed in a background (non-UI) thread to prevent slowing down or locking up
+	 * the application UI, and once new content is available the display of the ad will automatically run on the UI thread again.
+	 * @param interval Ad refresh interval (in seconds), same as invoking setUpdateTime().
+	 */
+	public void updateWithInterval(int interval)
+	{
+		super.setUpdateTime(interval);
+		super.update();
+	}
+
+	
+	/**
+	 * Set ad refresh interval (in seconds). Once an ad has finished loading, the timer starts
 	 * and a new ad will be loaded after this amount of time has elapsed. Default 120 seconds.
 	 * If 0, ads are not updated automatically (use the update() method for a manual update.)
 	 * If less than 0, the default value will be used instead.
@@ -116,28 +154,37 @@ public class MASTAdView extends AdViewContainer
 	 *  Show interstitial ad, which appears as a full screen and will popup over top of the current application activity.
 	 *  A standard close button will be included as specified by the MRAID standard.
 	 *  NOTE: you do not need to add the view to a layout when used for interstitial ads.
+	 *  NOTE: can only be used for ad views created with the isInterstitial property set to true.
 	 */
-	public void show()
+	public void showInterstitial()
 	{
-		super.show();
+		super.showInterstitial(0);
 	}
 	
-
+	
 	/**
-	 * Set log level to one of the log level values defined in he MASTAdLog class
-     * (corresponding to errors, errors + warnings, or everything including server traffic.)
-     * The SDK is instrumented with diagnostics logging that can assist with troubleshooting
-     * integration problems. Log messages are sent to the system logging interface (viewable
-     * with logcat) and an in-memory log of recent messages is stored for easy access.
-     * @see MASTAdLog See the MASTAdLog class for more information about logging.
-	 * @param logLevel Int log level to control which messages will be sent to the logs.
+	 *  Show interstitial ad, which appears as a full screen and will popup over top of the current application activity,
+	 *  and then automatically close the interstitial ad after duration seconds have elapsed.
+	 *  A standard close button will be included as specified by the MRAID standard.
+	 *  NOTE: you do not need to add the view to a layout when used for interstitial ads.
+	 *  NOTE: can only be used for ad views created with the isInterstitial property set to true.
 	 */
-	public void setLogLevel(int logLevel)
+	public void showInterstitial(int withDuration)
 	{
-		super.setLogLevel(logLevel);
+		super.showInterstitial(withDuration);
 	}
-
 	
+	
+	/**
+	 * Close an interstitial ad view.
+	 * NOTE: can only be used for ad views created with the isInterstitial property set to true.
+	 */
+	public void closeInterstitial()
+	{
+		super.closeInterstitial();
+	}
+	
+
 	/**
 	 * Get reference to the web view object used when displaying rich media ads. Advanced developers can use this to
 	 * customize the display and behavior of that control with the full range of standard view attributes supported
@@ -150,11 +197,11 @@ public class MASTAdView extends AdViewContainer
 	
 	
 	/**
-	 * Get reference to the image view object used when displaying image only ads. Advanced developers can use this to
+	 * Get reference to the view object used when displaying image only ads. Advanced developers can use this to
 	 * customize the display and behavior of that control with the full range of standard view attributes supported
 	 * by the Android system. Do not alter this object unless you know what you are doing!
 	 */
-	public ImageView getAdImageView()
+	public View getAdImageView()
 	{
 		return super.getAdImageView();
 	}
@@ -201,20 +248,20 @@ public class MASTAdView extends AdViewContainer
 	 */
 	public MASTAdRequest getAdRequest()
 	{
-		return adserverRequest;
+		return super.getAdRequest();
 	}
 
 	
 	/**
 	 * Get ad delegate object which developers can use to extend and/or interact with
 	 * feature and functions of the SDK ad handling, such as ad download callbacks,
-	 * MRAID event notifications, etc.
+	 * rich media event notifications, etc.
 	 * @see MASTAdDelegate See the MASTAdDelegate class for more information.
 	 * @return Object encapsulating various delegate interfaces and get/set methods.
 	 */
 	public MASTAdDelegate getAdDelegate()
 	{
-		return adDelegate;
+		return super.getAdDelegate();
 	}
 
 	
@@ -234,59 +281,8 @@ public class MASTAdView extends AdViewContainer
 	{
 		return super.getLastResponse();
 	}
-
-	
-	/**
-	 * Get current delay (in seconds) after which interstitial ad views will automatically close.
-	 * Default is 0, which means do not close automatically.
-	 */
-	public int getAutoCloseInterstitialTime()
-	{
-		return autoCloseInterstitialTime;
-	}
 	
 	
-	/**
-	 * Set a delay (in seconds) after which interstitial ad views will automatically close.
-	 * Default is 0, which means do not close automatically.
-	 */
-	public void setAutoCloseInterstitialTime(int time)
-	{
-		autoCloseInterstitialTime = time;
-	}
-	
-	
-	/**
-	 * Get current delay (in seconds) before which interstitial ad views will show the close button.
-	 * Default is 0, which means do not delay.
-	 */
-	public int getShowCloseInterstitialTime()
-	{
-		return showCloseInterstitialTime;
-	}
-	
-	
-	/**
-	 * Set a delay (in seconds) before which interstitial ad views will show the close button.
-	 * Default is 0, which means do not delay.
-	 */
-	public void setShowCloseInterstitialTime(int time)
-	{
-		showCloseInterstitialTime = time;
-	}
-	
-	
-	/**
-	 * Set ad placement value which rich media ads can use to determine if they are operating in a banner (inline)
-	 * or interstitial (full screen transitional) context. Use true for interstitial, false for banner. Default is false
-	 * for banner ads.
-	 */
-	public void setAdPlacementInterstitial(boolean isInterstitial)
-	{
-		super.setAdPlacementInterstitial(isInterstitial);
-	}
-	
-		
 	/**
 	 * Turn location detection on or off. If enabled, the device GPS location capabilities will be used to obtain
 	 * a position fix at least one. Ongoing location updates may continue depending on the minimum wait and minimum
@@ -300,13 +296,119 @@ public class MASTAdView extends AdViewContainer
 	{
 		super.setLocationDetection(detect, minWaitMillis, minMoveMeters);
 	}
+
+	
+	/**
+	 * Turn location detection on or off. If enabled, the device GPS location capabilities will be used to obtain
+	 * a position fix at least one. Ongoing location updates may continue, based on default minimum wait and minimum
+	 * distance settings. If user-specified latitude and/or longitude values have been set, and location detection
+	 * is enabled, the detected location will override preset values.
+	 * @param detect If true, location detection is enabled.
+	 */
+	public void setLocationDetection(boolean detect)
+	{
+		super.setLocationDetection(detect, MASTAdConstants.DEFAULT_LOCATION_REPEAT_WAIT, MASTAdConstants.DEFAULT_LOCATION_REPEAT_DISTANCE);
+	}
+	
+	
+	/**
+	 * Return current location detection state.
+	 * NOTE: This may be flase even if previously enabled, if device permissions/features do not support location detection.
+	 */
+	public boolean getLocationDetection()
+	{
+		return super.getLocationDetection();
+	}
 	
 
 	/**
-	 * Control if a close button will be displayed on a banner ad, or not. Default is false.
+	 * Provide a custom close button setup by the application for display on ad views in place of the default button
+	 * created by the SDK.
 	 */
-	public void addCloseToBanner(boolean flag)
+	public void setCustomCloseButton(Button closeButton)
 	{
-		super.addCloseToBanner(flag);
+		super.setCustomCloseButton(closeButton);
+	}
+
+	
+	/**
+	 * Get reference to any configured custom close button previously setup by the application developer.
+	 * @return Button custom close button object
+	 */
+	public Button getCustomCloseButton()
+	{
+		return super.getCustomCloseButton();
+	}
+	
+	
+	/**
+	 * Control if a close button will be displayed on a banner ad, or not.
+	 * Default is false. The setting applies for all subsequent updates.
+	 */
+	public void showCloseButton(boolean flag)
+	{
+		super.showCloseButton(flag, 0);
+	}
+	
+	
+	/**
+	 * Control if a close button will be displayed on a banner ad or not, and specify a
+	 * delay (in seconds) before which the button becomes visible. 
+	 * Default is false, and no delay. The setting applies for all subsequent updates.
+	 */
+	public void showCloseButton(int afterDelay)
+	{
+		super.showCloseButton(true, afterDelay);
+	}
+	
+	
+	/**
+	 * When URLs are opened as a result of a banner clikc (or the rich media open method) should an internal
+	 * SDK browser be used (true) or the default browser application configured on the device (false).
+	 */
+	public void setUseInternalBrowser(boolean flag)
+	{
+		super.setUseInternalBrowser(flag);
+	}
+	
+	
+	/**
+	 * Get current use internal browser setting.
+	 * @return True if intenral browser is to be used, false if default device browser application.
+	 */
+	public boolean getUseInternalBrowser()
+	{
+		return super.getUseInternalBrowser();
+		
+	}
+	
+	
+	/**
+	 * Reset all settings to default. Afer this, the ad view is essentially "new" and must be configured again before use.
+	 */
+	public void reset()
+	{
+		super.reset();
+	}
+	
+	
+	/**
+	 * Optional.
+	 * Set image resource which will be shown during ad loading if there is no ad content already visible.
+	 * @param resource Resource identifier for default image.
+	 */
+	public void setDefaultImageResource(Integer resource)
+	{
+		super.setDefaultImageResource(resource);
+	}
+	
+	
+	/**
+	 * Get any default image resource, if one has been configured.
+	 * @return Default image resource id, or NULL if none has been configured by the application.
+	 */
+	public Integer getDefaultImageResource()
+	{
+		return super.getDefaultImageResource();
 	}
 }

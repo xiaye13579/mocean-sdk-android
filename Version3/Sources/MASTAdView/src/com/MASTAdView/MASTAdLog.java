@@ -1,4 +1,4 @@
-//
+
 // Copyright (C) 2011, 2012 Mocean Mobile. All Rights Reserved. 
 //
 package com.MASTAdView;
@@ -6,6 +6,8 @@ package com.MASTAdView;
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
+
+import com.MASTAdView.core.AdViewContainer;
 
 import android.os.Environment;
 import android.util.Log;
@@ -18,48 +20,25 @@ import android.view.View;
  * reporting problem it is helpful to capture this diagnostic information to aid with
  * debugging and resolution.
  */
-public class MASTAdLog {
-	
+final public class MASTAdLog
+{	
 	/**
 	 * Log level value to turn logging off. The default.
 	 */
-	public static final int LOG_LEVEL_NONE =0;
+	public static final int LOG_LEVEL_NONE = 0;
 	
 	/**
 	 * Log level value to log errors only.
 	 */
-	public static final int LOG_LEVEL_1 =1;
+	public static final int LOG_LEVEL_ERROR = 1;
 	
 	/**
-	 * Log level value to log errors and warnings.
+	 * Log level value to log errors and debug information
 	 */
-	public static final int LOG_LEVEL_2 =2;
-	
-	/**
-	 * Log level value to log errors, warnings and server traffic.
-	 */
-	public static final int LOG_LEVEL_3 =3;
-	
-	/**
-	 * Log value associated with errors.
-	 */
-	public static final int LOG_TYPE_ERROR =1;
-	
-	/**
-	 * Log value associated with warnings. 
-	 */
-	public static final int LOG_TYPE_WARNING =2;
-	
-	/**
-	 * Log value associated with misc. diagnostics information (server traffic, etc.)
-	 */
-	public static final int LOG_TYPE_INFO =3;
+	public static final int LOG_LEVEL_DEBUG = 2;
 	
 	private int CurrentLogLevel = 0;
-	//private String AppName="";
-	private static String defaultLogFileName =  Environment.getExternalStorageDirectory().getAbsolutePath() + "/mOcean-sample-log.txt";
-	private static boolean loggingToFile = false;
-	private View adView;
+	private AdViewContainer adView = null;
 	
 	private static int DefaultLevel = LOG_LEVEL_NONE;
 	
@@ -74,71 +53,66 @@ public class MASTAdLog {
     
     /**
      * Set default log level to one of the log level values defined in he MASTAdLog class
-     * (corresponding to errors, errors + warnings, or everything including server traffic.)
+     * (corresponding to errors only, or everything including server traffic.)
      * 
      * @param logLevel Int log level to set as the default value (initially NONE).
      */
-	public static void setDefaultLogLevel(int logLevel)
+    synchronized public static void setDefaultLogLevel(int logLevel)
 	{
 		DefaultLevel = logLevel;
-		if ((logLevel > 0) && (loggingToFile == false))
-		{
-			setFileLog(defaultLogFileName); // log to default file
-		}
 	}
 	
-	/**
-	 * Enable debug logging to the named file.
-	 * @param fileName String file name, must be a full pathname to a writable file.
-	 */
-	public static void setFileLog(String fileName)
-	{
-		if ((fileName == null) || (fileName.length() < 1))
-		{
-			return;
-		}
-		
-		try {     
-			File filename = new File(fileName);
-			if (filename.exists()) filename.delete();
-			filename.createNewFile();
-			String cmd = "logcat -v time -f "+filename.getAbsolutePath(); // + " com.MASTAdView.";
-			Runtime.getRuntime().exec(cmd);
-			loggingToFile = true;
-			//log(LOG_LEVEL_1,LOG_TYPE_INFO,"SetFileLog","Logging to file: " + fileName);
-			//System.out.println("Logging to file: " + fileName);
-		} catch (IOException e) { 
-				e.printStackTrace(); 
-		}
-	}
-
+    
 	/**
 	 * Construct logging object.
 	 * @param adView Base view object associated with logging
 	 */
-	public MASTAdLog(View adView)
+	public MASTAdLog(AdViewContainer adView)
 	{
 		this.adView =  adView;
 		setLogLevel(DefaultLevel);
 	}
 	
+	
 	/**
 	 * Log a message
-	 * @param Level Int logging level, from 0 (none) to 3 (errors, warnings and server traffic)
-	 * @param Type Log Int message type, 1 (error, 2 (warning) or 3 (info) 
+	 * @param Level Int logging level, from 0 (none) to 2 (errors, warnings and server traffic)
 	 * @param tag String log message tag
 	 * @param msg String log message detail
 	 */
-	public void log(int Level, int Type, String tag, String msg)
-	{		
-		String resultTag = "["+Integer.toHexString(adView.hashCode())+"]"+ tag;
-		
-		if(Level<=CurrentLogLevel)
+	public void log(int Level, String tag, String msg)
+	{	
+		String resultTag;
+		if (adView != null)
 		{
-			switch(Type)
+			resultTag = "["+Integer.toHexString(adView.hashCode())+"]"+ tag;
+		}
+		else
+		{
+			resultTag = "[ default ]"+ tag;
+		}
+		 
+		// Notify app if delegate is defined
+		MASTAdDelegate delegate = adView.getAdDelegate();
+		if (delegate != null)
+		{
+	        MASTAdDelegate.LogEventHandler logHandler = delegate.getLogEventHandler(); 
+			if (logHandler != null)
 			{
-			case LOG_TYPE_ERROR: Log.e(resultTag, msg+' '); break;
-			case LOG_TYPE_WARNING: Log.w(resultTag, msg+' ');break;
+				boolean logEvent = logHandler.onLogEvent(Level, resultTag + msg);
+				if (!logEvent)
+				{
+					System.out.println(resultTag + msg); // at least write to console for emulator/debugger
+					return;
+				}
+			}
+		}
+		
+		if (Level <= getLogLevel())
+		{
+			switch(Level)
+			{
+			case LOG_LEVEL_ERROR: Log.e(resultTag, msg+' '); break;
 			default:
 				Log.i(resultTag, msg+' ');
 			}
@@ -147,30 +121,45 @@ public class MASTAdLog {
 		}
 	}
 
+	
 	/**
-	 * Set log message level to be recorded; log events at a higher level are ignored.
-	 * @param logLevel Int log level to be recorded
+	 * Get the current level for events that will be added to the log.
+	 * 
+	 * @return log level for events to be recorded
 	 */
-	public void setLogLevel(int logLevel)
+	synchronized public int getLogLevel()
+	{
+		return CurrentLogLevel;
+	}
+	
+	
+	/**
+	 * Set log level to one of the log level values defined in he MASTAdLog class
+     * (corresponding to errors, errors + warnings, or everything including server traffic.)
+     * The SDK is instrumented with diagnostics logging that can assist with troubleshooting
+     * integration problems. Log messages are sent to the system logging interface (viewable
+     * with logcat) and an in-memory log of recent messages is stored for easy access.
+     * @see MASTAdLog See the MASTAdLog class for more information about logging.
+	 * @param logLevel Int log level to control which messages will be sent to the logs.
+	 */
+	synchronized public void setLogLevel(int logLevel)
 	{
 		CurrentLogLevel = logLevel;
 		switch(logLevel)
 		{
-		case LOG_LEVEL_1:log(LOG_LEVEL_1,LOG_TYPE_INFO,"SetLogLevel","LOG_LEVEL_1");break;
-		case LOG_LEVEL_2:log(LOG_LEVEL_1,LOG_TYPE_INFO,"SetLogLevel","LOG_LEVEL_2");break;
-		case LOG_LEVEL_3:log(LOG_LEVEL_1,LOG_TYPE_INFO,"SetLogLevel","LOG_LEVEL_3");break;
+		case LOG_LEVEL_ERROR:
+			log(logLevel, "SetLogLevel", "LOG_LEVEL_ERROR");
+			break;
+		case LOG_LEVEL_DEBUG:
+			log(logLevel, "SetLogLevel", "LOG_LEVEL_DEBUG");
+			break;
 		default:
-			log(LOG_LEVEL_1,LOG_TYPE_INFO,"SetLogLevel","LOG_LEVEL_NONE");
-		}
-		
-		if ((logLevel > 0) && (loggingToFile == false))
-		{
-			setFileLog(defaultLogFileName); // log to default file
+			log(logLevel, "SetLogLevel", "LOG_LEVEL_NONE");
 		}
 	}
 	
 
-	private void logInternal(String message)
+	synchronized private void logInternal(String message)
 	{
 		if (inMemoryLog == null)
 		{
@@ -191,11 +180,12 @@ public class MASTAdLog {
         }
 	}
 
+	
 	/**
 	 * Get maximum number of messages to keep in memory
 	 * @return Current count setting
 	 */
-	public static int getMaximumlogCount()
+	synchronized public static int getMaximumlogCount()
 	{
 		return maximumInMemoryLogCount;
 	}
@@ -204,7 +194,7 @@ public class MASTAdLog {
 	 * Set maximum number of messages to keep in memory
 	 * @param value Maximum message count
 	 */
-	public static void setMaximumLogCount(int value)
+	synchronized public static void setMaximumLogCount(int value)
 	{
 		maximumInMemoryLogCount = value;
 	}
@@ -213,7 +203,7 @@ public class MASTAdLog {
 	 * Get reference to in-memory log informatoin
 	 * @return Vector of log message strings
 	 */
-	public static Vector<String> getInternalLogs()
+	synchronized public static Vector<String> getInternalLogs()
 	{
 		return inMemoryLog;
 	}
@@ -221,7 +211,7 @@ public class MASTAdLog {
 	/**
 	 * Clear internal log messages
 	 */
-	public static void clearInternalLogs()
+	synchronized public static void clearInternalLogs()
 	{
 		if (inMemoryLog != null)
 		{

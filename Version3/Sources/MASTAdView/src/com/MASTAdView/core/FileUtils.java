@@ -12,10 +12,12 @@ import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.MASTAdView.MASTAdLog;
+
 import android.content.Context;
 
 
-public class FileUtils
+final public class FileUtils
 {
 	
 	public static String md5(String data)
@@ -27,7 +29,11 @@ public class FileUtils
 			byte[] messageDigest = digester.digest();
 			return byteArrayToHexString(messageDigest);
 		}
-		catch(NoSuchAlgorithmException e) {	}
+		catch(NoSuchAlgorithmException e)
+		{
+			MASTAdLog logger = new MASTAdLog(null);
+			logger.log(MASTAdLog.LOG_LEVEL_ERROR, "FileUtils.md5 - exception", e.getMessage());
+		}
 		
 		return null;
 	}
@@ -48,7 +54,7 @@ public class FileUtils
 	
 	public static String readTextFromJar(Context context, String source)
 	{
-		System.out.println("Reading file from jar: " + source);
+		//System.out.println("Reading file from jar: " + source);
 		
 		try
 		{	
@@ -66,7 +72,9 @@ public class FileUtils
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
+			MASTAdLog logger = new MASTAdLog(null);
+			logger.log(MASTAdLog.LOG_LEVEL_ERROR, "FileUtils.readTextFromJar - exception", e.getMessage());
 		}
 		
 		return null;
@@ -75,7 +83,7 @@ public class FileUtils
 	
 	public static String copyTextFromJarIntoAssetDir(Context context, String alias, String source)
 	{
-		System.out.println("Copying file to assets: " + source);
+		//System.out.println("Copying file to assets: " + source);
 		
 		try
 		{
@@ -85,7 +93,9 @@ public class FileUtils
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
+			MASTAdLog logger = new MASTAdLog(null);
+			logger.log(MASTAdLog.LOG_LEVEL_ERROR, "FileUtils.copyTextFromJar - exception", e.getMessage());
 		}
 		
 		return null;

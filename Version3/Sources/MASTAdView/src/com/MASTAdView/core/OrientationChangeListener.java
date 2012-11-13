@@ -12,12 +12,12 @@ import android.view.Display;
 import android.view.OrientationEventListener;
 
 
-public class OrientationChangeListener extends OrientationEventListener
+final public class OrientationChangeListener extends OrientationEventListener
 {
-	private Context context;
+	final private Context context;
 	private static OrientationChangeListener instance = null;
 	private int lastOrientation = ORIENTATION_UNKNOWN;
-	private ArrayList<AdViewContainer> observedViews;
+	final private ArrayList<AdViewContainer> observedViews;
 	
 	
 	public OrientationChangeListener(Context context, Display display)
@@ -41,7 +41,7 @@ public class OrientationChangeListener extends OrientationEventListener
 	}
 	
 	
-	public void addView(AdViewContainer ad)
+	synchronized public void addView(AdViewContainer ad)
 	{
 		observedViews.add(ad);
 	}
@@ -56,7 +56,7 @@ public class OrientationChangeListener extends OrientationEventListener
 	 * 
 	 * 
 	 * 
-	 * XXX we don't are about the angle, just want to latch on to the device orientation itself
+	 * XXX we don't care about the angle, just want to latch on to the device orientation itself
 	 * 
 	 * 
 	 * 
@@ -71,15 +71,18 @@ public class OrientationChangeListener extends OrientationEventListener
 		
 		if (screenOrientation != lastOrientation)
 		{
-			// Orientation has changed, update each observed ad view
-			lastOrientation = screenOrientation;
-		
-			Iterator<AdViewContainer> i = observedViews.iterator();
-			AdViewContainer ad;
-			while (i.hasNext())
+			synchronized(this)
 			{
-				ad = i.next();
-				ad.onOrientationChange(orientation, screenOrientation);
+				// Orientation has changed, update each observed ad view
+				lastOrientation = screenOrientation;
+			
+				Iterator<AdViewContainer> i = observedViews.iterator();
+				AdViewContainer ad;
+				while (i.hasNext())
+				{
+					ad = i.next();
+					ad.onOrientationChange(orientation, screenOrientation);
+				}
 			}
 		}
 	}

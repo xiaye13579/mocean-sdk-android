@@ -14,11 +14,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.MASTAdView.MASTAdConstants;
+import com.MASTAdView.MASTAdLog;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-public class AdData
+final public class AdData
 {
 	// recognized ad type names
 	public static final String typeNameImage 				= "image";
@@ -33,7 +34,7 @@ public class AdData
 	public String 				clickUrl 					= null;
 	public String 				text 						= null;
 	public String 				imageUrl 					= null;
-	public Bitmap 				imageBitmap 				= null;
+	volatile public Bitmap 		imageBitmap 				= null;
 	public String 				trackUrl 					= null;
 	public String 				richContent 				= null;
 	public String 				error 						= null;
@@ -41,7 +42,7 @@ public class AdData
 	public String 				responseData 				= null;
 	
 	
-	public boolean hasContent()
+	synchronized public boolean hasContent()
 	{
 		if (adType != null)
 		{
@@ -75,7 +76,7 @@ public class AdData
 	}
 	
 	
-	public void setAdTypeByName(String typeName)
+	synchronized public void setAdTypeByName(String typeName)
 	{
 		if (typeName.compareTo(typeNameImage) == 0)
 		{
@@ -104,7 +105,7 @@ public class AdData
 	}
 	
 	
-	public String getAdTypeName()
+	synchronized public String getAdTypeName()
 	{
 		switch(adType)
 		{
@@ -124,14 +125,17 @@ public class AdData
 	}
 
 	
-	public void setImage(String url)
+	synchronized public void setImage(String url, boolean prefetch)
 	{
 		imageUrl = url;
-		imageBitmap = fetchImage(url);
+		if (prefetch)
+		{
+			imageBitmap = fetchImage(url);
+		}
 	}
 	
 	
-	public void setImage(String url, Bitmap bitmap)
+	synchronized public void setImage(String url, Bitmap bitmap)
 	{
 		imageUrl = url;
 		imageBitmap = bitmap;
@@ -142,10 +146,13 @@ public class AdData
 	{		
 		try
 		{
-			System.out.println("Fetcing URL: " + fromUrl);
-			
+			//System.out.println("Fetcing URL: " + fromUrl);
 			HttpClient httpclient = new DefaultHttpClient();  
     		HttpGet request = new HttpGet(fromUrl);
+    		
+    		// Always include our user agent header, if needed
+    		// XXX request.setHeader(header) XXX
+    		
     		HttpResponse response = httpclient.execute(request);     
     		StatusLine statusLine = response.getStatusLine();    
     		if (statusLine.getStatusCode() == 200)
@@ -155,7 +162,9 @@ public class AdData
 		}
 		catch(Exception e)
 		{
-			System.out.println("Fetcher: generic exception: " + e.getMessage());
+			//System.out.println("Fetcher: generic exception: " + e.getMessage());
+			MASTAdLog logger = new MASTAdLog(null);
+			logger.log(MASTAdLog.LOG_LEVEL_ERROR, "AdData.fetchUrl exception", e.getMessage());
 		}
 		
 		return null;
@@ -207,9 +216,7 @@ public class AdData
 	
 	public static Bitmap fetchImage(String url)
 	{
-		//System.out.println("Start fetch URL for: " + url);
 		InputStream is = fetchUrl(url);
-		//System.out.println("Done fetch URL");
 		
 		if (is != null)
 		{
@@ -236,7 +243,7 @@ public class AdData
 	}
 	
 	
-	public String toString()
+	synchronized public String toString()
 	{
 		StringBuffer sb = new StringBuffer();
 		sb.append("Ad: type=" + getAdTypeName());

@@ -6,12 +6,14 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 import org.json.JSONObject;
 
+import com.MASTAdView.MASTAdLog;
+
 import android.content.Context;
 
 
 // The MraidInterface class provides the java app with an interface to manipulate the environment
 // for rich media ads per the MRAID 2.0 specification.
-public class MraidInterface
+final public class MraidInterface
 {
 	// Features that mraid ads can take advantage of, if this instance supports them
 	public enum FEATURES
@@ -70,10 +72,20 @@ public class MraidInterface
 		{ DESCRIPTION, LOCATION, SUMMARY, START, END }
 
 	
+	// "action" values to use when firing error events for MRAID
+	public static final String MRAID_ERROR_ACTION_RESIZE		= "resize";
+	public static final String MRAID_ERROR_ACTION_CLOSE			= "close";
+	public static final String MRAID_ERROR_ACTION_HIDE			= "hide";
+	public static final String MRAID_ERROR_ACTION_EXPAND		= "expand";
+	public static final String MRAID_ERROR_ACTION_OPEN			= "open";
+	public static final String MRAID_ERROR_ACTION_PLAYVIDEO		= "playVideo";
+	public static final String MRAID_ERROR_ACTION_CREATE_EVENT	= "createCalendarEvent";
+	
+	
 	private PLACEMENT_TYPES adPlacementType;
-	private AdViewContainer adView;
-	private AdWebView webView;
-	private Context context;
+	final private AdViewContainer adView;
+	final private AdWebView webView;
+	final private Context context;
 	private STATES adState;
 	private DeviceFeatures deviceFeatures;
 	
@@ -93,9 +105,9 @@ public class MraidInterface
 	//
 	
 	
-	public void setDeviceFeatures()
+	synchronized public void setDeviceFeatures()
 	{
-		deviceFeatures = new DeviceFeatures(context);
+		deviceFeatures = new DeviceFeatures(context, adView);
 
 		String name;
 		for (MraidInterface.FEATURES feature : MraidInterface.FEATURES.values())
@@ -106,7 +118,7 @@ public class MraidInterface
 	}
 
 	
-	public DeviceFeatures getDeviceFeatures()
+	synchronized public DeviceFeatures getDeviceFeatures()
 	{
 		return deviceFeatures;
 	}
@@ -144,6 +156,7 @@ public class MraidInterface
 	public void fireErrorEvent(String message, String action)
 	{
 		//String name = get_EVENTS_name(EVENTS.ERROR);
+		adView.getLog().log(MASTAdLog.LOG_LEVEL_DEBUG, "MraidInterface.errorEvent", message + ":" + action);
 		webView.injectJavaScript("mraid.fireErrorEvent(\"" + message + "\",\"" + action + "\");");
 	}
 	
@@ -197,7 +210,6 @@ public class MraidInterface
 			adPlacementType = type;
 		}
 		String name = get_PLACEMENT_TYPES_name(type);
-		System.out.println("MraidInterface: set placement type to: " + name);
 		webView.injectJavaScript("mraid.setPlacementType(\"" + name + "\");");
 	}
 		
@@ -267,7 +279,7 @@ public class MraidInterface
 		}
 		catch (Exception ex)
 		{
-			System.out.println("Exception setting current position: " + ex.getMessage());
+			adView.getLog().log(MASTAdLog.LOG_LEVEL_ERROR, "JavascriptInterface setCurrentPosition - exception", ex.getMessage()); 
 		}		
 	}
 	
@@ -310,7 +322,7 @@ public class MraidInterface
 				}
 				catch(Exception ex)
 				{
-					System.out.println("Exception creating json object: " + ex.getMessage());
+					adView.getLog().log(MASTAdLog.LOG_LEVEL_ERROR, "JavascriptInterface setPropertiesFromList - exception", ex.getMessage());
 					return;
 				}
 			}
@@ -323,8 +335,7 @@ public class MraidInterface
 	
 	public void close()
 	{
-		System.out.println("MraidInterface: close");
-		
+		//System.out.println("MraidInterface: close");
 		webView.injectJavaScript("mraid.close();");
 	}
 	

@@ -21,10 +21,8 @@ import com.MASTAdView.core.ContentManager;
  * <A HREF="http://developer.moceanmobile.com/Mocean_Ad_Request_API">a variety of additional parameters</A>.
  * Any of these additional parameters can be set via the "generic" custom parameters object, below.
  */
-public class MASTAdRequest
+final public class MASTAdRequest
 {	
-	// required
-	
 	/**
 	 *  The id of the publisher site, obtained from the Mocean customer account representative.
 	 *  THIS IS A REQUIRED VALUE.
@@ -46,26 +44,28 @@ public class MASTAdRequest
 	public final static String parameter_userAgent 		= "ua";
 	
 	/**
-	 * Maximum width of ad to be requested from server.
+	 * Maximum width of ad to be requested from server. The SDK will set this automatically based on the
+	 * ad view properties, but the developer can override it.
 	 */
 	public final static String parameter_size_x 		= "size_x";
 	
 	/**
-	 * Maximum height of ad to be requested from server.
+	 * Maximum height of ad to be requested from server. The SDK will set this automatically based on the
+	 * ad view properties, but the developer can override it.
 	 */
 	public final static String parameter_size_y 		= "size_y";
 	
 	/**
 	 * SDK version. This is set automatically by the SDK.
-	 * DO NOT CHANGE THIS VALUE.
+	 * DO NOT CHANGE THIS VALUE (CONSIDER IT READ ONLY.)
 	 */
 	public final static String parameter_version 		= "version";
 	
 	/**
 	 * Number of ads to return in an ad request response. Always set to 1 by the SDK.
-	 * DO NOT CHANGE THIS VALUE.
+	 * DO NOT CHANGE THIS VALUE (CONSIDER IT READ ONLY.)
 	 */
-	public final static String parameter_count			= "count";
+	private final static String parameter_count			= "count";
 	
 	/**
 	 * URL of ad server this ad view will use when communicating with back end.
@@ -87,19 +87,7 @@ public class MASTAdRequest
 	public final static String parameter_longitude 		= "long";
 	
 	/**
-	 * Set the type of ads to be returned from the back-end, using 1 or more of the type values
-	 * AD_TYPE_TEXt, AD_TYPE_IMAGE, or AD_TYPE_RICHMEDIA from the MASTAdConstants class. Values
-	 * can be combined using a binary OR to include more than one type.
-	 */
-	public final static String parameter_type 			= "type";
-	
-	/**
-	 * Timeout value for ad request handling on the back-end server side.
-	 */
-	public final static String parameter_ad_call_timeout = "timeout";
-	
-	/**
-	 * Test mode flag, for requesting test ads from server.
+	 * Test mode flag, for requesting test ads from server. OPTIONAL, defaults to OFF.
 	 */
 	public final static String parameter_test 			= "test";
 	
@@ -107,14 +95,14 @@ public class MASTAdRequest
 	 * Custom parameter map which can be used to send arbitrary key/value pairs to the back-end.
 	 * The custom parameter value is a Map<String,String> managed by the application developer. 
 	 */
-	public final static String parameter_custom = "custom_parameters";
+	public final static String parameter_ad_request = "ad_request_parameters";
 	
 	
-	private Map<String, String> parameters = new HashMap<String, String>();
+	final private Map<String, String> parameters = new HashMap<String, String>();
 	private Map<String, String> customParameters;
 	
 	
-	private MASTAdLog AdLog;
+	final private MASTAdLog AdLog;
 	private String adserverURL = MASTAdConstants.adserverURL;
 	
 	
@@ -130,6 +118,17 @@ public class MASTAdRequest
 
 	
 	/**
+	 * Reset all values
+	 */
+	public synchronized void reset()
+	{
+		parameters.clear();
+		customParameters.clear();
+		adserverURL = MASTAdConstants.adserverURL;
+	}
+	
+	
+	/**
 	 * Return the value for the named property.
 	 * @param name Name of property to return, using one of the defined parameter values in this class.
 	 * @return Object (usually a string, except in the case of custom_parameters) requested.
@@ -138,7 +137,7 @@ public class MASTAdRequest
 	{
 		if ((name == null) || (name.length() < 1))
 		{
-			AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
+			AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, "null name");
 			return null; // can't work with unnamed parameter
 		}
 		
@@ -146,7 +145,7 @@ public class MASTAdRequest
 		{
 			return adserverURL;
 		}
-		else if (name.compareTo(parameter_custom) == 0)
+		else if (name.compareTo(parameter_ad_request) == 0)
 		{
 			return customParameters;
 		}
@@ -208,7 +207,7 @@ public class MASTAdRequest
 	{
 		boolean result = false;
 		
-		System.out.println("setPropertyInternal: name=" + name + ", value=" + value); // XXX
+		// System.out.println("setPropertyInternal: name=" + name + ", value=" + value);
 		
 		if (name.compareTo(parameter_count) == 0)
 		{
@@ -239,7 +238,7 @@ public class MASTAdRequest
 	{
 		if ((name == null) || (name.length() < 1))
 		{
-			AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
+			AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, "null name");
 			return false;
 		}
 		
@@ -262,11 +261,11 @@ public class MASTAdRequest
 	{
 		if ((name == null) || (name.length() < 1))
 		{
-			AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
+			AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, "null name");
 			return false;
 		}
 		
-		if (name.compareTo(parameter_custom) == 0)
+		if (name.compareTo(parameter_ad_request) == 0)
 		{
 			customParameters = value;
 			return true;
@@ -286,7 +285,7 @@ public class MASTAdRequest
 	{
 		if ((name == null) || (name.length() < 1))
 		{
-			AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
+			AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, "null name");
 			return false;
 		}
 		
@@ -316,7 +315,7 @@ public class MASTAdRequest
 	{
 		if ((name == null) || (name.length() < 1))
 		{
-			AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, "null name");
+			AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, "null name");
 			return false;
 		}
 		
@@ -366,7 +365,7 @@ public class MASTAdRequest
 		{
 			if ((value == null) || (value.length() < 1))
 			{
-				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_not_empty);
+				AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_not_empty);
 				return false;
 			}
 		}
@@ -374,7 +373,7 @@ public class MASTAdRequest
 		{
 			if (value == null)
 			{
-				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_not_null);
+				AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_not_null);
 				return false;
 			}
 		}
@@ -392,7 +391,7 @@ public class MASTAdRequest
 				
 				if ((lon < -90) || (lon > 90))
 				{
-					AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": valid: -90<=double<=90");
+					AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, name + ": valid: -90<=double<=90");
 					return false;
 				}
 			}
@@ -408,7 +407,7 @@ public class MASTAdRequest
 		{
 			if ((value == null) || (value < 1))
 			{
-				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
+				AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
 				return false;
 			}
 		}
@@ -416,7 +415,7 @@ public class MASTAdRequest
 		{
 			if ((value == null) || (value < 1))
 			{
-				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
+				AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
 				return false;
 			}
 		}
@@ -424,15 +423,7 @@ public class MASTAdRequest
 		{
 			if ((value == null) || (value < 1))
 			{
-				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
-				return false;
-			}
-		}
-		else if (name.compareTo(parameter_type) == 0)
-		{
-			if ((value == null) || (value < 0) || (value > 8))
-			{
-				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": valid: 1<=int<=7, 1 - text, 2 - image, 4 - richmedia ad, set combinations as sum of this values");
+				AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
 				return false;
 			}
 		}
@@ -440,7 +431,7 @@ public class MASTAdRequest
 		{
 			if ((value != null) && (value < 1))
 			{
-				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
+				AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
 				return false;
 			}
 		}
@@ -448,7 +439,7 @@ public class MASTAdRequest
 		{
 			if ((value != null) && (value < 1))
 			{
-				AdLog.log(MASTAdLog.LOG_LEVEL_3, MASTAdLog.LOG_TYPE_ERROR, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
+				AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
 				return false;
 			}
 		}
@@ -499,7 +490,7 @@ public class MASTAdRequest
 	
 	private void appendParameters(StringBuilder builderToString, Map<String, String> parameters)
 	{
-		if(parameters != null)
+		if (parameters != null)
 		{
 			Set<String> keySet = parameters.keySet();
 			

@@ -9,7 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 
 
-public class AdMessageHandler extends Handler
+final public class AdMessageHandler extends Handler
 {
 	// Messages sent to and processed by handler
 	public static final int	MESSAGE_RESIZE 		= 1000;
@@ -36,15 +36,14 @@ public class AdMessageHandler extends Handler
 	public static final String PLAYBACK_URL 	= "playback.Url";
 		
 	
-	private AdViewContainer adView;
-	private MraidInterface mraidInterface;
+	final private AdViewContainer adView;
+	private MraidInterface mraidInterface = null;
 	
 	
 	public AdMessageHandler(AdViewContainer parent)
 	{
 		super();
 		adView = parent;
-		mraidInterface = null;
 	}
 	
 	
@@ -52,7 +51,7 @@ public class AdMessageHandler extends Handler
 	// so that operations such as open/expand/resize can be performed on the UI thread. Can also be used by other
 	// background threads to run code on UI thread when needed.
 	@Override
-	public void handleMessage(Message msg)
+	synchronized public void handleMessage(Message msg)
 	{
 		String error = null;
 		Bundle data = msg.getData();
@@ -62,7 +61,6 @@ public class AdMessageHandler extends Handler
 			mraidInterface = adView.getAdWebView().getMraidInterface();
 		}
 		
-		
 		switch (msg.what)
 		{
 			case MESSAGE_RESIZE:
@@ -70,7 +68,7 @@ public class AdMessageHandler extends Handler
 				error = adView.resize(data); 
 				if (error != null)
 				{
-					mraidInterface.fireErrorEvent(error, "resize"); // XXX string 
+					mraidInterface.fireErrorEvent(error, MraidInterface.MRAID_ERROR_ACTION_RESIZE);
 				}
 				break;
 			}				
@@ -79,7 +77,7 @@ public class AdMessageHandler extends Handler
 				error = adView.close(data);
 				if (error != null)
 				{
-					mraidInterface.fireErrorEvent(error, "close"); // XXX string 
+					mraidInterface.fireErrorEvent(error, MraidInterface.MRAID_ERROR_ACTION_CLOSE);
 				}
 				break;
 			}
@@ -88,7 +86,7 @@ public class AdMessageHandler extends Handler
 				error = adView.hide(data);
 				if (error != null)
 				{
-					mraidInterface.fireErrorEvent(error, "hide"); // XXX string 
+					mraidInterface.fireErrorEvent(error, MraidInterface.MRAID_ERROR_ACTION_HIDE); 
 				}
 				break;
 			}
@@ -98,7 +96,7 @@ public class AdMessageHandler extends Handler
 				error = adView.show(data);
 				if (error != null)
 				{
-					mraidInterface.fireErrorEvent(error, "show"); // XXX string 
+					mraidInterface.fireErrorEvent(error, "show"); 
 				}
 				break;
 			}
@@ -108,7 +106,7 @@ public class AdMessageHandler extends Handler
 				error = adView.expand(data);
 				if (error != null)
 				{
-					mraidInterface.fireErrorEvent(error, "expand"); // XXX string 
+					mraidInterface.fireErrorEvent(error, MraidInterface.MRAID_ERROR_ACTION_EXPAND); 
 				}
 				break;
 			}
@@ -117,27 +115,16 @@ public class AdMessageHandler extends Handler
 				error = adView.open(data);
 				if (error != null)
 				{
-					mraidInterface.fireErrorEvent(error, "open"); // XXX string 
+					mraidInterface.fireErrorEvent(error, MraidInterface.MRAID_ERROR_ACTION_OPEN); 
 				}
 				break;
 			}
-			/*
-			case MESSAGE_PLAY_AUDIO:
-			{
-				error = adView.playAudio(data);
-				if (error != null)
-				{
-					mraidInterface.fireErrorEvent(error, "Mraid.PlayAudio()"); // XXX string 
-				}
-				break;
-			}
-			*/
 			case MESSAGE_PLAY_VIDEO:
 			{
 				error = adView.playVideo(data);
 				if (error != null)
 				{
-					mraidInterface.fireErrorEvent(error, "playVideo"); // XXX string 
+					mraidInterface.fireErrorEvent(error, MraidInterface.MRAID_ERROR_ACTION_PLAYVIDEO); 
 				}
 				break;
 			}
@@ -146,7 +133,7 @@ public class AdMessageHandler extends Handler
 				error = adView.createCalendarEvent(data);
 				if (error != null)
 				{
-					mraidInterface.fireErrorEvent(error, "createCalendarEvent"); // XXX string 
+					mraidInterface.fireErrorEvent(error, MraidInterface.MRAID_ERROR_ACTION_CREATE_EVENT); 
 				}
 				break;
 			}
@@ -154,7 +141,6 @@ public class AdMessageHandler extends Handler
 			{
 				String errorMessage = data.getString(ERROR_MESSAGE);
 				String action = data.getString(ERROR_ACTION);
-				System.out.println("Handler.Error: msg=" + msg + ", action=" + action);
 				mraidInterface.fireErrorEvent(errorMessage, action);
 				break;
 			}

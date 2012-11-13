@@ -10,21 +10,25 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Handler;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
 
-public class AdDialogFactory
+final public class AdDialogFactory
 {
-	private Context context;
+	final private Context context;
 	private Dialog  dialog;
-	private Handler handler;
+	final private Handler handler;
+	final AdViewContainer adViewContainer;
 	
 	
-	public AdDialogFactory(Context context)
+	public AdDialogFactory(Context context, AdViewContainer topContainer)
 	{
 		this.context = context;
+		adViewContainer = topContainer;
+		
 		handler = new Handler();
 	}
 	
@@ -99,28 +103,44 @@ public class AdDialogFactory
 		}
 		else
 		{
-			// Setup close button
-			closeButton = new Button(context);
-			
-			// Mraid spec requires min. 50 pixel height and width for close area
-			closeButton.setMinHeight(50);
-			closeButton.setMinWidth(50);
-			
-			if ((options != null) && (options.closeLabel != null))
+			if ((options != null) && (options.customClose != null) && (options.customClose))
 			{
-				closeButton.setText(options.closeLabel);
+				closeButton = new Button(context);
+				closeButton.setText("");
+				closeButton.setBackgroundColor(Color.TRANSPARENT);
+				
+				// Mraid spec requires min. 50 pixel height and width for close area
+				closeButton.setMinHeight(50);
+				closeButton.setMinWidth(50);
+			}
+			else if (adViewContainer.getCustomCloseButton() != null)
+			{
+				closeButton = adViewContainer.getCustomCloseButton();
+				if (closeButton.getParent() != null)
+				{
+					((ViewGroup)closeButton.getParent()).removeView(closeButton);
+				}
 			}
 			else
 			{
-				closeButton.setText("Close"); // XXX string
+				// Setup close button
+				closeButton = new Button(context);
+				
+				// Mraid spec requires min. 50 pixel height and width for close area
+				closeButton.setMinHeight(50);
+				closeButton.setMinWidth(50);
+				
+				if ((options != null) && (options.closeLabel != null))
+				{
+					closeButton.setText(options.closeLabel);
+				}
+				else 
+				{
+					closeButton.setText("Close"); // XXX string
+				}
 			}
-			
-			// If a custom close button is provided by the creative, make our button transparent but still active
-			if ((options != null) && (options.customClose != null) && (options.customClose))
-			{
-				closeButton.setText("");
-				closeButton.setBackgroundColor(Color.TRANSPARENT);
-			}
+					
+			closeButton.setOnClickListener(createCloseClickListener(ad, options));
 			
 			if ((options != null) && (options.showCloseDelay != null) && (options.showCloseDelay > 0))
 			{
@@ -151,40 +171,14 @@ public class AdDialogFactory
 			closeButton.setLayoutParams(createCloseLayoutParameters(options));
 			
 			adContainer.addView(closeButton);
-			closeButton.setOnClickListener(new View.OnClickListener()
-			{
-				@Override
-				public void onClick(View view)
-				{
-					System.out.println("dialog close click: dismissing...");
-					dialog.dismiss();
-					
-					AdWebView v;
-					if (ad instanceof AdWebView)
-					{
-						v = (AdWebView)ad;
-					}
-					else
-					{
-						v = ((AdViewContainer)ad).getAdWebView();
-					}
-					v.injectJavaScript("mraid.close();");
-					
-					if (options != null)
-					{
-						runRunnable(options.closeRunnable); // XXX not needed???
-					}
-				}
-			});
 		}
-		
+
 		dialog.setContentView(adContainer);
 		dialog.setOnDismissListener(new Dialog.OnDismissListener()
 		{
 			@Override
 			public void onDismiss(DialogInterface dialog)
 			{
-				System.out.println("dialog ondismiss ...");
 				//System.out.println("dialog ondismiss: removing views...");
 				//adContainer.removeAllViews();
 				if (options != null)
@@ -216,9 +210,38 @@ public class AdDialogFactory
 		
 		return dialog;
 	}
+
+	
+	private OnClickListener createCloseClickListener(final View ad, final DialogOptions options)
+	{
+		return new OnClickListener()
+		{
+			@Override
+			public void onClick(View view)
+			{
+				dialog.dismiss();
+				
+				AdWebView v;
+				if (ad instanceof AdWebView)
+				{
+					v = (AdWebView)ad;
+				}
+				else
+				{
+					v = ((AdViewContainer)ad).getAdWebView();
+				}
+				v.injectJavaScript("mraid.close();");
+				
+				if (options != null)
+				{
+					runRunnable(options.closeRunnable); // XXX not needed???
+				}
+			}
+		};	
+	}
 	
 	
-	private void runRunnable(Runnable worker)
+	synchronized private void runRunnable(Runnable worker)
 	{
 		if (worker != null)
 		{
@@ -233,7 +256,7 @@ public class AdDialogFactory
 	}
 	
 	
-	public static class DialogOptions
+	final public static class DialogOptions
 	{
 		Boolean  hideTitlebar		= null; 
 		Runnable closeRunnable 		= null;

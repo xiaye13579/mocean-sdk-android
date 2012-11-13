@@ -6,6 +6,9 @@ package com.MASTAdView.core;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.MASTAdView.MASTAdDelegate;
+import com.MASTAdView.MASTAdLog;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -13,10 +16,10 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 
-public class DeviceFeatures
+final public class DeviceFeatures
 {
-	private Context context;
-	
+	final private Context context;
+	final AdViewContainer adContainer;
 	
 	private Boolean cacheSmsSupport 		= null;
 	private Boolean cachePhoneSupport 		= null;
@@ -26,9 +29,10 @@ public class DeviceFeatures
 	private Boolean cacheVideoSupport 		= null;
 	
 	
-	public DeviceFeatures(Context context)
+	public DeviceFeatures(Context context, AdViewContainer container)
 	{
 		this.context = context;
+		adContainer = container;
 	}
 	
 	
@@ -55,6 +59,7 @@ public class DeviceFeatures
 	
 	
 	// Allow app developer to override system if desired
+	/*
 	public void setSupported(MraidInterface.FEATURES feature, Boolean value)
 	{
 		switch(feature)
@@ -73,14 +78,29 @@ public class DeviceFeatures
 			cacheVideoSupport = value;
 		}
 	}
-
+	*/
+	
 	
 	public boolean smsSupport()
 	{
+		MASTAdDelegate delegate = adContainer.getAdDelegate();
+		if (delegate != null)
+		{
+			MASTAdDelegate.FeatureSupportHandler handler = delegate.getFeatureSupportHandler();
+			
+			if (handler != null)
+			{
+				Boolean result = handler.shouldSupportSMS();
+				if (result != null)
+				{
+					return result.booleanValue();
+				}
+			}
+		}
+		
 		if (cacheSmsSupport == null)
 		{
 			cacheSmsSupport = context.checkCallingOrSelfPermission(android.Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
-			System.out.println("setSmsSupport: " + cacheSmsSupport);
 		}
 		
 		return cacheSmsSupport;
@@ -89,10 +109,24 @@ public class DeviceFeatures
 	
 	public boolean phoneSupport()
 	{
+		MASTAdDelegate delegate = adContainer.getAdDelegate();
+		if (delegate != null)
+		{
+			MASTAdDelegate.FeatureSupportHandler handler = delegate.getFeatureSupportHandler();
+			
+			if (handler != null)
+			{
+				Boolean result = handler.shouldSupportPhone();
+				if (result != null)
+				{
+					return result.booleanValue();
+				}
+			}
+		}
+		
 		if (cachePhoneSupport == null)
 		{
 			cachePhoneSupport = context.checkCallingOrSelfPermission(android.Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED;
-			System.out.println("setPhoneSupport: " + cachePhoneSupport);
 		}
 		
 		return cachePhoneSupport;
@@ -115,12 +149,26 @@ public class DeviceFeatures
 	
 	public boolean calendarSupport()
 	{
+		MASTAdDelegate delegate = adContainer.getAdDelegate();
+		if (delegate != null)
+		{
+			MASTAdDelegate.FeatureSupportHandler handler = delegate.getFeatureSupportHandler();
+			
+			if (handler != null)
+			{
+				Boolean result = handler.shouldSupportCalendar();
+				if (result != null)
+				{
+					return result.booleanValue();
+				}
+			}
+		}
+		
 		if (cacheCalendarSupport == null)
 		{
 			cacheCalendarSupport =
 					((context.checkCallingOrSelfPermission(android.Manifest.permission.WRITE_CALENDAR) == PackageManager.PERMISSION_GRANTED) &&
 					 (context.checkCallingOrSelfPermission(android.Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED));
-			System.out.println("setCalendarSupport: " + cacheCalendarSupport);
 		}
 		
 		return cacheCalendarSupport;
@@ -144,7 +192,8 @@ public class DeviceFeatures
 		catch (Exception ex)
 		{
 			String error = "Error creating calendar: " + ex.getMessage();
-			System.out.println(error);
+			MASTAdLog logger = new MASTAdLog(null);
+			logger.log(MASTAdLog.LOG_LEVEL_ERROR, "DeviceFeatures", error);
 			return error;
 		}
 			
@@ -156,7 +205,7 @@ public class DeviceFeatures
 	
 	
 	// Parse date strings
-	private Long parseDateString(String input)
+	synchronized private Long parseDateString(String input)
 	{
 		try
 		{
@@ -172,7 +221,8 @@ public class DeviceFeatures
 		}
 		catch(Exception ex)
 		{
-			System.out.println("Error parsing date: " + input + ", exception: " + ex.getMessage());
+			MASTAdLog logger = new MASTAdLog(null);
+			logger.log(MASTAdLog.LOG_LEVEL_ERROR, "DeviceFeatures exception parsing date", ex.getMessage());
 		}
 		
 		return System.currentTimeMillis();
@@ -250,10 +300,24 @@ public class DeviceFeatures
 	
 	public boolean storePictureSupport()
 	{
+		MASTAdDelegate delegate = adContainer.getAdDelegate();
+		if (delegate != null)
+		{
+			MASTAdDelegate.FeatureSupportHandler handler = delegate.getFeatureSupportHandler();
+			
+			if (handler != null)
+			{
+				Boolean result = handler.shouldSupportStorePicture();
+				if (result != null)
+				{
+					return result.booleanValue();
+				}
+			}
+		}
+		
 		if (cachePictureSupport == null)
 		{
-			cachePictureSupport = true; // XXX
-			System.out.println("setPictureSupport: " + cachePictureSupport);
+			cachePictureSupport = true;
 		}
 
 		return cachePictureSupport;
@@ -262,6 +326,21 @@ public class DeviceFeatures
 	
 	public boolean inlineVideoSupport()
 	{
+		MASTAdDelegate delegate = adContainer.getAdDelegate();
+		if (delegate != null)
+		{
+			MASTAdDelegate.FeatureSupportHandler handler = delegate.getFeatureSupportHandler();
+			
+			if (handler != null)
+			{
+				Boolean result = handler.shouldShouldPlayVideo();
+				if (result != null)
+				{
+					return result.booleanValue();
+				}
+			}
+		}
+		
 		if (cacheVideoSupport == null)
 		{
 			// Honeycomb and later OS versions can playback inline with hardware support
@@ -283,7 +362,6 @@ public class DeviceFeatures
 			{
 				cacheVideoSupport = false; // no inline video?
 			}
-			System.out.println("setVideoSupport: " + cacheVideoSupport);
 		}
 
 		return cacheVideoSupport;
@@ -298,7 +376,8 @@ public class DeviceFeatures
 		if (i.resolveActivity(context.getPackageManager()) == null)
 		{
 			String error = "No video playback handler found, skipping..."; // XXX string
-			System.out.println(error);
+			MASTAdLog logger = new MASTAdLog(null);
+			logger.log(MASTAdLog.LOG_LEVEL_ERROR, "DeviceFeatures", error);			
 			return error;
 		}
 		

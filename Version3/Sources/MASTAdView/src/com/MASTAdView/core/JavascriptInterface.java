@@ -15,6 +15,8 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
+import com.MASTAdView.MASTAdDelegate;
+import com.MASTAdView.MASTAdLog;
 import com.MASTAdView.MASTAdView;
 
 import android.content.Context;
@@ -26,25 +28,26 @@ import android.os.Message;
 
 
 // The javascript interface class exposes java methods so that they can be invoked from the javascript layer/ad creative
-public class JavascriptInterface
+final public class JavascriptInterface
 {
 	// Name used to attach java methods to javacsript; invocation of a java method from js
 	// looks like: AdWebView.method(parameters)
 	final private String JAVASCRIPT_METHOD_PREFIX = "AdWebView";
 		
 		
-	private AdViewContainer adView;
-	private AdWebView webView;
-	private Context context;
-
+	final private AdViewContainer adView;
+	final private AdWebView webView;
+	final private Context context;
+	final private MASTAdLog adLog;
+	
 	private List<NameValuePair> orientationProperties = null;
-	private Object orientationSyncObject = new Object();
+	final private Object orientationSyncObject = new Object();
 
 	private List<NameValuePair> expandProperties = null;
-	private Object expandSyncObject = new Object();
+	final private Object expandSyncObject = new Object();
 	
 	private List<NameValuePair> resizeProperties = null;
-	private Object resizeSyncObject = new Object();
+	final private Object resizeSyncObject = new Object();
 	
 	
 	// Construct interface
@@ -53,6 +56,7 @@ public class JavascriptInterface
 		adView = container;
 		this.webView = webView; 
 		context = adView.getContext();
+		adLog = adView.getLog();
 		
 		// Setup javascript -> java interface
 		webView.addJavascriptInterface(this, JAVASCRIPT_METHOD_PREFIX);
@@ -65,18 +69,20 @@ public class JavascriptInterface
 	//
 
 	
+	// Log a message
 	public void log(String message)
 	{
-		System.out.println("JavascriptInterface.log: " + message);
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface", "log message=" + message);
+		adView.richmediaEvent("log", message);
 	}
 	
-
+	
 	// Open (new) URL in full-screen internal (or external, by setting) browser window;
 	// the target URL does NOT expect to operate in an MRAID environment.
 	public void open(String url)
 	{
-		System.out.println("JavascriptInterface: open");
-		adView.mraidEvent("open", url);
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface", "open");
+		adView.richmediaEvent("open", url);
 	
 		synchronized(this)
 		{
@@ -96,8 +102,8 @@ public class JavascriptInterface
 	// Allow an ad to downgrade its state, and fire a state change event
 	public void close()
 	{
-		System.out.println("JavascriptInterface: close");
-		adView.mraidEvent("close", null);
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface", "close");
+		adView.richmediaEvent("close", null);
 		
 		synchronized(this)
 		{
@@ -109,11 +115,11 @@ public class JavascriptInterface
 	// Used by javascript code to pass orientation properties into the java app
 	public void setOrientationProperties(String encodedProperties)
 	{
-		adView.mraidEvent("setOrientationProperties", encodedProperties);
+		adView.richmediaEvent("setOrientationProperties", encodedProperties);
 		
 		synchronized (orientationSyncObject)
 		{
-			System.out.println("JavascriptInterface: setOrientationProperties: " + encodedProperties);
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface", "setOrientationProperties: " + encodedProperties);
 	
 			// The encoded property string is made up of key=value fragments joined with an '&',
 			// with each key and value portion being uri encoded (on the javascript side.) We
@@ -159,7 +165,7 @@ public class JavascriptInterface
 			}
 			catch(Exception ex)
 			{
-				System.out.println("Exception setting orientation properties from javascript: " + ex.getMessage() + " using: " + encodedProperties);
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "JavascriptInterface", "Exception setting orientation properties from javascript: " + ex.getMessage() + " using: " + encodedProperties);
 			}
 		}
 	}
@@ -168,11 +174,11 @@ public class JavascriptInterface
 	// Used by javascript code to pass expand properties into the java app
 	public void setExpandProperties(String encodedProperties)
 	{
-		adView.mraidEvent("setExpandProperties", encodedProperties);
+		adView.richmediaEvent("setExpandProperties", encodedProperties);
 		
 		synchronized (expandSyncObject)
 		{
-			System.out.println("JavascriptInterface: setExpandProperties: " + encodedProperties);
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface", "setExpandProperties: " + encodedProperties);
 	
 			// The encoded property string is made up of key=value fragments joined with an '&',
 			// with each key and value portion being uri encoded (on the javascript side.) We
@@ -187,7 +193,7 @@ public class JavascriptInterface
 			}
 			catch(Exception ex)
 			{
-				System.out.println("Exception setting expand properties from javascript: " + ex.getMessage() + " using: " + encodedProperties);
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "JavascriptInterface", "Exception setting expand properties from javascript: " + ex.getMessage() + " using: " + encodedProperties);
 			}
 		}
 	}
@@ -198,11 +204,11 @@ public class JavascriptInterface
 	// Ad state will change to expanded upon success (firing the state change event.)
 	public void expand(String url)
 	{
-		adView.mraidEvent("expand", url);
+		adView.richmediaEvent("expand", url);
 		
 		synchronized (expandSyncObject)
 		{
-			System.out.println("JavascriptInterface: expand");
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface", "expand");
 			
 		
 			// Notify ad view to perform resize on UI thread
@@ -221,11 +227,11 @@ public class JavascriptInterface
 	// Used by javascript code to pass resize properties into the java app
 	public void setResizeProperties(String encodedProperties, String sizeIsPixels)
 	{
-		adView.mraidEvent("setResizeProperties", encodedProperties);
+		adView.richmediaEvent("setResizeProperties", encodedProperties);
 		
 		synchronized (resizeSyncObject)
 		{
-			System.out.println("JavascriptInterface: setResizeProperties: " + encodedProperties);
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface", "setResizeProperties: " + encodedProperties);
 	
 			// The encoded property string is made up of key=value fragments joined with an '&',
 			// with each key and value portion being uri encoded (on the javascript side.) We
@@ -246,7 +252,7 @@ public class JavascriptInterface
 			}
 			catch(Exception ex)
 			{
-				System.out.println("Exception setting resize properties from javascript: " + ex.getMessage() + " using: " + encodedProperties);
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "JavascriptInterface", "Exception setting resize properties from javascript: " + ex.getMessage() + " using: " + encodedProperties);
 			}
 		}
 	}
@@ -258,11 +264,11 @@ public class JavascriptInterface
 	// as well as the size change event.)
 	public void resize()
 	{
-		adView.mraidEvent("resize", null);
+		adView.richmediaEvent("resize", null);
 		
 		synchronized (resizeSyncObject)
 		{
-			System.out.println("JavascriptInterface: resize");
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface", "resize");
 			
 			if ((resizeProperties == null) || (resizeProperties.isEmpty()))
 			{
@@ -283,11 +289,11 @@ public class JavascriptInterface
 	// get current postion for ad view
 	public String getCurrentPosition()
 	{
-		adView.mraidEvent("getCurrentPosition", null);
+		adView.richmediaEvent("getCurrentPosition", null);
 		
 		synchronized(this)
 		{
-			System.out.println("javascriptinterface: getCurrentPositon()");
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface", "getCurrentPositon()");
 			
 			int x = AdSizeUtilities.devicePixelToMraidPoint(adView.getLeft(), context);
 			int y = AdSizeUtilities.devicePixelToMraidPoint(adView.getTop(), context);
@@ -307,7 +313,7 @@ public class JavascriptInterface
 			}
 			catch (Exception ex)
 			{
-				System.out.println("Exception returning current position: " + ex.getMessage());
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "JavascriptInterface", "Exception returning current position: " + ex.getMessage());
 			}
 		}
 		
@@ -317,20 +323,25 @@ public class JavascriptInterface
 	
 	public void createCalendarEntry(String encodedProperties)
 	{
-		adView.mraidEvent("createCalendarEntry", encodedProperties);
+		adView.richmediaEvent("createCalendarEntry", encodedProperties);
 		
 		synchronized(this)
 		{
 			boolean approved = false;
-			if (adView.adDelegate.getUserApprovalRequestHandler() != null)
+			MASTAdDelegate delegate = adView.getAdDelegate();
+			if (delegate != null)
 			{
-				// XXX move this to UI thread???
-				approved = adView.adDelegate.getUserApprovalRequestHandler().onAddCalendarEntryEvent((MASTAdView)adView);
+				MASTAdDelegate.FeatureSupportHandler approvalHandler = delegate.getFeatureSupportHandler(); 
+				if ( approvalHandler != null)
+				{
+					// move this to UI thread???
+					approved = approvalHandler.shouldAddCalendarEntry((MASTAdView)adView, encodedProperties);
+				}
 			}
 			
 			if (approved)
 			{
-				System.out.println("JavascriptInterface: createCalendarEntry: " + encodedProperties);
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface", "createCalendarEntry: " + encodedProperties);
 			
 				// The encoded property string is made up of key=value fragments joined with an '&',
 				// with each key and value portion being uri encoded (on the javascript side.) We
@@ -350,7 +361,7 @@ public class JavascriptInterface
 				catch(Exception ex)
 				{
 					String error = "Exception creating calendar event javascript: " + ex.getMessage() + " using: " + encodedProperties;
-					System.out.println(error);
+					adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "JavascriptInterface", error);
 					webView.getMraidInterface().fireErrorEvent(error, "createCalendarEvent");
 				}
 			}
@@ -360,7 +371,7 @@ public class JavascriptInterface
 	
 	public void playVideo(String uri)
 	{
-		adView.mraidEvent("playVideo", uri);
+		adView.richmediaEvent("playVideo", uri);
 		
 		synchronized(this)
 		{
@@ -390,15 +401,16 @@ public class JavascriptInterface
 	
 	public boolean storePicture(final String uri)
 	{
-		adView.mraidEvent("storePicture", uri);
+		adView.richmediaEvent("storePicture", uri);
 		
 		synchronized(this)
 		{
 			boolean approved = false;
-			if (adView.adDelegate.getUserApprovalRequestHandler() != null)
+			MASTAdDelegate.FeatureSupportHandler approvalHandler = adView.getAdDelegate().getFeatureSupportHandler();
+			if (approvalHandler != null)
 			{
 				// XXX move this to UI thread???
-				approved = adView.adDelegate.getUserApprovalRequestHandler().onStorePictureEvent((MASTAdView)adView, uri);
+				approved = approvalHandler.shouldStorePicture((MASTAdView)adView, uri);
 			}
 			
 			if (approved)
@@ -423,7 +435,7 @@ public class JavascriptInterface
 						        		{
 						            		public void onScanCompleted(String path, Uri uri)
 						            		{
-						            			// XXX log scan of file
+						            			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface", "storePicture done, media scaner run"); 
 						            		}
 						        		});
 						        
@@ -432,7 +444,7 @@ public class JavascriptInterface
 						}
 						catch(Exception ex)
 						{
-							// log
+							adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "JavascriptInterface storePicture exception", ex.getMessage()); 
 							webView.getMraidInterface().fireErrorEvent("Error storing picture: " + ex.getMessage(), "storePicture");
 						}
 						
@@ -447,7 +459,7 @@ public class JavascriptInterface
 			}
 			else
 			{
-				// XXX log...
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface storePicture", "not allowed"); 
 				webView.getMraidInterface().fireErrorEvent("Storing picture not allowed for: " + uri, "storePicture");
 			}
 		}
@@ -543,7 +555,7 @@ public class JavascriptInterface
 
 	private Bundle convertResizeDimensionsToPixels(List<NameValuePair> list)
 	{
-		System.out.println("Converting resize properites to pixel values");
+		//System.out.println("Converting resize properites to pixel values");
 		
 		Bundle data = new Bundle();
 		
@@ -591,7 +603,7 @@ public class JavascriptInterface
 	
 	private void convertResizeDimensionsToPoints(List<NameValuePair> list)
 	{
-		System.out.println("Converting resize properites to point values");
+		//System.out.println("Converting resize properites to point values");
 		
 		if (list != null)
 		{
