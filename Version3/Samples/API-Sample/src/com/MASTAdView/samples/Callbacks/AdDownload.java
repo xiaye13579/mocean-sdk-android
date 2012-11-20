@@ -109,6 +109,12 @@ public class AdDownload extends Activity {
 			Log.d("Callback","error: "+arg0+"\n");
 			updateUi(mUpdateResults, "Error :" + arg0);
 		}
+
+		@Override
+		public void onAdViewable(MASTAdView arg0) {
+			Log.d("Callback", "end");
+			updateUi(mUpdateResults, "Ad Viewwable");
+		}
     }
     
     private Runnable mUpdateResults = new Runnable() {

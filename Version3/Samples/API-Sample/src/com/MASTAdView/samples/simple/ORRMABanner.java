@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import com.MASTAdView.MASTAdLog;
 import com.MASTAdView.MASTAdRequest;
 import com.MASTAdView.MASTAdView;
 import com.MASTAdView.samples.R;
@@ -59,7 +60,8 @@ public class ORRMABanner extends Activity {
         adserverView.setId(1);
         setAdLayoutParams();
         linearLayout.addView(adserverView);
-        //adserverView.setContentAlignment(true);
+        adserverView.getAdLog().setLogLevel(MASTAdLog.LOG_LEVEL_DEBUG);
+        adserverView.setLocationDetection(true, null, null);
 		adserverView.update();
         
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);

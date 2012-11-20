@@ -34,6 +34,8 @@ public class AdClickListener extends Activity {
 	private Button btnRefresh;
 	private int site = 19829;
 	private int zone = 88269;
+	volatile private String updateMessage;
+	
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +67,7 @@ public class AdClickListener extends Activity {
         adserverView = new MASTAdView(this, site, zone);
         adserverView.setId(1);
         setAdLayoutParams();
-        adserverView.getAdDelegate().setAdClickEventHandler(new UserOnAdClickListener());
+        adserverView.getAdDelegate().setAdActivityEventHandler(new UserAdActivityEventHandler());
         linearLayout.addView(adserverView);
         //adserverView.setContentAlignment(true);
 		adserverView.update();
@@ -83,27 +85,51 @@ public class AdClickListener extends Activity {
 		adserverView.update();
 	}
 	
-	String uMessage;
-    class UserOnAdClickListener implements MASTAdDelegate.AdClickEventHandler {
+	
+    class UserAdActivityEventHandler implements MASTAdDelegate.AdActivityEventHandler {
 		
 		private void updateUi(Runnable mUpdateResults, String string) {
-	    	uMessage = string;
+			updateMessage = string;
 	    	handler.post(mUpdateResults);
 		}
 
 		@Override
-		public boolean onClickEvent(MASTAdView arg0, String arg1) {
+		public void onAdAttachedToActivity(MASTAdView arg0) {
+			updateUi(mUpdateResults, "Ad attached to activity");
+		}
+
+		@Override
+		public boolean onAdClicked(MASTAdView arg0, String arg1) {
 			updateUi(mUpdateResults, "Click url = "+ arg1);
 			return false; // let SDK continue click processing
 		}
-    	
+
+		@Override
+		public void onAdCollapsed(MASTAdView arg0) {
+			updateUi(mUpdateResults, "Ad collapsed");
+		}
+
+		@Override
+		public void onAdDetachedFromActivity(MASTAdView arg0) {
+			updateUi(mUpdateResults, "Ad dettached from activity");
+		}
+
+		@Override
+		public void onAdExpanded(MASTAdView arg0, int arg1, int arg2) {
+			updateUi(mUpdateResults, "Ad expanded");
+		}
+
+		@Override
+		public void onAdResized(MASTAdView arg0, int arg1, int arg2) {
+			updateUi(mUpdateResults, "Ad resized");
+		}
     }
     
     private Runnable mUpdateResults = new Runnable() {
     	public void run() {
 	    	AlertDialog.Builder builder = new AlertDialog.Builder(context)
 			.setTitle("OnAdClickListener")
-			.setMessage(uMessage);
+			.setMessage(updateMessage);
 
 	    	DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
 				@Override

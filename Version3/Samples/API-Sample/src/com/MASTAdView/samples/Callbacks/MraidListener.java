@@ -66,7 +66,7 @@ public class MraidListener extends Activity {
         adserverView = new MASTAdView(this, site, zone);
         adserverView.setId(1);
         setAdLayoutParams();
-        adserverView.getAdDelegate().setMraidEventHandler(new UserOnMraidListener());
+        adserverView.getAdDelegate().setRichmediaEventHandler(new UserOnMraidListener());
         linearLayout.addView(adserverView);
         //adserverView.setContentAlignment(true);
 		adserverView.update();
@@ -85,7 +85,7 @@ public class MraidListener extends Activity {
 	}
 	
 	String uMessage;
-    class UserOnMraidListener implements MASTAdDelegate.MraidEventHandler {
+    class UserOnMraidListener implements MASTAdDelegate.RichmediaEventHandler {
 
 		private void updateUi(Runnable mUpdateResults, String string) {
 	    	uMessage = string;
@@ -93,7 +93,7 @@ public class MraidListener extends Activity {
 		}
 
 		@Override
-		public void onMraidEvent(MASTAdView arg0, String arg1, String arg2) {
+		public void onRichmediaEvent(MASTAdView arg0, String arg1, String arg2) {
 			updateUi(mUpdateResults, "event arg1 = " + arg1+ "\n arg2 = "+arg2);			
 		}
     }

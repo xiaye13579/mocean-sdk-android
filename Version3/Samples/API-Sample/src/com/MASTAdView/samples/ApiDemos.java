@@ -36,7 +36,7 @@ public class ApiDemos extends ListActivity {
         
         Intent intent = getIntent();
 
-        MASTAdLog.setDefaultLogLevel(MASTAdLog.LOG_LEVEL_3);
+        MASTAdLog.setDefaultLogLevel(MASTAdLog.LOG_LEVEL_DEBUG);
         MASTAdLog.setMaximumLogCount(500); // save up to 500 message in memory for display through app
         
         String path = intent.getStringExtra("com.MASTAdView.sample.Path");
@@ -66,7 +66,7 @@ public class ApiDemos extends ListActivity {
                 new int[] { android.R.id.text1 }));
         getListView().setTextFilterEnabled(true);
         
-        MASTAdLog.setDefaultLogLevel(MASTAdLog.LOG_LEVEL_3);
+        MASTAdLog.setDefaultLogLevel(MASTAdLog.LOG_LEVEL_DEBUG);
         
     }
 

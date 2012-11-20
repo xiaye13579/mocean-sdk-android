@@ -83,17 +83,23 @@ public class AdvancedAnimation extends Activity {
 			
 			@Override
 			public void onDownloadEnd(MASTAdView arg0) {
-				Animation animation = new TranslateAnimation(
-			            Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
-			            Animation.RELATIVE_TO_SELF, -1.0f, Animation.RELATIVE_TO_SELF, 0.0f
-			        );
-				animation.setDuration(2000);
-				adserverView.startAnimation(animation);	
+				// TODO Auto-generated method stub
+				
 			}
 			
 			@Override
 			public void onDownloadBegin(MASTAdView arg0) {
 				adserverView.startAnimation(animation);	
+			}
+
+			@Override
+			public void onAdViewable(MASTAdView arg0) {
+				Animation animation = new TranslateAnimation(
+			            Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
+			            Animation.RELATIVE_TO_SELF, -1.0f, Animation.RELATIVE_TO_SELF, 0.0f
+			        );
+				animation.setDuration(2000);
+				adserverView.startAnimation(animation);
 			}
 		});
         

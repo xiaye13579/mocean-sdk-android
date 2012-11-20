@@ -57,20 +57,20 @@ public class Interstitial extends Activity {
 					setAdLayoutParams();
 			        //adserverView.setContentAlignment(true);
 			        adserverView.update();
-					adserverView.show();
+					adserverView.showInterstitial();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
         
-        adserverView = new MASTAdView(this, site, zone);
+        adserverView = new MASTAdView(this, site, zone, true);
         adserverView.setId(1);
         setAdLayoutParams();
-        adserverView.setAutoCloseInterstitialTime(15);
+        //adserverView.setAutoCloseInterstitialTime(15);
         //adserverView.setContentAlignment(true);
         adserverView.update();
-		adserverView.show();
+		adserverView.showInterstitial(15);
         
         frameMain = (LinearLayout) findViewById(R.id.frameMain);
         BitmapDrawable background = (BitmapDrawable)getResources().getDrawable(R.drawable.repeat_bg);

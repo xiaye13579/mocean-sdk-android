@@ -161,6 +161,12 @@ public class RequestAndResponse extends Activity {
 					}
 				});
 			}
+
+			@Override
+			public void onAdViewable(MASTAdView arg0) {
+				// TODO Auto-generated method stub
+				
+			}
 		});        
         
         linearLayout.addView(adserverView);
