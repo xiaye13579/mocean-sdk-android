@@ -735,8 +735,6 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 				downloadHandler.onDownloadError((MASTAdView)this, ad.error);
 			}
 		}
-		
-		adReloadTimer.startTimer();
 
 		if (defaultImageResource != null)
 		{
@@ -750,13 +748,19 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			}
 		}
 		
+		adReloadTimer.startTimer();
+		
+		// Show previous ad?
+		if (lastResponse == null)
+		{
+			return;
+		}		
 		// If supposed to show previous ad on error, but no previous content, skip out
-		if ((lastResponse !=null) && (lastResponse.hasContent()) && !isShowPreviousAdOnError)
+		if ((lastResponse != null) && (lastResponse.hasContent()) && (lastResponse.error == null) && !isShowPreviousAdOnError)
 		{
 			return;
 		}
 		
-		// Show previous ad
 		setResult(lastResponse);
 		
 		return;

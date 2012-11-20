@@ -54,12 +54,6 @@ final public class OrientationChangeListener extends OrientationEventListener
 	 * and 270 degrees when its right side is to the top. ORIENTATION_UNKNOWN is returned when the
 	 * device is close to flat and the orientation cannot be determined.
 	 * 
-	 * 
-	 * 
-	 * XXX we don't care about the angle, just want to latch on to the device orientation itself
-	 * 
-	 * 
-	 * 
 	 */
 	public void onOrientationChanged(int orientation)
 	{

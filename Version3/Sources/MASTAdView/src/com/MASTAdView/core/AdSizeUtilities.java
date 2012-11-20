@@ -118,8 +118,6 @@ final public class AdSizeUtilities
 	// Display URL in a (non-MRAID) web view after fetching content using background thread
 	synchronized public String openInBackgroundThread(final AdDialogFactory.DialogOptions options, final String url)
 	{
-		System.out.println("Open, url=" + url); // XXX
-
 		final StringBuffer responseValue = new StringBuffer();
 		
 		Thread fetchUrl = new Thread()

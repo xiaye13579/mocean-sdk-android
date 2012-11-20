@@ -45,7 +45,7 @@ final public class MASTAdLog
 	// Maximum number of messages to keep in memory for review access through the app;
 	// keep this small by default to conserve memory usage. When debugging apps, callers
 	// can increase this value.
-	private static int maximumInMemoryLogCount = 200;
+	private static int maximumInMemoryLogCount = 100;
 	
 	// Store all diag info in private internal vector of strings
     private static Vector<String> inMemoryLog = null;
@@ -91,19 +91,24 @@ final public class MASTAdLog
 		{
 			resultTag = "[ default ]"+ tag;
 		}
-		 
+		
 		// Notify app if delegate is defined
-		MASTAdDelegate delegate = adView.getAdDelegate();
-		if (delegate != null)
+		if (adView != null)
 		{
-	        MASTAdDelegate.LogEventHandler logHandler = delegate.getLogEventHandler(); 
-			if (logHandler != null)
+			MASTAdDelegate delegate = adView.getAdDelegate();
+			if (delegate != null)
 			{
-				boolean logEvent = logHandler.onLogEvent(Level, resultTag + msg);
-				if (!logEvent)
+		        MASTAdDelegate.LogEventHandler logHandler = delegate.getLogEventHandler(); 
+				if (logHandler != null)
 				{
-					System.out.println(resultTag + msg); // at least write to console for emulator/debugger
-					return;
+					boolean logEvent = logHandler.onLogEvent(Level, resultTag + msg);
+					if (!logEvent)
+					{
+						// at least write to console for emulator/debugger
+						System.out.print(resultTag);
+						System.out.println(msg); 
+						return;
+					}
 				}
 			}
 		}
@@ -112,12 +117,12 @@ final public class MASTAdLog
 		{
 			switch(Level)
 			{
-			case LOG_LEVEL_ERROR: Log.e(resultTag, msg+' '); break;
+			case LOG_LEVEL_ERROR: Log.e(resultTag, msg); break;
 			default:
-				Log.i(resultTag, msg+' ');
+				Log.i(resultTag, msg);
 			}
 			
-			logInternal(resultTag + msg);
+			logInternal(msg);
 		}
 	}
 

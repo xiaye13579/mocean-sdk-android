@@ -164,7 +164,7 @@ final public class MraidInterface
 	// Tell ad that environment is ready, and change state from loading to default
 	public void fireReadyEvent()
 	{
-		// XXX latest spec has switched the order so that state change goes before ready event...
+		// latest spec has switched the order so that state change goes before ready event...
 		setState(STATES.DEFAULT);
 		
 		String name = get_EVENTS_name(EVENTS.READY);
