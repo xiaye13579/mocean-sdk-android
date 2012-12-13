@@ -349,9 +349,8 @@ final public class JavascriptInterface
 				// a real URI.
 				try
 				{
-					URI propertiesUri = new URI("http://calendar.event?" + encodedProperties);
-					List<NameValuePair> properties = URLEncodedUtils.parse(propertiesUri, "UTF-8"); 
-					Bundle dataBundle = listToDataBundle(properties);
+					JSONObject properties = new JSONObject(encodedProperties);
+					Bundle dataBundle = calendarParameteresToDataBundle(properties);
 					
 					// Notify ad view to perform action on UI thread
 					Message msg = adView.getHandler().obtainMessage(AdMessageHandler.MESSAGE_CREATE_EVENT);
@@ -471,6 +470,52 @@ final public class JavascriptInterface
 	//
 	// Support functions
 	//
+
+	
+	private Bundle calendarParameteresToDataBundle(JSONObject properties)
+	{
+		Bundle data = new Bundle();
+		
+		try
+		{
+			if (properties != null)
+			{
+				String name;
+				String value;
+				
+				// description
+				name = MraidInterface.get_CALENDAR_EVENT_PARAMETERS_name(MraidInterface.CALENDAR_EVENT_PARAMETERS.DESCRIPTION);
+				value = properties.getString(name);
+				data.putString(name, value);
+				
+				// summary
+				name = MraidInterface.get_CALENDAR_EVENT_PARAMETERS_name(MraidInterface.CALENDAR_EVENT_PARAMETERS.SUMMARY);
+				value = properties.getString(name);
+				data.putString(name, value);
+				
+				// location
+				name = MraidInterface.get_CALENDAR_EVENT_PARAMETERS_name(MraidInterface.CALENDAR_EVENT_PARAMETERS.LOCATION);
+				value = properties.getString(name);
+				data.putString(name, value);
+				
+				// start
+				name = MraidInterface.get_CALENDAR_EVENT_PARAMETERS_name(MraidInterface.CALENDAR_EVENT_PARAMETERS.START);
+				value = properties.getString(name);
+				data.putString(name, value);
+				
+				// end
+				name = MraidInterface.get_CALENDAR_EVENT_PARAMETERS_name(MraidInterface.CALENDAR_EVENT_PARAMETERS.END);
+				value = properties.getString(name);
+				data.putString(name, value);
+			}
+		}
+		catch(Exception ex)
+		{
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "JavascriptInterface", "Exception processing calendar event properties from javascript: " + ex.getMessage() + " using: " + properties.toString());
+		}
+		
+		return data;
+	}
 	
 	
 	// Convert a name value pair list to a name/value data bundle for passing through the handler interface

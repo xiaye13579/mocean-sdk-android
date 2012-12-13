@@ -40,7 +40,8 @@ window.mraid_init = function()
             info += encodeURIComponent(property) + '=' +
 		    encodeURIComponent(result[property]);
         }
-        
+    
+   		//console.log("returning: " + info);    
         return info;
     };
     
@@ -249,7 +250,7 @@ window.mraid_init = function()
     // MRAID
     mraid.getState = function()
     {
-        console.log("getState");
+        console.log("getState: value=" + state);
         
         return state;
     };
@@ -335,7 +336,7 @@ window.mraid_init = function()
     mraid.close = function()
     {
 		console.log("close");
-
+		
 		AdWebView.close();
     };
 
@@ -691,7 +692,7 @@ window.mraid_init = function()
 	// MRAID
 	mraid.storePicture = function(url)
 	{
-		if (mraid.support(FEATURES.STORE_PICTURE))
+		if (mraid.supports(FEATURES.STORE_PICTURE))
 		{
 			console.log("store picture: " + url);
 		
@@ -710,11 +711,9 @@ window.mraid_init = function()
 	
 	mraid.createCalendarEvent = function(parameters)
 	{
-		if (mraid.support(FEATURES.CALENDAR))
+		if (mraid.supports(FEATURES.CALENDAR))
 		{
-			console.log("create calendar event: " + parameters);
-		
-			AdWebView.createCalendarEntry(mraid.returnInfo(parameters));
+			AdWebView.createCalendarEntry(JSON.stringify(parameters));
 		}
 		else
 		{

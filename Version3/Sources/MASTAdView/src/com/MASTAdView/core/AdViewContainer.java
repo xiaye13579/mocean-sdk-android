@@ -3,6 +3,7 @@
 //
 package com.MASTAdView.core;
 
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -11,6 +12,7 @@ import org.apache.http.NameValuePair;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -18,9 +20,12 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.MailTo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.telephony.SmsManager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -940,7 +945,9 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			}
 				
 			// Return to default state
-			adWebView.getMraidInterface().setState(MraidInterface.STATES.DEFAULT);			
+			adWebView.getMraidInterface().setState(MraidInterface.STATES.DEFAULT);
+			adWebView.getMraidInterface().fireSizeChangeEvent(this.getWidth(), this.getHeight());
+			//adWebView.getMraidInterface().fireSizeChangeEvent(AdSizeUtilities.devicePixelToMraidPoint(this.getWidth(), context), AdSizeUtilities.devicePixelToMraidPoint(this.getHeight(), context));
 		}
 		else if (adState == MraidInterface.STATES.RESIZED)
 		{
@@ -968,6 +975,8 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			
 			// Return to default state
 			adWebView.getMraidInterface().setState(MraidInterface.STATES.DEFAULT);
+			adWebView.getMraidInterface().fireSizeChangeEvent(this.getWidth(), this.getHeight());
+			//adWebView.getMraidInterface().fireSizeChangeEvent(AdSizeUtilities.devicePixelToMraidPoint(this.getWidth(), context), AdSizeUtilities.devicePixelToMraidPoint(this.getHeight(), context));
 		}
 		else
 		{
@@ -1146,13 +1155,64 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	public String open(Bundle data)
 	{
 		String  url = data.getString(AdMessageHandler.OPEN_URL);
-
-		// Pass options for dialog through to creator
-		AdDialogFactory.DialogOptions options = new AdDialogFactory.DialogOptions();
-		options.backgroundColor = Color.BLACK;
-		options.noClose = true; // no add-on close function, just browser default
 		
-		return adSizeUtilities.openInBackgroundThread(options, url);
+		try
+		{
+			url = URLDecoder.decode(url, "UTF-8");
+			Uri uri = Uri.parse(url);
+			
+			// for "action" urls (sms, tel, mailto) just invoke, for others do a fetch/open
+			if (uri.getScheme().equalsIgnoreCase("mailto"))
+			{
+				MailTo mt = MailTo.parse(url);
+				Intent i = new Intent(Intent.ACTION_SEND);
+		        i.setType("text/plain");
+		        i.putExtra(Intent.EXTRA_EMAIL, new String[]{mt.getTo()});
+		        i.putExtra(Intent.EXTRA_SUBJECT, mt.getSubject());
+		        i.putExtra(Intent.EXTRA_CC, mt.getCc());
+		        i.putExtra(Intent.EXTRA_TEXT, mt.getBody());
+		        context.startActivity(i);
+		        
+            	return null;
+			}
+			else if (uri.getScheme().equalsIgnoreCase("sms"))
+			{
+				Intent i = new Intent(Intent.ACTION_VIEW);
+				i.setType("vnd.android-dir/mms-sms");
+				
+				// android doesn't parse these urls correctly for all os versions...
+				String phoneNumber = url.substring(4);
+				i.putExtra("address", phoneNumber);
+				
+				// smsIntent.putExtra("sms_body","Body of Message");
+				
+				context.startActivity(i);
+				
+				return null;
+			}
+			else if (uri.getScheme().equalsIgnoreCase("tel"))
+			{
+				Intent i = new Intent(Intent.ACTION_DIAL); // could use ACTION_CALL to immedidately place the call, but this is better
+				i.setData(uri);
+				context.startActivity(i);
+				
+				return null;
+			}
+			else
+			{
+				// Pass options for dialog through to creator
+				AdDialogFactory.DialogOptions options = new AdDialogFactory.DialogOptions();
+				options.backgroundColor = Color.BLACK;
+				options.noClose = true; // no add-on close function, just browser default
+				
+				return adSizeUtilities.openInBackgroundThread(options, url);
+			}
+		}
+		catch (Exception e)
+		{
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "openUrlInExternalBrowser","url=" + url +"; error="+e.getMessage());
+			return e.getMessage();
+		}
 	}
 	
 	

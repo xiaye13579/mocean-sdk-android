@@ -112,6 +112,8 @@ final public class AdDialogFactory
 				// Mraid spec requires min. 50 pixel height and width for close area
 				closeButton.setMinHeight(50);
 				closeButton.setMinWidth(50);
+
+				closeButton.setOnClickListener(createCloseClickListener(ad, options));
 			}
 			else if (adViewContainer.getCustomCloseButton() != null)
 			{
@@ -120,6 +122,10 @@ final public class AdDialogFactory
 				{
 					((ViewGroup)closeButton.getParent()).removeView(closeButton);
 				}
+				
+				
+				
+				closeButton.setOnClickListener(createCloseClickListener(ad, options));
 			}
 			else
 			{
@@ -138,39 +144,48 @@ final public class AdDialogFactory
 				{
 					closeButton.setText("Close"); // XXX string
 				}
-			}
-					
-			closeButton.setOnClickListener(createCloseClickListener(ad, options));
+				
+				
+				
+				closeButton.setOnClickListener(createCloseClickListener(ad, options));
+			}	
 			
 			if ((options != null) && (options.showCloseDelay != null) && (options.showCloseDelay > 0))
 			{
-				closeButton.setVisibility(View.INVISIBLE);
-				Thread closeThread = new Thread()
+				if (closeButton != null)
 				{
-					public void run()
+					closeButton.setVisibility(View.INVISIBLE);
+					Thread closeThread = new Thread()
 					{
-						try { Thread.sleep(options.showCloseDelay * 1000); } catch(Exception e) { }
-						handler.post(new Runnable()
+						public void run()
 						{
-							public void run()
+							try { Thread.sleep(options.showCloseDelay * 1000); } catch(Exception e) { }
+							handler.post(new Runnable()
 							{
-								closeButton.setVisibility(View.VISIBLE);
-							}
-						});
-					}
-				};
-				closeThread.setName("[AdDialogFactory] showCloseDelay");
-				closeThread.start();
+								public void run()
+								{
+									closeButton.setVisibility(View.VISIBLE);
+								}
+							});
+						}
+					};
+					closeThread.setName("[AdDialogFactory] showCloseDelay");
+					closeThread.start();
+				}
 			}
 			else
 			{
-				closeButton.setVisibility(View.VISIBLE);
+				if (closeButton != null)
+				{
+					closeButton.setVisibility(View.VISIBLE);
+				}
 			}
 			
-			
-			closeButton.setLayoutParams(createCloseLayoutParameters(options));
-			
-			adContainer.addView(closeButton);
+			if (closeButton != null)
+			{
+				closeButton.setLayoutParams(createCloseLayoutParameters(options));
+				adContainer.addView(closeButton);
+			}
 		}
 
 		dialog.setContentView(adContainer);
@@ -230,6 +245,7 @@ final public class AdDialogFactory
 				{
 					v = ((AdViewContainer)ad).getAdWebView();
 				}
+
 				v.injectJavaScript("mraid.close();");
 				
 				if (options != null)
