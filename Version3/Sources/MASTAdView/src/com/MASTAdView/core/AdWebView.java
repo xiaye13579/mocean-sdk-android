@@ -40,6 +40,7 @@ public class AdWebView extends WebView
 	private MraidInterface mraidInterface;
 	private String mraidScript;
 	private boolean mraidLoaded = false; // has mraid library been loaded?
+	private Object mraidLoadSync = new Object();
 	final private StringBuffer defferedJavascript;
 	private DisplayMetrics metrics;
 	final private boolean supportMraid;
@@ -91,6 +92,29 @@ public class AdWebView extends WebView
 			adClickHandler = new AdClickHandler(adViewContainer);
 		}
 	}
+
+	
+	public void setMraidLoaded(boolean value)
+	{
+		synchronized (mraidLoadSync)
+		{
+			mraidLoaded = value;
+			mraidLoadSync.notify();
+		}
+	}
+	
+	
+	public boolean getMraidLoaded()
+	{
+		boolean result = false;
+		
+		synchronized (mraidLoadSync)
+		{
+			result = mraidLoaded;
+		}
+		
+		return result;
+	}
 	
 	
 	public JavascriptInterface getJavascriptInterface()
@@ -111,7 +135,7 @@ public class AdWebView extends WebView
 		clearView();
 		defferedJavascript.setLength(0);
 		//mraidInterface.setState(MraidInterface.STATES.LOADING);
-		mraidLoaded = false;
+		setMraidLoaded(false);
 	}
 	
 	
@@ -138,7 +162,7 @@ public class AdWebView extends WebView
 		{
 			if (supportMraid)
 			{
-				if (mraidLoaded)
+				if (getMraidLoaded())
 				{
 					adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "injectJavascript", str);
 					loadUrl("javascript:" + str);
@@ -307,7 +331,15 @@ public class AdWebView extends WebView
 			if (supportMraid)
 			{
 				loadUrl("javascript:" + mraidScript);
-				mraidLoaded = true;
+				
+				// Wait for mraid loaded to be true, set by js bridge
+				if (!getMraidLoaded())
+				{
+					synchronized (mraidLoadSync)
+					{
+						try { mraidLoadSync.wait(); } catch (Exception e) { }
+					}
+				}
 				
 				mraidInterface.setDeviceFeatures();
 				if (mraidInterface.getDeviceFeatures().isSupported(MraidInterface.FEATURES.INLINE_VIDEO))

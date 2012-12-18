@@ -465,6 +465,15 @@ final public class JavascriptInterface
 		
 		return false;
 	}
+
+	
+	//
+	// Allow bridge to set mraid loaded flag
+	//
+	public void mraidLoaded()
+	{
+		webView.setMraidLoaded(true);		
+	}
 	
 	
 	//

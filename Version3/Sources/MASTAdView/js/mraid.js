@@ -733,7 +733,11 @@ window.mraid_init = function()
 		AdWebView.playVideo(url);
 	}
 	
-		    
+
+	// Set flag indicating mraid library loaded
+	AdWebView.mraidLoaded();
+	
+			    
 	// end of mraid_init routine
 };
 

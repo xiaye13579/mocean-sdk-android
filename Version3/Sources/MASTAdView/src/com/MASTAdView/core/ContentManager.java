@@ -123,7 +123,19 @@ final public class ContentManager
 		if (senderParameters.containsKey(consumer))
 		{
 			senderParameters.get(consumer).sender = null;
-			senderParameters.get(consumer).cTh.cancel();
+			ContentThread cTh = senderParameters.get(consumer).cTh;
+			if (cTh != null)
+			{
+				try
+				{
+					cTh.cancel();
+				}
+				catch(Exception ex)
+				{
+					MASTAdLog logger = new MASTAdLog(null);
+					logger.log(MASTAdLog.LOG_LEVEL_DEBUG, "ContentManager", "Error stopping thread, ignored...");
+				}
+			}
 			senderParameters.remove(consumer);
 		}
 	}
