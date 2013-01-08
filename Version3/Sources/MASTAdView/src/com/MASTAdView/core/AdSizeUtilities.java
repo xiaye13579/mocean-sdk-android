@@ -514,12 +514,15 @@ final public class AdSizeUtilities
 		parentContainer.getLocationOnScreen(bannerPosition);
 		offsetX += bannerPosition[0];
 		offsetY += bannerPosition[1];
+	
+		AdWebView adWebView = parentContainer.getAdWebView();
 		
 		if (!allowOffScreen)
 		{
 			// If needed, reposition to keep within screen width
 			// for example: offset = 120, toWdith = 600, screen width = 640
-			// in which case offset needs to be reduced by 80
+			// in which case offset needs to be reduced by 80.
+			// NOTE: for Y (vertical) axis, do not include the top title bar area
 			int delta = (offsetX + toWidth) - metrics.widthPixels; 
 			if (delta > 0)
 			{
@@ -533,8 +536,9 @@ final public class AdSizeUtilities
 				offsetX = 0;
 			}
 				
-			// and height, using same approach
-			delta = (offsetY + toHeight) - metrics.heightPixels; 
+			// And height, using same approach, but we don't allow encroaching into the status
+			// bar area at the top of the screen.
+			delta = (offsetY + toHeight) - (metrics.heightPixels - adWebView.getStatusBarHeight()); 
 			if (delta > 0)
 			{
 				offsetY = offsetY - delta;
@@ -547,7 +551,6 @@ final public class AdSizeUtilities
 		}
 		//System.out.println("!!! resizeWorker: set margins to: " + offsetX + "," + offsetY);
 	
-		AdWebView adWebView = parentContainer.getAdWebView();
 		RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)adWebView.getLayoutParams();
 		lp.setMargins(offsetX, offsetY, 0, 0);
 		lp.width = toWidth;

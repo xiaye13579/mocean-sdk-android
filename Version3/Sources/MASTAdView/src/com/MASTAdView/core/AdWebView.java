@@ -34,7 +34,7 @@ public class AdWebView extends WebView
 	final private AdViewContainer adViewContainer;
 	private JavascriptInterface javascriptInterface;
 	private MraidInterface mraidInterface;
-	private String mraidScript;
+	//private String mraidScript;
 	private boolean mraidLoaded = false; // has mraid library been loaded?
 	private Object mraidLoadSync = new Object();
 	final private StringBuffer defferedJavascript;
@@ -80,7 +80,7 @@ public class AdWebView extends WebView
 			javascriptInterface = new JavascriptInterface(parent, this);
 			mraidInterface = new MraidInterface(parent, this);
 			
-			mraidScript = FileUtils.readTextFromJar(parent.getContext(),  "/mraid.js");
+			//mraidScript = FileUtils.readTextFromJar(parent.getContext(),  "/mraid.js");
 		}
 		
 		//System.out.println("mread script read: " + mraidScript);
@@ -221,7 +221,7 @@ public class AdWebView extends WebView
 	}
 	
 	
-	private int getStatusBarHeight()
+	public int getStatusBarHeight()
 	{
 		try
 		{
@@ -293,7 +293,7 @@ public class AdWebView extends WebView
 			if (supportMraid)
 			{
 				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "loading javascript library");
-				loadUrl("javascript:" + mraidScript);
+				//loadUrl("javascript:" + mraidScript);
 				
 				// Wait for mraid loaded to be true, set by js bridge
 				if (!getMraidLoaded())

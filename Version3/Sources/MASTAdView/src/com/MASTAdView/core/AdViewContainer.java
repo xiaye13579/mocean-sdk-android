@@ -187,6 +187,8 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	private void initialize(Context c)
 	{
 		context = c;
+		setScriptPath();
+		
 		if (adserverRequest == null) adserverRequest = new MASTAdRequest(adLog, context);
 		
 		self = this; // save reference to the container
@@ -501,11 +503,12 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		adWebView.setVisibility(View.VISIBLE);
 		
 		//webData = "<HTML><HEAD><TITLE>Testing...</TITLE></HEAD><BODY><H1>Testing document...</H1></BODY></HTML>";
-		//String dataOut = setupViewport(false, webData);
+		String dataOut = setupViewport(false, webData);
 		//System.out.println("setWebContent: injecting: " + dataOut);
-		setupViewport(false, webData);
+		//setupViewport(false, webData);
 		
-		adWebView.loadDataWithBaseURL(null, webData, "text/html", "UTF-8", null);
+		adWebView.loadDataWithBaseURL(null, dataOut, "text/html", "UTF-8", null);
+		//adWebView.loadDataWithBaseURL(null, webData, "text/html", "UTF-8", null);
 	}
 	
 	
@@ -903,17 +906,28 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 
 	
-	// Create viewport for showing ad; version 2.9 and earlier had a "bug" which caused
-	// ad creative to be scaled on device to the device dpi; version 2.10 introduced a fix
-	// for this, but the change in behavior caused some issues. A deprecated flag allowed
-	// reverting to the old behavior. Per a client suggestion, another fix is being introduced
-	// which allows the app developer to customer the header and/or body code to be injected.
+	private static String mScriptPath = null;
+	
+	
+	private synchronized void setScriptPath()
+	{
+		if (mScriptPath == null)
+		{
+			mScriptPath = FileUtils.copyTextFromJarIntoAssetDir(context, "/mraid.js", "/mraid.js");
+		}
+	}
+
+	
+	// Create viewport for showing ad
 	private String setupViewport(boolean headerOnly, String body)
 	{
 		StringBuffer data = new StringBuffer("<html><head>");
 		
 		// Insert our javascript bridge library; this is always required
-		data.append("<style>*{margin:0;padding:0}</style>");				
+		data.append("<style>*{margin:0;padding:0}</style>");
+		data.append("<script src=\"file://");
+		data.append(mScriptPath);
+		data.append("\" type=\"text/javascript\"></script>");
 		data.append(getInjectionHeaderCode());
 		data.append("</head><body>");
 		
