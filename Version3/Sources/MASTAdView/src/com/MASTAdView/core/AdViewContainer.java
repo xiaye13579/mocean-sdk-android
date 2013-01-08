@@ -919,7 +919,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 
 	
 	// Create viewport for showing ad
-	private String setupViewport(boolean headerOnly, String body)
+	public String setupViewport(boolean headerOnly, String body)
 	{
 		StringBuffer data = new StringBuffer("<html><head>");
 		

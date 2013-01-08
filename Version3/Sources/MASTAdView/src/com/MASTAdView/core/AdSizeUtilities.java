@@ -82,12 +82,6 @@ final public class AdSizeUtilities
 			DefaultHttpClient client = new DefaultHttpClient();
 			HttpGet get = new HttpGet(url);
 			get.addHeader("Connection","close");
-
-			
-			
-			// XXX set user agent???
-			
-			
 			
 			HttpResponse response = client.execute(get);
 			if(response.getStatusLine().getStatusCode() == 200)
@@ -124,18 +118,13 @@ final public class AdSizeUtilities
 	// Display URL in a (non-MRAID) web view after fetching content using background thread
 	synchronized public String openInBackgroundThread(final AdDialogFactory.DialogOptions options, final String url)
 	{
-		final StringBuffer responseValue = new StringBuffer();
+		//final StringBuffer responseValue = new StringBuffer();
 		
 		Thread fetchUrl = new Thread()
 		{
 			public void run()
 			{
-				responseValue.append(fetchUrl(url));
-				if (responseValue.length() > 0)
-				{
-					// Now that we have the data, get back on UI thread to display it...
-					adClickHandler.openUrlForBrowsing(parentContainer.getContext(), url);
-				}
+				adClickHandler.openUrlForBrowsing(parentContainer.getContext(), url);
 			}
 		};
 		fetchUrl.setName("[AdSizeUtilities] openInBackgroundThread");
@@ -303,6 +292,8 @@ final public class AdSizeUtilities
 				responseValue.append(fetchUrl(url));
 				if (responseValue.length() > 0)
 				{
+					final String dataOut = parentContainer.setupViewport(false, responseValue.toString());
+					
 					// Now that we have the data, get back on UI thread to display it...
 					parentContainer.getHandler().post(new Runnable()
 					{
@@ -312,7 +303,8 @@ final public class AdSizeUtilities
 							{
 								expandedAdView = parentContainer.createWebView(context);
 								expandedAdView.setVisibility(View.VISIBLE);
-								expandedAdView.loadDataWithBaseURL(null, responseValue.toString(), "text/html", "UTF-8", null);
+								//expandedAdView.loadDataWithBaseURL(null, responseValue.toString(), "text/html", "UTF-8", null);
+								expandedAdView.loadDataWithBaseURL(null, dataOut, "text/html", "UTF-8", null);
 								
 								// Base ad view state already set to expanded, but per spec this new ad view should also
 								// be set to expanded after it loads.

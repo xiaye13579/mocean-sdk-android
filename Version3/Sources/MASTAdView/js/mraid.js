@@ -14,7 +14,7 @@ console.error = console.log;
 
 window.mraid_init = function()
 {
-    console.log('mraid_init start');
+    //console.log('mraid_init start');
     
     var mraid = window.mraid = {};
     
@@ -721,7 +721,7 @@ window.mraid_init = function()
 		AdWebView.playVideo(url);
 	}
 	
-	console.log('mraid_init done');			    
+	//console.log('mraid_init done');			    
 	// end of mraid_init routine
 };
 

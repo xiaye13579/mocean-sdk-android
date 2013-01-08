@@ -48,7 +48,7 @@ public class AdClickHandler implements View.OnClickListener
 	
 	public void openUrlForBrowsing(Context context, String url)
 	{
-		if(url==null) return;
+		if (url==null) return;
 		
 		if ((openUrlThread==null) || (openUrlThread.getState().equals(Thread.State.TERMINATED)))
 		{
