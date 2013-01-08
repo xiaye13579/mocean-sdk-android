@@ -231,10 +231,12 @@ final public class AdData
 				// error closing stream... bleh!
 			}
 			
+			/*
 			if (image != null)
 			{
 				System.out.println("fetchImage: Image decoded, size: " + image.getWidth() + "x" + image.getHeight());
 			}
+			*/
 			
 			return image;
 		}

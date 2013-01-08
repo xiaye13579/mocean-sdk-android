@@ -208,7 +208,7 @@ final public class AdSizeUtilities
 		{
 			toHeight = metrics.heightPixels;
 		}
-		System.out.println("startExpand: to h/w = " + toHeight + "/" + toWidth);
+		//System.out.println("startExpand: to h/w = " + toHeight + "/" + toWidth);
 
 		// Pass options for dialog through to creator
 		AdDialogFactory.DialogOptions options = new AdDialogFactory.DialogOptions();
@@ -281,7 +281,7 @@ final public class AdSizeUtilities
 		}*/
 
 		
-		System.out.println("Expand: two part creative, next url=" + url);
+		//System.out.println("Expand: two part creative, next url=" + url);
 
 		final StringBuffer responseValue = new StringBuffer();
 		
@@ -400,7 +400,7 @@ final public class AdSizeUtilities
 			@Override
 			public void onClick(View view)
 			{
-				System.out.println("resize close click: dismissing...");
+				//System.out.println("resize close click: dismissing...");
 				adWebView.injectJavaScript("mraid.close();");
 			}
 		});
@@ -486,12 +486,12 @@ final public class AdSizeUtilities
 		String invalidMessage = resizePropertiesValid(toWidth, toHeight, closePosition, offsetX, offsetY, offScreen);
 		if (invalidMessage != null)
 		{
-			System.out.println(invalidMessage);
+			//System.out.println(invalidMessage);
 			return invalidMessage;
 		}
 		else
 		{
-			System.out.println("resize validated: h/w = " + toHeight + "/" + toWidth);
+			//System.out.println("resize validated: h/w = " + toHeight + "/" + toWidth);
 		}
 		
 		return resizeWorker(toWidth, toHeight, closePosition, offsetX, offsetY, offScreen);

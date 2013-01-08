@@ -133,20 +133,6 @@ final public class DeviceFeatures
 	}
 	
 	
-	/*
-	public boolean emailSupport()
-	{
-		if (cacheEmailSupport == null)
-		{
-			cacheEmailSupport = context.checkCallingOrSelfPermission(android.Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED;
-			System.out.println("setEmailSupport: " + cacheEmailSupport);
-		}
-		
-		return cacheEmailSupport;
-	}
-	*/
-	
-	
 	public boolean calendarSupport()
 	{
 		MASTAdDelegate delegate = adContainer.getAdDelegate();
@@ -228,76 +214,7 @@ final public class DeviceFeatures
 		return System.currentTimeMillis();
 	}
 	
-	
-	/*
-	public String createCalendarEvent(String description, String location,  String summary, String start, String end)
-	{
-		if (calendarSupport())
-		{
-			try
-			{
-				String[] projection = new String[] { "_id", "name" };
-
-				Uri calendars = Uri.parse("content://calendar/calendars");
-	            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO)
-	            {
-					calendars = Uri.parse("content://com.android.calendar/calendars");
-	            }
-				     
-				Cursor managedCursor = ((Activity)context).managedQuery(calendars, projection, "selected=1", null, null);
-				String calId; 
-	
-				if (managedCursor!= null && managedCursor.moveToFirst())
-				{
-					int idColumn = managedCursor.getColumnIndex("_id");
-				    calId = managedCursor.getString(idColumn);
-				}
-				else
-				{
-					String error = "Create calendar event failed, could not find local calendar.";
-					System.out.println(error);
-					return error;
-				}
-				
-				ContentValues event = new ContentValues();
-				event.put(Events.CALENDAR_ID, calId);
-				event.put(Events.TITLE, summary);
-				event.put(Events.DESCRIPTION, description);
-				event.put(Events.EVENT_LOCATION, location);
-				
-				Long ldate = parseDateString(start);
-				event.put(Events.DTSTART, ldate);
-				ldate = parseDateString(end);
-				event.put(Events.DTEND, ldate);
-				
-				
-				Uri eventsUri = Uri.parse("content://calendar/events");
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO)
-	            {
-					eventsUri = Uri.parse("content://com.android.calendar/events");
-	            }
-	            
-			    context.getContentResolver().insert(eventsUri, event);
-			}
-			catch (Exception e)
-			{
-				String error = "Excetion creating calendar event: " + e.getMessage();
-				System.out.println(error);
-				return error;
-			}
-		}
-		else
-		{
-			String error = "Calendar not available";
-			System.out.println(error);
-			return error;
-		}
 		
-		return null;
-	}
-	*/
-	
-	
 	public boolean storePictureSupport()
 	{
 		MASTAdDelegate delegate = adContainer.getAdDelegate();
