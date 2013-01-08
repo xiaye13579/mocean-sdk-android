@@ -25,7 +25,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.telephony.SmsManager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -502,9 +501,9 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		adWebView.setVisibility(View.VISIBLE);
 		
 		//webData = "<HTML><HEAD><TITLE>Testing...</TITLE></HEAD><BODY><H1>Testing document...</H1></BODY></HTML>";
-		String dataOut = setupViewport(false, webData);
+		//String dataOut = setupViewport(false, webData);
 		//System.out.println("setWebContent: injecting: " + dataOut);
-		
+		setupViewport(false, webData);
 		
 		adWebView.loadDataWithBaseURL(null, webData, "text/html", "UTF-8", null);
 	}

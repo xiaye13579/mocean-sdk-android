@@ -21,9 +21,7 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.MASTAdView.MASTAdConstants;
 import com.MASTAdView.MASTAdDelegate;
@@ -396,16 +394,6 @@ final public class AdSizeUtilities
 		return layoutParams;
 	}
 	
-	
-	private RelativeLayout.LayoutParams createResizeContentLayoutParameters()
-	{
-		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
-		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-		
-		return layoutParams;
-	}
-
 	
 	private Button createResizeCloseButton(String where, final AdWebView adWebView)
 	{

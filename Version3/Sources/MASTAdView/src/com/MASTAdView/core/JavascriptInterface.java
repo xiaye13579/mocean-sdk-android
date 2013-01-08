@@ -492,29 +492,6 @@ final public class JavascriptInterface
 	}
 	
 	
-	// Convert a name value pair list to a name/value data bundle for passing through the handler interface
-	private Bundle listToDataBundle(List<NameValuePair> list)
-	{
-		Bundle data = new Bundle();
-		
-		if (list != null)
-		{
-			Iterator<NameValuePair> i = list.iterator();
-			NameValuePair nvp;
-			while (i.hasNext())
-			{
-				nvp = i.next();
-				if ((nvp != null) && (nvp.getName() != null))
-				{
-					data.putString(nvp.getName(), nvp.getValue());
-				}
-			}
-		}
-		
-		return data;
-	}
-	
-
 	private String getListValueByName(List<NameValuePair> list, String name)
 	{
 		if ((list != null) && (name != null))

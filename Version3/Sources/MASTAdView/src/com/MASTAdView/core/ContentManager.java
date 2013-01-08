@@ -27,9 +27,7 @@ import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 
 import com.MASTAdView.MASTAdConstants;
-import com.MASTAdView.MASTAdDelegate;
 import com.MASTAdView.MASTAdLog;
-import com.MASTAdView.MASTAdView;
 
 final public class ContentManager
 {

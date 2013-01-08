@@ -236,6 +236,7 @@ final public class AdDialogFactory
 			{
 				dialog.dismiss();
 				
+				/*
 				AdWebView v;
 				if (ad instanceof AdWebView)
 				{
@@ -249,6 +250,8 @@ final public class AdDialogFactory
 				// Behave as if mraid.close() has been invoked
 				//v.injectJavaScript("mraid.close();");
 				//v.getMraidInterface().setState(MraidInterface.STATES.DEFAULT);
+				 */
+				
 				adViewContainer.getHandler().sendEmptyMessage(AdMessageHandler.MESSAGE_CLOSE);
 				
 				if (options != null)

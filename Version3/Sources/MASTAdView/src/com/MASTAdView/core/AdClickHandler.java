@@ -106,10 +106,12 @@ public class AdClickHandler implements View.OnClickListener
 			}				
 		}
 			
+		/*
 		if (newUrl==null)
 		{
 			newUrl = url;
 		}
+		*/
 		
 		Uri uri = Uri.parse(newUrl);
 		if (parentContainer.getUseInternalBrowser() && (uri.getScheme().equals("http") || uri.getScheme().equals("https")))

@@ -105,10 +105,12 @@ final public class FileUtils
 	public static String writeToDisk(InputStream in, File writeFile) throws IllegalStateException, IOException 
 	{
 		byte buff[] = new byte[1024];
-		FileOutputStream out = new FileOutputStream(writeFile);
-
+		FileOutputStream out = null;
+		
 		if (in != null)
 		{
+			out = new FileOutputStream(writeFile);
+			
 			do
 			{
 				int numread = in.read(buff);
@@ -126,8 +128,12 @@ final public class FileUtils
 			throw new IOException("NULL input stream in writeToDisk");
 		}
 		
-		out.flush();
-		out.close();
+		if (out != null)
+		{
+			out.flush();
+			out.close();
+		}
+		
 		return writeFile.getAbsolutePath();
 	}
 }

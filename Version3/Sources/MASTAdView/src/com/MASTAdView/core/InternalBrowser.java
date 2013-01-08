@@ -2,30 +2,18 @@ package com.MASTAdView.core;
 
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.channels.Selector;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
 
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
-import android.graphics.drawable.GradientDrawable.Orientation;
 import android.net.Uri;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -147,16 +135,16 @@ public class InternalBrowser extends Dialog {
 			@Override
 			public void onPageFinished(WebView view, String url) {
 				super.onPageFinished(view, url);
-				buttonRefresh.setVisibility(buttonRefresh.VISIBLE);
-				buttonStopRefresh.setVisibility(buttonRefresh.GONE);
+				buttonRefresh.setVisibility(View.VISIBLE);
+				buttonStopRefresh.setVisibility(View.GONE);
 				UpdateButtons();
 			}
 			
 			@Override
 			public void onPageStarted(WebView view, String url, Bitmap favicon) {
 				super.onPageStarted(view, url, favicon);
-				buttonRefresh.setVisibility(buttonRefresh.GONE);
-				buttonStopRefresh.setVisibility(buttonRefresh.VISIBLE);
+				buttonRefresh.setVisibility(View.GONE);
+				buttonStopRefresh.setVisibility(View.VISIBLE);
 			}
 		});
 		UpdateButtons();
@@ -190,7 +178,7 @@ public class InternalBrowser extends Dialog {
 			buttonStopRefresh.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
 			buttonStopRefresh.setBackgroundDrawable(GetSelector(_context,"ib_close_regular.png", "ib_close_press.png", null));
 			ll.addView(buttonStopRefresh);
-			buttonStopRefresh.setVisibility(buttonRefresh.GONE);
+			buttonStopRefresh.setVisibility(View.GONE);
 		}
 		bottomLayout.addView(ll);
 		return button;

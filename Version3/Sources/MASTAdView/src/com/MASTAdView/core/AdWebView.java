@@ -3,8 +3,6 @@
 //
 package com.MASTAdView.core;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +13,8 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.Window;
@@ -44,7 +40,7 @@ public class AdWebView extends WebView
 	final private StringBuffer defferedJavascript;
 	private DisplayMetrics metrics;
 	final private boolean supportMraid;
-	final private boolean launchBrowserOnClicks;
+	//final private boolean launchBrowserOnClicks;
 	private AdClickHandler adClickHandler = null;
 	private static long viewId = System.currentTimeMillis();
 	
@@ -59,7 +55,7 @@ public class AdWebView extends WebView
 		adLog = log;
 		this.metrics = metrics;
 		supportMraid = mraid;
-		launchBrowserOnClicks = handleClicks;
+		//launchBrowserOnClicks = handleClicks;
 		
 		//dataToInject = null;
 		defferedJavascript = new StringBuffer();
@@ -213,47 +209,6 @@ public class AdWebView extends WebView
 			
 			mraidInterface.setExpandProperties(list);
 		}
-	}
-	
-	
-	private void initializeResizeProperties()
-	{
-		if (!supportMraid)
-		{
-			return;
-		}
-		
-		List<NameValuePair> list = new ArrayList<NameValuePair>(2);
-		
-		// Add width
-		String name = MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.WIDTH);
-		NameValuePair nvp = new BasicNameValuePair(name, "" + AdSizeUtilities.devicePixelToMraidPoint(adViewContainer.getWidth(), getContext()));
-		list.add(nvp);
-		
-		// Add height
-		name = MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.HEIGHT);
-		nvp = new BasicNameValuePair(name, "" + AdSizeUtilities.devicePixelToMraidPoint(adViewContainer.getHeight(), getContext()));
-		list.add(nvp);
-		
-		AdWebView adWebView = adViewContainer.getAdWebView();
-		int[] screenLocation = new int[2];
-		adWebView.getLocationOnScreen(screenLocation);
-		
-		// Add x offset
-		name = MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.OFFSET_X);
-		nvp = new BasicNameValuePair(name, "" + AdSizeUtilities.devicePixelToMraidPoint(screenLocation[0], getContext()));
-		//nvp = new BasicNameValuePair(name, "" + adViewContainer.getLeft());
-		//nvp = new BasicNameValuePair(name, "" + adWebView.getLeft());
-		list.add(nvp);
-		
-		// Add y offset
-		name = MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.OFFSET_Y);
-		nvp = new BasicNameValuePair(name, "" + AdSizeUtilities.devicePixelToMraidPoint(screenLocation[1], getContext()));
-		//nvp = new BasicNameValuePair(name, "" + adWebView.getTop());
-		//nvp = new BasicNameValuePair(name, "" + adViewContainer.getTop());
-		list.add(nvp);
-				
-		mraidInterface.setResizeProperties(list);
 	}
 	
 	

@@ -3,15 +3,11 @@
 //
 package com.MASTAdView;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Vector;
 
-import com.MASTAdView.core.AdViewContainer;
-
-import android.os.Environment;
 import android.util.Log;
-import android.view.View;
+
+import com.MASTAdView.core.AdViewContainer;
 
 /**
  * The SDK is instrumented with log() calls to record errors, warnings and server traffic

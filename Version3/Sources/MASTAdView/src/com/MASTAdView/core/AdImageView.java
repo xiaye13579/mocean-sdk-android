@@ -1,11 +1,5 @@
 package com.MASTAdView.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.DisplayMetrics;
@@ -28,9 +22,9 @@ public class AdImageView extends WebView
 	final private AdViewContainer adViewContainer;
 	private JavascriptInterface javascriptInterface;
 	private MraidInterface mraidInterface;
-	private String mraidScript;
-	private DisplayMetrics metrics;
-	final private boolean launchBrowserOnClicks;
+	//private String mraidScript;
+	//private DisplayMetrics metrics;
+	//final private boolean launchBrowserOnClicks;
 	private AdClickHandler adClickHandler = null;
 	
 	
@@ -40,8 +34,8 @@ public class AdImageView extends WebView
 		
 		adViewContainer = parent;
 		adLog = log;
-		this.metrics = metrics;
-		launchBrowserOnClicks = handleClicks;
+		//this.metrics = metrics;
+		//launchBrowserOnClicks = handleClicks;
 		
 		// Customize settings for web view
 		WebSettings webSettings = getSettings();
@@ -107,13 +101,9 @@ public class AdImageView extends WebView
 	
 	final private class AdWebViewClient extends WebViewClient
 	{
-		private Context context;
-		
-		
 		public AdWebViewClient(Context context)
 		{
 			super();
-			this.context = context;
 		}
 		
 		@Override
