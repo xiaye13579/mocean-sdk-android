@@ -285,42 +285,7 @@ final public class JavascriptInterface
 		}
 	}
 
-	
-	// get current postion for ad view
-	public String getCurrentPosition()
-	{
-		adView.richmediaEvent("getCurrentPosition", null);
 		
-		synchronized(this)
-		{
-			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "JavascriptInterface", "getCurrentPositon()");
-			
-			int x = AdSizeUtilities.devicePixelToMraidPoint(adView.getLeft(), context);
-			int y = AdSizeUtilities.devicePixelToMraidPoint(adView.getTop(), context);
-			int w = AdSizeUtilities.devicePixelToMraidPoint(adView.getWidth(), context);
-			int h = AdSizeUtilities.devicePixelToMraidPoint(adView.getHeight(), context);
-			
-			try
-			{
-				JSONObject position = new JSONObject();
-				position.put(MraidInterface.get_CURRENT_POSITION_name(MraidInterface.CURRENT_POSITION.X), "" + x);
-				position.put(MraidInterface.get_CURRENT_POSITION_name(MraidInterface.CURRENT_POSITION.Y), "" + y);
-				position.put(MraidInterface.get_CURRENT_POSITION_name(MraidInterface.CURRENT_POSITION.WIDTH), "" + w);
-				position.put(MraidInterface.get_CURRENT_POSITION_name(MraidInterface.CURRENT_POSITION.HEIGHT), "" + h);
-			
-				System.out.println("returning: " + position.toString());
-				return position.toString();
-			}
-			catch (Exception ex)
-			{
-				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "JavascriptInterface", "Exception returning current position: " + ex.getMessage());
-			}
-		}
-		
-		return "undefined";
-	}
-
-	
 	public void createCalendarEntry(String encodedProperties)
 	{
 		adView.richmediaEvent("createCalendarEntry", encodedProperties);

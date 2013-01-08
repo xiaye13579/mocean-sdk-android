@@ -14,7 +14,7 @@ console.error = console.log;
 
 window.mraid_init = function()
 {
-    console.log('mraid_init');
+    console.log('mraid_init start');
     
     var mraid = window.mraid = {};
     
@@ -96,7 +96,7 @@ window.mraid_init = function()
         var handlers = listeners[event];
         if (handlers)
         {
-            //handlers.remove(listener); // XXX not supported
+            //handlers.remove(listener); // not supported
             var idx = handlers.indexOf(listener);
             if (idx != -1)
             {
@@ -241,9 +241,14 @@ window.mraid_init = function()
         
         state = newState;
         
-        if (diff)	// XXX spec says resized -> resized fires an event
+        if (diff)
         {
             mraid.fireChangeEvent(EVENTS.STATE_CHANGE, state);
+        }
+        else if (state === STATES.RESIZED)
+        {
+        	// spec says resized -> resized fires an event
+        	mraid.fireChangeEvent(EVENTS.STATE_CHANGE, state);
         }
     };
     
@@ -322,8 +327,8 @@ window.mraid_init = function()
     mraid.open = function(url)
     {
 		console.log("open");
-
-		AdWebView.open(encodeURIComponent(url));
+		
+		AdWebView.open(url);
     };
     
     
@@ -370,7 +375,7 @@ window.mraid_init = function()
             var field = writableFields[wf];
             if (properties[field] !== undefined)
             {
-                expandProperties[field] = properties[field];
+                orientationProperties[field] = properties[field];
             }
         }
     
@@ -382,7 +387,7 @@ window.mraid_init = function()
     {
         console.log("getOrientationProperties");
         
-        return expandProperties;
+        return orientationProperties;
     };
     
     
@@ -438,9 +443,14 @@ window.mraid_init = function()
     // MRAID
     mraid.expand = function(url)
     {
+    	//debug:
+    	//console.log("@@@");
+    	//console.log("ad content: " + document.body.innerHTML);
+    	//console.log("@@@");
+    
         console.log("expand");
        
-        AdWebView.expand(encodeURIComponent(url));
+        AdWebView.expand(url);
     };
     
     
@@ -482,17 +492,8 @@ window.mraid_init = function()
                 resizeProperties[field] = properties[field];
             }
         }
-        
-        // XXX NOTE: sizeIsPixels is a hack for supporting ormma resize(width,height)
-        // XXX should not need this in production for MRAID 2 only!!!
-        if (typeof sizeIsPixels != "undefined")
-        {
-			AdWebView.setResizeProperties(mraid.returnInfo(mraid.getResizeProperties), sizeIsPixels);
-		}
-		else
-		{
-			AdWebView.setResizeProperties(mraid.returnInfo(mraid.getResizeProperties), "false");
-		}	
+        	
+		AdWebView.setResizeProperties(mraid.returnInfo(mraid.getResizeProperties), "false");
     };
     
     // MRAID
@@ -595,13 +596,7 @@ window.mraid_init = function()
     mraid.getCurrentPosition = function()
     {
         console.log("getCurrentPosition");
-        
-        var position = AdWebView.getCurrentPosition();
-        if (typeof position != "undefined")
-        {
-        	currentPosition = position;
-        }
-        
+            
         return currentPosition;
     };
     
@@ -609,13 +604,6 @@ window.mraid_init = function()
     mraid.getSize = function()
     {
         console.log("getSize");
-        
-        
-        var position = AdWebView.getCurrentPosition();
-        if (typeof position != "undefined")
-        {
-        	currentPosition = position;
-        }
         
         var size = 
         {
@@ -733,11 +721,7 @@ window.mraid_init = function()
 		AdWebView.playVideo(url);
 	}
 	
-
-	// Set flag indicating mraid library loaded
-	AdWebView.mraidLoaded();
-	
-			    
+	console.log('mraid_init done');			    
 	// end of mraid_init routine
 };
 
@@ -746,4 +730,7 @@ window.mraid_init = function()
 if (!window.mraid)
 {
     window.mraid_init();
+    
+    // Set flag indicating mraid library loaded
+	AdWebView.mraidLoaded();
 }

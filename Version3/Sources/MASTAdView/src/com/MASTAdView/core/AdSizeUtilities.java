@@ -21,7 +21,9 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.MASTAdView.MASTAdConstants;
 import com.MASTAdView.MASTAdDelegate;
@@ -42,6 +44,12 @@ final public class AdSizeUtilities
 	final private Context							context;
 	
 	private AdClickHandler 							adClickHandler = null;
+
+	// Properties used to resize and restore ad view
+	private View 									resizeOldContent = null;
+	private ViewGroup 								resizeDecorView = null;
+	private int 									resizeOldContentIndex = 0;
+	private Button 									resizeCloseButton = null;
 	
 	
 	public AdSizeUtilities(AdViewContainer adContainer, DisplayMetrics metrics)
@@ -129,22 +137,6 @@ final public class AdSizeUtilities
 				{
 					// Now that we have the data, get back on UI thread to display it...
 					adClickHandler.openUrlForBrowsing(parentContainer.getContext(), url);
-					
-					/*
-					parentContainer.getHandler().post(new Runnable()
-					{
-						public void run()
-						{
-							AdWebView v = new AdWebView(parentContainer, adLog, metrics, false); // custom ad web view w/ no MRAID
-							v.setVisibility(View.VISIBLE);
-							v.loadDataWithBaseURL(null, responseValue.toString(), "text/html", "UTF-8", null);
-							
-							//expandedCallback(options.height, options.width);
-							Dialog dialog = adDialogFactory.createDialog(v, options);
-							dialog.show();	
-						}
-					});
-					*/
 				}
 			}
 		};
@@ -318,21 +310,29 @@ final public class AdSizeUtilities
 					{
 						public void run()
 						{
-							expandedAdView = parentContainer.createWebView(context);
-							expandedAdView.setVisibility(View.VISIBLE);
-							expandedAdView.loadDataWithBaseURL(null, responseValue.toString(), "text/html", "UTF-8", null);
-							
-							// Base ad view state already set to expanded, but per spec this new ad view should also
-							// be set to expanded after it loads.
-							expandedAdView.getMraidInterface().setState(MraidInterface.STATES.EXPANDED);
-							
-							expandedCallback(options.height, options.width);
-							
-							Dialog dialog = adDialogFactory.createDialog(expandedAdView, options);
-							dialog.show();
-							
-							// Apply orientation options
-							handleOrientation(allowReorientation, forceOrientation, context);
+							try
+							{
+								expandedAdView = parentContainer.createWebView(context);
+								expandedAdView.setVisibility(View.VISIBLE);
+								expandedAdView.loadDataWithBaseURL(null, responseValue.toString(), "text/html", "UTF-8", null);
+								
+								// Base ad view state already set to expanded, but per spec this new ad view should also
+								// be set to expanded after it loads.
+								expandedAdView.getMraidInterface().setState(MraidInterface.STATES.EXPANDED);
+								
+								expandedCallback(options.height, options.width);
+								
+								Dialog dialog = adDialogFactory.createDialog(expandedAdView, options);
+								dialog.show();
+								
+								// Apply orientation options
+								handleOrientation(allowReorientation, forceOrientation, context);								
+							}
+							catch(Exception ex)
+							{
+								adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "expandInBackgroundThread", ex.getMessage());
+								parentContainer.getAdWebView().getMraidInterface().fireErrorEvent(ex.getMessage(), "expand");
+							}
 						}
 					});
 				}
@@ -361,7 +361,7 @@ final public class AdSizeUtilities
 	}
 	
 	
-	private RelativeLayout.LayoutParams createCloseLayoutParameters(String closePosition)
+	private RelativeLayout.LayoutParams createCloseLayoutParameters(String closePosition, final AdWebView adWebView)
 	{
 		// Mraid spec requires min. 50 pixel height and width for close area
 		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(50, 50);
@@ -369,43 +369,43 @@ final public class AdSizeUtilities
 		switch(parentContainer.getAdWebView().getMraidInterface().get_RESIZE_CUSTOM_CLOSE_POSITION_by_name(closePosition))
 		{
 		case TOP_LEFT:
-			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+			layoutParams.addRule(RelativeLayout.ALIGN_LEFT, adWebView.getId());
+			layoutParams.addRule(RelativeLayout.ALIGN_TOP, adWebView.getId());
 			break;
 		case TOP_CENTER:
 			layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
-			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+			layoutParams.addRule(RelativeLayout.ALIGN_TOP, adWebView.getId());
 			break;
 		case BOTTOM_LEFT:
-			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+			layoutParams.addRule(RelativeLayout.ALIGN_LEFT, adWebView.getId());
+			layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, adWebView.getId());
 			break;
 		case BOTTOM_RIGHT:
-			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
-			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+			layoutParams.addRule(RelativeLayout.ALIGN_RIGHT, adWebView.getId());
+			layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, adWebView.getId());
 			break;
 		case BOTTOM_CENTER:
-			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+			layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, adWebView.getId());
 			layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
 			break;
 		default: // top right is the default
-			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
-			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+			layoutParams.addRule(RelativeLayout.ALIGN_RIGHT, adWebView.getId());
+			layoutParams.addRule(RelativeLayout.ALIGN_TOP, adWebView.getId());
 		}
 			
 		return layoutParams;
 	}
 	
 	
-	private RelativeLayout.LayoutParams createResizeAdLayoutParameters(/* View offsetView */ int width, int height)
+	private RelativeLayout.LayoutParams createResizeContentLayoutParameters()
 	{
-		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
-		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
+		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
 		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
 		
 		return layoutParams;
 	}
-	
+
 	
 	private Button createResizeCloseButton(String where, final AdWebView adWebView)
 	{
@@ -413,7 +413,7 @@ final public class AdSizeUtilities
 		Button closeButton = new Button(context);
 		closeButton.setText("");
 		closeButton.setBackgroundColor(Color.TRANSPARENT);
-		closeButton.setLayoutParams(createCloseLayoutParameters(where));
+		closeButton.setLayoutParams(createCloseLayoutParameters(where, adWebView));
 		
 		closeButton.setOnClickListener(new View.OnClickListener()
 		{
@@ -521,14 +521,11 @@ final public class AdSizeUtilities
 	// Move ad web view to new / larger contain in front of app content, and display
 	private String resizeWorker(int toWidth, int toHeight, String closePosition, int offsetX, int offsetY, boolean allowOffScreen)
 	{
-		AdWebView adWebView = parentContainer.getAdWebView();
-		adWebView.setLayoutParams(createResizeAdLayoutParameters(toWidth, toHeight));
-		
-		// ZZZ this should probably be wrap content and/or use the size from the properties
-		// create layout parameters for frame to hold ad (and close button area)
-		ViewGroup.MarginLayoutParams frameLp = new ViewGroup.MarginLayoutParams(ViewGroup.MarginLayoutParams.FILL_PARENT, ViewGroup.MarginLayoutParams.FILL_PARENT);
-		offsetX += parentContainer.getLeft();
-		offsetY += parentContainer.getTop();
+		// Combine offset and relative position of ad view on screen
+		int[] bannerPosition = { 0, 0 };
+		parentContainer.getLocationOnScreen(bannerPosition);
+		offsetX += bannerPosition[0];
+		offsetY += bannerPosition[1];
 		
 		if (!allowOffScreen)
 		{
@@ -560,40 +557,65 @@ final public class AdSizeUtilities
 				offsetY = 0;
 			}
 		}
+		//System.out.println("!!! resizeWorker: set margins to: " + offsetX + "," + offsetY);
+	
+		AdWebView adWebView = parentContainer.getAdWebView();
+		RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)adWebView.getLayoutParams();
+		lp.setMargins(offsetX, offsetY, 0, 0);
+		lp.width = toWidth;
+		lp.height = toHeight;
 		
-		frameLp.setMargins(offsetX, offsetY, 0, 0);
-		
-		// Ad view is already displayed in a resized "overlay", just adjust the size
+		// Get parent for ad view
 		ViewGroup parent = (ViewGroup)adWebView.getParent();
 		
-		if (adWebView.getMraidInterface().getState() == MraidInterface.STATES.RESIZED)
+		// notify ad using mraid methods per spec.
+		// NOTE: this needs to come before the block below so that the state is resized when the ad container checks
+		adWebView.getMraidInterface().fireSizeChangeEvent(toWidth, toHeight);
+		adWebView.getMraidInterface().setState(MraidInterface.STATES.RESIZED);
+				
+		//if (adWebView.getMraidInterface().getState() == MraidInterface.STATES.RESIZED)
+		if ((parent instanceof AdViewContainer) == false)
 		{
 			// ad view already displayed in resized "overlay", simply adjust the size/position
-			parent.setLayoutParams(frameLp);
+			parent.requestLayout();
+			adWebView.requestLayout();
 		}
 		else
 		{
-			// Remove ad view from parent (inline with app content)
-			parent.removeView(adWebView);;
-			
-			// Create new "overlay" and move ad view to it
+			// Create new "overlay" and move ad view and screen content to it
 			RelativeLayout adFrame = new RelativeLayout(context);
+			ViewGroup.LayoutParams plp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
+			//ViewGroup.LayoutParams plp = new ViewGroup.LayoutParams(toWidth, toHeight);
+			adFrame.setLayoutParams(plp);
+			
+			// Remove ad view from parent (inline with app content)
+			parent.removeView(adWebView);
 			adFrame.addView(adWebView);
+			
+			// Find previous screen content, remove it 
+			resizeDecorView = ((ViewGroup)((Activity) context).getWindow().getDecorView());
+			//resizeOldContent = resizeDecorView.findViewById(android.R.id.content);
+			//resizeOldContentIndex = ((ViewGroup)resizeOldContent.getParent()).indexOfChild(resizeOldContent);
+			resizeOldContentIndex = 0;
+			resizeOldContent = resizeDecorView.getChildAt(resizeOldContentIndex);
+			((ViewGroup)resizeOldContent.getParent()).removeView(resizeOldContent);
+			adFrame.addView(resizeOldContent);
 			
 			// Create close button (transparent, as visual indicator is provided by ad)
 			// and position based on ad rule
-			adFrame.addView(createResizeCloseButton(closePosition, adWebView));
+			resizeCloseButton = createResizeCloseButton(closePosition, adWebView);  
+			adFrame.addView(resizeCloseButton);
 			
 			// Finish, display it
-			adFrame.setLayoutParams(frameLp);
-			((ViewGroup)((Activity) context).getWindow().getDecorView()).addView(adFrame);
+			resizeDecorView.addView(adFrame, resizeOldContentIndex);
+			adFrame.bringChildToFront(adWebView);
+			adFrame.bringChildToFront(resizeCloseButton);
+			adWebView.measure(toWidth, toHeight);
+			adWebView.requestLayout();
+			adFrame.requestLayout();
 			adWebView.requestFocus();
 		}
 		
-		// notify ad using mraid methods per spec.
-		adWebView.getMraidInterface().fireSizeChangeEvent(toWidth, toHeight);
-		adWebView.getMraidInterface().setState(MraidInterface.STATES.RESIZED);
-	
 		MASTAdDelegate delegate = parentContainer.getAdDelegate();
 		if (delegate != null)
 		{
@@ -605,6 +627,20 @@ final public class AdSizeUtilities
 		}
 		
 		return null;
+	}
+	
+	
+	synchronized public void undoResize()
+	{
+		// Put old screen content back in decor view where it started
+		if ((resizeDecorView != null) && (resizeOldContent != null))
+		{
+			((ViewGroup)resizeOldContent.getParent()).removeView(resizeOldContent);
+			resizeDecorView.addView(resizeOldContent, resizeOldContentIndex);
+			
+			resizeOldContent = null;
+			resizeDecorView = null;
+		}
 	}
 
 	

@@ -30,6 +30,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -90,6 +91,9 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	
 	// Use internal browser or standalone browser?
 	private boolean 								useInternalBrowser = false;
+
+	// Coordinates of view on screen
+	private int[] coordinates = { 0, 0 };
 	
 	
 	//
@@ -211,10 +215,8 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		adWebView = createWebView(context);
 		
 		// Setup auto parameters (such as user agent, etc.)
-		//autoDetectParameters = AutoDetectParameters.getInstance();
 		setAutomaticParameters(context);
 				
-		//setLayoutParams(new ViewGroup.LayoutParams(1, 1));
 		setVisibility(View.GONE);
 		//setOrientation(LinearLayout.HORIZONTAL);
 		setBackgroundColor(MASTAdConstants.DEFAULT_COLOR);
@@ -306,7 +308,20 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 
 		v.setLayoutParams(createAdLayoutParameters());		
 		v.setBackgroundColor(defaltBackgroundColor);
-				
+
+		// Set a global layout listener which will be called when the layout pass is completed and the view is drawn;
+		// this seems to be the only reliable way to get the initial location information which isn't set until the
+		// layout is complete.
+		getViewTreeObserver().addOnGlobalLayoutListener(
+				new ViewTreeObserver.OnGlobalLayoutListener() {
+					public void onGlobalLayout() {
+						if ((adWebView != null) && (adWebView.getMraidInterface().getState() == MraidInterface.STATES.DEFAULT)) {
+							adWebView.getLocationOnScreen(coordinates); // getLocationInWindow() for relative
+							adWebView.getMraidInterface().setCurrentPosition(coordinates[0], coordinates[1], adWebView.getWidth(), adWebView.getHeight());
+						}
+					}
+		});
+		
 		return v;
 	}
 
@@ -394,8 +409,6 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	@Override
 	public void setLayoutParams(ViewGroup.LayoutParams params)
 	{
-		//System.out.println("SetLayoutParams: " + params.toString());
-		
 		setVisibility(View.VISIBLE);
 		
 		//layoutWidth  = params.width;
@@ -408,8 +421,21 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	// view being notified of a size change (rotation?)
 	protected void onSizeChanged(int w, int h, int ow, int oh)
 	{
-		adWebView.getMraidInterface().fireSizeChangeEvent(w, h);
-        super.onSizeChanged(w, h, ow, oh);
+		if (adWebView != null)
+		{
+			adWebView.getLocationOnScreen(coordinates); // getLocationInWindow() for relative
+			adWebView.getMraidInterface().setCurrentPosition(coordinates[0], coordinates[1], w, h);
+			
+			// Notify ad that size has changed
+			adWebView.getMraidInterface().fireSizeChangeEvent(w, h);
+			
+			if ((adWebView.getMraidInterface().getState() == MraidInterface.STATES.LOADING) ||
+				(adWebView.getMraidInterface().getState() == MraidInterface.STATES.DEFAULT))
+			{
+				// and pass event through, unless expanded/resized (where this view is being covered)
+		        super.onSizeChanged(w, h, ow, oh);
+			}
+		}
     }
 
 	
@@ -621,10 +647,16 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	 */
 	public void update()
 	{
-		//update(true);
-		
-		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "update", "");
-		StartLoadContent();
+		MraidInterface.STATES state = adWebView.getMraidInterface().getState(); 
+		if ((state == MraidInterface.STATES.DEFAULT) || (state == MraidInterface.STATES.LOADING))
+		{
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "update", "");
+			StartLoadContent();	
+		}
+		else
+		{
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "update", "skipped - state not default (" + state + ")");
+		}
 	}
 	
 	
@@ -951,31 +983,56 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		}
 		else if (adState == MraidInterface.STATES.RESIZED)
 		{
-			//System.out.println("Closing resized ad view...");
+			int resizeToX;
+			int resizeToY;
+			if ((resizeOldWidth != 0) && (resizeOldWidth != 0))
+			{
+				resizeToX = resizeOldWidth;
+				resizeToY = resizeOldHeight;
+				resizeOldWidth = 0;
+				resizeOldHeight = 0;
+			}
+			else
+			{
+				resizeToX = this.getWidth();
+				resizeToY = this.getHeight();
+			}
 			
 			// Remove adview from temporary container
 			ViewGroup parent = (ViewGroup)adWebView.getParent();
 			if (parent != null)
 			{
 				parent.removeView(adWebView);
+			
+				// Also put screen content back in place, unoding change made when resize was first done
+				adSizeUtilities.undoResize();
 				
 				// Now remove parent, which was a temporary container created for the expand/resize
+				/*
 				ViewGroup pparent = (ViewGroup)parent.getParent();
 				if (pparent != null)
 				{
 					pparent.removeView(parent);
 				}
+				*/
 			}
 	
 			// Reset layout parameters
-			adWebView.setLayoutParams(createAdLayoutParameters());
+			//adWebView.setLayoutParams(createAdLayoutParameters());
+			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)adWebView.getLayoutParams();
+			lp.setMargins(0, 0, 0, 0);
+			lp.width = RelativeLayout.LayoutParams.FILL_PARENT;
+			lp.height = RelativeLayout.LayoutParams.FILL_PARENT;
 			
 			// Move ad view back to normal container
 			this.addView(adWebView);
+			adWebView.requestLayout();
+			this.requestLayout();
 			
 			// Return to default state
 			adWebView.getMraidInterface().setState(MraidInterface.STATES.DEFAULT);
-			adWebView.getMraidInterface().fireSizeChangeEvent(this.getWidth(), this.getHeight());
+			//adWebView.getMraidInterface().fireSizeChangeEvent(this.getWidth(), this.getHeight());
+			adWebView.getMraidInterface().fireSizeChangeEvent(resizeToX, resizeToY);
 			//adWebView.getMraidInterface().fireSizeChangeEvent(AdSizeUtilities.devicePixelToMraidPoint(this.getWidth(), context), AdSizeUtilities.devicePixelToMraidPoint(this.getHeight(), context));
 		}
 		else
@@ -1134,12 +1191,19 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 	
 	
+	private int resizeOldWidth = 0;
+	private int resizeOldHeight = 0;
+	
+	
 	/**
 	 * Resize the ad view container; this method is invoked by the javascript interface and runs on
 	 * the UI thread via a handler invocation, with data passed as part of the message bundle.
 	 */
 	public String resize(Bundle data)
 	{
+		resizeOldWidth = this.getWidth();
+		resizeOldHeight = this.getHeight();
+		
 		// You can only invoke resize from the default ad state, or from the resized state (to further change the size)
 		if ((adWebView.getMraidInterface().getState() == MraidInterface.STATES.DEFAULT) ||
 			(adWebView.getMraidInterface().getState() == MraidInterface.STATES.RESIZED))
@@ -1390,7 +1454,10 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		// ??? If the ad content was downloaded while the view was not attached to a window
 		// they we attempt to "install" it now; however, need to make sure we don't get into
 		// a race condition between set content completing and this method at the same time.
-		if ((lastResponse != null) && (lastResponse.hasContent()))
+		if ((lastResponse != null) && (lastResponse.hasContent()) &&
+			((adWebView == null) || 
+			 ((adWebView.getMraidInterface().getState() == MraidInterface.STATES.LOADING) ||
+			  (adWebView.getMraidInterface().getState() == MraidInterface.STATES.DEFAULT))))
 		{
 			if (lastResponse.adType == MASTAdConstants.AD_TYPE_EXTERNAL_THIRDPARTY)
 			{
@@ -1400,6 +1467,15 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			{
 				setAdContent(lastResponse); // If we have ad content from "before", load it
 			}
+		}
+		
+		if ((adWebView != null) &&
+			((adWebView.getMraidInterface().getState() == MraidInterface.STATES.LOADING) ||
+			 (adWebView.getMraidInterface().getState() == MraidInterface.STATES.DEFAULT)))
+		{
+			adWebView.getLocationOnScreen(coordinates); // getLocationInWindow() for relative
+			adWebView.getMraidInterface().setCurrentPosition(coordinates[0], coordinates[1], adWebView.getWidth(), adWebView.getHeight());
+			//adWebView.getMraidInterface().setCurrentPosition(adWebView.getLeft(), adWebView.getTop(), adWebView.getWidth(), adWebView.getHeight());
 		}
 		
 		// Notify ad that viewable state has changed
@@ -1681,7 +1757,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	{
 		return customCloseButton;
 	}
-	
+
 	
 	public void onOrientationChange(int orientationAngle, int screenOrientation)
 	{
@@ -1694,7 +1770,15 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		windowManager.getDefaultDisplay().getMetrics(metrics);		
 		adSizeUtilities.setMetrics(metrics);
 		
-		adWebView.getMraidInterface().setCurrentPosition(adWebView.getLeft(), adWebView.getTop(), adWebView.getWidth(), adWebView.getHeight());
+		// Update current position values
+		//adWebView.getMraidInterface().setCurrentPosition(adWebView.getLeft(), adWebView.getTop(), w, h);
+		if (adWebView != null)
+		{
+			adWebView.getLocationOnScreen(coordinates); // getLocationInWindow() for relative
+			adWebView.getMraidInterface().setCurrentPosition(coordinates[0], coordinates[1], adWebView.getWidth(), adWebView.getHeight());
+			//adWebView.getMraidInterface().setCurrentPosition(adWebView.getLeft(), adWebView.getTop(), adWebView.getWidth(), adWebView.getHeight());
+		}
+		
 		//adWebView.getMraidInterface().setOrientation(orientationAngle);
 		
 		// If ad is expanded and a 2 part creative caused a new view to be created,
@@ -1703,7 +1787,9 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			(adSizeUtilities.getExpandedAdView() != null))
 		{
 			AdWebView expandedWebView = adSizeUtilities.getExpandedAdView(); 
-			expandedWebView.getMraidInterface().setCurrentPosition(expandedWebView.getLeft(), expandedWebView.getTop(), expandedWebView.getWidth(), expandedWebView.getHeight());
+			//expandedWebView.getMraidInterface().setCurrentPosition(expandedWebView.getLeft(), expandedWebView.getTop(), expandedWebView.getWidth(), expandedWebView.getHeight());
+			expandedWebView.getMraidInterface().setCurrentPosition(coordinates[0], coordinates[1], adWebView.getWidth(), adWebView.getHeight());
+			
 			//expandedWebView.getMraidInterface().setOrientation(orientationAngle);
 		}
 	}

@@ -46,12 +46,14 @@ public class AdWebView extends WebView
 	final private boolean supportMraid;
 	final private boolean launchBrowserOnClicks;
 	private AdClickHandler adClickHandler = null;
+	private static long viewId = System.currentTimeMillis();
 	
 	
 	@SuppressLint("SetJavaScriptEnabled")
 	public AdWebView(AdViewContainer parent, MASTAdLog log, DisplayMetrics metrics, boolean mraid, boolean handleClicks)
 	{
 		super(parent.getContext());
+		this.setId(getIdForView());
 		
 		adViewContainer = parent;
 		adLog = log;
@@ -94,6 +96,13 @@ public class AdWebView extends WebView
 	}
 
 	
+	synchronized private int getIdForView()
+	{
+		viewId += 1;
+		return (int)viewId;
+	}
+	
+	
 	public void setMraidLoaded(boolean value)
 	{
 		synchronized (mraidLoadSync)
@@ -134,7 +143,7 @@ public class AdWebView extends WebView
 		stopLoading();
 		clearView();
 		defferedJavascript.setLength(0);
-		//mraidInterface.setState(MraidInterface.STATES.LOADING);
+		mraidInterface.setState(MraidInterface.STATES.LOADING);
 		setMraidLoaded(false);
 	}
 	
@@ -326,10 +335,9 @@ public class AdWebView extends WebView
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon)
 		{
-			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "loading javascript library");
-			
 			if (supportMraid)
 			{
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "loading javascript library");
 				loadUrl("javascript:" + mraidScript);
 				
 				// Wait for mraid loaded to be true, set by js bridge
@@ -337,10 +345,15 @@ public class AdWebView extends WebView
 				{
 					synchronized (mraidLoadSync)
 					{
+						//System.out.println("@@@ waiting for mraid ready");
 						try { mraidLoadSync.wait(); } catch (Exception e) { }
 					}
+					
+					try { Thread.sleep(50); } catch (Exception e) { } // yield
+					//System.out.println("@@@ DONE waiting for mraid ready");
 				}
 				
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "setting device features");
 				mraidInterface.setDeviceFeatures();
 				if (mraidInterface.getDeviceFeatures().isSupported(MraidInterface.FEATURES.INLINE_VIDEO))
 				{
@@ -364,15 +377,19 @@ public class AdWebView extends WebView
 				
 				if (defferedJavascript.length() > 0)
 				{
+					adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "injecting deferred javascript");
+					
 					// Now that mraid script is loaded, send any commands that were saved from earlier
 					injectJavaScript(defferedJavascript.toString());
 					defferedJavascript.setLength(0);
 				}
 			
 				// Initialize width/height values for expand properties (starts off with screen size)
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "initialize expand properties");
 				initializeExpandProperties();
 			
 				// setScreenSize 
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "set screen size");
 				try
 				{
 					JSONObject screenSize = new JSONObject();
@@ -386,6 +403,7 @@ public class AdWebView extends WebView
 				}
 				
 				// setMaxSize
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "set max size");
 				try
 				{
 					JSONObject maxSize = new JSONObject();
@@ -399,6 +417,7 @@ public class AdWebView extends WebView
 				}
 			}
 			
+			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "loading ad url: " + url);
 			super.onPageStarted(view, url, favicon);
 		}
 
@@ -436,17 +455,8 @@ public class AdWebView extends WebView
 				}
 				catch(Exception ex)
 				{
-					adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageStarted", "Error setting default position information.");
+					adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageFinished", "Error setting default position information.");
 				}
-				
-				// set default resize properties (width/height) 
-				initializeResizeProperties(); // XXX should not need this with real mraid 2 samples
-				
-				
-				
-				// XXX set state to default here per revised spec???
-				
-				
 				
 				// Tell ad everything is ready, trigger state change from loading to default
 				mraidInterface.fireReadyEvent();
@@ -459,6 +469,8 @@ public class AdWebView extends WebView
 		{
 			super.onReceivedError(view, errorCode, description, failingUrl);
 		
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onReceivedError", "" + errorCode + ":" + description);
+			
 			MASTAdDelegate delegate = adViewContainer.getAdDelegate();
 			if (delegate != null)
 			{

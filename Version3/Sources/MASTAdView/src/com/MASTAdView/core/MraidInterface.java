@@ -458,7 +458,7 @@ final public class MraidInterface
 		case OFFSET_Y:
 			return "offsetY";
 		case ALLOW_OFF_SCREEN:
-			return "allowOffScreen";
+			return "allowOffscreen";
 		default:
 			return r.toString().toLowerCase();
 		}
