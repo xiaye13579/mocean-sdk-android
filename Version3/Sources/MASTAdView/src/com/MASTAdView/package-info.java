@@ -1,14 +1,5 @@
 /** 
- * Welcome to the Mocean Mobile SDK package for Android, version 3.0 Beta 1.<BR>Copyright (C) 2011, 2012 Mocean Mobile. All Rights Reserved. 
- * <P><I><B>
- * NOTE: This 3.0 BETA release of the Mocean AD SDK is intended to provide developers with early access to the upcoming
- * MRAID 2.0 based SDK. The specification, this code, and the overall feature set is not yet final. Comments and feedback
- * are welcome.
- * <P>
- * YOU MUST NOT DELIVER PRODUCTS BASED ON THIS BETA SDK!
- * </B></I><P>
- * For more information, please visit: 
- * <A HREF="http://developer.moceanmobile.com/SDK_Pre-release_Pending_Changing">http://developer.moceanmobile.com/SDK_Pre-release_Pending_Changing</A>
+ * Welcome to the Mocean Mobile SDK package for Android, version 3.0.<BR>Copyright (C) 2011, 2012, 2013 Mocean Mobile. All Rights Reserved. 
  * <P>
  * Mocean Mobile is unlike any other mobile ad serving platform available. Developed specifically for mobile
  * devices, the Mocean Mobile Ad Serving Technology streamlines the many moving parts in mobile advertising
@@ -63,7 +54,7 @@
 package com.MASTAdView;
 
 //
-// Copyright (C) 2011, 2012 Mocean Mobile. All Rights Reserved. 
+// Copyright (C) 2011, 2012, 2013 Mocean Mobile. All Rights Reserved. 
 //
 
 // NO CODE HERE!!!

@@ -391,8 +391,7 @@ public class MASTAdView extends AdViewContainer
 	
 	
 	/**
-	 * Optional.
-	 * Set image resource which will be shown during ad loading if there is no ad content already visible.
+	 * Set (optional) image resource which will be shown during ad loading if there is no ad content already visible.
 	 * @param resource Resource identifier for default image.
 	 */
 	public void setDefaultImageResource(Integer resource)
