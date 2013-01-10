@@ -47,7 +47,7 @@
         <activity android:label="Simple/Rich Media" 
             android:name=".simple.ORRMABanner"
 			android:screenOrientation="sensor"
-			android:configChanges="keyboardHidden|orientation">
+			android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"></action>
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>

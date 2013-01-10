@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -26,8 +27,8 @@ public class ORRMABanner extends Activity {
 	private EditText inpSite;
 	private EditText inpZone;
 	private Button btnRefresh;
-	private int site = 19829;
-	private int zone = 98463;
+	private int site = 30299; // was 19829;
+	private int zone = 156037; // aron: 152280; // crisp mr2 152600; // was 98463;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +62,8 @@ public class ORRMABanner extends Activity {
         setAdLayoutParams();
         linearLayout.addView(adserverView);
         adserverView.getAdLog().setLogLevel(MASTAdLog.LOG_LEVEL_DEBUG);
-        adserverView.setLocationDetection(true, null, null);
+        //adserverView.setLocationDetection(true, null, null);
+        adserverView.setUpdateTime(0);
 		adserverView.update();
         
         LinearLayout frameMain = (LinearLayout) findViewById(R.id.frameMain);
@@ -73,8 +75,8 @@ public class ORRMABanner extends Activity {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		setAdLayoutParams();
-		adserverView.update();
+		//setAdLayoutParams();
+		//adserverView.update();
 	}
 		
 	private void setAdLayoutParams() {
@@ -83,7 +85,8 @@ public class ORRMABanner extends Activity {
 		windowManager.getDefaultDisplay().getMetrics(metrics);
 
 		int height = 150;
-		int width = metrics.widthPixels;
+		//int width = metrics.widthPixels;
+		int width = LayoutParams.FILL_PARENT;
 
 		ViewGroup.LayoutParams lp = adserverView.getLayoutParams();
 		if (lp == null) {
@@ -98,7 +101,7 @@ public class ORRMABanner extends Activity {
         //adserverView.setMinSizeY(height);
 		
         //adserverView.setMaxSizeX(metrics.widthPixels);
-		adserverView.getAdRequest().setProperty(MASTAdRequest.parameter_size_x, width);
+		adserverView.getAdRequest().setProperty(MASTAdRequest.parameter_size_x, metrics.widthPixels);
         adserverView.getAdRequest().setProperty(MASTAdRequest.parameter_size_y, height);
         
         
