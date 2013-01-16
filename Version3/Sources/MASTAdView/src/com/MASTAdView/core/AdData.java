@@ -38,6 +38,7 @@ final public class AdData
 	public String 				trackUrl 					= null;
 	public String 				richContent 				= null;
 	public String 				error 						= null;
+	public Integer				serverErrorCode				= null;
 	public List<NameValuePair>	externalCampaignProperties	= null;
 	public String 				responseData 				= null;
 	
@@ -51,7 +52,7 @@ final public class AdData
 				return true;
 			}
 			
-			if ((adType == MASTAdConstants.AD_TYPE_IMAGE) && (imageBitmap != null))
+			if ((adType == MASTAdConstants.AD_TYPE_IMAGE) && ((imageBitmap != null) || (imageUrl != null)))
 			{
 				return true;
 			}

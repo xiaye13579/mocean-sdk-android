@@ -382,7 +382,16 @@ public class MASTAdView extends AdViewContainer
 	
 	
 	/**
-	 * Reset all settings to default. Afer this, the ad view is essentially "new" and must be configured again before use.
+	 * Clear current ad content and close any expanded/resize views.
+	 */
+	public void removeContent()
+	{
+		super.removeContent();
+	}
+	
+	
+	/**
+	 * Clear current ad content and reset all settings to default. Afer this, the ad view is essentially "new" and must be configured again before use.
 	 */
 	public void reset()
 	{

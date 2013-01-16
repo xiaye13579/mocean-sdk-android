@@ -21,29 +21,31 @@ import com.MASTAdView.MASTAdLog;
 final public class AdParser
 {
 	// XML tags we key off of
-	public static final String TAG_AD 			= "ad";
-	public static final String TAG_URL 			= "url";
-	public static final String TAG_TEXT 		= "text";
-	public static final String TAG_IMG 			= "img";
-	public static final String TAG_TRACK 		= "track";
-	public static final String TAG_CONTENT 		= "content";
-	//public static final String TAG_RESPONSE 	= "response";
-	public static final String TAG_CAMPAIGN_TYPE = "type";
-	public static final String TAG_CAMPAIGN_ID	= "campaign_id";
-	public static final String TAG_PARAM		= "param";
-	public static final String TAG_TRACK_URL	= "track_url";
+	public static final String TAG_AD 										= "ad";
+	public static final String TAG_URL 										= "url";
+	public static final String TAG_TEXT 									= "text";
+	public static final String TAG_IMG 										= "img";
+	public static final String TAG_TRACK 									= "track";
+	public static final String TAG_CONTENT 									= "content";
+	//public static final String TAG_RESPONSE 								= "response";
+	public static final String TAG_CAMPAIGN_TYPE 							= "type";
+	public static final String TAG_CAMPAIGN_ID								= "campaign_id";
+	public static final String TAG_PARAM									= "param";
+	public static final String TAG_TRACK_URL								= "track_url";
+	public static final String TAG_ERROR									= "error";
 	
 	
 	// XML attributes for various tags
-	public static final String ATTRIBUTE_AD_TYPE = "type";
-	public static final String ATTRIBUTE_AD_FEED = "feed";
-	public static final String ATTRIBUTE_EXTERNAL_CAMPAIGN_VARIABLE_NAME = "name";
-
+	public static final String ATTRIBUTE_AD_TYPE 							= "type";
+	public static final String ATTRIBUTE_AD_FEED 							= "feed";
+	public static final String ATTRIBUTE_EXTERNAL_CAMPAIGN_VARIABLE_NAME 	= "name";
+	public static final String ATTRIBUTE_ERROR_CODE 						= "code";
+	
 	
 	// Constants for external third party campaign
-	public static final String EXTERNAL_THIRD_PARTY_CAMPAIGN_SIGNAL = "client_side_external_campaign";
-	public static final String EXTERNAL_THIRD_PARTY_CAMPAIGN_START	= "<external_campaign";
-	public static final String EXTERNAL_THIRD_PARTY_CAMPAIGN_END	= "</external_campaign>";
+	public static final String EXTERNAL_THIRD_PARTY_CAMPAIGN_SIGNAL 		= "client_side_external_campaign";
+	public static final String EXTERNAL_THIRD_PARTY_CAMPAIGN_START			= "<external_campaign";
+	public static final String EXTERNAL_THIRD_PARTY_CAMPAIGN_END			= "</external_campaign>";
 
 	
 	final private boolean prefetchImages;
@@ -138,6 +140,12 @@ final public class AdParser
 	// <response> ..orignal response from mediated server, etc.. </response> 
 	// </ad>
 	// </mojiva>
+	//
+	// or, if an error was encourtered on the server side:
+	// <?xml version="1.0" encoding="UTF-8"?>
+	// <mojiva>
+	// <error code='-1'>Error has occured</error>
+	// </mojiva>
 	final private class AdHandler extends DefaultHandler
 	{
 		final private AdData currentAd;
@@ -179,6 +187,23 @@ final public class AdParser
 	    			currentAd.thirdPartyFeed = value;
 	    		}
             }
+	    	else if (localName.equalsIgnoreCase(TAG_ERROR) &&
+            		(attributes != null) && (attributes.getLength() > 0))
+            {
+	    		String value = attributes.getValue(uri, ATTRIBUTE_ERROR_CODE);
+	    		if (value != null)
+	    		{
+		    		try
+		    		{
+		    			currentAd.serverErrorCode = Integer.parseInt(value);
+		    		}
+		    		catch(Exception ex)
+		    		{
+		    			currentAd.serverErrorCode = null;
+		    			currentAd.error = "Exception parsing server error code: " + ex.getMessage() + "\r\n";
+		    		}
+	    		}
+            }
 	    }
 	    
 	    @Override
@@ -213,6 +238,17 @@ final public class AdParser
             	else
             	{
             		currentAd.richContent = sb.toString();
+            	}
+            }
+            else if (localName.equalsIgnoreCase(TAG_ERROR))
+            {
+            	if (currentAd.error != null)
+            	{
+            		currentAd.error = currentAd.error + sb.toString();
+            	}
+            	else
+            	{
+            		currentAd.error = sb.toString();
             	}
             }
             

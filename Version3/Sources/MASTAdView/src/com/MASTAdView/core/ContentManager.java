@@ -288,7 +288,7 @@ final public class ContentManager
 		}
 	}
 
-	
+	/*
 	public String getDeviceId()
 	{
 		return getDeviceId((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
@@ -324,6 +324,7 @@ final public class ContentManager
 		id = deviceId;
 		return deviceId;
 	}
+	*/
 	
 	private void initDefaultParameters()
 	{
@@ -353,35 +354,9 @@ final public class ContentManager
 			autoDetectParameters += "&"+MASTAdRequest.parameter_device_id+"=" + deviceIdMd5;
 		}
 		*/
-		
-		Integer connectionSpeed = null;
-    	ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-    	NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-    	
-		if (networkInfo != null) {
-			int type = networkInfo.getType();
-			int subtype = networkInfo.getSubtype();
-			
-			//0 - low (gprs, edge), 1 - fast (3g, wifi)
-			if (type == ConnectivityManager.TYPE_WIFI) {
-				connectionSpeed = 1;
-			} else if (type == ConnectivityManager.TYPE_MOBILE) {
-				if (subtype == TelephonyManager.NETWORK_TYPE_EDGE) {
-					connectionSpeed = 0;
-				} else if (subtype == TelephonyManager.NETWORK_TYPE_GPRS) {
-					connectionSpeed = 0;
-				} else if (subtype == TelephonyManager.NETWORK_TYPE_UMTS) {
-					connectionSpeed = 1;
-				}
-			}
-		}
-		
-		if (connectionSpeed != null) {
-			autoDetectParameters += "&connection_speed="+connectionSpeed.toString();
-		}
 	}
 
-	
+	/*
 	private synchronized String makeDeviceId(Context context) {
 		if (id == null) {
 			File installation = new File(context.getFilesDir(), INSTALLATION);
@@ -449,4 +424,5 @@ final public class ContentManager
 		out.write(id.getBytes());
 		out.close();
 	}
+	*/
 }

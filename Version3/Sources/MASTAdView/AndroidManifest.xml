@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.MASTAdView"
-    android:versionCode="030002"
-    android:versionName="3.0.2" >
+    android:versionCode="030003"
+    android:versionName="3.0.3" >
 
     <uses-sdk
         android:minSdkVersion="8"

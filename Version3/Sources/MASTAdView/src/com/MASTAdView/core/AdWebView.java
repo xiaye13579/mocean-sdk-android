@@ -387,7 +387,8 @@ public class AdWebView extends WebView
 				MASTAdDelegate.AdDownloadEventHandler downloadHandler = delegate.getAdDownloadHandler(); 
 				if ( downloadHandler != null)
 				{
-					downloadHandler.onDownloadEnd((MASTAdView)adViewContainer);
+					//downloadHandler.onDownloadEnd((MASTAdView)adViewContainer);
+					downloadHandler.onAdViewable((MASTAdView)adViewContainer);
 				}
 			}
 

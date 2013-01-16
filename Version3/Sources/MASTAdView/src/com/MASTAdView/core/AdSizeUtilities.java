@@ -196,7 +196,7 @@ final public class AdSizeUtilities
 		}
 		catch(Exception ex)
 		{
-			return MASTAdConstants.STR_ORMMA_ERROR_EXPAND; // XXX new, more specific error
+			return MASTAdConstants.STR_RICHMEDIA_ERROR_EXPAND; // XXX new, more specific error
 		}
 	
 		// Limit expand size to device width/height at most
@@ -427,7 +427,7 @@ final public class AdSizeUtilities
 			}
 			else
 			{
-				return MASTAdConstants.STR_ORMMA_ERROR_RESIZE; // XXX new, more specific error for missing width
+				return MASTAdConstants.STR_RICHMEDIA_ERROR_RESIZE; // XXX new, more specific error for missing width
 			}
 			
 			value = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.HEIGHT));
@@ -437,7 +437,7 @@ final public class AdSizeUtilities
 			}
 			else
 			{
-				return MASTAdConstants.STR_ORMMA_ERROR_RESIZE; // XXX new, more specific error for missing height
+				return MASTAdConstants.STR_RICHMEDIA_ERROR_RESIZE; // XXX new, more specific error for missing height
 			}	
 				
 			closePosition = data.getString(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.CUSTOM_CLOSE_POSITION));
@@ -480,7 +480,7 @@ final public class AdSizeUtilities
 		}
 		catch(Exception ex)
 		{
-			return MASTAdConstants.STR_ORMMA_ERROR_RESIZE; // XXX new, more specific error
+			return MASTAdConstants.STR_RICHMEDIA_ERROR_RESIZE; // XXX new, more specific error
 		}
 	
 		String invalidMessage = resizePropertiesValid(toWidth, toHeight, closePosition, offsetX, offsetY, offScreen);

@@ -66,6 +66,12 @@ final public class MASTAdRequest
 	 * DO NOT CHANGE THIS VALUE (CONSIDER IT READ ONLY.)
 	 */
 	private final static String parameter_count			= "count";
+
+	/**
+	 * Format of response data to request from back-end. We always ask for XML.
+	 * DO NOT CHANGE THIS VALUE (CONSIDER IT READ ONLY.)
+	 */
+	private final static String paramter_key			= "key";
 	
 	/**
 	 * URL of ad server this ad view will use when communicating with back end.
@@ -211,7 +217,15 @@ final public class MASTAdRequest
 		
 		if (name.compareTo(parameter_count) == 0)
 		{
-			result = false;
+			result = false; // not allowed to set this
+		}
+		else if (name.compareTo(paramter_key) == 0)
+		{
+			result = false; // not allowed to set this
+		}
+		else if (name.compareTo(parameter_version) == 0)
+		{
+			result = false; // not allowed to set this
 		}
 		else if (name.compareTo(parameter_ad_server_url) == 0)
 		{
@@ -412,14 +426,6 @@ final public class MASTAdRequest
 			}
 		}
 		else if (name.compareTo(parameter_zone) == 0)
-		{
-			if ((value == null) || (value < 1))
-			{
-				AdLog.log(MASTAdLog.LOG_LEVEL_DEBUG, MASTAdConstants.STR_INVALID_PARAM, name + ": " + error_over_zero);
-				return false;
-			}
-		}
-		else if (name.compareTo(parameter_count) == 0)
 		{
 			if ((value == null) || (value < 1))
 			{

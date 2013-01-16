@@ -229,8 +229,11 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 	
 	
-	public void reset()
+	public void removeContent()
 	{
+		// If interstitial, resized or expanded ad open, close
+		close(null); // XXX
+		
 		// Reset all to initial state
 		removeAllViews();
 
@@ -238,7 +241,17 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		if (adImageView instanceof ImageView)
 		{
 			freeBitmapImageviewResouces((ImageView)adImageView);
-		}
+		}		
+	}
+	
+	
+	public void reset()
+	{
+		removeContent();
+		
+		// stop ad reload timer and disable
+		adReloadTimer.setAdReloadPeriod(MASTAdConstants.AD_RELOAD_PERIOD);
+		adReloadTimer.stopTimer(true);
 		
 		bannerCloseButton = null;
 		customCloseButton = null;
@@ -257,7 +270,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 
 		isShowCloseOnBanner = false;
 		isShowPreviousAdOnError = false;
-
+		
 		adserverRequest.reset();
 	}
 	
@@ -761,10 +774,26 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 
 
-	// Invoked when retreiving an ad fails
+	// Invoked when retrieving an ad fails
 	private void setErrorResult(AdData ad)
 	{
-		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "requestGet result["+String.valueOf(requestCounter)+"][ERROR]", ad.error);
+		if (ad.serverErrorCode != null)
+		{
+			// If the server returned an error code, and it is 404 (no ads available) we treat that as informational;
+			// other codes are true errors.
+			if (ad.serverErrorCode == 404)
+			{
+				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "requestGet result["+String.valueOf(requestCounter)+"][ERROR][CODE=" + ad.serverErrorCode+"]", ad.error);
+			}
+			else
+			{
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "requestGet result["+String.valueOf(requestCounter)+"][ERROR][CODE=" + ad.serverErrorCode+"]", ad.error);
+			}
+		}
+		else
+		{
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "requestGet result["+String.valueOf(requestCounter)+"][ERROR]", ad.error);
+		}
 
 		if (adDelegate != null)
 		{
@@ -812,12 +841,18 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		if (ad == null)
 		{
 			AdData error = new AdData();
-			error.error = "Unknown error getting ad (null object)...";
+			error.error = MASTAdConstants.STR_NULL_AD_ERROR;
 			setErrorResult(error);
 			return false;
 		}
 		else if (ad.error != null)
 		{
+			setErrorResult(ad);
+			return false;
+		}
+		else if (ad.hasContent() == false)
+		{
+			ad.error = MASTAdConstants.STR_NO_AD_CONTENT_ERROR;
 			setErrorResult(ad);
 			return false;
 		}
@@ -949,7 +984,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	
 
 	// Called when close() method is invoked from ad view
-	public String close(Bundle data)
+	public String close(Bundle ignoredBundle)
 	{	
 		MraidInterface.STATES adState = adWebView.getMraidInterface().getState();
 		if (adPlacementType == MraidInterface.PLACEMENT_TYPES.INTERSTITIAL)
@@ -998,6 +1033,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		{
 			int resizeToX;
 			int resizeToY;
+			/*
 			if ((resizeOldWidth != 0) && (resizeOldWidth != 0))
 			{
 				resizeToX = resizeOldWidth;
@@ -1010,6 +1046,9 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 				resizeToX = this.getWidth();
 				resizeToY = this.getHeight();
 			}
+			*/
+			resizeToX = this.getWidth();
+			resizeToY = this.getHeight();
 			
 			// Remove adview from temporary container
 			ViewGroup parent = (ViewGroup)adWebView.getParent();
@@ -1204,8 +1243,8 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	}
 	
 	
-	private int resizeOldWidth = 0;
-	private int resizeOldHeight = 0;
+	//private int resizeOldWidth = 0;
+	//private int resizeOldHeight = 0;
 	
 	
 	/**
@@ -1214,8 +1253,8 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	 */
 	public String resize(Bundle data)
 	{
-		resizeOldWidth = this.getWidth();
-		resizeOldHeight = this.getHeight();
+		//resizeOldWidth = this.getWidth();
+		//resizeOldHeight = this.getHeight();
 		
 		// You can only invoke resize from the default ad state, or from the resized state (to further change the size)
 		if ((adWebView.getMraidInterface().getState() == MraidInterface.STATES.DEFAULT) ||
@@ -1225,7 +1264,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			return adSizeUtilities.startResize(data);		
 		} 
 		
-		return MASTAdConstants.STR_ORMMA_ERROR_RESIZE;
+		return MASTAdConstants.STR_RICHMEDIA_ERROR_RESIZE;
 	}
 	
 	
@@ -1302,7 +1341,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			return adSizeUtilities.startExpand(data, adReloadTimer);
 		}
 		
-		return MASTAdConstants.STR_ORMMA_ERROR_EXPAND; // new, more specific error
+		return MASTAdConstants.STR_RICHMEDIA_ERROR_EXPAND; // new, more specific error
 	}
 	
 		
