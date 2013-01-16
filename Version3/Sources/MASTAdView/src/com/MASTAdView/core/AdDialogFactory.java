@@ -43,7 +43,8 @@ final public class AdDialogFactory
 	{
 		if ((options != null) && (options.width != null) && (options.height != null))
 		{
-			RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(options.width, options.height);
+			//RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(options.width, options.height);
+			RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
 			layoutParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
 			layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
 			return layoutParams;
@@ -123,8 +124,6 @@ final public class AdDialogFactory
 					((ViewGroup)closeButton.getParent()).removeView(closeButton);
 				}
 				
-				
-				
 				closeButton.setOnClickListener(createCloseClickListener(ad, options));
 			}
 			else
@@ -144,8 +143,6 @@ final public class AdDialogFactory
 				{
 					closeButton.setText("Close"); // XXX string
 				}
-				
-				
 				
 				closeButton.setOnClickListener(createCloseClickListener(ad, options));
 			}	
