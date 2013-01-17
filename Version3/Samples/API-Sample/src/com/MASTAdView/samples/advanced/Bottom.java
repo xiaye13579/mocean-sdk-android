@@ -27,7 +27,7 @@ public class Bottom extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 98465; // zumobi tapdance, 320x150 or 640x300
+	private int zone = 88269;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

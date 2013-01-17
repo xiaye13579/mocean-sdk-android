@@ -102,7 +102,7 @@ public class ApiDemos extends ListActivity {
 
         for (int i = 0; i < len; i++) {        	
             ResolveInfo info = list.get(i);
-            String str =list.get(0).getClass().getPackage().toString();
+            //String str =list.get(0).getClass().getPackage().toString();
             CharSequence labelSeq = info.loadLabel(pm);
             String label = labelSeq != null
                     ? labelSeq.toString()

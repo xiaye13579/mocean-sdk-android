@@ -179,5 +179,23 @@
                 <category android:name="android.intent.category.SAMPLE_CODE"></category>
             </intent-filter>
         </activity>
+        <activity android:name=".error.Hide"
+             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+             android:label="Error/Hide"
+             android:screenOrientation="sensor">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
+        <activity android:name=".error.Image"
+             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+             android:label="Error/Image"
+             android:screenOrientation="sensor">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.SAMPLE_CODE"></category>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

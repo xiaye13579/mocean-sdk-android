@@ -38,7 +38,7 @@ public class Dimensions extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 102238;
+	private int zone = 152280;
     private int dimensionsWidth = -1;
     private int dimensionsHeight = -1;
     private int dimensionsX = 0;

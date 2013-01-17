@@ -29,7 +29,7 @@ public class TopAndBottom extends Activity {
 	private EditText inpZoneTop;
 	private Button btnRefreshTop;
 	private int siteTop = 19829;
-	private int zoneTop = 98466;
+	private int zoneTop = 102238;
 
 	private MASTAdView adserverViewBottom;
 	private LinearLayout linearLayoutBottom;
@@ -37,7 +37,7 @@ public class TopAndBottom extends Activity {
 	private EditText inpZoneBottom;
 	private Button btnRefreshBottom;
 	private int siteBottom = 19829;
-	private int zoneBottom = 98465 ;
+	private int zoneBottom = 88269;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

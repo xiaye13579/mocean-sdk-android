@@ -28,7 +28,7 @@ public class ORRMABanner extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 30299; // was 19829;
-	private int zone = 156037; // aron: 152280; // crisp mr2 152600; // was 98463;
+	private int zone = 98463;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
