@@ -4,13 +4,9 @@
 package com.MASTAdView.core;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.util.HashMap;
-import java.util.UUID;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -21,9 +17,6 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.ByteArrayBuffer;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 
 import com.MASTAdView.MASTAdConstants;
@@ -31,14 +24,14 @@ import com.MASTAdView.MASTAdLog;
 
 final public class ContentManager
 {
-	private static final String INSTALLATION = "INSTALLATION";
+	//private static final String INSTALLATION = "INSTALLATION";
 	private volatile String autoDetectParameters = "";
 	private String userAgent = "";
 	private static ContentManager instance;
 	private static boolean isSimAvailable;
 	final private HashMap<ContentConsumer, ContentParameters> senderParameters = new HashMap<ContentConsumer, ContentParameters>();
-	private String id = null;
-	private boolean useSystemDeviceId = false;
+	//private String id = null;
+	//private boolean useSystemDeviceId = false;
 	final private Context context;
 	final private AdParser parser;
 

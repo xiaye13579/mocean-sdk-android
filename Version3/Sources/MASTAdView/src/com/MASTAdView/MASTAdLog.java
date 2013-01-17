@@ -78,6 +78,16 @@ final public class MASTAdLog
 	 */
 	public void log(int Level, String tag, String msg)
 	{	
+		if (msg == null)
+		{
+			return;
+		}
+		
+		if (tag == null)
+		{
+			tag = "";
+		}
+		
 		String resultTag;
 		if (adView != null)
 		{

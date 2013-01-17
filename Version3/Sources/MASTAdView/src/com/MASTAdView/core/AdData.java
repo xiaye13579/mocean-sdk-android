@@ -13,11 +13,11 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import com.MASTAdView.MASTAdConstants;
-import com.MASTAdView.MASTAdLog;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+
+import com.MASTAdView.MASTAdConstants;
+import com.MASTAdView.MASTAdLog;
 
 final public class AdData
 {
@@ -144,15 +144,23 @@ final public class AdData
 	
 	
 	public static InputStream fetchUrl(String fromUrl)
+	{
+		return fetchUrl(fromUrl, null);
+	}
+	
+	public static InputStream fetchUrl(String fromUrl, String userAgent)
 	{		
 		try
 		{
 			//System.out.println("Fetcing URL: " + fromUrl);
 			HttpClient httpclient = new DefaultHttpClient();  
     		HttpGet request = new HttpGet(fromUrl);
-    		
+    
     		// Always include our user agent header, if needed
-    		// XXX request.setHeader(header) XXX
+    		if (userAgent != null)
+			{
+    			request.setHeader("User-Agent", userAgent);
+			}
     		
     		HttpResponse response = httpclient.execute(request);     
     		StatusLine statusLine = response.getStatusLine();    
@@ -172,14 +180,14 @@ final public class AdData
 	}
 	
 	
-	public static void sendImpressionOnThread(String url)
+	public static void sendImpressionOnThread(String url, String userAgent)
 	{
 		if ((url == null) || (url.length() < 1))
 		{
 			return;
 		}
 		
-		InputStream is = fetchUrl(url);
+		InputStream is = fetchUrl(url, userAgent);
 		
 		if (is != null)
 		{	
@@ -195,7 +203,7 @@ final public class AdData
 	}
 	
 	
-	public static void sendImpressionInBackground(final String url)
+	public static void sendImpressionInBackground(final String url, final String userAgent)
 	{
 		if ((url == null) || (url.length() < 1))
 		{
@@ -207,7 +215,7 @@ final public class AdData
 			@Override
 			public void run()
 			{
-				sendImpressionOnThread(url);
+				sendImpressionOnThread(url, userAgent);
 			}
 		};
 		thread.setName("[AdData] sendImpression");

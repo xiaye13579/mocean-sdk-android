@@ -629,7 +629,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		if ((ad != null) && (ad.trackUrl != null) && (ad.trackUrl.length() > 0))
 		{
 			// Looks like we have a tracking url, fire off worker to send impression back to server
-			AdData.sendImpressionInBackground(ad.trackUrl);
+			AdData.sendImpressionInBackground(ad.trackUrl, getUserAgent());
 		}
 	}
 	
