@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +32,9 @@ public class AdvancedAnimation extends Activity {
 	private Button btnRefresh;
 	private Animation animation;
 	private int site = 19829;
-	private int zone = 146951; // was 88269;
+	private int zone = 88269;
+	private Handler uiHandler = new Handler();
+	
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,28 +81,32 @@ public class AdvancedAnimation extends Activity {
 			@Override
 			public void onDownloadError(MASTAdView arg0, String arg1) {
 				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void onDownloadEnd(MASTAdView arg0) {
 				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void onDownloadBegin(MASTAdView arg0) {
-				adserverView.startAnimation(animation);	
+				// TODO Auto-generated method stub	
 			}
 
 			@Override
 			public void onAdViewable(MASTAdView arg0) {
-				Animation animation = new TranslateAnimation(
-			            Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
-			            Animation.RELATIVE_TO_SELF, -1.0f, Animation.RELATIVE_TO_SELF, 0.0f
-			        );
-				animation.setDuration(2000);
-				adserverView.startAnimation(animation);
+				uiHandler.post(new Runnable()
+				{
+					public void run()
+					{
+						Animation animation = new TranslateAnimation(
+					            Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
+					            Animation.RELATIVE_TO_SELF, -1.0f, Animation.RELATIVE_TO_SELF, 0.0f
+					        );
+						animation.setDuration(2000);
+						adserverView.startAnimation(animation);
+					}
+				});
 			}
 		});
         

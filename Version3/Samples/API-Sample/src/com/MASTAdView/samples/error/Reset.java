@@ -27,7 +27,7 @@ import com.MASTAdView.MASTAdDelegate;
 import com.MASTAdView.samples.R;
 
 
-public class Hide extends Activity implements MASTAdDelegate.AdDownloadEventHandler {
+public class Reset extends Activity implements MASTAdDelegate.AdDownloadEventHandler {
 	private MASTAdView adserverView;
 	private LinearLayout linearLayout;
 	private EditText inpSite;
@@ -147,11 +147,12 @@ public class Hide extends Activity implements MASTAdDelegate.AdDownloadEventHand
 
 	@Override
 	public void onDownloadEnd(final MASTAdView sender) {
+		// This must run on the UI thread
 		uiHandler.post(new Runnable()
 		{
 			public void run()
 			{
-				sender.setVisibility(View.VISIBLE);
+				sender.setBackgroundColor(Color.BLACK);
 			}
 		});
 	}
@@ -163,11 +164,13 @@ public class Hide extends Activity implements MASTAdDelegate.AdDownloadEventHand
 
 	@Override
 	public void onDownloadError(final MASTAdView sender, String error) {
+		// This must run on the UI thread
 		uiHandler.post(new Runnable()
 		{
 			public void run()
 			{
-				sender.setVisibility(View.GONE);
+				sender.removeContent();
+				sender.setBackgroundColor(Color.BLUE);
 			}
 		});
 	}	

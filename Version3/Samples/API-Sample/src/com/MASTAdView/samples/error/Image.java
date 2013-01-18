@@ -37,7 +37,7 @@ public class Image extends Activity implements MASTAdDelegate.AdDownloadEventHan
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 88269;
+	private int zone = 102238;
 	private Handler uiHandler = new Handler();
 	private ImageView defaultImage = null;
 	
@@ -86,7 +86,7 @@ public class Image extends Activity implements MASTAdDelegate.AdDownloadEventHan
         
         // Add explanatory message to bottom
         TextView note = new TextView(this);
-        note.setText("Use valid zone (ex 88269) or broken zone (ex 158514) to see error handling.");
+        note.setText("Use valid zone (ex 102238) or broken zone (ex 158514) to see error handling.");
         note.setTextColor(Color.BLACK);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         lp.setMargins(20, 20, 20, 20);
