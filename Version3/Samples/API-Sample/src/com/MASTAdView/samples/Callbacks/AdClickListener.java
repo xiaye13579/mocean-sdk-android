@@ -26,7 +26,7 @@ import com.MASTAdView.samples.R;
 
 public class AdClickListener extends Activity {
 	private Context context;
-	private Handler handler = new Handler();
+	volatile Handler handler = new Handler();
 	private MASTAdView adserverView;
 	private LinearLayout linearLayout;
 	private EditText inpSite;
@@ -89,8 +89,11 @@ public class AdClickListener extends Activity {
     class UserAdActivityEventHandler implements MASTAdDelegate.AdActivityEventHandler {
 		
 		private void updateUi(Runnable mUpdateResults, String string) {
-			updateMessage = string;
-	    	handler.post(mUpdateResults);
+			if (handler != null)
+			{
+				updateMessage = string;
+				handler.post(mUpdateResults);
+			}
 		}
 
 		@Override
@@ -175,5 +178,17 @@ public class AdClickListener extends Activity {
         adserverView.getAdRequest().setProperty(MASTAdRequest.parameter_size_y, height);
 		adserverView.requestLayout();
 	}
+
 	
+	public void onStop()
+	{
+		handler = null;
+		super.onStop();
+	}
+	
+	public void onDestroy()
+	{
+		handler = null;
+		super.onDestroy();
+	}
 }

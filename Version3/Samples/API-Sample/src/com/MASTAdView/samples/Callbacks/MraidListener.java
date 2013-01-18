@@ -27,7 +27,7 @@ import com.MASTAdView.samples.R;
 
 public class MraidListener extends Activity {
 	private Context context;
-	private Handler handler = new Handler();
+	volatile Handler handler = new Handler();
 	private MASTAdView adserverView;
 	private LinearLayout linearLayout;
 	private EditText inpSite;
@@ -88,8 +88,11 @@ public class MraidListener extends Activity {
     class UserOnMraidListener implements MASTAdDelegate.RichmediaEventHandler {
 
 		private void updateUi(Runnable mUpdateResults, String string) {
-	    	uMessage = string;
-	    	handler.post(mUpdateResults);
+			if (handler != null)
+			{
+				uMessage = string;
+				handler.post(mUpdateResults);
+			}
 		}
 
 		@Override
@@ -148,5 +151,16 @@ public class MraidListener extends Activity {
         adserverView.getAdRequest().setProperty(MASTAdRequest.parameter_size_y, height);
 		adserverView.requestLayout();
 	}
+
+	public void onStop()
+	{
+		handler = null;
+		super.onStop();
+	}
 	
+	public void onDestroy()
+	{
+		handler = null;
+		super.onDestroy();
+	}
 }
