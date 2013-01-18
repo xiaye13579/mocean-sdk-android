@@ -1,5 +1,5 @@
 /** 
- * Welcome to the Mocean Mobile SDK package for Android, version 3.0.<BR>Copyright (C) 2011, 2012, 2013 Mocean Mobile. All Rights Reserved. 
+ * Welcome to the Mocean Mobile SDK package for Android, version 3.0.1.<BR>Copyright (C) 2011, 2012, 2013 Mocean Mobile. All Rights Reserved. 
  * <P>
  * Mocean Mobile is unlike any other mobile ad serving platform available. Developed specifically for mobile
  * devices, the Mocean Mobile Ad Serving Technology streamlines the many moving parts in mobile advertising
