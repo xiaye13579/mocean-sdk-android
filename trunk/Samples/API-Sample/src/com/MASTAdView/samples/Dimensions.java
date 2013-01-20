@@ -26,11 +26,6 @@ import com.MASTAdView.MASTAdRequest;
 import com.MASTAdView.MASTAdView;
 
 
-
-// XXX take min size and viewport parameters out of UI
-
-
-
 public class Dimensions extends Activity {
 	private MASTAdView adserverView;
 	private LinearLayout linearLayout;
@@ -38,7 +33,7 @@ public class Dimensions extends Activity {
 	private EditText inpZone;
 	private Button btnRefresh;
 	private int site = 19829;
-	private int zone = 152280;
+	private int zone = 156037;
     private int dimensionsWidth = -1;
     private int dimensionsHeight = -1;
     private int dimensionsX = 0;
