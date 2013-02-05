@@ -679,7 +679,7 @@ final public class AdSizeUtilities
 	}
 	
 	
-	private static MraidInterface.FORCE_ORIENTATION_PROPERTIES getScreenOrientation(Context context)
+	public static MraidInterface.FORCE_ORIENTATION_PROPERTIES getScreenOrientation(Context context)
 	{
 		switch (context.getResources().getConfiguration().orientation)
 		{
@@ -695,7 +695,7 @@ final public class AdSizeUtilities
 	}
 	
 	
-	MraidInterface.FORCE_ORIENTATION_PROPERTIES getScreenOrientationBySize(DisplayMetrics metrics)
+	private MraidInterface.FORCE_ORIENTATION_PROPERTIES getScreenOrientationBySize(DisplayMetrics metrics)
 	{
 		// Simple test by looking at geometry of screen
 		if (metrics.widthPixels > metrics.heightPixels)
@@ -710,7 +710,7 @@ final public class AdSizeUtilities
 	
 	
 	// set & lock screen orienetation (if portrait or landscape), otherwise unlock (if none)
-	private static boolean setScreenOrientation(MraidInterface.FORCE_ORIENTATION_PROPERTIES toOrientation, Context context)
+	public static boolean setScreenOrientation(MraidInterface.FORCE_ORIENTATION_PROPERTIES toOrientation, Context context)
 	{
 		if (context instanceof Activity)
 		{

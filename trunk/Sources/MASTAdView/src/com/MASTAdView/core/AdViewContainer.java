@@ -1102,7 +1102,8 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		if (adPlacementType == MraidInterface.PLACEMENT_TYPES.INTERSTITIAL)
 		{
 			MraidInterface.STATES adState = adWebView.getMraidInterface().getState();
-			if (adState == MraidInterface.STATES.DEFAULT)
+			if ((adState == MraidInterface.STATES.DEFAULT) ||
+				(adState == MraidInterface.STATES.LOADING)) // Non-MRAID ad state never goes beyond loading
 			{
 				//System.out.println("Closing interstitial ad view...");
 				

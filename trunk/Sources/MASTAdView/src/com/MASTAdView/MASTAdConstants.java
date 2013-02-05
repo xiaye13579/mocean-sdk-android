@@ -45,7 +45,7 @@ public class MASTAdConstants {
 	
 	
 	public static final String STR_INVALID_PARAM 			= "invalid param";
-	public static final String STR_EMPTY_SERVER_RESPONSE  	= "No ads available";
+	public static final String STR_EMPTY_SERVER_RESPONSE  	= "No ads available"; // MUST exactly match error returned by server
 	public static final String STR_NULL_AD_ERROR			= "Unknown error: ad object is null...";
 	public static final String STR_NO_AD_CONTENT_ERROR		= "Unkonwn error: ad object has no content...";
 	public static final String STR_RICHMEDIA_ERROR_RESIZE 	= "Error: resize: Cannot resize an ad that is not in the default state.";
