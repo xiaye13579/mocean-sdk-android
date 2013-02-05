@@ -129,7 +129,10 @@ final public class MASTAdRequest
 	public synchronized void reset()
 	{
 		parameters.clear();
-		customParameters.clear();
+		if (customParameters != null)
+		{
+			customParameters.clear();
+		}
 		adserverURL = MASTAdConstants.adserverURL;
 	}
 	
