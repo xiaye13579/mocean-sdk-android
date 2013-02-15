@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import com.MASTAdView.MASTAdDelegate;
@@ -225,7 +224,7 @@ final public class JavascriptInterface
 	
 	
 	// Used by javascript code to pass resize properties into the java app
-	public void setResizeProperties(String encodedProperties, String sizeIsPixels)
+	public void setResizeProperties(String encodedProperties)
 	{
 		adView.richmediaEvent("setResizeProperties", encodedProperties);
 		
@@ -243,12 +242,6 @@ final public class JavascriptInterface
 				//List<NameValuePair> properties = URLEncodedUtils.parse(propertiesUri, "UTF-8"); 
 				//resizeProperties = createMapFromList(properties);
 				resizeProperties = URLEncodedUtils.parse(propertiesUri, "UTF-8");
-				if ((sizeIsPixels != null) && (sizeIsPixels.equalsIgnoreCase("true")))
-				{
-					// convert to points, because that's what we assume later
-					// XXX This is a hack for ormma resize(withd, height) compatibility, should not be needed in production!!!
-					convertResizeDimensionsToPoints(resizeProperties);
-				}
 			}
 			catch(Exception ex)
 			{
@@ -594,59 +587,5 @@ final public class JavascriptInterface
 		}
 		
 		return data;
-	}
-	
-	
-	private void convertResizeDimensionsToPoints(List<NameValuePair> list)
-	{
-		//System.out.println("Converting resize properites to point values");
-		
-		if (list != null)
-		{
-			Iterator<NameValuePair> i = list.iterator();
-			NameValuePair nvp;
-			BasicNameValuePair newNvp;
-			Integer pixels;
-			int index;
-			while (i.hasNext())
-			{
-				nvp = i.next();
-				if ((nvp != null) && (nvp.getName() != null))
-				{
-					if (nvp.getName().compareTo(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.HEIGHT)) == 0)
-					{
-						pixels = AdSizeUtilities.devicePixelToMraidPoint(Integer.parseInt(nvp.getValue()), context);
-						newNvp = new BasicNameValuePair(nvp.getName(), "" + pixels);
-						index = list.indexOf(nvp);
-						list.remove(index);
-						list.add(index, newNvp);
-					}
-					else if (nvp.getName().compareTo(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.WIDTH)) == 0)
-					{
-						pixels = AdSizeUtilities.devicePixelToMraidPoint(Integer.parseInt(nvp.getValue()), context);
-						newNvp = new BasicNameValuePair(nvp.getName(), "" + pixels);
-						index = list.indexOf(nvp);
-						list.remove(index);
-						list.add(index, newNvp);
-					}
-					else if (nvp.getName().compareTo(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.OFFSET_X)) == 0)
-					{
-						pixels = AdSizeUtilities.devicePixelToMraidPoint(Integer.parseInt(nvp.getValue()), context);
-						newNvp = new BasicNameValuePair(nvp.getName(), "" + pixels);
-						index = list.indexOf(nvp);
-						list.remove(index);
-						list.add(index, newNvp);
-					}
-					else if (nvp.getName().compareTo(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.OFFSET_Y)) == 0)
-					{
-						pixels = AdSizeUtilities.devicePixelToMraidPoint(Integer.parseInt(nvp.getValue()), context);
-						newNvp = new BasicNameValuePair(nvp.getName(), "" + pixels);
-						index = list.indexOf(nvp);
-						list.remove(index);
-						list.add(index, newNvp);
-					}
-				}
-			}
-		}
 	}
 }

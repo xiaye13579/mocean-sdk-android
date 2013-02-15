@@ -478,7 +478,7 @@ window.mraid_init = function()
     };
     
     // MRAID
-    mraid.setResizeProperties = function(properties, sizeIsPixels)
+    mraid.setResizeProperties = function(properties)
     {
         console.log("setResizeProperties");
         
@@ -493,7 +493,7 @@ window.mraid_init = function()
             }
         }
         	
-		AdWebView.setResizeProperties(mraid.returnInfo(mraid.getResizeProperties), "false");
+		AdWebView.setResizeProperties(mraid.returnInfo(mraid.getResizeProperties));
     };
     
     // MRAID
@@ -660,17 +660,6 @@ window.mraid_init = function()
     mraid.setOrientation = function(orientation)
     {
         currentOrientation = orientation;
-    };
-    
-    // MRAID
-    mraid.getOrientation = function()
-    {
-        console.log("getOrientation");
-      
-      	var o = AdWebView.getOrientation();
-      	mraid.setOrientation(o);
-      	   
-        return currentOrientation;
     };
     
     //////////

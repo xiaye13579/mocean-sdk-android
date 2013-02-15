@@ -695,20 +695,6 @@ final public class AdSizeUtilities
 	}
 	
 	
-	private MraidInterface.FORCE_ORIENTATION_PROPERTIES getScreenOrientationBySize(DisplayMetrics metrics)
-	{
-		// Simple test by looking at geometry of screen
-		if (metrics.widthPixels > metrics.heightPixels)
-		{
-			return MraidInterface.FORCE_ORIENTATION_PROPERTIES.LANDSCAPE;
-		}
-		else
-		{
-			return MraidInterface.FORCE_ORIENTATION_PROPERTIES.PORTRAIT;
-		}
-	}
-	
-	
 	// set & lock screen orienetation (if portrait or landscape), otherwise unlock (if none)
 	public static boolean setScreenOrientation(MraidInterface.FORCE_ORIENTATION_PROPERTIES toOrientation, Context context)
 	{
