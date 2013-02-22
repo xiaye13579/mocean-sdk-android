@@ -312,7 +312,7 @@ window.mraid_init = function()
     // MRAID
     mraid.isViewable = function()
     {
-        console.log("isViewable");
+        console.log("isViewable: " + isViewable);
         
         return isViewable;
     };

@@ -337,14 +337,17 @@ final public class AdSizeUtilities
 	
 	private String resizePropertiesValid(int toWidth, int toHeight, String closePosition, int offsetX, int offsetY, boolean offscreen)
 	{
-		if ((toWidth > metrics.widthPixels) || (toHeight > metrics.heightPixels))
+		int maxWidth = metrics.widthPixels;
+		int maxHeight = metrics.heightPixels - parentContainer.getAdWebView().getStatusBarHeight();
+				
+		if ((toWidth > maxWidth) || (toHeight > maxHeight))
 		{
-			return "Resize to larger the screen size not allowed";
+			return "Resize to larger than screen size not allowed";	// ZZZ move to strings
 		}
 		
-		if ((toWidth == metrics.widthPixels) && (toHeight == metrics.heightPixels))
+		if ((toWidth == maxWidth) && (toHeight == maxHeight))
 		{
-			return "Resize may not completely fill the screen";
+			return "Resize may not completely fill the screen";		// ZZZ move to strings
 		}
 		
 		return null;
@@ -499,46 +502,51 @@ final public class AdSizeUtilities
 	
 	
 	// Move ad web view to new / larger contain in front of app content, and display
-	private String resizeWorker(int toWidth, int toHeight, String closePosition, int offsetX, int offsetY, boolean allowOffScreen)
+	private String resizeWorker(int toWidth, int toHeight, String closePosition, int offsetXin, int offsetYin, boolean allowOffScreen)
 	{
 		// Combine offset and relative position of ad view on screen
 		int[] bannerPosition = { 0, 0 };
 		parentContainer.getLocationOnScreen(bannerPosition);
-		offsetX += bannerPosition[0];
-		offsetY += bannerPosition[1];
-	
+		int offsetX = offsetXin + bannerPosition[0];
+		int offsetY = offsetYin + bannerPosition[1];
+		
 		AdWebView adWebView = parentContainer.getAdWebView();
 		
 		if (!allowOffScreen)
 		{
-			// If needed, reposition to keep within screen width
-			// for example: offset = 120, toWdith = 600, screen width = 640
-			// in which case offset needs to be reduced by 80.
-			// NOTE: for Y (vertical) axis, do not include the top title bar area
-			int delta = (offsetX + toWidth) - metrics.widthPixels; 
+			int maxWidth = metrics.widthPixels;
+			int maxHeight = metrics.heightPixels;
+			
+			// Adjust X position/size
+			int delta = (offsetX + toWidth) - maxWidth;
 			if (delta > 0)
 			{
-				offsetX = offsetX - delta;
+				offsetX -= delta;
 			}
-			
-			// offset itself might negative, or the math above could have caused it
-			// but in either case, make 0 our minimum
 			if (offsetX < 0)
 			{
 				offsetX = 0;
 			}
-				
-			// And height, using same approach, but we don't allow encroaching into the status
-			// bar area at the top of the screen.
-			delta = (offsetY + toHeight) - (metrics.heightPixels - adWebView.getStatusBarHeight()); 
+			delta = (offsetX + toWidth) - maxWidth;
 			if (delta > 0)
 			{
-				offsetY = offsetY - delta;
+				toWidth -= delta;
 			}
 			
+			// Adjust Y position/size
+			delta = (offsetY + toHeight) - maxHeight;
+			if (delta > 0)
+			{
+				offsetY -= delta;
+			}
 			if (offsetY < 0)
 			{
 				offsetY = 0;
+			}
+			delta = (offsetY + toHeight) - maxHeight;
+			if (delta > 0)
+			{
+				toHeight -= delta;
 			}
 		}
 		//System.out.println("!!! resizeWorker: set margins to: " + offsetX + "," + offsetY);

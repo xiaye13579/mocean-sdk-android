@@ -443,7 +443,7 @@ final public class MraidInterface
 	
 	public static String get_RESIZE_CUSTOM_CLOSE_POSITION_name(RESIZE_CUSTOM_CLOSE_POSITION r)
 	{
-		return r.toString().toLowerCase();
+		return r.toString().toLowerCase().replace("_", "-");
 	}
 	
 	

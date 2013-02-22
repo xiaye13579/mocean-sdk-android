@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -193,7 +194,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		
 		self = this; // save reference to the container
 		
-		// Setup handler for inter-thread communication/method invoation
+		// Setup handler for inter-thread communication/method invocation
 		handler = new AdMessageHandler(this);
 		
 		WindowManager windowManager = (WindowManager) ((Activity)context).getSystemService(Context.WINDOW_SERVICE);
@@ -226,6 +227,18 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		
 		adDelegate = new MASTAdDelegate();
 		adReloadTimer = new AdReloadTimer(context, this, adLog);
+		
+		// Set a global scroll listener which should be called when anything in the view tree scrolls;
+		// when this is calld, check the visibility of the ad view and update the viewable property appropriately.
+		getViewTreeObserver().addOnScrollChangedListener(
+			new ViewTreeObserver.OnScrollChangedListener()
+			{ 
+				public void onScrollChanged()
+				{ 
+					//System.out.println("!!! onScrollChanged called");
+					setViewable(adWebView);
+				} 
+			});
 	}
 	
 	
@@ -327,14 +340,17 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		// this seems to be the only reliable way to get the initial location information which isn't set until the
 		// layout is complete.
 		getViewTreeObserver().addOnGlobalLayoutListener(
-				new ViewTreeObserver.OnGlobalLayoutListener() {
-					public void onGlobalLayout() {
-						if ((adWebView != null) && (adWebView.getMraidInterface().getState() == MraidInterface.STATES.DEFAULT)) {
+			new ViewTreeObserver.OnGlobalLayoutListener()
+			{
+				public void onGlobalLayout()
+				{
+					if ((adWebView != null) && (adWebView.getMraidInterface().getState() == MraidInterface.STATES.DEFAULT))
+					{
 							adWebView.getLocationOnScreen(coordinates); // getLocationInWindow() for relative
 							adWebView.getMraidInterface().setCurrentPosition(coordinates[0], coordinates[1], adWebView.getWidth(), adWebView.getHeight());
-						}
 					}
-		});
+				}
+			});
 		
 		return v;
 	}
@@ -460,6 +476,12 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	
 	private void setTextContent(AdData ad)
 	{
+		// remove view from any other containers (if needed)
+		if (adTextView.getParent() != null)
+		{
+			((ViewGroup)adTextView.getParent()).removeView(adTextView);
+		}
+				
 		addView(adTextView);
 		adTextView.setText(ad.text);
 		adTextView.setVisibility(View.VISIBLE);
@@ -478,6 +500,12 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	
 	private void setImageContent(AdData ad)
 	{
+		// remove view from any other containers (if needed)
+		if (adImageView.getParent() != null)
+		{
+			((ViewGroup)adImageView.getParent()).removeView(adImageView);
+		}
+		
 		addView(adImageView);
 		
 		if (adImageView instanceof ImageView)
@@ -505,6 +533,12 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	
 	private void setWebContent(String webData)
 	{	
+		// remove view from any other containers (if needed)
+		if (adWebView.getParent() != null)
+		{
+			((ViewGroup)adWebView.getParent()).removeView(adWebView);
+		}
+		
 		// If state is not loading, set that before continuing
 		if (adWebView.getMraidInterface().getState() != MraidInterface.STATES.LOADING)
 		{
@@ -1116,7 +1150,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 				// set state to hidden
 				adWebView.getMraidInterface().setState(MraidInterface.STATES.HIDDEN);
 				
-				// Notify ad that viewable state has changed - already done???
+				// Notify ad that viewable state has changed
 				adWebView.getMraidInterface().setViewable(false);
 			}
 			else
@@ -1129,6 +1163,21 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "AdViewContainer", "Attempt to close interstitial with wrong placement");
 
 		}
+	}
+	
+	
+	// ZZZ Can we invoke this when view scrolls in/out of screen (viewport)???
+	private void setViewable(AdWebView webView)
+	{
+		Rect scrollBounds = new Rect();
+		this.getHitRect(scrollBounds);
+		if (webView.getLocalVisibleRect(scrollBounds)) {
+		    // View is within the visible window
+			adWebView.getMraidInterface().setViewable(true);
+		} else {
+		    // View is not within the visible window
+			adWebView.getMraidInterface().setViewable(true);
+		}	
 	}
 	
 	
@@ -1533,6 +1582,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		
 		// Notify ad that viewable state has changed
 		adWebView.getMraidInterface().setViewable(true);
+		//setViewable(adWebView); // if only there was a reliable way to get notified if we're scrolling
 	}
 	
 	
