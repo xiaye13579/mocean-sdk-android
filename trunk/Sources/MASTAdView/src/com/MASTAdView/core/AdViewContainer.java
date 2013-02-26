@@ -1402,7 +1402,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	
 	/** Default viewport string injected into ad view **/
 	private static final String defaultViewportDefinition =
-		"<meta name=\"viewport\" content=\"user-scalable=no,target-densitydpi=device-dpi\"/>";
+		"<meta name=\"viewport\" content=\"user-scalable=no\"/>";
 	
 	/** Default body style css injected into ad view **/
 	private static final String defaultBodyStyle =
