@@ -924,8 +924,8 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			else
 			{	
 				setAdContentOnUi(ad);
-				adReloadTimer.startTimer();
 			}
+			adReloadTimer.startTimer();
 		}
 		catch (Exception e)
 		{
