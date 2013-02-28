@@ -28,6 +28,7 @@ import com.MASTAdView.MASTAdDelegate;
 import com.MASTAdView.MASTAdLog;
 import com.MASTAdView.MASTAdView;
 
+@SuppressLint("SetJavaScriptEnabled")
 public class AdWebView extends WebView
 {
 	final private MASTAdLog adLog;
@@ -45,7 +46,6 @@ public class AdWebView extends WebView
 	private static long viewId = System.currentTimeMillis();
 	
 	
-	@SuppressLint("SetJavaScriptEnabled")
 	public AdWebView(AdViewContainer parent, MASTAdLog log, DisplayMetrics metrics, boolean mraid, boolean handleClicks)
 	{
 		super(parent.getContext());
@@ -60,6 +60,10 @@ public class AdWebView extends WebView
 		//dataToInject = null;
 		defferedJavascript = new StringBuffer();
 		
+		// Clients for javascript and other integration
+		setWebChromeClient(new AdWebChromeClient());
+		setWebViewClient(new AdWebViewClient(parent.getContext()));
+		
 		// Customize settings for web view
 		WebSettings webSettings = getSettings();
 		webSettings.setJavaScriptEnabled(true);
@@ -70,11 +74,7 @@ public class AdWebView extends WebView
 		
 		// apply standard properties
 		setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-		
-		// Clients for javascript and other integration
-		setWebChromeClient(new AdWebChromeClient());
-		setWebViewClient(new AdWebViewClient(parent.getContext()));
-		
+				
 		if (supportMraid)
 		{
 			javascriptInterface = new JavascriptInterface(parent, this);

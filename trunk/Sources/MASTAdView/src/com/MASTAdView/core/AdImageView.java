@@ -1,5 +1,6 @@
 package com.MASTAdView.core;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.DisplayMetrics;
@@ -16,6 +17,7 @@ import com.MASTAdView.MASTAdLog;
 import com.MASTAdView.MASTAdView;
 
 
+@SuppressLint("SetJavaScriptEnabled")
 public class AdImageView extends WebView
 {	
 	final private MASTAdLog adLog;
@@ -35,7 +37,11 @@ public class AdImageView extends WebView
 		adViewContainer = parent;
 		adLog = log;
 		//this.metrics = metrics;
-		//launchBrowserOnClicks = handleClicks;
+		//launchBrowserOnClicks = handleClicks; 
+		
+		// Clients for javascript and other integration
+		setWebChromeClient(new AdWebChromeClient());
+		setWebViewClient(new AdWebViewClient(parent.getContext()));
 		
 		// Customize settings for web view
 		WebSettings webSettings = getSettings();
@@ -47,11 +53,7 @@ public class AdImageView extends WebView
 		
 		// apply standard properties
 		setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-		
-		// Clients for javascript and other integration
-		setWebChromeClient(new AdWebChromeClient());
-		setWebViewClient(new AdWebViewClient(parent.getContext()));
-		
+				
 		if (handleClicks)
 		{
 			adClickHandler = new AdClickHandler(adViewContainer);
