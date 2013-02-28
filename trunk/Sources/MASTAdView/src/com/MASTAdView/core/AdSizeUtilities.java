@@ -32,6 +32,8 @@ import com.MASTAdView.core.AdDialogFactory.DialogOptions;
 
 final public class AdSizeUtilities
 {
+	final private int								CloseControlSize = 50;
+	
 	final private AdViewContainer 					parentContainer;
 	final private MASTAdLog 						adLog;
 	volatile private DisplayMetrics					metrics;
@@ -337,8 +339,10 @@ final public class AdSizeUtilities
 	
 	private String resizePropertiesValid(int toWidth, int toHeight, String closePosition, int offsetX, int offsetY, boolean offscreen)
 	{
+		AdWebView adWebView = parentContainer.getAdWebView();
+		
 		int maxWidth = metrics.widthPixels;
-		int maxHeight = metrics.heightPixels - parentContainer.getAdWebView().getStatusBarHeight();
+		int maxHeight = metrics.heightPixels - adWebView.getStatusBarHeight();
 				
 		if ((toWidth > maxWidth) || (toHeight > maxHeight))
 		{
@@ -350,14 +354,25 @@ final public class AdSizeUtilities
 			return "Resize may not completely fill the screen";		// ZZZ move to strings
 		}
 		
+		// The resulting size must be at least large enough for the close control.
+		int closeControlSize = mraidPointToDevicePixel(CloseControlSize, adWebView.getContext());
+		if ((toWidth < closeControlSize) || (toHeight < closeControlSize))
+		{
+			return "Resize must be large enough for close control.";
+		}
+		
 		return null;
 	}
 	
 	
 	private RelativeLayout.LayoutParams createCloseLayoutParameters(String closePosition, final AdWebView adWebView)
 	{
+		RelativeLayout.LayoutParams adWebViewLayoutParams = (RelativeLayout.LayoutParams)adWebView.getLayoutParams();
+		
 		// Mraid spec requires min. 50 pixel height and width for close area
-		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(50, 50);
+		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+				mraidPointToDevicePixel(CloseControlSize, adWebView.getContext()), 
+				mraidPointToDevicePixel(CloseControlSize, adWebView.getContext()));
 		
 		switch(parentContainer.getAdWebView().getMraidInterface().get_RESIZE_CUSTOM_CLOSE_POSITION_by_name(closePosition))
 		{
@@ -366,8 +381,12 @@ final public class AdSizeUtilities
 			layoutParams.addRule(RelativeLayout.ALIGN_TOP, adWebView.getId());
 			break;
 		case TOP_CENTER:
-			layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
+			layoutParams.leftMargin = adWebViewLayoutParams.leftMargin + adWebView.getWidth()/2 - layoutParams.width/2;
 			layoutParams.addRule(RelativeLayout.ALIGN_TOP, adWebView.getId());
+			break;
+		case CENTER:
+			layoutParams.leftMargin = adWebViewLayoutParams.leftMargin + adWebView.getWidth()/2 - layoutParams.width/2;
+			layoutParams.topMargin = adWebViewLayoutParams.topMargin + adWebView.getHeight()/2 - layoutParams.height/2;
 			break;
 		case BOTTOM_LEFT:
 			layoutParams.addRule(RelativeLayout.ALIGN_LEFT, adWebView.getId());
@@ -378,8 +397,8 @@ final public class AdSizeUtilities
 			layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, adWebView.getId());
 			break;
 		case BOTTOM_CENTER:
+			layoutParams.leftMargin = adWebViewLayoutParams.leftMargin + adWebView.getWidth()/2 - layoutParams.width/2;
 			layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, adWebView.getId());
-			layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
 			break;
 		default: // top right is the default
 			layoutParams.addRule(RelativeLayout.ALIGN_RIGHT, adWebView.getId());
@@ -516,43 +535,103 @@ final public class AdSizeUtilities
 		{
 			int maxWidth = metrics.widthPixels;
 			int maxHeight = metrics.heightPixels;
+
+			// TODO: Determine if the assumption that the min/max coordinates 
+			// are between 0 and maxSize.  If not adjust the following.
+			int minOffsetX = 0;
+			int minOffsetY = 0;
+			int maxOffsetX = maxWidth;
+			int maxOffsetY = maxHeight;			
+					
+			// First adjust the height and width to fit.
+			if (toWidth > maxWidth)
+			{
+				toWidth = maxWidth;
+			}
+			if (toHeight > maxHeight)
+			{
+				toHeight = maxHeight;
+			}
 			
-			// Adjust X position/size
-			int delta = (offsetX + toWidth) - maxWidth;
-			if (delta > 0)
+			// Adjust X to be between 0 and maxWidth
+			if (offsetX < minOffsetX)
 			{
-				offsetX -= delta;
+				offsetX = minOffsetX;
 			}
-			if (offsetX < 0)
+			else if (offsetX + toWidth > maxOffsetX)
 			{
-				offsetX = 0;
-			}
-			delta = (offsetX + toWidth) - maxWidth;
-			if (delta > 0)
-			{
-				toWidth -= delta;
+				int diff = (offsetX + toWidth) - maxOffsetX;
+				offsetX -= diff;
 			}
 			
-			// Adjust Y position/size
-			delta = (offsetY + toHeight) - maxHeight;
-			if (delta > 0)
+			// Adjust Y to be between 0 and maxHeight
+			if (offsetY < minOffsetY)
 			{
-				offsetY -= delta;
+				offsetY = minOffsetY;
 			}
-			if (offsetY < 0)
+			else if (offsetY + toHeight > maxOffsetY)
 			{
-				offsetY = 0;
-			}
-			delta = (offsetY + toHeight) - maxHeight;
-			if (delta > 0)
-			{
-				toHeight -= delta;
+				int diff = (offsetY + toHeight) - maxOffsetY; 
+				offsetY -= diff;
 			}
 		}
-		//System.out.println("!!! resizeWorker: set margins to: " + offsetX + "," + offsetY);
+		else
+		{
+			int closeControlSize = mraidPointToDevicePixel(CloseControlSize, adWebView.getContext());
+			
+			// The resulting resize with close control must expose the close control on the screen.
+			// Calculate where the close button will end up.
+			int closeX = toWidth - closeControlSize;
+			int closeY = 0;
+			
+			switch(parentContainer.getAdWebView().getMraidInterface().get_RESIZE_CUSTOM_CLOSE_POSITION_by_name(closePosition))
+			{
+			case TOP_LEFT:
+				closeX = 0;
+				closeY = 0;
+				break;
+			case TOP_CENTER:
+				closeX = toWidth/2 - closeControlSize/2;
+				closeY = 0;
+				break;
+			case CENTER:
+				closeX = toWidth/2 - closeControlSize/2;
+				closeY = toHeight/2 - closeControlSize/2;
+				break;
+			case BOTTOM_LEFT:
+				closeX = 0;
+				closeY = toHeight - closeControlSize;
+				break;
+			case BOTTOM_RIGHT:
+				closeX = toWidth - closeControlSize;
+				closeY = toHeight - closeControlSize;
+				break;
+			case BOTTOM_CENTER:
+				closeX = toWidth/2 - closeControlSize/2;
+				closeY = toHeight - closeControlSize;
+				break;
+			default: // top right is the default
+				break;
+			}
+			
+			// Adjust for the new offset.
+			closeX += offsetX;
+			closeY += offsetY;
+
+			int screenMinX = 0;
+			int screenMinY = 0;
+			int screenMaxX = metrics.widthPixels;
+			int screenMaxY = metrics.heightPixels;
+			
+			if ((closeX < screenMinX) || (closeY < screenMinY) || 
+					(closeX + closeControlSize > screenMaxX) || (closeY + closeControlSize > screenMaxY))
+			{
+				return "Resize must include the close control on screen.";
+			}
+		}
 	
 		RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)adWebView.getLayoutParams();
-		lp.setMargins(offsetX, offsetY, 0, 0);
+		lp.setMargins(offsetX, offsetY, Integer.MIN_VALUE, Integer.MIN_VALUE);
 		lp.width = toWidth;
 		lp.height = toHeight;
 		
@@ -570,6 +649,12 @@ final public class AdSizeUtilities
 			// ad view already displayed in resized "overlay", simply adjust the size/position
 			parent.requestLayout();
 			adWebView.requestLayout();
+			
+			// Update close button position.
+			RelativeLayout adFrame = (RelativeLayout)resizeCloseButton.getParent();
+			adFrame.removeView(resizeCloseButton);
+			resizeCloseButton = createResizeCloseButton(closePosition, adWebView);  
+			adFrame.addView(resizeCloseButton);
 		}
 		else
 		{
@@ -626,6 +711,15 @@ final public class AdSizeUtilities
 		// Put old screen content back in decor view where it started
 		if ((resizeDecorView != null) && (resizeOldContent != null))
 		{
+			if (resizeCloseButton != null)
+			{
+				RelativeLayout adFrame = (RelativeLayout)resizeCloseButton.getParent();
+				if (adFrame != null)
+				{
+					adFrame.removeView(resizeCloseButton);
+				}
+			}
+			
 			((ViewGroup)resizeOldContent.getParent()).removeView(resizeOldContent);
 			resizeDecorView.addView(resizeOldContent, resizeOldContentIndex);
 			
