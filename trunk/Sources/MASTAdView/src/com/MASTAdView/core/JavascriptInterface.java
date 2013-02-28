@@ -521,12 +521,22 @@ final public class JavascriptInterface
 				{
 					if (nvp.getName().compareTo(MraidInterface.get_EXPAND_PROPERTIES_name(MraidInterface.EXPAND_PROPERTIES.HEIGHT)) == 0)
 					{
-						pixels = AdSizeUtilities.mraidPointToDevicePixel(Integer.parseInt(nvp.getValue()), context);
+						int value = 0;
+						String nvpValue = nvp.getValue();
+						if (nvpValue != null)
+							value = Integer.parseInt(nvpValue);
+						
+						pixels = AdSizeUtilities.mraidPointToDevicePixel(value, context);
 						data.putString(nvp.getName(), pixels.toString());
 					}
 					else if (nvp.getName().compareTo(MraidInterface.get_EXPAND_PROPERTIES_name(MraidInterface.EXPAND_PROPERTIES.WIDTH)) == 0)
 					{
-						pixels = AdSizeUtilities.mraidPointToDevicePixel(Integer.parseInt(nvp.getValue()), context);
+						int value = 0;
+						String nvpValue = nvp.getValue();
+						if (nvpValue != null)
+							value = Integer.parseInt(nvpValue);
+						
+						pixels = AdSizeUtilities.mraidPointToDevicePixel(value, context);
 						data.putString(nvp.getName(), pixels.toString());
 					}
 					else
@@ -560,22 +570,42 @@ final public class JavascriptInterface
 				{
 					if (nvp.getName().compareTo(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.HEIGHT)) == 0)
 					{
-						pixels = AdSizeUtilities.mraidPointToDevicePixel(Integer.parseInt(nvp.getValue()), context);
+						int value = 0;
+						String nvpValue = nvp.getValue();
+						if (nvpValue != null)
+							value = Integer.parseInt(nvpValue);
+						
+						pixels = AdSizeUtilities.mraidPointToDevicePixel(value, context);
 						data.putString(nvp.getName(), pixels.toString());
 					}
 					else if (nvp.getName().compareTo(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.WIDTH)) == 0)
 					{
-						pixels = AdSizeUtilities.mraidPointToDevicePixel(Integer.parseInt(nvp.getValue()), context);
+						int value = 0;
+						String nvpValue = nvp.getValue();
+						if (nvpValue != null)
+							value = Integer.parseInt(nvpValue);
+					
+						pixels = AdSizeUtilities.mraidPointToDevicePixel(value, context);
 						data.putString(nvp.getName(), pixels.toString());
 					}
 					else if (nvp.getName().compareTo(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.OFFSET_X)) == 0)
 					{
-						pixels = AdSizeUtilities.mraidPointToDevicePixel(Integer.parseInt(nvp.getValue()), context);
+						int value = 0;
+						String nvpValue = nvp.getValue();
+						if (nvpValue != null)
+							value = Integer.parseInt(nvpValue);
+						
+						pixels = AdSizeUtilities.mraidPointToDevicePixel(value, context);
 						data.putString(nvp.getName(), pixels.toString());
 					}
 					else if (nvp.getName().compareTo(MraidInterface.get_RESIZE_PROPERTIES_name(MraidInterface.RESIZE_PROPERTIES.OFFSET_Y)) == 0)
 					{
-						pixels = AdSizeUtilities.mraidPointToDevicePixel(Integer.parseInt(nvp.getValue()), context);
+						int value = 0;
+						String nvpValue = nvp.getValue();
+						if (nvpValue != null)
+							value = Integer.parseInt(nvpValue);
+						
+						pixels = AdSizeUtilities.mraidPointToDevicePixel(value, context);
 						data.putString(nvp.getName(), pixels.toString());
 					}
 					else
