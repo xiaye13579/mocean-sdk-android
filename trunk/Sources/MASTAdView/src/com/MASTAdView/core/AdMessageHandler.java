@@ -22,6 +22,7 @@ final public class AdMessageHandler extends Handler
 	public static final int	MESSAGE_PLAY_VIDEO 	= 1007;
 	public static final int MESSAGE_CREATE_EVENT = 1008;
 	public static final int	MESSAGE_RAISE_ERROR = 1009;
+	public static final int MESSAGE_ORIENTATION_PROPERTIES = 1010;
 
 	// public static final int	MESSAGE_PLAY_AUDIO 	= xxxx;
 	
@@ -142,6 +143,15 @@ final public class AdMessageHandler extends Handler
 				String errorMessage = data.getString(ERROR_MESSAGE);
 				String action = data.getString(ERROR_ACTION);
 				mraidInterface.fireErrorEvent(errorMessage, action);
+				break;
+			}
+			case MESSAGE_ORIENTATION_PROPERTIES:
+			{
+				error = adView.updateOrientationProperties(data);
+				if (error != null)
+				{
+					mraidInterface.fireErrorEvent(error, MraidInterface.MRAID_ERROR_ACTION_SET_ORIENTATION_PROPERTIES);
+				}
 				break;
 			}
 		}

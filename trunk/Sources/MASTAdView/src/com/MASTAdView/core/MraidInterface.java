@@ -80,7 +80,7 @@ final public class MraidInterface
 	public static final String MRAID_ERROR_ACTION_OPEN			= "open";
 	public static final String MRAID_ERROR_ACTION_PLAYVIDEO		= "playVideo";
 	public static final String MRAID_ERROR_ACTION_CREATE_EVENT	= "createCalendarEvent";
-	
+	public static final String MRAID_ERROR_ACTION_SET_ORIENTATION_PROPERTIES = "setOrientationProperties";
 	
 	private PLACEMENT_TYPES adPlacementType;
 	final private AdViewContainer adView;
@@ -412,6 +412,19 @@ final public class MraidInterface
 		}
 	}
 	
+	public static FORCE_ORIENTATION_PROPERTIES get_FORCE_ORIENTATION_PROPERTIES_by_name(String forceOrientationPropertiesName)
+	{
+		if (forceOrientationPropertiesName != null)
+		{
+			for (FORCE_ORIENTATION_PROPERTIES p : FORCE_ORIENTATION_PROPERTIES.values())
+			{
+				if (get_FORCE_ORIENTATION_PROPERTIES_name(p).equals(forceOrientationPropertiesName))
+					return p;
+			}
+		}
+		
+		return FORCE_ORIENTATION_PROPERTIES.NONE;
+	}	
 	
 	public static String get_EXPAND_PROPERTIES_name(EXPAND_PROPERTIES e)
 	{
@@ -427,14 +440,15 @@ final public class MraidInterface
 	}
 	
 	
-	public RESIZE_CUSTOM_CLOSE_POSITION get_RESIZE_CUSTOM_CLOSE_POSITION_by_name(String positionName)
+	public static RESIZE_CUSTOM_CLOSE_POSITION get_RESIZE_CUSTOM_CLOSE_POSITION_by_name(String positionName)
 	{
-		for (RESIZE_CUSTOM_CLOSE_POSITION p : RESIZE_CUSTOM_CLOSE_POSITION.values())
+		if (positionName != null)
 		{
-			if (positionName.compareTo(get_RESIZE_CUSTOM_CLOSE_POSITION_name(p)) == 0)
+			for (RESIZE_CUSTOM_CLOSE_POSITION p : RESIZE_CUSTOM_CLOSE_POSITION.values())
 			{
-				return p;
-			}	
+				if (get_RESIZE_CUSTOM_CLOSE_POSITION_name(p).equals(positionName))
+					return p;
+			}
 		}
 		
 		return RESIZE_CUSTOM_CLOSE_POSITION.TOP_RIGHT; // default position, or null for error?

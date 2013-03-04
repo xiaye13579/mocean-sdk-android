@@ -51,6 +51,10 @@ final public class AdSizeUtilities
 	private int 									resizeOldContentIndex = 0;
 	private Button 									resizeCloseButton = null;
 	
+	// Expand and pre-expand properties
+	private int 										preExpandRequestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+	private boolean 									expandAllowOrientationChange = true;
+	private MraidInterface.FORCE_ORIENTATION_PROPERTIES expandForceOrientation = MraidInterface.FORCE_ORIENTATION_PROPERTIES.NONE;
 	
 	public AdSizeUtilities(AdViewContainer adContainer, DisplayMetrics metrics)
 	{
@@ -143,7 +147,6 @@ final public class AdSizeUtilities
 		Integer toHeight 		   = null;
 		Boolean customClose		   = null;
 		//Boolean isModal			   = null; // this is read only, always true per spec
-		Boolean allowReorientation = null;
 		String  forceOrientation   = null;
 		String  url				   = null;
 		try
@@ -181,17 +184,21 @@ final public class AdSizeUtilities
 			value = data.getString(MraidInterface.get_ORIENTATION_PROPERTIES_name(MraidInterface.ORIENTATION_PROPERTIES.ALLOW_ORIENTATION_CHANGE));
 			if ((value != null) && (value.equalsIgnoreCase("false")))
 			{
-				allowReorientation = false;
+				expandAllowOrientationChange = false;
 			}
 			else
 			{
-				allowReorientation = true; // default
+				expandAllowOrientationChange = true; // default
 			}
 			
 			forceOrientation = data.getString(MraidInterface.get_ORIENTATION_PROPERTIES_name(MraidInterface.ORIENTATION_PROPERTIES.FORCE_ORIENTATION));
 			if (forceOrientation == null)
 			{
-				forceOrientation = MraidInterface.get_FORCE_ORIENTATION_PROPERTIES_name(MraidInterface.FORCE_ORIENTATION_PROPERTIES.NONE);
+				expandForceOrientation = MraidInterface.FORCE_ORIENTATION_PROPERTIES.NONE;
+			}
+			else
+			{
+				expandForceOrientation = MraidInterface.get_FORCE_ORIENTATION_PROPERTIES_by_name(forceOrientation);
 			}
 			
 			url = data.getString(AdMessageHandler.EXPAND_URL);
@@ -211,6 +218,8 @@ final public class AdSizeUtilities
 			toHeight = metrics.heightPixels;
 		}
 		//System.out.println("startExpand: to h/w = " + toHeight + "/" + toWidth);
+		
+		preExpandRequestedOrientation = ((Activity)context).getRequestedOrientation();
 
 		// Pass options for dialog through to creator
 		AdDialogFactory.DialogOptions options = new AdDialogFactory.DialogOptions();
@@ -219,6 +228,14 @@ final public class AdSizeUtilities
 		options.height = toHeight;
 		options.width = toWidth;
 		
+		options.dismissRunnable = new Runnable()
+		{
+			public void run()
+			{
+				parentContainer.getAdWebView().getMraidInterface().close();
+			}
+		};
+		
 		timer.stopTimer(false); // stop ad refresh timer		
 		
 		parentContainer.getAdWebView().getMraidInterface().setState(MraidInterface.STATES.EXPANDED);
@@ -226,19 +243,54 @@ final public class AdSizeUtilities
 		if ((url == null) || (url.length() < 1) || (url.equalsIgnoreCase("undefined")))
 		{
 			// We are using existing ad view / content, safe to do this on UI thread
-			return expandInUIThread(options, allowReorientation, forceOrientation);
+			return expandInUIThread(options);
 		}
 		else
 		{
 			// Two part creative, need to fetch new data, must use non-UI thread for that;
 			// after data available will call back to finish on ui thread via handler.
-			return expandInBackgroundThread(options, allowReorientation, forceOrientation, url);
+			return expandInBackgroundThread(options, url);
 		}	
 	}
 	
 	
+	synchronized public String setOrientationProperties(Bundle data)
+	{
+		try
+		{
+			String value = data.getString(MraidInterface.get_ORIENTATION_PROPERTIES_name(MraidInterface.ORIENTATION_PROPERTIES.ALLOW_ORIENTATION_CHANGE));
+			if ((value != null) && (value.equalsIgnoreCase("false")))
+			{
+				expandAllowOrientationChange = false;
+			}
+			else
+			{
+				expandAllowOrientationChange = true; // default
+			}
+			
+			String forceOrientation = data.getString(MraidInterface.get_ORIENTATION_PROPERTIES_name(MraidInterface.ORIENTATION_PROPERTIES.FORCE_ORIENTATION));
+			if (forceOrientation == null)
+			{
+				expandForceOrientation = MraidInterface.FORCE_ORIENTATION_PROPERTIES.NONE;
+			}
+			else
+			{
+				expandForceOrientation = MraidInterface.get_FORCE_ORIENTATION_PROPERTIES_by_name(forceOrientation);
+			}
+		}
+		catch(Exception ex)
+		{
+			return MASTAdConstants.STR_RICHMEDIA_ERROR_EXPAND; // XXX new, more specific error
+		}
+		
+		updateOrientation();
+		
+		return null;
+	}
+	
+	
 	// MRAID expand for one-part creative where we use existing ad web view / content (so all done in UI thread)
-	private String expandInUIThread(AdDialogFactory.DialogOptions options, boolean allowReorientation, String forceOrientation)
+	private String expandInUIThread(AdDialogFactory.DialogOptions options)
 	{	
 		expandedCallback(options.height, options.width);
 		
@@ -247,34 +299,13 @@ final public class AdSizeUtilities
 		dialog.show();
 	
 		// Apply orientation options
-		handleOrientation(allowReorientation, forceOrientation, context);
+		updateOrientation();
 		
 		return null;
 	}
 
-	
-	public static void handleOrientation(boolean allowReorientation, String forceOrientation, Context context)
-	{
-		// Force orientation, if value is "portrait" or "landscape"
-		forceOrientationTo(forceOrientation, context);
-		
-		// Now that orientation is (potentially) set, lock or unlock based on other setting
-		if (allowReorientation)
-		{
-			// This will unlock orientation changes so that device will follow user
-			setScreenOrientation(MraidInterface.FORCE_ORIENTATION_PROPERTIES.NONE, context);
-		}
-		else
-		{
-			// Lock orientation in current setting; might be redundant after the above,
-			// but if no force orientation was set, is still required (and should not be harmful)
-			setScreenOrientation(getScreenOrientation(context), context);
-		}
-	}
-	
-	
 	// MRAID expand for two-part creative; fetch content from URL and display in new (MRAID) ad web view
-	private String expandInBackgroundThread(final AdDialogFactory.DialogOptions options, final boolean allowReorientation, final String forceOrientation, final String url)
+	private String expandInBackgroundThread(final AdDialogFactory.DialogOptions options, final String url)
 	{
 		/*boolean dontLoad = false;
 		if (URL == null || URL.equals("undefined")) {
@@ -315,10 +346,11 @@ final public class AdSizeUtilities
 								expandedCallback(options.height, options.width);
 								
 								Dialog dialog = adDialogFactory.createDialog(expandedAdView, options);
+								
 								dialog.show();
 								
 								// Apply orientation options
-								handleOrientation(allowReorientation, forceOrientation, context);								
+								updateOrientation();								
 							}
 							catch(Exception ex)
 							{
@@ -336,6 +368,40 @@ final public class AdSizeUtilities
 		return null;
 	}
 
+	
+	private void updateOrientation()
+	{
+		if ((context instanceof Activity) == false)
+			return;
+		
+		// Force as requested.  Note that a force without being locked may not work as the creative intended.
+		switch (expandForceOrientation)
+		{
+		case PORTRAIT:
+			((Activity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+			break;
+
+		case LANDSCAPE:
+			((Activity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+			break;
+		
+		default:
+			break;
+		}
+		
+		// Lock takes precedence over force.  So it's possible force will be meaningless without being locked.
+		if (expandAllowOrientationChange == true)
+		{
+			((Activity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+		}
+		else
+		{
+			if (expandForceOrientation == MraidInterface.FORCE_ORIENTATION_PROPERTIES.NONE)
+			{
+				((Activity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+			}
+		}
+	}
 	
 	private String resizePropertiesValid(int toWidth, int toHeight, String closePosition, int offsetX, int offsetY, boolean offscreen)
 	{
@@ -374,7 +440,7 @@ final public class AdSizeUtilities
 				mraidPointToDevicePixel(CloseControlSize, adWebView.getContext()), 
 				mraidPointToDevicePixel(CloseControlSize, adWebView.getContext()));
 		
-		switch(parentContainer.getAdWebView().getMraidInterface().get_RESIZE_CUSTOM_CLOSE_POSITION_by_name(closePosition))
+		switch(MraidInterface.get_RESIZE_CUSTOM_CLOSE_POSITION_by_name(closePosition))
 		{
 		case TOP_LEFT:
 			layoutParams.addRule(RelativeLayout.ALIGN_LEFT, adWebView.getId());
@@ -584,7 +650,7 @@ final public class AdSizeUtilities
 			int closeX = toWidth - closeControlSize;
 			int closeY = 0;
 			
-			switch(parentContainer.getAdWebView().getMraidInterface().get_RESIZE_CUSTOM_CLOSE_POSITION_by_name(closePosition))
+			switch(MraidInterface.get_RESIZE_CUSTOM_CLOSE_POSITION_by_name(closePosition))
 			{
 			case TOP_LEFT:
 				closeX = 0;
@@ -739,6 +805,9 @@ final public class AdSizeUtilities
 		options.showCloseDelay = showCloseDelay;
 		options.autoCloseDelay = autoCloseDelay;
 		
+		if (context instanceof Activity)
+			preExpandRequestedOrientation = ((Activity)context).getRequestedOrientation();
+		
 		Dialog dialog = adDialogFactory.createDialog(parentContainer, options);
 		dialog.show();
 	}
@@ -752,6 +821,9 @@ final public class AdSizeUtilities
 		{
 			d.dismiss();
 			
+			if (context instanceof Activity)
+				((Activity)context).setRequestedOrientation(preExpandRequestedOrientation);
+			
 			MASTAdDelegate delegate = parentContainer.getAdDelegate();
 			if (delegate != null)
 			{
@@ -763,23 +835,6 @@ final public class AdSizeUtilities
 			}
 		}	
 	}
-	
-	
-	private static void forceOrientationTo(String orientationName, Context context)
-	{
-		if (orientationName != null)
-		{
-			if (orientationName.equalsIgnoreCase("portrait"))
-			{
-				setScreenOrientation(MraidInterface.FORCE_ORIENTATION_PROPERTIES.PORTRAIT, context);
-			}
-			else if (orientationName.equalsIgnoreCase("landscape"))
-			{
-				setScreenOrientation(MraidInterface.FORCE_ORIENTATION_PROPERTIES.LANDSCAPE, context);
-			}
-		}
-	}
-	
 	
 	public static MraidInterface.FORCE_ORIENTATION_PROPERTIES getScreenOrientation(Context context)
 	{
@@ -795,35 +850,6 @@ final public class AdSizeUtilities
 			return MraidInterface.FORCE_ORIENTATION_PROPERTIES.PORTRAIT;
 		}	
 	}
-	
-	
-	// set & lock screen orienetation (if portrait or landscape), otherwise unlock (if none)
-	public static boolean setScreenOrientation(MraidInterface.FORCE_ORIENTATION_PROPERTIES toOrientation, Context context)
-	{
-		if (context instanceof Activity)
-		{
-			if (toOrientation == MraidInterface.FORCE_ORIENTATION_PROPERTIES.LANDSCAPE)
-			{
-				((Activity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); 
-			}
-			else if (toOrientation == MraidInterface.FORCE_ORIENTATION_PROPERTIES.PORTRAIT)
-			{
-				((Activity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); 
-			}
-			else
-			{
-				((Activity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED); 
-			}
-			
-			return true;
-		}
-		else
-		{
-			System.out.println("Context is not an activity, cannot manipulate screen orientation");
-			return false;
-		}
-	}
-	
 	
 	synchronized public AdWebView getExpandedAdView()
 	{

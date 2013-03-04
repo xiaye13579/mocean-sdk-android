@@ -1394,6 +1394,17 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		return MASTAdConstants.STR_RICHMEDIA_ERROR_EXPAND; // new, more specific error
 	}
 	
+	
+	public String updateOrientationProperties(Bundle data)
+	{
+		if (adWebView.getMraidInterface().getState() == MraidInterface.STATES.EXPANDED)
+		{
+			return adSizeUtilities.setOrientationProperties(data);
+		}
+
+		return null;
+	}
+	
 		
 	//
 	// Injection header

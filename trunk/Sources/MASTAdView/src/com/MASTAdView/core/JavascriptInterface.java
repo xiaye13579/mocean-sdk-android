@@ -131,36 +131,11 @@ final public class JavascriptInterface
 				//expandProperties = createMapFromList(properties);
 				orientationProperties = URLEncodedUtils.parse(propertiesUri, "UTF-8");
 				
-				// If orientation properties are set, and ad is expanded, apply those now
-				// because the spec allows creatives to change orientation settings on-the-fly
-				MraidInterface.STATES adState = webView.getMraidInterface().getState();
-				
-				
-				
-				// XXX need to do this for interstital as well
-				
-				
-				
-				if (adState == MraidInterface.STATES.EXPANDED)
-				{
-					boolean allowReorientation = true; // default
-					String forceOrientation = MraidInterface.get_FORCE_ORIENTATION_PROPERTIES_name(MraidInterface.FORCE_ORIENTATION_PROPERTIES.NONE);
-					
-					String value = getListValueByName(orientationProperties, MraidInterface.get_ORIENTATION_PROPERTIES_name(MraidInterface.ORIENTATION_PROPERTIES.ALLOW_ORIENTATION_CHANGE));
-					if ((value != null) && (value.equalsIgnoreCase("false")))
-					{
-						allowReorientation = false;
-					}
-
-					value = getListValueByName(orientationProperties, MraidInterface.get_ORIENTATION_PROPERTIES_name(MraidInterface.ORIENTATION_PROPERTIES.FORCE_ORIENTATION));
-					if (value != null)
-					{
-						forceOrientation = value;
-					}
-
-					// Apply orientation options
-					AdSizeUtilities.handleOrientation(allowReorientation, forceOrientation, context);
-				}
+				// Notify ad view to update orientation on UI thread
+				Message msg = adView.getHandler().obtainMessage(AdMessageHandler.MESSAGE_ORIENTATION_PROPERTIES);
+				Bundle data = convertOrientationProperties(orientationProperties);
+				msg.setData(data);
+				adView.getHandler().sendMessage(msg);
 			}
 			catch(Exception ex)
 			{
@@ -551,6 +526,26 @@ final public class JavascriptInterface
 	}
 	
 	
+	private Bundle convertOrientationProperties(List<NameValuePair> list)
+	{
+		Bundle data = new Bundle();
+		
+		if (list != null)
+		{
+			Iterator<NameValuePair> i = list.iterator();
+			NameValuePair nvp;
+			while (i.hasNext())
+			{
+				nvp = i.next();
+				if ((nvp != null) && (nvp.getName() != null))
+				{
+					data.putString(nvp.getName(), nvp.getValue());
+				}
+			}
+		}
+		
+		return data;
+	}
 
 	private Bundle convertResizeDimensionsToPixels(List<NameValuePair> list)
 	{
