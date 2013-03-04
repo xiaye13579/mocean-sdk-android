@@ -5,8 +5,8 @@
   </description>
 
   <!-- set global properties for this project/build -->
-  <property name="sdkVersion"  value="3.0.1" />
-  <property name="releaseDate" value="2013-01-18" />
+  <property name="sdkVersion"  value="3.0.2" />
+  <property name="releaseDate" value="2013-03-04" />
  
   <!-- import generic build script which does everythign else -->
   <import file="build-worker.xml" />
