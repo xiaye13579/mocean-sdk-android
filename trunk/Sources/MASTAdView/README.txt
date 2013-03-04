@@ -12,6 +12,10 @@ Release Notes:
 - New removeContent method in developer API (see javadoc documentation for more.)
 
 3.0.2
+- Fixed edge cases of handling custom parameters and refresh.
+- Fixed edge case with non-MRAID interstitial ads and close button.
+- Updated MRAID JavaScript bridge layer.
+- Corrected MRAID resize placement when ad view is located at the bottom.
 - Removed target-densitiydpi viewport setting for rich media ad content.
 - Relocated JAvaScript handlers for the web view to before enabling JavaScript as some
   OS varients may attempt to reference handlers on enablement.
