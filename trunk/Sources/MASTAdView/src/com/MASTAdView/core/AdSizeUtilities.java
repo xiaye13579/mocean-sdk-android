@@ -398,7 +398,20 @@ final public class AdSizeUtilities
 		{
 			if (expandForceOrientation == MraidInterface.FORCE_ORIENTATION_PROPERTIES.NONE)
 			{
-				((Activity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+				int currentOrientation = ((Activity)context).getResources().getConfiguration().orientation;
+				
+				switch (currentOrientation)
+				{
+				case Configuration.ORIENTATION_PORTRAIT:
+					((Activity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+					break;
+				case Configuration.ORIENTATION_LANDSCAPE:
+					((Activity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+					break;
+				default:
+					((Activity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+					break;
+				}
 			}
 		}
 	}
