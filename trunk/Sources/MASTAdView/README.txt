@@ -12,6 +12,7 @@ Release Notes:
 - New removeContent method in developer API (see javadoc documentation for more.)
 
 3.0.2
+
 - Fixed edge cases of handling custom parameters and refresh.
 - Fixed edge case with non-MRAID interstitial ads and close button.
 - Updated MRAID JavaScript bridge layer.
