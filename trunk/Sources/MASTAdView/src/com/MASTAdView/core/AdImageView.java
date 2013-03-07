@@ -193,18 +193,18 @@ public class AdImageView extends WebView
 	public void setImage(AdData ad)
 	{ 
 		StringBuffer data = new StringBuffer("<html>");
-		data.append("<head><style>*{margin:0; padding:0; width: 100%; height: 100%;}</style>");
+		data.append("<head><meta name=\"viewport\" content=\"target-densityDpi=device-dpi\"><style>body{margin:0; padding:0; width: 100%; height: 100%; display: table;} div{display: table-cell; vertical-align: middle; text-align:center;}</style>");
 		data.append("<script language=\"javascript\">function AutoScale() {");
 		data.append("var normWidth  = document.body.clientWidth  / document.getElementById(\"ADIMAGE\").naturalWidth;");
 		data.append("var normHeight = document.body.clientHeight / document.getElementById(\"ADIMAGE\").naturalHeight;");
 		data.append("var scaleFactor = normWidth; if (normWidth > normHeight) scaleFactor = normHeight;");
-		data.append("if (scaleFactor < 1 && scaleFactor != 0) {");
+		data.append("if (scaleFactor > 1 && scaleFactor != 0) {");
 		data.append("document.getElementById(\"ADIMAGE\").style.width = document.getElementById(\"ADIMAGE\").naturalWidth * scaleFactor;");
 		data.append("document.getElementById(\"ADIMAGE\").style.height = document.getElementById(\"ADIMAGE\").naturalHeight * scaleFactor;");
 		data.append("}}</script></head>");
 		data.append("<body onload=\"javascript:AutoScale();\" onresize=\"javascript:AutoScale();\" style=\"background-color:#");
 		data.append("" + MASTAdConstants.DEFAULT_COLOR + "\">");
-		data.append("<A HREF=\"" + ad.clickUrl + "\"><IMG ID=\"ADIMAGE\" SRC=\"" + ad.imageUrl + "\"></A>");
+		data.append("<div id=\"adwrap\"><A HREF=\"" + ad.clickUrl + "\"><IMG ID=\"ADIMAGE\" SRC=\"" + ad.imageUrl + "\"></A></div>");
 		data.append("</body></html>");
 		
 		//System.out.println("AdImageView: injecting code: " + data.toString());
