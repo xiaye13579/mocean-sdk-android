@@ -26,4 +26,5 @@ Release Notes:
 - Updated MRAID setOrientationProperties method to ensure ads can properly force orientation.
 - Updated documentation to reflect recommended android:configChanges attribute.  Should contain:
   keyboardHidden|orientation|screenSize.  Also moved release notes to the README.txt.
- 
+- Updated AdImageView HTML wrapper to properly aspect ratio scale images.
+
