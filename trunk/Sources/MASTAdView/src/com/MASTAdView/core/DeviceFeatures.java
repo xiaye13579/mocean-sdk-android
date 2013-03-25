@@ -42,7 +42,7 @@ final public class DeviceFeatures
 		{
 		case SMS:
 			return smsSupport();
-		case PHONE:
+		case TEL:
 			return phoneSupport();
 		//case EMAIL:
 			//return emailSupport();

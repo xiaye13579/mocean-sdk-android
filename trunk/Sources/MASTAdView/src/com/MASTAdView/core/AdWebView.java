@@ -413,6 +413,8 @@ public class AdWebView extends WebView
 				{
 					adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageFinished", "Error setting default position information.");
 				}
+
+				mraidInterface.setViewable(getVisibility() == View.VISIBLE);
 				
 				// Tell ad everything is ready, trigger state change from loading to default
 				mraidInterface.fireReadyEvent();

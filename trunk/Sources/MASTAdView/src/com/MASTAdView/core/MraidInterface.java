@@ -17,7 +17,7 @@ final public class MraidInterface
 {
 	// Features that mraid ads can take advantage of, if this instance supports them
 	public enum FEATURES
-		{ SMS, PHONE, CALENDAR, STORE_PICTURE, INLINE_VIDEO }
+		{ SMS, TEL, CALENDAR, STORE_PICTURE, INLINE_VIDEO }
 	
 	// View states for an ad
 	public enum STATES
