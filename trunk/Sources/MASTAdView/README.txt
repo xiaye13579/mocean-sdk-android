@@ -28,3 +28,7 @@ Release Notes:
   keyboardHidden|orientation|screenSize.  Also moved release notes to the README.txt.
 - Updated AdImageView HTML wrapper to properly aspect ratio scale images.
 
+3.0.3
+
+- Adding logic to properly default the MRAID isViewable flag.
+- Renaming feature properly to TEL from PHONE.
