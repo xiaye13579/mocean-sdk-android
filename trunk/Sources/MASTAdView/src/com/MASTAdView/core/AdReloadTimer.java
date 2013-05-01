@@ -32,14 +32,7 @@ final public class AdReloadTimer
 	
 	synchronized public void setAdReloadPeriod(int value)
 	{
-		if (value < 1000)
-		{
-			adReloadPeriod = value * 1000;
-		}
-		else
-		{
-			adReloadPeriod = value;
-		}
+		adReloadPeriod = value * 1000;
 	}
 	
 	
