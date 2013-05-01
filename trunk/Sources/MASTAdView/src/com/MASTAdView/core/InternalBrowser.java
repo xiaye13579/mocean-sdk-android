@@ -1,12 +1,12 @@
 package com.MASTAdView.core;
 
 
-import java.io.IOException;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
@@ -203,28 +203,12 @@ public class InternalBrowser extends Dialog {
 	public static Drawable GetDrawable(Context context, String fileName)
 	{
 		try {
-			return Drawable.createFromStream(context.getAssets().open(fileName), null);
-		} catch (IOException e) {
+			java.io.InputStream stream = InternalBrowser.class.getResourceAsStream("/" + fileName);
+			Bitmap bitmap = BitmapFactory.decodeStream(stream);
+			BitmapDrawable bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
+			return bitmapDrawable;
+		} catch (Exception e) {
 			return null;
 		}
 	}
-	
-	/* private Bitmap getBitmapFromAsset(String strName) throws IOException    
-	 {         
-		 AssetManager assetManager = context.getAssets();          
-		 InputStream istr = assetManager.open(strName);         
-		 Bitmap bitmap = BitmapFactory.decodeStream(istr);          
-		 return bitmap;     
-	} 
-	
-	Drawable GetImage(String imageName)
-	{
-		try {
-			Bitmap bitmap = getBitmapFromAsset(imageName);
-		} catch (IOException e) {
-			return null;
-		}
-		return null;
-	}*/
-
 }
