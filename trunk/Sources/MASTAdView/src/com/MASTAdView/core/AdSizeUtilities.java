@@ -46,9 +46,8 @@ final public class AdSizeUtilities
 	private AdClickHandler 							adClickHandler = null;
 
 	// Properties used to resize and restore ad view
-	private View 									resizeOldContent = null;
 	private ViewGroup 								resizeDecorView = null;
-	private int 									resizeOldContentIndex = 0;
+	private RelativeLayout 							resizeAdFrame = null;
 	private Button 									resizeCloseButton = null;
 	
 	// Expand and pre-expand properties
@@ -716,11 +715,6 @@ final public class AdSizeUtilities
 		
 		// Get parent for ad view
 		ViewGroup parent = (ViewGroup)adWebView.getParent();
-		
-		// notify ad using mraid methods per spec.
-		// NOTE: this needs to come before the block below so that the state is resized when the ad container checks
-		adWebView.getMraidInterface().fireSizeChangeEvent(toWidth, toHeight);
-		adWebView.getMraidInterface().setState(MraidInterface.STATES.RESIZED);
 				
 		//if (adWebView.getMraidInterface().getState() == MraidInterface.STATES.RESIZED)
 		if ((parent instanceof AdViewContainer) == false)
@@ -730,10 +724,9 @@ final public class AdSizeUtilities
 			adWebView.requestLayout();
 			
 			// Update close button position.
-			RelativeLayout adFrame = (RelativeLayout)resizeCloseButton.getParent();
-			adFrame.removeView(resizeCloseButton);
+			resizeAdFrame.removeView(resizeCloseButton);
 			resizeCloseButton = createResizeCloseButton(closePosition, adWebView);  
-			adFrame.addView(resizeCloseButton);
+			resizeAdFrame.addView(resizeCloseButton);
 		}
 		else
 		{
@@ -747,14 +740,8 @@ final public class AdSizeUtilities
 			parent.removeView(adWebView);
 			adFrame.addView(adWebView);
 			
-			// Find previous screen content, remove it 
+			// Get the decor view where the new overlay will be placed.
 			resizeDecorView = ((ViewGroup)((Activity) context).getWindow().getDecorView());
-			//resizeOldContent = resizeDecorView.findViewById(android.R.id.content);
-			//resizeOldContentIndex = ((ViewGroup)resizeOldContent.getParent()).indexOfChild(resizeOldContent);
-			resizeOldContentIndex = 0;
-			resizeOldContent = resizeDecorView.getChildAt(resizeOldContentIndex);
-			((ViewGroup)resizeOldContent.getParent()).removeView(resizeOldContent);
-			adFrame.addView(resizeOldContent);
 			
 			// Create close button (transparent, as visual indicator is provided by ad)
 			// and position based on ad rule
@@ -762,14 +749,21 @@ final public class AdSizeUtilities
 			adFrame.addView(resizeCloseButton);
 			
 			// Finish, display it
-			resizeDecorView.addView(adFrame, resizeOldContentIndex);
+			resizeDecorView.addView(adFrame, 0);
+			adFrame.bringToFront();
 			adFrame.bringChildToFront(adWebView);
 			adFrame.bringChildToFront(resizeCloseButton);
 			adWebView.measure(toWidth, toHeight);
 			adWebView.requestLayout();
 			adFrame.requestLayout();
 			adWebView.requestFocus();
+			
+			resizeAdFrame = adFrame;
 		}
+		
+		// notify ad using mraid methods per spec.
+		adWebView.getMraidInterface().fireSizeChangeEvent(toWidth, toHeight);
+		adWebView.getMraidInterface().setState(MraidInterface.STATES.RESIZED);
 		
 		MASTAdDelegate delegate = parentContainer.getAdDelegate();
 		if (delegate != null)
@@ -784,29 +778,15 @@ final public class AdSizeUtilities
 		return null;
 	}
 	
-	
 	synchronized public void undoResize()
 	{
-		// Put old screen content back in decor view where it started
-		if ((resizeDecorView != null) && (resizeOldContent != null))
+		if ((resizeDecorView != null) && (resizeAdFrame != null))
 		{
-			if (resizeCloseButton != null)
-			{
-				RelativeLayout adFrame = (RelativeLayout)resizeCloseButton.getParent();
-				if (adFrame != null)
-				{
-					adFrame.removeView(resizeCloseButton);
-				}
-			}
-			
-			((ViewGroup)resizeOldContent.getParent()).removeView(resizeOldContent);
-			resizeDecorView.addView(resizeOldContent, resizeOldContentIndex);
-			
-			resizeOldContent = null;
+			resizeDecorView.removeView(resizeAdFrame);
 			resizeDecorView = null;
+			resizeAdFrame = null;
 		}
 	}
-
 	
 	// Show interstitial ad view
 	synchronized public void showInterstitialDialog(int showCloseDelay, int autoCloseDelay)
@@ -824,7 +804,6 @@ final public class AdSizeUtilities
 		Dialog dialog = adDialogFactory.createDialog(parentContainer, options);
 		dialog.show();
 	}
-
 	
 	// Dismiss dialog created via open/expand/show
 	synchronized public void dismissDialog()
