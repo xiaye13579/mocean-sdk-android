@@ -199,6 +199,18 @@ final public class AdDialogFactory
 				}
 			}
 		});		
+		
+		dialog.setOnCancelListener(new Dialog.OnCancelListener()
+		{
+			@Override
+			public void onCancel(DialogInterface dialog)
+			{
+				if (options != null)
+				{
+					runRunnable(options.dismissRunnable);
+				}
+			}
+		});
 
 		if ((options != null) && (options.autoCloseDelay != null) && (options.autoCloseDelay > 0))
 		{
