@@ -798,6 +798,29 @@ final public class AdSizeUtilities
 		options.showCloseDelay = showCloseDelay;
 		options.autoCloseDelay = autoCloseDelay;
 		
+		options.dismissRunnable = new Runnable()
+		{
+			public void run()
+			{
+				MASTAdDelegate delegate = parentContainer.getAdDelegate();
+				if (delegate != null)
+				{
+					MASTAdDelegate.AdActivityEventHandler eventHandler = delegate.getAdActivityEventHandler();
+					if (eventHandler != null)
+					{
+						if (parentContainer instanceof MASTAdView)
+						{
+							eventHandler.onAdCollapsed((MASTAdView) parentContainer);
+						}
+						else
+						{
+							eventHandler.onAdCollapsed(null);
+						}
+					}
+				}
+			}
+		};
+		
 		if (context instanceof Activity)
 			preExpandRequestedOrientation = ((Activity)context).getRequestedOrientation();
 		
@@ -815,16 +838,6 @@ final public class AdSizeUtilities
 			
 			if (context instanceof Activity)
 				((Activity)context).setRequestedOrientation(preExpandRequestedOrientation);
-			
-			MASTAdDelegate delegate = parentContainer.getAdDelegate();
-			if (delegate != null)
-			{
-				MASTAdDelegate.AdActivityEventHandler eventHandler = delegate.getAdActivityEventHandler();
-				if (eventHandler != null)
-				{
-					eventHandler.onAdCollapsed((MASTAdView)parentContainer);
-				}
-			}
 		}	
 	}
 	
