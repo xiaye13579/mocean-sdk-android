@@ -296,16 +296,21 @@ public class AdWebView extends WebView
 				//loadUrl("javascript:" + mraidScript);
 				
 				// Wait for mraid loaded to be true, set by js bridge
-				if (!getMraidLoaded())
+				synchronized (mraidLoadSync)
 				{
-					synchronized (mraidLoadSync)
+					if (!getMraidLoaded())
 					{
 						//System.out.println("@@@ waiting for mraid ready");
-						try { mraidLoadSync.wait(); } catch (Exception e) { }
+						try
+						{
+							mraidLoadSync.wait(1000);
+						}
+						catch (InterruptedException e)
+						{
+							adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageStarted", "timed out waiting for js bridge to load");
+						}
+						//System.out.println("@@@ DONE waiting for mraid ready");
 					}
-					
-					try { Thread.sleep(50); } catch (Exception e) { } // yield
-					//System.out.println("@@@ DONE waiting for mraid ready");
 				}
 				
 				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "setting device features");
