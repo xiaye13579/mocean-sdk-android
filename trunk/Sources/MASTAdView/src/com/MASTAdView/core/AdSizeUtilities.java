@@ -222,6 +222,7 @@ final public class AdSizeUtilities
 
 		// Pass options for dialog through to creator
 		AdDialogFactory.DialogOptions options = new AdDialogFactory.DialogOptions();
+		options.hideTitlebar = Boolean.valueOf(true);
 		options.backgroundColor = Color.BLACK; // XXX setting?
 		options.customClose = customClose;
 		options.height = toHeight;
