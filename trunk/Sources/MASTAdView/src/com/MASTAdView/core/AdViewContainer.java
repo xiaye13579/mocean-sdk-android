@@ -79,8 +79,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	private int										showCloseInterstitialTime = 0;
 	
 	private Handler 								handler;
-	
-	private OrientationChangeListener				orientationChangeListener = null;
+
 	private AdLocationListener						locationListener = null;
 	
 	// Local notion of placement type, partically duplicating the mraid interface value, needed for non-mraid ads
@@ -198,10 +197,6 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		handler = new AdMessageHandler(this);
 		
 		WindowManager windowManager = (WindowManager) ((Activity)context).getSystemService(Context.WINDOW_SERVICE);
-			
-		// listen for orientation changes, and handle them for eveyr add view
-		orientationChangeListener = OrientationChangeListener.getInstance(context, windowManager.getDefaultDisplay());
-		orientationChangeListener.addView(this);
 		
 		// Save original screen dimensions for later use
 		metrics = new DisplayMetrics();
@@ -578,17 +573,6 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			}
 		}
 		
-		if (isShowCloseOnBanner)
-		{
-			// put close button back if requested
-			if  (bannerCloseButton != null)
-			{
-				addView(bannerCloseButton);
-			}
-			
-			showCloseButtonWorker();
-		}
-		
 		if (ad.adType == MASTAdConstants.AD_TYPE_TEXT)
 		{
 			setTextContent(ad);
@@ -602,6 +586,17 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		else // RICHMEDIA or THIRDPARTY (which uses rich media)
 		{
 			setWebContent(ad.richContent);
+		}
+		
+		if (isShowCloseOnBanner)
+		{
+			// put close button back if requested
+			if  (bannerCloseButton != null)
+			{
+				addView(bannerCloseButton);
+			}
+			
+			showCloseButtonWorker();
 		}
 		
 		//adViewState = MraidInterface.STATES.DEFAULT; already done in ad web view???
@@ -1384,9 +1379,9 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	
 	public String expand(Bundle data)
 	{
-		// You can only invoke expand from the default or expanded ad states
+		// You can only invoke expand from the default or resized ad states
 		if ((adWebView.getMraidInterface().getState() == MraidInterface.STATES.DEFAULT) ||
-			(adWebView.getMraidInterface().getState() == MraidInterface.STATES.EXPANDED))
+			(adWebView.getMraidInterface().getState() == MraidInterface.STATES.RESIZED))
 		{
 			return adSizeUtilities.startExpand(data, adReloadTimer);
 		}
@@ -1548,6 +1543,8 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	protected void onAttachedToWindow()
 	{
 		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "Attached to Window", "");
+		
+		OrientationChangeListener.getInstance(context.getApplicationContext()).addView(this);
 
 		adReloadTimer.startTimer();
 		
@@ -1600,6 +1597,8 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	protected void onDetachedFromWindow()
 	{
 		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "Detached from Window", "");
+		
+		OrientationChangeListener.getInstance(context.getApplicationContext()).removeView(this);
 		
 		/*
 		if (image!=null)
@@ -1764,6 +1763,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 						}
 						
 						bannerCloseButton.setVisibility(visible);
+						bannerCloseButton.bringToFront();
 					}
 				});
 			}

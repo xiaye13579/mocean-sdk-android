@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import android.content.Context;
-import android.view.Display;
 import android.view.OrientationEventListener;
 
 
@@ -20,7 +19,7 @@ final public class OrientationChangeListener extends OrientationEventListener
 	final private ArrayList<AdViewContainer> observedViews;
 	
 	
-	public OrientationChangeListener(Context context, Display display)
+	public OrientationChangeListener(Context context)
 	{
 		super(context);
 		super.enable();
@@ -30,11 +29,11 @@ final public class OrientationChangeListener extends OrientationEventListener
 	}
 	
 	
-	synchronized public static OrientationChangeListener getInstance(Context c, Display d)
+	synchronized public static OrientationChangeListener getInstance(Context c)
 	{
 		if (instance == null)
 		{
-			instance = new OrientationChangeListener(c, d);
+			instance = new OrientationChangeListener(c);
 		}
 		
 		return instance;
@@ -46,6 +45,10 @@ final public class OrientationChangeListener extends OrientationEventListener
 		observedViews.add(ad);
 	}
 	
+	synchronized public void removeView(AdViewContainer ad)
+	{
+		observedViews.remove(ad);
+	}
 	
 	/*
 	 * Called when the orientation of the device has changed. orientation parameter is in degrees,
