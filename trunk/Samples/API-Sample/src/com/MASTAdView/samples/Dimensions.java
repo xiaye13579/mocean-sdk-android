@@ -38,7 +38,6 @@ public class Dimensions extends Activity {
     private int dimensionsHeight = -1;
     private int dimensionsX = 0;
     private int dimensionsY = 0;
-    private boolean useInternalBrowser = false;
     
     
     // Custom viewport options
@@ -127,6 +126,7 @@ public class Dimensions extends Activity {
         	sbY.setText("" + dimensionsY);
         	
         	final CheckBox cbUseInternal = (CheckBox)dialog.findViewById(R.id.cbUseInternal);
+        	cbUseInternal.setChecked(adserverView.getUseInternalBrowser());
         	
         	final CheckBox cbFillWidth = (CheckBox) dialog.findViewById(R.id.cbFillParentWidth);
         	cbFillWidth.setOnCheckedChangeListener(new OnCheckedChangeListener()
@@ -195,14 +195,7 @@ public class Dimensions extends Activity {
 					lp.height = dimensionsHeight;
 					newAdserverView.getAdRequest().setProperty(MASTAdRequest.parameter_size_y, dimensionsHeight);
 					
-					if (cbUseInternal.isChecked())
-					{
-						useInternalBrowser = true;
-					}
-					else
-					{
-						useInternalBrowser = false;
-					}
+					newAdserverView.setUseInternalBrowser(cbUseInternal.isChecked());
 					
 					val = Integer.parseInt(sbX.getText().toString());
 					dimensionsX = val;
