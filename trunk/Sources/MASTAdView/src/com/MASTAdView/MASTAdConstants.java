@@ -8,7 +8,7 @@ package com.MASTAdView;
  */
 public class MASTAdConstants {
 
-	public static final String SDK_VERSION = "3.0.3";
+	public static final String SDK_VERSION = "3.0.4";
 	public static final int DEFAULT_COLOR = 0xFFFFFFFF;
 	
 	public static final int AD_RELOAD_PERIOD = 120000; //in milliseconds
