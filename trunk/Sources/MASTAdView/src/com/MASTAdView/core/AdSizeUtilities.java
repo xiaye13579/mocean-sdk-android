@@ -716,6 +716,8 @@ final public class AdSizeUtilities
 		
 		// Get parent for ad view
 		ViewGroup parent = (ViewGroup)adWebView.getParent();
+		if (parent == null)
+			return "Error: resize: container parent null.";
 				
 		//if (adWebView.getMraidInterface().getState() == MraidInterface.STATES.RESIZED)
 		if ((parent instanceof AdViewContainer) == false)
