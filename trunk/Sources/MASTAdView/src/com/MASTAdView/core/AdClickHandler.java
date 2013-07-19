@@ -82,38 +82,7 @@ public class AdClickHandler implements View.OnClickListener
 	
 	private void openUrlWorker(final Context context, final String url)
 	{
-		String lastUrl = null;
-		String newUrl =  url;
-		URL connectURL;
-		
-		// Follow redirects to final resource location
-		while(!newUrl.equals(lastUrl))
-		{
-			lastUrl = newUrl;
-			try
-			{					
-				connectURL = new URL(newUrl);					
-				HttpURLConnection conn = (HttpURLConnection)connectURL.openConnection();
-				newUrl = conn.getHeaderField("Location");
-				if (newUrl==null) 
-				{
-					newUrl=conn.getURL().toString();
-				}
-			}
-			catch (Exception e)
-			{
-				newUrl = lastUrl;
-			}				
-		}
-			
-		/*
-		if (newUrl==null)
-		{
-			newUrl = url;
-		}
-		*/
-		
-		Uri uri = Uri.parse(newUrl);
+		Uri uri = Uri.parse(url);
 		if (parentContainer.getUseInternalBrowser() && (uri.getScheme().equals("http") || uri.getScheme().equals("https")))
 		{
 			parentContainer.getHandler().post(new Runnable()
@@ -136,12 +105,12 @@ public class AdClickHandler implements View.OnClickListener
 		{
 			try
 			{
-				Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(newUrl));
+				Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 				context.startActivity(intent);
 			}
 			catch (Exception e)
 			{
-				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "openUrlInExternalBrowser","url="+ newUrl+"; error="+e.getMessage());
+				adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "openUrlInExternalBrowser","url="+ url +"; error="+e.getMessage());
 			}
 		}		
 	}
