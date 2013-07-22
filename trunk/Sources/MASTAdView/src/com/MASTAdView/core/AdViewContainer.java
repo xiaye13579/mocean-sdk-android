@@ -40,6 +40,7 @@ import android.widget.TextView;
 import com.MASTAdView.MASTAdConstants;
 import com.MASTAdView.MASTAdDelegate;
 import com.MASTAdView.MASTAdDelegate.RichmediaEventHandler;
+import com.MASTAdView.core.MraidInterface.STATES;
 import com.MASTAdView.MASTAdLog;
 import com.MASTAdView.MASTAdRequest;
 import com.MASTAdView.MASTAdView;
@@ -341,8 +342,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 				{
 					if ((adWebView != null) && (adWebView.getMraidInterface().getState() == MraidInterface.STATES.DEFAULT))
 					{
-							adWebView.getLocationOnScreen(coordinates); // getLocationInWindow() for relative
-							adWebView.getMraidInterface().setCurrentPosition(coordinates[0], coordinates[1], adWebView.getWidth(), adWebView.getHeight());
+						adWebView.updateMraidLayout(adWebView.getMraidInterface().getState() == STATES.EXPANDED);
 					}
 				}
 			});
@@ -448,8 +448,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 	{
 		if (adWebView != null)
 		{
-			adWebView.getLocationOnScreen(coordinates); // getLocationInWindow() for relative
-			adWebView.getMraidInterface().setCurrentPosition(coordinates[0], coordinates[1], w, h);
+			adWebView.updateMraidLayout(adWebView.getMraidInterface().getState() == STATES.EXPANDED);
 			
 			// Notify ad that size has changed
 			adWebView.getMraidInterface().fireSizeChangeEvent(w, h);
@@ -1584,7 +1583,7 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 			 (adWebView.getMraidInterface().getState() == MraidInterface.STATES.DEFAULT)))
 		{
 			adWebView.getLocationOnScreen(coordinates); // getLocationInWindow() for relative
-			adWebView.getMraidInterface().setCurrentPosition(coordinates[0], coordinates[1], adWebView.getWidth(), adWebView.getHeight());
+//			adWebView.getMraidInterface().setCurrentPosition(coordinates[0], coordinates[1], adWebView.getWidth(), adWebView.getHeight());
 			//adWebView.getMraidInterface().setCurrentPosition(adWebView.getLeft(), adWebView.getTop(), adWebView.getWidth(), adWebView.getHeight());
 		}
 		
@@ -1888,23 +1887,16 @@ public class AdViewContainer extends RelativeLayout implements ContentManager.Co
 		//adWebView.getMraidInterface().setCurrentPosition(adWebView.getLeft(), adWebView.getTop(), w, h);
 		if (adWebView != null)
 		{
-			adWebView.getLocationOnScreen(coordinates); // getLocationInWindow() for relative
-			adWebView.getMraidInterface().setCurrentPosition(coordinates[0], coordinates[1], adWebView.getWidth(), adWebView.getHeight());
-			//adWebView.getMraidInterface().setCurrentPosition(adWebView.getLeft(), adWebView.getTop(), adWebView.getWidth(), adWebView.getHeight());
+			adWebView.updateMraidLayout(adWebView.getMraidInterface().getState() == STATES.EXPANDED);
 		}
-		
-		//adWebView.getMraidInterface().setOrientation(orientationAngle);
-		
+
 		// If ad is expanded and a 2 part creative caused a new view to be created,
 		// inject events into that one also.
 		if ((adWebView.getMraidInterface().getState() == MraidInterface.STATES.EXPANDED) &&
 			(adSizeUtilities.getExpandedAdView() != null))
 		{
 			AdWebView expandedWebView = adSizeUtilities.getExpandedAdView(); 
-			//expandedWebView.getMraidInterface().setCurrentPosition(expandedWebView.getLeft(), expandedWebView.getTop(), expandedWebView.getWidth(), expandedWebView.getHeight());
-			expandedWebView.getMraidInterface().setCurrentPosition(coordinates[0], coordinates[1], adWebView.getWidth(), adWebView.getHeight());
-			
-			//expandedWebView.getMraidInterface().setOrientation(orientationAngle);
+			expandedWebView.updateMraidLayout(true);
 		}
 	}
 	

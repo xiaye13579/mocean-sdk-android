@@ -27,6 +27,7 @@ import android.webkit.WebViewClient;
 import com.MASTAdView.MASTAdDelegate;
 import com.MASTAdView.MASTAdLog;
 import com.MASTAdView.MASTAdView;
+import com.MASTAdView.core.MraidInterface.STATES;
 
 @SuppressLint("SetJavaScriptEnabled")
 public class AdWebView extends WebView
@@ -90,7 +91,6 @@ public class AdWebView extends WebView
 			adClickHandler = new AdClickHandler(adViewContainer);
 		}
 	}
-
 	
 	synchronized private int getIdForView()
 	{
@@ -143,6 +143,95 @@ public class AdWebView extends WebView
 		setMraidLoaded(false);
 	}
 	
+	public void updateMraidLayout(boolean expanded)
+	{
+		// setScreenSize 
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "set screen size");
+		try
+		{
+			JSONObject screenSize = new JSONObject();
+			screenSize.put(MraidInterface.get_SCREEN_SIZE_name(MraidInterface.SCREEN_SIZE.WIDTH), AdSizeUtilities.devicePixelToMraidPoint(metrics.widthPixels, getContext()));
+			screenSize.put(MraidInterface.get_SCREEN_SIZE_name(MraidInterface.SCREEN_SIZE.HEIGHT), AdSizeUtilities.devicePixelToMraidPoint(metrics.heightPixels, getContext()));
+			injectJavaScript("mraid.setScreenSize(" + screenSize.toString() + ");");
+		}
+		catch(Exception ex)
+		{
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageStarted", "Error setting screen size information.");
+		}
+		
+		// setMaxSize
+		adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "set max size");
+		try
+		{
+			JSONObject maxSize = new JSONObject();
+			maxSize.put(MraidInterface.get_MAX_SIZE_name(MraidInterface.MAX_SIZE.WIDTH), AdSizeUtilities.devicePixelToMraidPoint(metrics.widthPixels, getContext()));
+			maxSize.put(MraidInterface.get_MAX_SIZE_name(MraidInterface.MAX_SIZE.HEIGHT), AdSizeUtilities.devicePixelToMraidPoint(metrics.heightPixels - getStatusBarHeight(), getContext()));
+			injectJavaScript("mraid.setMaxSize(" + maxSize.toString() + ");");
+		}
+		catch(Exception ex)
+		{
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageStarted", "Error setting max size information.");
+		}
+		
+		// setCurrentPosition
+		try
+		{
+			int x, y, w, h;
+			
+			if (expanded == false)
+			{
+				int coordinates[] = new int[2];
+				getLocationOnScreen(coordinates);
+				x = AdSizeUtilities.devicePixelToMraidPoint(coordinates[0], getContext());
+				y = AdSizeUtilities.devicePixelToMraidPoint(coordinates[1], getContext());
+				w = AdSizeUtilities.devicePixelToMraidPoint(getWidth(), getContext());
+				h = AdSizeUtilities.devicePixelToMraidPoint(getHeight(), getContext());
+			}
+			else
+			{
+				x = 0;
+				y = 0;
+				w = AdSizeUtilities.devicePixelToMraidPoint(metrics.widthPixels, getContext());
+				h = AdSizeUtilities.devicePixelToMraidPoint(metrics.heightPixels, getContext());
+			}
+			
+			JSONObject position = new JSONObject();
+			position.put(MraidInterface.get_CURRENT_POSITION_name(MraidInterface.CURRENT_POSITION.X), x);
+			position.put(MraidInterface.get_CURRENT_POSITION_name(MraidInterface.CURRENT_POSITION.Y), y);
+			position.put(MraidInterface.get_CURRENT_POSITION_name(MraidInterface.CURRENT_POSITION.WIDTH), w);
+			position.put(MraidInterface.get_CURRENT_POSITION_name(MraidInterface.CURRENT_POSITION.HEIGHT), h);
+			
+			injectJavaScript("mraid.setCurrentPosition(" + position.toString() + ");");
+		}
+		catch(Exception ex)
+		{
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageFinished", "Error setting current position information.");
+		}
+		
+		// setDefaultPosition
+		try
+		{
+			int coordinates[] = new int[2];
+			adViewContainer.getLocationOnScreen(coordinates);
+			int x = AdSizeUtilities.devicePixelToMraidPoint(coordinates[0], getContext());
+			int y = AdSizeUtilities.devicePixelToMraidPoint(coordinates[1], getContext());
+			int w = AdSizeUtilities.devicePixelToMraidPoint(adViewContainer.getWidth(), getContext());
+			int h = AdSizeUtilities.devicePixelToMraidPoint(adViewContainer.getHeight(), getContext());
+			
+			JSONObject position = new JSONObject();
+			position.put(MraidInterface.get_DEFAULT_POSITION_name(MraidInterface.DEFAULT_POSITION.X), x);
+			position.put(MraidInterface.get_DEFAULT_POSITION_name(MraidInterface.DEFAULT_POSITION.Y), y);
+			position.put(MraidInterface.get_DEFAULT_POSITION_name(MraidInterface.DEFAULT_POSITION.WIDTH), w);
+			position.put(MraidInterface.get_DEFAULT_POSITION_name(MraidInterface.DEFAULT_POSITION.HEIGHT),  h);
+			injectJavaScript("mraid.setDefaultPosition(" + position.toString() + ");");
+		}
+		catch(Exception ex)
+		{
+			adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageFinished", "Error setting default position information.");
+		}
+
+		mraidInterface.setViewable(getVisibility() == View.VISIBLE);
+	}
 	
 	final private class AdWebChromeClient extends WebChromeClient
 	{
@@ -347,34 +436,6 @@ public class AdWebView extends WebView
 				// Initialize width/height values for expand properties (starts off with screen size)
 				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "initialize expand properties");
 				initializeExpandProperties();
-			
-				// setScreenSize 
-				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "set screen size");
-				try
-				{
-					JSONObject screenSize = new JSONObject();
-					screenSize.put(MraidInterface.get_SCREEN_SIZE_name(MraidInterface.SCREEN_SIZE.WIDTH), "" + AdSizeUtilities.devicePixelToMraidPoint(metrics.widthPixels, getContext()));
-					screenSize.put(MraidInterface.get_SCREEN_SIZE_name(MraidInterface.SCREEN_SIZE.HEIGHT), "" + AdSizeUtilities.devicePixelToMraidPoint(metrics.heightPixels, getContext()));
-					injectJavaScript("mraid.setScreenSize(" + screenSize.toString() + ");");
-				}
-				catch(Exception ex)
-				{
-					adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageStarted", "Error setting screen size information.");
-				}
-				
-				// setMaxSize
-				adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "set max size");
-				try
-				{
-					JSONObject maxSize = new JSONObject();
-					maxSize.put(MraidInterface.get_MAX_SIZE_name(MraidInterface.MAX_SIZE.WIDTH), "" + AdSizeUtilities.devicePixelToMraidPoint(metrics.widthPixels, getContext()));
-					maxSize.put(MraidInterface.get_MAX_SIZE_name(MraidInterface.MAX_SIZE.HEIGHT), "" + AdSizeUtilities.devicePixelToMraidPoint(metrics.heightPixels - getStatusBarHeight(), getContext()));
-					injectJavaScript("mraid.setMaxSize(" + maxSize.toString() + ");");
-				}
-				catch(Exception ex)
-				{
-					adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageStarted", "Error setting max size information.");
-				}
 			}
 			
 			adLog.log(MASTAdLog.LOG_LEVEL_DEBUG, "onPageStarted", "loading ad url: " + url);
@@ -399,27 +460,7 @@ public class AdWebView extends WebView
 
 			if (supportMraid)
 			{	
-				// setDefaultPosition
-				try
-				{
-					int x = AdSizeUtilities.devicePixelToMraidPoint(adViewContainer.getLeft(), context);
-					int y = AdSizeUtilities.devicePixelToMraidPoint(adViewContainer.getTop(), context);
-					int w = AdSizeUtilities.devicePixelToMraidPoint(adViewContainer.getWidth(), context);
-					int h = AdSizeUtilities.devicePixelToMraidPoint(adViewContainer.getHeight(), context);
-					
-					JSONObject position = new JSONObject();
-					position.put(MraidInterface.get_DEFAULT_POSITION_name(MraidInterface.DEFAULT_POSITION.X), "" + x);
-					position.put(MraidInterface.get_DEFAULT_POSITION_name(MraidInterface.DEFAULT_POSITION.Y), "" + y);
-					position.put(MraidInterface.get_DEFAULT_POSITION_name(MraidInterface.DEFAULT_POSITION.WIDTH), "" + w);
-					position.put(MraidInterface.get_DEFAULT_POSITION_name(MraidInterface.DEFAULT_POSITION.HEIGHT), "" + h);
-					injectJavaScript("mraid.setDefaultPosition(" + position.toString() + ");");
-				}
-				catch(Exception ex)
-				{
-					adLog.log(MASTAdLog.LOG_LEVEL_ERROR, "onPageFinished", "Error setting default position information.");
-				}
-
-				mraidInterface.setViewable(getVisibility() == View.VISIBLE);
+				updateMraidLayout(getMraidInterface().getState() == STATES.EXPANDED);
 				
 				// Tell ad everything is ready, trigger state change from loading to default
 				mraidInterface.fireReadyEvent();

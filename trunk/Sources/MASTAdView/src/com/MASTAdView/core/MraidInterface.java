@@ -259,41 +259,6 @@ final public class MraidInterface
 		setPropertiesFromList("Resize", list);
 	}
 	
-	
-	synchronized public void setCurrentPosition(int x, int y, int width, int height)
-	{
-		x = AdSizeUtilities.devicePixelToMraidPoint(x, context);
-		y = AdSizeUtilities.devicePixelToMraidPoint(y, context);
-		width = AdSizeUtilities.devicePixelToMraidPoint(width, context);
-		height = AdSizeUtilities.devicePixelToMraidPoint(height, context);
-		
-		try
-		{
-			JSONObject position = new JSONObject();
-			position.put(MraidInterface.get_CURRENT_POSITION_name(MraidInterface.CURRENT_POSITION.X), "" + x);
-			position.put(MraidInterface.get_CURRENT_POSITION_name(MraidInterface.CURRENT_POSITION.Y), "" + y);
-			position.put(MraidInterface.get_CURRENT_POSITION_name(MraidInterface.CURRENT_POSITION.WIDTH), "" + width);
-			position.put(MraidInterface.get_CURRENT_POSITION_name(MraidInterface.CURRENT_POSITION.HEIGHT), "" + height);
-			
-			webView.injectJavaScript("mraid.setCurrentPosition(" + position.toString() + ");");
-		}
-		catch (Exception ex)
-		{
-			adView.getLog().log(MASTAdLog.LOG_LEVEL_ERROR, "JavascriptInterface setCurrentPosition - exception", ex.getMessage()); 
-		}		
-	}
-	
-	
-	
-	
-	/*
-	synchronized public void setOrientation(int value)
-	{
-		webView.injectJavaScript("mraid.setOrientation(" + value + ");");
-	}
-	*/
-	
-	
 	//
 	// Utilities
 	//

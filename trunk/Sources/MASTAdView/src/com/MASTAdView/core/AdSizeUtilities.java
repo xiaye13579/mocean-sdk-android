@@ -238,8 +238,6 @@ final public class AdSizeUtilities
 		
 		timer.stopTimer(false); // stop ad refresh timer		
 		
-		parentContainer.getAdWebView().getMraidInterface().setState(MraidInterface.STATES.EXPANDED);
-		
 		if ((url == null) || (url.length() < 1) || (url.equalsIgnoreCase("undefined")))
 		{
 			// We are using existing ad view / content, safe to do this on UI thread
@@ -297,7 +295,10 @@ final public class AdSizeUtilities
 		expandedAdView = null;
 		Dialog dialog = adDialogFactory.createDialog(parentContainer.getAdWebView(), options);
 		dialog.show();
-	
+		
+		parentContainer.getAdWebView().updateMraidLayout(true);
+		parentContainer.getAdWebView().getMraidInterface().setState(MraidInterface.STATES.EXPANDED);
+
 		// Apply orientation options
 		updateOrientation();
 		
@@ -348,6 +349,9 @@ final public class AdSizeUtilities
 								Dialog dialog = adDialogFactory.createDialog(expandedAdView, options);
 								
 								dialog.show();
+								
+								// Notify the banner that initiated the expand that the ad state is now expanded.
+								parentContainer.getAdWebView().getMraidInterface().setState(MraidInterface.STATES.EXPANDED);
 								
 								// Apply orientation options
 								updateOrientation();								
