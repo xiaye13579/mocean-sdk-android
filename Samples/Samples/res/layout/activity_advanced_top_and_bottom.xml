@@ -1,0 +1,22 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AdvancedTopAndBottom" >
+    
+    <com.moceanmobile.mast.MASTAdView
+        android:id="@+id/adViewTop"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        zone="102238"
+        android:background="#777777" />
+
+    <com.moceanmobile.mast.MASTAdView
+        android:id="@+id/adViewBottom"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:layout_alignParentBottom="true"
+        zone="88269"
+        android:background="#777777" />
+    
+</RelativeLayout>
