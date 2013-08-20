@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.moceanmobile.mast.samples"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="17" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.moceanmobile.mast.samples.SamplesListActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.SimpleImage"
+            android:label="@string/title_activity_simple_image" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.SimpleAnimatedGIF"
+            android:label="@string/title_activity_simple_animated_gif" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.SimpleInterstitial"
+            android:label="@string/title_activity_simple_interstitial" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.SimpleRichMedia"
+            android:label="@string/title_activity_simple_rich_media" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.SimpleText"
+            android:label="@string/title_activity_simple_text" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.AdvancedAnimation"
+            android:label="@string/title_activity_advanced_animation" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.AdvancedBottom"
+            android:label="@string/title_activity_advanced_bottom" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.AdvancedList"
+            android:label="@string/title_activity_advanced_list" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.AdvancedTopAndBottom"
+            android:label="@string/title_activity_advanced_top_and_bottom" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.DelegateGeneric"
+            android:label="@string/title_activity_delegate_generic" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.DelegateMRAID"
+            android:label="@string/title_activity_delegate_mraid" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.DelegateThirdParty"
+            android:label="@string/title_activity_delegate_third_party" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.DelegateLogging"
+            android:label="@string/title_activity_delegate_logging" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.DelegateNoContent"
+            android:label="@string/title_activity_delegate_no_content" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.ErrorHide"
+            android:label="@string/title_activity_error_hide" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.ErrorImage"
+            android:label="@string/title_activity_error_image" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.ErrorReset"
+            android:label="@string/title_activity_error_reset" >
+        </activity>
+        <activity
+            android:name="com.moceanmobile.mast.samples.CustomConfig"
+            android:label="@string/title_activity_custom_config" >
+        </activity>
+    </application>
+
+</manifest>
