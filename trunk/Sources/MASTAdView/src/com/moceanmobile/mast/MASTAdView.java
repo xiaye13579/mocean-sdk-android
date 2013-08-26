@@ -1,5 +1,8 @@
 package com.moceanmobile.mast;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -10,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 
+import android.R;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -20,7 +24,9 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -63,6 +69,7 @@ public class MASTAdView extends ViewGroup
 	}
 	
 	final int CloseAreaSizeDp = 50;
+	final int UnsetValue = Short.MIN_VALUE;
 	
 	private String sdkVersion = Defaults.SDK_VERSION;
 	
@@ -74,6 +81,8 @@ public class MASTAdView extends ViewGroup
 	private boolean test = false;
 	private String adNetworkURL = Defaults.AD_NETWORK_URL;
 	private Map<String, String> adRequestParameters = new HashMap<String, String>();
+	private boolean showCloseButton = false;
+	private int closeButtonDelay = 0;
 	private boolean useInternalBrowser = false;
 	private LogLevel logLevel = LogLevel.Error;
 	private PlacementType placementType = PlacementType.Inline;
@@ -82,6 +91,9 @@ public class MASTAdView extends ViewGroup
 	private WebView webView = null;
 	private TextView textView = null;
 	private ImageView imageView = null;
+	
+	// Close button
+	private ScheduledFuture<?> closeButtonFuture = null;
 	
 	// Interstitial configuration
 	private ExpandDialog interstitialDialog = null;
@@ -96,6 +108,7 @@ public class MASTAdView extends ViewGroup
 	private boolean mraidTwoPartExpand = false;
 	private Bridge mraidTwoPartBridge = null;
 	private WebView mraidTwoPartWebView = null;
+	private int mraidOriginalOrientation = UnsetValue;
 	
 	// Handles WebView client callbacks for MRAID or other WebView based ads.
 	private WebView.Handler webViewHandler = new WebViewHandler();
@@ -593,11 +606,12 @@ public class MASTAdView extends ViewGroup
 		
 		interstitialDialog.show();
 		
+		prepareCloseButton();
 		performAdTracking();
 		
 		if (durationSeconds > 0)
 		{
-			interstitialDelayFuture = Background.getExecutor().scheduleAtFixedRate(new Runnable()
+			interstitialDelayFuture = Background.getExecutor().schedule(new Runnable()
 			{
 				@Override
 				public void run()
@@ -605,7 +619,7 @@ public class MASTAdView extends ViewGroup
 					closeInterstitial();
 				}
 				
-			}, 0, durationSeconds, TimeUnit.SECONDS);
+			}, durationSeconds, TimeUnit.SECONDS);
 		}
 	}
 	
@@ -877,8 +891,7 @@ public class MASTAdView extends ViewGroup
 
 		this.adDescriptor = adDescriptor;
 
-		// TODO: prepareCloseButton
-		
+		prepareCloseButton();
 		performAdTracking();
 				
 		if (requestListener != null)
@@ -914,8 +927,7 @@ public class MASTAdView extends ViewGroup
 		
 		this.adDescriptor = adDescriptor;
 		
-		// TODO: prepareCloseButton
-		
+		prepareCloseButton();
 		performAdTracking();
 		
 		if (requestListener != null)
@@ -1020,6 +1032,30 @@ public class MASTAdView extends ViewGroup
 		super.onAttachedToWindow();
 		
 		performAdTracking();
+	}
+	
+	@Override
+	protected void onDetachedFromWindow()
+	{	
+		super.onDetachedFromWindow();
+		
+		// TODO: NPE when resized and activity is destoryed.
+		
+		if (mraidBridge != null)
+		{
+			switch (mraidBridge.getState())
+			{
+			case Loading:
+			case Hidden:
+			case Default:
+				break;
+				
+			case Resized:
+			case Expanded:
+				mraidBridgeHandler.mraidClose(mraidBridge);
+				break;
+			}
+		}
 	}
 
 	@Override
@@ -1260,14 +1296,16 @@ public class MASTAdView extends ViewGroup
 	}
 	
 	// main thread
-	private void updateOrientation()
+	private void setMRAIDOrientation()
 	{
-		Activity activity = null;
-		if (getContext() instanceof Activity)
-			activity = (Activity) getContext();
-		
+		Activity activity = getActivity();
 		if (activity == null)
 			return;
+		
+		if (mraidOriginalOrientation == UnsetValue)
+		{
+			mraidOriginalOrientation = activity.getRequestedOrientation();
+		}
 		
 		OrientationProperties orientationProperties = mraidBridge.getOrientationProperties();
 		
@@ -1308,6 +1346,129 @@ public class MASTAdView extends ViewGroup
 				}
 			}
 		}
+	}
+	
+	// main thread
+	private void resetMRAIDOrientation()
+	{
+		Activity activity = getActivity();
+		if (activity == null)
+			return;
+		
+		if (mraidOriginalOrientation != UnsetValue)
+		{
+			activity.setRequestedOrientation(mraidOriginalOrientation);
+		}
+	}
+	
+	// main thread
+	private void prepareCloseButton()
+	{
+		if (closeButtonFuture != null)
+		{
+			closeButtonFuture.cancel(true);
+			closeButtonFuture = null;
+		}
+		
+	    if (mraidBridge != null)
+	    {
+	        switch (mraidBridge.getState())
+	        {
+	            case Expanded:
+	                // When expanded use the built in button or the custom one, else nothing else.
+	                if (mraidBridge.getExpandProperties().useCustomClose() == false)
+	                {
+	                    showCloseButton();
+	                }
+	                return;
+	                
+	            case Resized:
+	                // The ad creative MUST supply it's own close button.
+	                return;
+	                
+	            default:
+	                break;
+	        }
+	    }
+	    
+	    if (closeButtonDelay < 0)
+	        return;
+	    
+	    if (closeButtonDelay == 0)
+	    {
+	        showCloseButton();
+	        return;
+	    }
+	    
+	    closeButtonFuture = Background.getExecutor().schedule(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				showCloseButton();
+			}
+			
+		}, closeButtonDelay, TimeUnit.SECONDS);
+	}
+	
+	// main thread
+	@SuppressWarnings("deprecation")
+	private void showCloseButton()
+	{
+		BitmapDrawable closeButtonDrawable = null;
+		
+		if (closeButtonDrawable == null)
+		{
+			try
+			{
+				InputStream is = WebView.class.getResourceAsStream("/close_button.png");
+				closeButtonDrawable = new BitmapDrawable(getResources(), is);
+				closeButtonDrawable.setGravity(Gravity.CENTER);
+			}
+			catch (Exception ex)
+			{
+				// TODO: Log this?
+			}
+		}
+		
+		if (closeButtonDrawable == null)
+			return;
+		
+	    if (mraidBridge != null)
+	    {
+	        switch (mraidBridge.getState())
+	        {
+	            case Loading:
+	            case Default:
+	            case Hidden:
+	                // Like text or image ads just put the close button at the top of the stack
+	                // on the ad view and not on the webview.
+	                break;
+	                
+	            case Expanded:
+	                mraidExpandDialog.setCloseImage(closeButtonDrawable);
+	                return;
+	                
+	            case Resized:
+	                mraidResizeCloseArea.setBackgroundDrawable(closeButtonDrawable);
+	                return;
+	        }
+	    }
+	    
+	    switch (placementType)
+	    {
+	        case Inline:
+	        {
+	        	// TODO: Support inline close button?
+	            break;
+	        }
+
+	        case Interstitial:
+	        {
+	        	interstitialDialog.setCloseImage(closeButtonDrawable);
+	            break;
+	        }
+	    }
 	}
 	
 	private class WebViewHandler implements WebView.Handler
@@ -1481,6 +1642,8 @@ public class MASTAdView extends ViewGroup
 						updateMRAIDLayoutForState(mraidBridge, State.Default);
 						mraidBridge.setState(State.Default);
 						
+						resetMRAIDOrientation();
+						
 						if (richMediaListener != null)
 						{
 							richMediaListener.onCollapsed(MASTAdView.this);
@@ -1517,8 +1680,10 @@ public class MASTAdView extends ViewGroup
 		@Override
 		public void mraidUpdatedExpandProperties(final Bridge bridge)
 		{
-			// TODO: Nothing to do except possibly toggle use custom close?
-			// TODO: There's another callback for use custom close that needs to be implemented.
+			if ((bridge != mraidBridge) && (bridge != mraidTwoPartBridge))
+				return;
+			
+			prepareCloseButton();
 		}
 
 		@Override
@@ -1609,7 +1774,7 @@ public class MASTAdView extends ViewGroup
 			{
 				public void run()
 				{
-					updateOrientation();
+					setMRAIDOrientation();
 				}
 			});
 		}
@@ -2155,11 +2320,29 @@ public class MASTAdView extends ViewGroup
 					richMediaListener.onExpanded(MASTAdView.this);
 				}
 			}
+			
+			prepareCloseButton();
+		}
+		
+		public void onBackPressed()
+		{
+			if (this == interstitialDialog)
+			{
+				if (closeArea.getBackground() == null)
+				{
+					// Don't allow close until the close button is available.
+					return;
+				}
+			}
+			
+			super.onBackPressed();
 		}
 		
 		public void addView(View view)
 		{
 			container.addView(view);
+			
+			closeArea.bringToFront();
 		}
 		
 		public void removeView(View view)
@@ -2180,9 +2363,10 @@ public class MASTAdView extends ViewGroup
 			}
 		}
 		
+		@SuppressWarnings("deprecation")
 		public void setCloseImage(Drawable image)
 		{
-			closeArea.setBackground(image);
+			closeArea.setBackgroundDrawable(image);
 		}
 		
 		@Override
