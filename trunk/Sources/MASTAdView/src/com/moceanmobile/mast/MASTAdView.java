@@ -1,8 +1,6 @@
 package com.moceanmobile.mast;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 
-import android.R;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -24,12 +21,16 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.telephony.TelephonyManager;
@@ -68,10 +69,9 @@ public class MASTAdView extends ViewGroup
 		Debug,
 	}
 	
-	final int CloseAreaSizeDp = 50;
-	final int UnsetValue = Short.MIN_VALUE;
-	
-	private String sdkVersion = Defaults.SDK_VERSION;
+	final private String sdkVersion = Defaults.SDK_VERSION;
+	final private int CloseAreaSizeDp = 50;
+	final private int OrientationReset = Short.MIN_VALUE;
 	
 	// User agent used for all requests
 	private String userAgent = null;
@@ -79,10 +79,9 @@ public class MASTAdView extends ViewGroup
 	// Configuration
 	private int zone = 0;
 	private boolean test = false;
+	private int updateInterval = 0;
 	private String adNetworkURL = Defaults.AD_NETWORK_URL;
 	private Map<String, String> adRequestParameters = new HashMap<String, String>();
-	private boolean showCloseButton = false;
-	private int closeButtonDelay = 0;
 	private boolean useInternalBrowser = false;
 	private LogLevel logLevel = LogLevel.Error;
 	private PlacementType placementType = PlacementType.Inline;
@@ -93,6 +92,9 @@ public class MASTAdView extends ViewGroup
 	private ImageView imageView = null;
 	
 	// Close button
+	private boolean showCloseButton = false;
+	private int closeButtonDelay = 0;
+	private Drawable closeButtonCustomDrawable = null;
 	private ScheduledFuture<?> closeButtonFuture = null;
 	
 	// Interstitial configuration
@@ -101,14 +103,16 @@ public class MASTAdView extends ViewGroup
 	
 	// MRAID support
 	private Bridge mraidBridge = null;
+	private boolean mraidBridgeInit = false;
 	private Bridge.Handler mraidBridgeHandler = new MRAIDHandler();
 	private ExpandDialog mraidExpandDialog = null;
 	private RelativeLayout mraidResizeLayout = null;
 	private View mraidResizeCloseArea = null;
 	private boolean mraidTwoPartExpand = false;
 	private Bridge mraidTwoPartBridge = null;
+	private boolean mraidTwoPartBridgeInit = false;
 	private WebView mraidTwoPartWebView = null;
-	private int mraidOriginalOrientation = UnsetValue;
+	private int mraidOriginalOrientation = OrientationReset;
 	
 	// Handles WebView client callbacks for MRAID or other WebView based ads.
 	private WebView.Handler webViewHandler = new WebViewHandler();
@@ -119,12 +123,15 @@ public class MASTAdView extends ViewGroup
 	private AdRequest adRequest = null;
 	private AdDescriptor adDescriptor = null;
 	private AdRequestHandler adRequestHandler = new AdRequestHandler();
-	private int adUpdateIntervalSeconds = 0;
 	private ScheduledFuture<?> adUpdateIntervalFuture = null;
 	
 	// Tracking
 	private boolean invokeTracking = false;
-
+	
+	// Location support
+	private LocationManager locationManager = null;
+	private LocationListener locationListener = null;
+	
 	// Delegates
 	private ActivityListener activityListener;
 	private FeatureSupportHandler featureSupportHandler;
@@ -159,7 +166,7 @@ public class MASTAdView extends ViewGroup
 		init(false);
 	}
 	
-	private void init(boolean interstitial)
+	protected void init(boolean interstitial)
 	{
 		placementType = PlacementType.Inline;
 		
@@ -177,7 +184,7 @@ public class MASTAdView extends ViewGroup
 		initUserAgent();
 	}
 	
-	private void applyAttributeSet(AttributeSet attrs)
+	protected void applyAttributeSet(AttributeSet attrs)
 	{
 		setZone(attrs.getAttributeIntValue(null, MASTAdViewConstants.xml_layout_attribute_zone, zone));
 		
@@ -193,9 +200,7 @@ public class MASTAdView extends ViewGroup
 		if (updateOnLayout)
 		{
 			updateOnLayout = false;
-			
-			// TODO: Setup interval update if interval update xml layout set.
-			
+
 			update();
 		}
 	}
@@ -294,16 +299,6 @@ public class MASTAdView extends ViewGroup
 		return richMediaListener;
 	}
 	
-	public void setZone(int zone)
-	{
-		this.zone = zone;
-	}
-	
-	public int getZone()
-	{
-		return zone;
-	}
-	
 	public void setAdNetworkURL(String adNetworkURL)
 	{
 		this.adNetworkURL = adNetworkURL;
@@ -317,6 +312,66 @@ public class MASTAdView extends ViewGroup
 	public Map<String, String> getAdRequestParameters()
 	{
 		return adRequestParameters;
+	}
+	
+	public void setUpdateInterval(int updateInterval)
+	{
+		this.updateInterval = updateInterval;
+	}
+	
+	public int getUpdateInterval()
+	{
+		return updateInterval;
+	}
+	
+	public void setZone(int zone)
+	{
+		this.zone = zone;
+	}
+	
+	public int getZone()
+	{
+		return zone;
+	}
+	
+	public void setTest(boolean test)
+	{
+		this.test = test;
+	}
+	
+	public boolean isTest()
+	{
+		return test;
+	}
+	
+	public void setShowCloseButton(boolean showCloseButton)
+	{
+		this.showCloseButton = showCloseButton;
+	}
+	
+	public boolean getShowCloseButton()
+	{
+		return showCloseButton;
+	}
+	
+	public void setCloseButtonDelay(int closeButtonDelay)
+	{
+		this.closeButtonDelay = closeButtonDelay;
+	}
+	
+	public int getCloseButtonDelay()
+	{
+		return closeButtonDelay;
+	}
+	
+	public void setCloseButtonCustomDrawable(Drawable closeButtonCustomDrawable)
+	{
+		this.closeButtonCustomDrawable = closeButtonCustomDrawable;
+	}
+	
+	public Drawable getCloseButtonCustomDrawable()
+	{
+		return closeButtonCustomDrawable;
 	}
 	
 	public void setUseInternalBrowser(boolean useInternalBrowser)
@@ -335,6 +390,98 @@ public class MASTAdView extends ViewGroup
 		return false;
 	}
 	
+	public boolean isLocationDetectionEnabled()
+	{
+		if (locationManager != null)
+		{
+			return true;
+		}
+
+		return false;
+	}
+	
+	// if enabled, uses optimum criteria for battery life
+	// if fine tuning is required, use enableLocationDetection
+	// usesPermission access fine or coarse location
+	public void setLocationDetectionEnabled(boolean locationDetectionEnabled)
+	{
+		if (locationDetectionEnabled == false)
+		{
+			if (locationManager != null)
+			{
+				locationManager.removeUpdates(locationListener);
+				locationManager = null;
+				locationListener = null;
+			}
+			
+			return;
+		}
+		
+		Criteria criteria = new Criteria();
+		criteria.setCostAllowed(false);
+		
+		criteria.setPowerRequirement(Criteria.NO_REQUIREMENT);
+		
+		criteria.setBearingRequired(false);
+		criteria.setBearingAccuracy(Criteria.NO_REQUIREMENT);
+		
+		criteria.setSpeedRequired(false);
+		criteria.setSpeedAccuracy(Criteria.NO_REQUIREMENT);
+		
+		criteria.setAltitudeRequired(false);
+		criteria.setVerticalAccuracy(Criteria.NO_REQUIREMENT);
+		
+		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+		criteria.setHorizontalAccuracy(Criteria.ACCURACY_LOW);
+		
+		enableLocationDetection(Defaults.LOCATION_DETECTION_MINTIME, Defaults.LOCATION_DETECTION_MINDISTANCE,
+				criteria, null);
+	}
+	
+	// see LocationManager.requestLocationUpdates
+	// if  the provider is non-null then the criteria is ignored.
+	// disable with setLocationDetection(false)
+	public void enableLocationDetection(long minTime, float minDistance, Criteria criteria, String provider)
+	{
+		if ((provider == null) && (criteria == null))
+			throw new IllegalArgumentException("criteria or provider required");
+		
+		locationManager = (LocationManager) MASTAdView.this.getContext().getSystemService(Context.LOCATION_SERVICE);
+		if (locationManager != null)
+		{
+			try
+			{
+				locationListener = new LocationListener();
+				if (provider != null)
+				{
+					locationManager.requestLocationUpdates(provider, minTime, minDistance, locationListener);
+				}
+				else
+				{
+					locationManager.requestLocationUpdates(minTime, minDistance, criteria, locationListener, null);
+				}
+			}
+			catch (Exception ex)
+			{
+				logEvent("Error requesting location updates.  Exception:" + ex, LogLevel.Error);
+				
+				locationManager.removeUpdates(locationListener);
+				locationManager = null;
+				locationListener = null;
+			}
+		}
+	}
+	
+	public void setLogLevel(LogLevel logLevel)
+	{
+		this.logLevel = logLevel;
+	}
+	
+	public LogLevel getLogLevel()
+	{
+		return logLevel;
+	}
+	
 	public void update()
 	{
 		update(false);
@@ -351,9 +498,22 @@ public class MASTAdView extends ViewGroup
 			adUpdateIntervalFuture = null;
 		}
 		
+		if (updateInterval > 0)
+		{
+			adUpdateIntervalFuture = Background.getExecutor().scheduleAtFixedRate(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					internalUpdate();
+				}
+				
+			}, 0, updateInterval, TimeUnit.SECONDS);
+		}
+		
 	    if (force)
 	    {
-	    	// TODO: Close internal browser
+	    	closeInternalBrowser();
 
 	    	if (placementType == PlacementType.Inline)
 	    	{
@@ -378,42 +538,60 @@ public class MASTAdView extends ViewGroup
 		internalUpdate();
 	}
 	
-	public void updateWithTimeInterval(int intervalSeconds)
+	public void reset()
 	{
+		deferredUpdate = false;
+		
+		removeContent();
+		
 		if (adUpdateIntervalFuture != null)
 		{
-			adUpdateIntervalFuture.cancel(false);
+			adUpdateIntervalFuture.cancel(true);
 			adUpdateIntervalFuture = null;
 		}
 		
-		adUpdateIntervalSeconds = intervalSeconds;
-		
-		if (adUpdateIntervalSeconds > 0)
+		if (interstitialDelayFuture != null)
 		{
-			adUpdateIntervalFuture = Background.getExecutor().scheduleAtFixedRate(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					internalUpdate();
-				}
-				
-			}, 0, adUpdateIntervalSeconds, TimeUnit.SECONDS);
+			interstitialDelayFuture.cancel(true);
+			interstitialDelayFuture = null;
 		}
+		
+		// TODO: Close internal browser
+		
+		setLocationDetectionEnabled(false);
+	}
+	
+	// main thread
+	public void removeContent()
+	{
+		deferredUpdate = false;
+		
+		resetRichMediaAd();
+		resetImageAd();
+		resetTextAd();
+		
+		switch (placementType)
+		{
+		case Inline:
+			removeAllViews();
+			break;
+			
+		case Interstitial:
+			interstitialDialog.removeAllViews();
+		}
+		
+		adDescriptor = null;
 	}
 	
 	private void internalUpdate()
 	{
 		deferredUpdate = false;
 		
-		// TODO: If internal browser open deferredUpate = true; return;
-		/*
-		if (false)
+		if (isInternalBrowserOpen())
 		{
 			deferredUpdate = true;
 			return;
 		}
-		*/
 		
 		if ((mraidBridge != null) && (mraidBridgeHandler != null))
 		{
@@ -516,78 +694,6 @@ public class MASTAdView extends ViewGroup
 		}
 	}
 	
-	public void reset()
-	{
-		deferredUpdate = false;
-		
-		removeContent();
-		
-		if (adUpdateIntervalFuture != null)
-		{
-			adUpdateIntervalFuture.cancel(true);
-			adUpdateIntervalFuture = null;
-		}
-		
-		if (interstitialDelayFuture != null)
-		{
-			interstitialDelayFuture.cancel(true);
-			interstitialDelayFuture = null;
-		}
-		
-		// TODO: Close internal browser
-		
-		setLocationDetectionEnabled(false);
-	}
-	
-	// main thread
-	public void removeContent()
-	{
-		deferredUpdate = false;
-		
-		resetRichMediaAd();
-		resetImageAd();
-		resetTextAd();
-		
-		switch (placementType)
-		{
-		case Inline:
-			removeAllViews();
-			break;
-			
-		case Interstitial:
-			interstitialDialog.removeAllViews();
-		}
-		
-		adDescriptor = null;
-	}
-	
-	private void resumeUpdates()
-	{
-		if (deferredUpdate)
-		{
-			update();
-		}
-		
-		if (adUpdateIntervalFuture != null)
-		{
-			adUpdateIntervalFuture.cancel(true);
-			adUpdateIntervalFuture = null;
-			
-			if (adUpdateIntervalSeconds > 0)
-			{
-				adUpdateIntervalFuture = Background.getExecutor().scheduleAtFixedRate(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						internalUpdate();
-					}
-					
-				}, adUpdateIntervalSeconds, adUpdateIntervalSeconds, TimeUnit.SECONDS);
-			}
-		}
-	}
-	
 	public void showInterstitial()
 	{
 		showInterstitialWithDuration(0);
@@ -636,42 +742,6 @@ public class MASTAdView extends ViewGroup
 		{
 			interstitialDialog.dismiss();
 		}
-	}
-	
-	public boolean isLocationDetectionEnabled()
-	{
-		// TODO
-		return false;
-	}
-	
-	public void setLocationDetectionEnabled(boolean locationDetectionEnabled)
-	{
-		
-	}
-	
-	public void enableLocationDetection(int distance)
-	{
-		
-	}
-	
-	public void setTest(boolean test)
-	{
-		this.test = test;
-	}
-	
-	public boolean isTest()
-	{
-		return test;
-	}
-	
-	public void setLogLevel(LogLevel logLevel)
-	{
-		this.logLevel = logLevel;
-	}
-	
-	public LogLevel getLogLevel()
-	{
-		return logLevel;
 	}
 
 	public ImageView getImageView()
@@ -724,7 +794,6 @@ public class MASTAdView extends ViewGroup
 			break;
 			
 		case Interstitial:
-			// TODO: Ned the same as above to protect against a view that's already got a parent.
 			interstitialDialog.addView(view);
 			break;
 		}
@@ -961,6 +1030,7 @@ public class MASTAdView extends ViewGroup
 		
 		addContentView(webView, layoutParams);
 		
+		mraidBridgeInit = false;
 		mraidBridge = new Bridge(webView, mraidBridgeHandler);
 		
 		String fragment = adDescriptor.getContent();
@@ -1017,6 +1087,7 @@ public class MASTAdView extends ViewGroup
 		
 		mraidTwoPartWebView = new WebView(getContext());
 		mraidTwoPartWebView.setHandler(webViewHandler);
+		mraidTwoPartBridgeInit = false;
 		mraidTwoPartBridge = new Bridge(mraidTwoPartWebView, mraidBridgeHandler);
 
 		mraidTwoPartWebView.loadUrl(url);
@@ -1162,6 +1233,60 @@ public class MASTAdView extends ViewGroup
 		});
 	}
 	
+	// main thread
+	private void openInternalBrowser(String url)
+	{
+		
+	}
+	
+	// main thread
+	private void closeInternalBrowser()
+	{
+		
+	}
+	
+	private void initMRAIDBridge(Bridge bridge)
+	{
+		if (bridge == null)
+			return;
+		
+		synchronized (bridge)
+		{
+			if ((bridge == mraidBridge) && (mraidBridgeInit == false))
+			{
+				return;
+			}
+			else if ((bridge == mraidTwoPartBridge) && (mraidTwoPartBridgeInit == false))
+			{
+				return;
+			}
+			
+			if (bridge.webView.isLoaded() == false)
+				return;
+			
+			if (bridge.getState() != Consts.State.Loading)
+				return;
+			
+			// Initialize the bridge.
+			bridge.setPlacementType(placementType);
+			
+			setMRAIDSupportedFeatures(bridge);
+			
+			if (bridge == mraidBridge)
+			{
+				updateMRAIDLayoutForState(bridge, State.Default);
+				bridge.setState(State.Default);
+			}
+			else
+			{
+				updateMRAIDLayoutForState(bridge, State.Expanded);
+				bridge.setState(State.Expanded);
+			}
+			
+			bridge.sendReady();
+		}
+	}
+	
 	private void setMRAIDSupportedFeatures(Bridge bridge)
 	{
 		if (bridge == null)
@@ -1302,7 +1427,7 @@ public class MASTAdView extends ViewGroup
 		if (activity == null)
 			return;
 		
-		if (mraidOriginalOrientation == UnsetValue)
+		if (mraidOriginalOrientation == OrientationReset)
 		{
 			mraidOriginalOrientation = activity.getRequestedOrientation();
 		}
@@ -1355,7 +1480,7 @@ public class MASTAdView extends ViewGroup
 		if (activity == null)
 			return;
 		
-		if (mraidOriginalOrientation != UnsetValue)
+		if (mraidOriginalOrientation != OrientationReset)
 		{
 			activity.setRequestedOrientation(mraidOriginalOrientation);
 		}
@@ -1415,7 +1540,7 @@ public class MASTAdView extends ViewGroup
 	@SuppressWarnings("deprecation")
 	private void showCloseButton()
 	{
-		BitmapDrawable closeButtonDrawable = null;
+		Drawable closeButtonDrawable = closeButtonCustomDrawable;
 		
 		if (closeButtonDrawable == null)
 		{
@@ -1423,11 +1548,11 @@ public class MASTAdView extends ViewGroup
 			{
 				InputStream is = WebView.class.getResourceAsStream("/close_button.png");
 				closeButtonDrawable = new BitmapDrawable(getResources(), is);
-				closeButtonDrawable.setGravity(Gravity.CENTER);
+				((BitmapDrawable) closeButtonDrawable).setGravity(Gravity.CENTER);
 			}
 			catch (Exception ex)
 			{
-				// TODO: Log this?
+				logEvent("Error loading built in close button.  Exception:" + ex, LogLevel.Error);
 			}
 		}
 		
@@ -1450,6 +1575,7 @@ public class MASTAdView extends ViewGroup
 	                return;
 	                
 	            case Resized:
+	            	// Supporting API8 and higher.  Avoiding reflection for now.
 	                mraidResizeCloseArea.setBackgroundDrawable(closeButtonDrawable);
 	                return;
 	        }
@@ -1482,39 +1608,13 @@ public class MASTAdView extends ViewGroup
 		@Override
 		public void webViewPageFinished(WebView webView)
 		{
-			Bridge bridge = mraidBridge;
-			if (webView != MASTAdView.this.webView)
+			if (mraidBridge.webView == webView)
 			{
-				if (webView == mraidTwoPartWebView)
-				{
-					bridge = mraidTwoPartBridge;
-				}
-				else
-				{
-					// Old/stale web view.
-					return;
-				}
+				initMRAIDBridge(mraidBridge);
 			}
-			
-			if (bridge != null)
+			else if ((mraidTwoPartBridge != null) && (mraidTwoPartBridge.webView == webView))
 			{
-				// Initialize the bridge.
-				bridge.setPlacementType(placementType);
-				
-				setMRAIDSupportedFeatures(bridge);
-				
-				if (bridge == mraidBridge)
-				{
-					updateMRAIDLayoutForState(bridge, State.Default);
-					bridge.setState(State.Default);
-				}
-				else
-				{
-					updateMRAIDLayoutForState(bridge, State.Expanded);
-					bridge.setState(State.Expanded);
-				}
-				
-				bridge.sendReady();
+				initMRAIDBridge(mraidTwoPartBridge);
 			}
 		}
 
@@ -1523,13 +1623,15 @@ public class MASTAdView extends ViewGroup
 		{
 			resetRichMediaAd();
 			
-			logEvent("Error loading webView baed ad content.  Error code:" + String.valueOf(errorCode) + 
+			logEvent("Error loading rich media ad content.  Error code:" + String.valueOf(errorCode) + 
 					" Description:" + description, LogLevel.Error);
 
 			if (requestListener != null)
 			{
 				requestListener.onFailedToReceiveAd(MASTAdView.this, null);
 			}
+			
+			removeContent();
 		}
 
 		@Override
@@ -1542,6 +1644,24 @@ public class MASTAdView extends ViewGroup
 	
 	private class MRAIDHandler implements Bridge.Handler
 	{
+		@Override
+		public void mraidInit(final Bridge bridge)
+		{
+			if ((bridge != mraidBridge) && (bridge != mraidTwoPartBridge))
+				return;
+			
+			if (bridge == mraidBridge)
+			{
+				mraidBridgeInit = true;
+			}
+			else if (bridge == mraidTwoPartBridge)
+			{
+				mraidTwoPartBridgeInit = true;
+			}
+
+			initMRAIDBridge(bridge);
+		}
+		
 		@Override
 		public void mraidClose(final Bridge bridge)
 		{
@@ -1602,7 +1722,8 @@ public class MASTAdView extends ViewGroup
 						
 						if (bridge == mraidBridge)
 						{
-							resumeUpdates();
+							if (deferredUpdate)
+								update();
 						}
 					}
 				});
@@ -1651,7 +1772,8 @@ public class MASTAdView extends ViewGroup
 						
 						if (bridge == mraidBridge)
 						{
-							resumeUpdates();
+							if (deferredUpdate)
+								update();
 						}
 					}
 				});
@@ -1713,7 +1835,7 @@ public class MASTAdView extends ViewGroup
 					//  the two part expand operation.
 					break;
 				}
-					
+
 				bridge.sendErrorMessage("Can not expand while state is loading.", Consts.CommandExpand);
 				return;
 				
@@ -2340,7 +2462,16 @@ public class MASTAdView extends ViewGroup
 		
 		public void addView(View view)
 		{
-			container.addView(view);
+			if (view.getParent() != container)
+			{
+				if (view.getParent() != null)
+				{
+					ViewGroup viewGroup = (ViewGroup) view.getParent();
+					viewGroup.removeView(view);
+				}
+				
+				container.addView(view);
+			}
 			
 			closeArea.bringToFront();
 		}
@@ -2366,6 +2497,7 @@ public class MASTAdView extends ViewGroup
 		@SuppressWarnings("deprecation")
 		public void setCloseImage(Drawable image)
 		{
+        	// Supporting API8 and higher.  Avoiding reflection for now.
 			closeArea.setBackgroundDrawable(image);
 		}
 		
@@ -2373,6 +2505,46 @@ public class MASTAdView extends ViewGroup
 		public void show()
 		{
 			super.show();
+		}
+	}
+	
+	private class LocationListener implements android.location.LocationListener
+	{
+		@Override
+		public void onLocationChanged(Location location)
+		{
+			logEvent("LocationListener.onLocationChanged location:" + location.toString(), LogLevel.Debug);
+			
+			String lat = String.valueOf(location.getLatitude());
+			String lng = String.valueOf(location.getLongitude());
+				
+			adRequestParameters.put("lat", lat);
+			adRequestParameters.put("long", lng);
+		}
+
+		@Override
+		public void onProviderDisabled(String provider)
+		{
+			logEvent("LocationListener.onProviderDisabled provider:" + provider, LogLevel.Debug);
+		}
+
+		@Override
+		public void onProviderEnabled(String provider)
+		{
+			logEvent("LocationListener.onProviderEnabled provider:" + provider, LogLevel.Debug);
+		}
+
+		@Override
+		public void onStatusChanged(String provider, int status, Bundle extras)
+		{
+			logEvent("LocationListener.onStatusChanged provider:" + provider + 
+					" status:" + String.valueOf(status), LogLevel.Debug);
+			
+			if (status == LocationProvider.AVAILABLE)
+				return;
+			
+			adRequestParameters.remove("lat");
+			adRequestParameters.remove("long");
 		}
 	}
 	
@@ -2405,7 +2577,7 @@ public class MASTAdView extends ViewGroup
 		return activity;
 	}
 
-	private final void runOnUiThread(final Runnable runnable)
+	protected final void runOnUiThread(final Runnable runnable)
 	{
 		if (runnable == null)
 			return;

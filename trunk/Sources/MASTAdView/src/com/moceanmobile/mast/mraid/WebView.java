@@ -26,6 +26,7 @@ public class WebView extends android.webkit.WebView
 
 	private boolean hasAPI11 = false;
 	private Handler handler = null;
+	private boolean loaded = false;
 	
 	// For API10 and lower a string, for API11 and higher an InputStream
 	private Object mraidBridgeJavascript = null;
@@ -98,6 +99,11 @@ public class WebView extends android.webkit.WebView
 			});
 		}
 	}
+	
+	public boolean isLoaded()
+	{
+		return loaded;
+	}
 
 	private class TouchListener implements View.OnTouchListener
 	{
@@ -160,6 +166,8 @@ public class WebView extends android.webkit.WebView
 		{
 			super.onPageStarted(view, url, favicon);
 			
+			loaded = false;
+			
 			if (handler != null)
 				handler.webViewPageStarted((WebView) view);
 		}
@@ -168,6 +176,8 @@ public class WebView extends android.webkit.WebView
 		public void onPageFinished(android.webkit.WebView view, String url)
 		{
 			super.onPageFinished(view, url);
+			
+			loaded = true;
 			
 			if (handler != null)
 				handler.webViewPageFinished((WebView) view);
