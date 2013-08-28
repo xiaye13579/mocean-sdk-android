@@ -4,11 +4,12 @@
     android:layout_height="match_parent"
     tools:context=".SimpleInterstitial" >
 
-    <com.moceanmobile.mast.MASTAdView
+    <com.moceanmobile.mast.MASTAdViewInterstitial
         android:id="@+id/adView"
-        android:layout_width="match_parent"
-        android:layout_height="75dp" 
+        android:layout_width="0dp"
+        android:layout_height="0dp" 
         android:background="#777777"
+        android:visibility="invisible"
         zone="88269" />
 
 </RelativeLayout>

@@ -3,6 +3,8 @@
 
     <string name="app_name">Samples</string>
     <string name="action_refresh">Refresh</string>
+    <string name="action_refresh_top">Refresh Top</string>
+    <string name="action_refresh_bottom">Refresh Bottom</string>
     <string name="title_activity_simple_image">Simple/Image</string>
     <string name="title_activity_simple_animated_gif">Simple/Animated GIF</string>
     <string name="title_activity_simple_interstitial">Simple/Interstitial</string>
@@ -22,6 +24,5 @@
     <string name="title_activity_error_reset">Error/Reset</string>
     <string name="title_activity_custom_config">Custom/Config</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
 
 </resources>
