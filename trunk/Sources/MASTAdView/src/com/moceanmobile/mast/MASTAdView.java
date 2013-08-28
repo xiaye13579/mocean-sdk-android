@@ -1115,9 +1115,12 @@ public class MASTAdView extends ViewGroup
 	@Override
 	protected void onDetachedFromWindow()
 	{	
-		super.onDetachedFromWindow();
+		Activity activity = getActivity();
+		if (activity == null)
+			return;
 		
-		// TODO: NPE when resized and activity is destoryed.
+		if (activity.isFinishing())
+			return;
 		
 		if (mraidBridge != null)
 		{
@@ -1134,6 +1137,8 @@ public class MASTAdView extends ViewGroup
 				break;
 			}
 		}
+		
+		super.onDetachedFromWindow();
 	}
 
 	@Override
@@ -2653,7 +2658,7 @@ public class MASTAdView extends ViewGroup
 		if (ctx instanceof Activity)
 		{
 			Activity activity = (Activity) ctx;
-			activity.runOnUiThread(uiRunnable);
+			activity.runOnUiThread(uiRunnable);		
 		}
 		else
 		{
