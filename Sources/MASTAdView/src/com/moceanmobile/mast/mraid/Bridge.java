@@ -294,7 +294,11 @@ public class Bridge
 				catch (Exception ex) {}
 			}
 			
-			if (Consts.CommandClose.equals(command))
+			if (Consts.CommandInit.equals(command))
+			{
+				handler.mraidInit(this);
+			}
+			else if (Consts.CommandClose.equals(command))
 			{
 				handler.mraidClose(this);
 			}
@@ -361,8 +365,9 @@ public class Bridge
 	
 	public interface Handler
 	{
-        public void mraidClose(Bridge bridge);
-        public void mraidOpen(Bridge bridge, String url);
+		public void mraidInit(Bridge bridge);
+		public void mraidClose(Bridge bridge);
+		public void mraidOpen(Bridge bridge, String url);
         public void mraidUpdateCurrentPosition(Bridge bridge);
         public void mraidUpdatedExpandProperties(Bridge bridge);
         public void mraidExpand(Bridge bridge, String url);

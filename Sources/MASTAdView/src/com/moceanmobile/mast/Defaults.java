@@ -9,6 +9,9 @@ public class Defaults
 	
 	public static final int NETWORK_TIMEOUT_SECONDS = 5;
 	
+	public static final int LOCATION_DETECTION_MINTIME = 10 * 60 * 1000; // 10 Minutes in ms
+	public static final int LOCATION_DETECTION_MINDISTANCE = 20; // Meters
+	
 	public static final String AD_NETWORK_URL = "http://ads.moceanads.com/ad";
 	
 	// Default injection HTML rich media ads.

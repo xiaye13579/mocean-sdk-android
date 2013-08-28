@@ -65,6 +65,7 @@ public interface Consts
     public static final String False = "false";
 
     public static final String Scheme = "mraid";
+    public static final String CommandInit = "init";
     public static final String CommandClose = "close";
     public static final String CommandOpen = "open";
     public static final String CommandUpdateCurrentPosition = "updatecurrentposition";
