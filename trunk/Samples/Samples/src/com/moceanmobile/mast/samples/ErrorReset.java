@@ -2,15 +2,13 @@ package com.moceanmobile.mast.samples;
 
 import java.util.Map;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.view.Menu;
 
 import com.moceanmobile.mast.MASTAdView;
 import com.moceanmobile.mast.MASTAdViewDelegate;
 
-public class ErrorReset extends Activity {
-
+public class ErrorReset extends RefreshActivity
+{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -49,13 +47,5 @@ public class ErrorReset extends Activity {
 				
 			}
 		});
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.refresh_menu, menu);
-		return true;
 	}
 }

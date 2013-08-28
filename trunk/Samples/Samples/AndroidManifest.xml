@@ -14,6 +14,8 @@
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
         android:allowBackup="true"
@@ -30,75 +32,93 @@
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.SimpleImage"
-            android:label="@string/title_activity_simple_image" >
+            android:label="@string/title_activity_simple_image"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.SimpleAnimatedGIF"
-            android:label="@string/title_activity_simple_animated_gif" >
+            android:label="@string/title_activity_simple_animated_gif"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.SimpleInterstitial"
-            android:label="@string/title_activity_simple_interstitial" >
+            android:label="@string/title_activity_simple_interstitial"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.SimpleRichMedia"
-            android:label="@string/title_activity_simple_rich_media" >
+            android:label="@string/title_activity_simple_rich_media"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.SimpleText"
-            android:label="@string/title_activity_simple_text" >
+            android:label="@string/title_activity_simple_text"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.AdvancedAnimation"
-            android:label="@string/title_activity_advanced_animation" >
+            android:label="@string/title_activity_advanced_animation"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.AdvancedBottom"
-            android:label="@string/title_activity_advanced_bottom" >
+            android:label="@string/title_activity_advanced_bottom"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.AdvancedList"
-            android:label="@string/title_activity_advanced_list" >
+            android:label="@string/title_activity_advanced_list"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.AdvancedTopAndBottom"
-            android:label="@string/title_activity_advanced_top_and_bottom" >
+            android:label="@string/title_activity_advanced_top_and_bottom"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.DelegateGeneric"
-            android:label="@string/title_activity_delegate_generic" >
+            android:label="@string/title_activity_delegate_generic"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.DelegateMRAID"
-            android:label="@string/title_activity_delegate_mraid" >
+            android:label="@string/title_activity_delegate_mraid"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.DelegateThirdParty"
-            android:label="@string/title_activity_delegate_third_party" >
+            android:label="@string/title_activity_delegate_third_party"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.DelegateLogging"
-            android:label="@string/title_activity_delegate_logging" >
+            android:label="@string/title_activity_delegate_logging"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.DelegateNoContent"
-            android:label="@string/title_activity_delegate_no_content" >
+            android:label="@string/title_activity_delegate_no_content"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.ErrorHide"
-            android:label="@string/title_activity_error_hide" >
+            android:label="@string/title_activity_error_hide"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.ErrorImage"
-            android:label="@string/title_activity_error_image" >
+            android:label="@string/title_activity_error_image"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.ErrorReset"
-            android:label="@string/title_activity_error_reset" >
+            android:label="@string/title_activity_error_reset"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.CustomConfig"
-            android:label="@string/title_activity_custom_config" >
+            android:label="@string/title_activity_custom_config"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
     </application>
 
