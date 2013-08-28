@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -127,6 +128,9 @@ public class MASTAdView extends ViewGroup
 	
 	// Tracking
 	private boolean invokeTracking = false;
+	
+	// Internal browser
+	private BrowserDialog browserDialog = null;
 	
 	// Location support
 	private LocationManager locationManager = null;
@@ -386,7 +390,11 @@ public class MASTAdView extends ViewGroup
 	
 	public boolean isInternalBrowserOpen()
 	{
-		// TODO
+		if ((browserDialog != null) && browserDialog.isShowing())
+		{
+			return true;
+		}
+		
 		return false;
 	}
 	
@@ -421,18 +429,10 @@ public class MASTAdView extends ViewGroup
 		criteria.setCostAllowed(false);
 		
 		criteria.setPowerRequirement(Criteria.NO_REQUIREMENT);
-		
 		criteria.setBearingRequired(false);
-		criteria.setBearingAccuracy(Criteria.NO_REQUIREMENT);
-		
 		criteria.setSpeedRequired(false);
-		criteria.setSpeedAccuracy(Criteria.NO_REQUIREMENT);
-		
 		criteria.setAltitudeRequired(false);
-		criteria.setVerticalAccuracy(Criteria.NO_REQUIREMENT);
-		
 		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-		criteria.setHorizontalAccuracy(Criteria.ACCURACY_LOW);
 		
 		enableLocationDetection(Defaults.LOCATION_DETECTION_MINTIME, Defaults.LOCATION_DETECTION_MINDISTANCE,
 				criteria, null);
@@ -451,14 +451,20 @@ public class MASTAdView extends ViewGroup
 		{
 			try
 			{
-				locationListener = new LocationListener();
+				
+				if (provider == null)
+				{
+					List<String> providers = locationManager.getProviders(criteria, true);
+					if ((providers != null) && (providers.size() > 0))
+					{
+						provider = providers.get(0);
+					}
+				}
+				
 				if (provider != null)
 				{
+					locationListener = new LocationListener();
 					locationManager.requestLocationUpdates(provider, minTime, minDistance, locationListener);
-				}
-				else
-				{
-					locationManager.requestLocationUpdates(minTime, minDistance, criteria, locationListener, null);
 				}
 			}
 			catch (Exception ex)
@@ -556,7 +562,8 @@ public class MASTAdView extends ViewGroup
 			interstitialDelayFuture = null;
 		}
 		
-		// TODO: Close internal browser
+		closeInternalBrowser();
+		browserDialog = null;
 		
 		setLocationDetectionEnabled(false);
 	}
@@ -1186,14 +1193,19 @@ public class MASTAdView extends ViewGroup
 	@Override
 	public boolean onTouchEvent(MotionEvent event)
 	{	
-		if (((imageView != null) && (imageView.getParent() == this)) ||
-			((textView != null) && (textView.getParent() == this)))
+		switch (event.getAction())
 		{
-			if ((adDescriptor != null) && (TextUtils.isEmpty(adDescriptor.getURL()) == false))
+		case MotionEvent.ACTION_DOWN:
+			if (((imageView != null) && (imageView.getParent() == this)) ||
+				((textView != null) && (textView.getParent() == this)))
 			{
-				openUrl(adDescriptor.getURL(), false);
-				return true;
+				if ((adDescriptor != null) && (TextUtils.isEmpty(adDescriptor.getURL()) == false))
+				{
+					openUrl(adDescriptor.getURL(), false);
+					return true;
+				}
 			}
+			break;
 		}
 		
 		return false;
@@ -1216,8 +1228,8 @@ public class MASTAdView extends ViewGroup
 			{
 				if ((bypassInternalBrowser == false) && useInternalBrowser)
 				{
-					// TODO: Open internal browser?
-					// TODO: open internal browser delegate
+					openInternalBrowser(url);
+					return;
 				}
 
 				if (activityListener != null)
@@ -1236,13 +1248,53 @@ public class MASTAdView extends ViewGroup
 	// main thread
 	private void openInternalBrowser(String url)
 	{
+		if (browserDialog == null)
+		{
+			browserDialog = new BrowserDialog(getContext(), url, new BrowserDialog.Handler()
+			{
+				@Override
+				public void browserDialogDismissed(BrowserDialog browserDialog)
+				{
+					if (internalBrowserListener != null)
+					{
+						internalBrowserListener.onInternalBrowserDismissed(MASTAdView.this);
+					}
+				}
+
+				@Override
+				public void browserDialogOpenUrl(BrowserDialog browserDialog, String url)
+				{
+					openUrl(url, true);
+					browserDialog.dismiss();
+				}
+			});
+		}
+		else
+		{
+			browserDialog.loadUrl(url);
+		}
 		
+		if (browserDialog.isShowing() == false)
+		{
+			browserDialog.show();
+		}
+		
+		if (internalBrowserListener != null)
+		{
+			internalBrowserListener.onInternalBrowserPresented(this);
+		}
 	}
 	
 	// main thread
 	private void closeInternalBrowser()
 	{
-		
+		if (browserDialog != null)
+		{
+			if (browserDialog.isShowing())
+			{
+				browserDialog.dismiss();
+			}
+		}
 	}
 	
 	private void initMRAIDBridge(Bridge bridge)
