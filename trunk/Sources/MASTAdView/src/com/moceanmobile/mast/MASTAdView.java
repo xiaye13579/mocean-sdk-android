@@ -868,9 +868,25 @@ public class MASTAdView extends ViewGroup
             {
                 if (content.contains("client_side_external_campaign") == true)
                 {
-                	// TODO: Need third party parser and descriptor.
-                	// TODO: Invoke delegate on received third party request.
-                    return;
+                	try
+                	{
+                		if (requestListener != null)
+                		{
+                			ThirdPartyDescriptor thirdPartyDescriptor = 
+	                			ThirdPartyDescriptor.parseDescriptor(content);
+	                	
+                			requestListener.onReceivedThirdPartyRequest(this,
+                					thirdPartyDescriptor.getProperties(),
+                					thirdPartyDescriptor.getParams());
+                		}
+                	}
+                	catch (Exception ex)
+                	{
+                		logEvent("Error parsing third party content descriptor.  Exception:" + ex, 
+                				LogLevel.Error);
+                	}
+                	
+                	return;
                 }
             }
         }
