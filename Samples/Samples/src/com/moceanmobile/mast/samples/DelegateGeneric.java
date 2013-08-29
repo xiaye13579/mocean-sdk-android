@@ -67,7 +67,7 @@ public class DelegateGeneric extends RefreshActivity
 		public void onReceivedThirdPartyRequest(MASTAdView adView,
 				Map<String, String> properties, Map<String, String> parameters)
 		{
-			appendOutput("onReceivedThirdPartyRequest properties:" + properties + " paramters" + parameters);
+			appendOutput("onReceivedThirdPartyRequest properties:" + properties + " paramters:" + parameters);
 		}
 	}
 	
