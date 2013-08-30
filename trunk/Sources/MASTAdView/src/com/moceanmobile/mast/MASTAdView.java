@@ -19,6 +19,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -1258,10 +1259,15 @@ public class MASTAdView extends ViewGroup
 					activityListener.onLeavingApplication(MASTAdView.this);
 				}
 				
-				// TODO: Returning application delegate?
-				// TODO: Suspend updating (if inline update with visibility set to invisible?)?
 				Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-				getContext().startActivity(intent);
+				if (intentAvailable(intent))
+				{
+					getContext().startActivity(intent);	
+				}
+				else
+				{
+					logEvent("Unable to start activity for browsing URL.", LogLevel.Error);
+				}				
 			}
 		});
 	}
@@ -2283,13 +2289,18 @@ public class MASTAdView extends ViewGroup
 					@Override
 					public void run()
 					{
-						getContext().startActivity(intent);
-						
-						// TODO: Determine if intent started/failed and send error to bridge.
-						
-						if (activityListener != null)
+						if (intentAvailable(intent) == true)
 						{
-							activityListener.onLeavingApplication(MASTAdView.this);
+							getContext().startActivity(intent);
+							
+							if (activityListener != null)
+							{
+								activityListener.onLeavingApplication(MASTAdView.this);
+							}
+						}
+						else
+						{
+							logEvent("Unable to start activity for calendary edit.", LogLevel.Error);
 						}
 					}
 				});
@@ -2648,6 +2659,18 @@ public class MASTAdView extends ViewGroup
 		}
 		
 		return activity;
+	}
+	
+	private final boolean intentAvailable(Intent intent)
+	{
+		PackageManager packageManager = getContext().getPackageManager();
+		List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+		if ((resolveInfoList != null) && (resolveInfoList.isEmpty() == false))
+		{
+			return true;
+		}
+		
+		return false;
 	}
 
 	protected final void runOnUiThread(final Runnable runnable)
