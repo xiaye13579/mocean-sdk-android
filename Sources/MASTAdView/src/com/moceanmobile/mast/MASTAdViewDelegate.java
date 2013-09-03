@@ -1,3 +1,6 @@
+//
+// Copyright (C) 2013 Mocean Mobile. All Rights Reserved. 
+//
 package com.moceanmobile.mast;
 
 import java.util.Map;
@@ -8,10 +11,29 @@ public interface MASTAdViewDelegate
 {
 	public interface RequestListener
 	{
+		/**
+		 * Failed to receive ad content (network or other related error).
+		 * 
+		 * @param adView 
+		 * @param ex Exception, if any, encountered while attempting to reqest an ad.
+		 */
 		public void onFailedToReceiveAd(MASTAdView adView, Exception ex);
 		
+		/**
+		 * Ad received and rendered.
+		 * 
+		 * @param adView
+		 */
 		public void onReceivedAd(MASTAdView adView);
 		
+		/**
+		 * Third party ad received.  The application should be expecting this and ready to
+		 * render the ad with the supplied configuration.
+		 * 
+		 * @param adView
+		 * @param properties Properties of the ad request (ad network information).
+		 * @param parameters Parameters for the third party network (expected to be passed to that network).
+		 */
 		public void onReceivedThirdPartyRequest(MASTAdView adView, Map<String, String> properties, Map<String, String> parameters);
 	}
 
@@ -58,18 +80,65 @@ public interface MASTAdViewDelegate
 
 	public interface InternalBrowserListener
 	{
+		/**
+		 * Invoked when the internal browser has been presented to the user.
+		 * 
+		 * @param adView
+		 */
 		public void onInternalBrowserPresented(MASTAdView adView);
+		
+		/**
+		 * Invoked when the internal browser has been closed by the user or the SDK.
+		 * @param adView
+		 */
 		public void onInternalBrowserDismissed(MASTAdView adView);
 	}
 	
 	public interface RichMediaListener
 	{
+		/**
+		 * Invoked when a rich media ad expands to the full screen size.
+		 * 
+		 * @param adView
+		 */
 		public void onExpanded(MASTAdView adView);
+		
+		/**
+		 * Invoked when a rich media ad is resized larger than it's default/configured size.
+		 * 
+		 * @param adView
+		 * @param area Area of the screen used to render the resized ad.
+		 */
 		public void onResized(MASTAdView adView, Rect area);
+		
+		/**
+		 * Invoked when a rich media ad collapses from an expanded or resized state.
+		 * 
+		 * @param adView
+		 */
 		public void onCollapsed(MASTAdView adView);
 		
+		/**
+		 * Invoked when a rich media ad requests a video to be played.
+		 * <p>
+		 * If false is returned the URL is handled like any other URL action and ActivityListener.onOpenUrl()
+		 * will be invoked for further processing.
+		 * 
+		 * @param adView
+		 * @param url
+		 * @return true to indicate the video playing has been handled by the application, false to 
+		 * allow the SDK to handle the URL.
+		 */
 		public boolean onPlayVideo(MASTAdView adView, String url);
 
+		/**
+		 * Invoked after a rich media (MRAID) event has occurred.  Since the event has already been handled
+		 * applications need not implement any behavior.  However, applications can use this to listen and act
+		 * on handled rich media events with other behavior.
+		 * 
+		 * @param adView
+		 * @param request
+		 */
 		public void onEventProcessed(MASTAdView adView, String request);
 	}
 	
@@ -79,10 +148,14 @@ public interface MASTAdViewDelegate
 	public interface LogListener
 	{
 		/**
+		 * Invoked when the SDK logs events.  If applications override logging they can return true to
+		 * indicate the log event has been consumed and the SDK processing is not needed.
+		 * <p>
+		 * Will not be invoked if the adView instance's logLevel is set lower than the event.
 		 * 
 		 * @param adView
-		 * @param event
-		 * @param logLevel
+		 * @param event String representing the event to be logged.
+		 * @param logLevel LogLevel of the event.
 		 * @return
 		 */
 		public boolean onLogEvent(MASTAdView adView, String event, MASTAdView.LogLevel logLevel);

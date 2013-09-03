@@ -1,3 +1,6 @@
+//
+// Copyright (C) 2013 Mocean Mobile. All Rights Reserved. 
+//
 package com.moceanmobile.mast;
 
 import java.io.BufferedInputStream;
