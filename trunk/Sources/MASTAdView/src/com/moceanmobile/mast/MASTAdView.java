@@ -1,3 +1,6 @@
+//
+// Copyright (C) 2013 Mocean Mobile. All Rights Reserved. 
+//
 package com.moceanmobile.mast;
 
 import java.io.InputStream;
@@ -62,6 +65,13 @@ import com.moceanmobile.mast.mraid.OrientationProperties;
 import com.moceanmobile.mast.mraid.ResizeProperties;
 import com.moceanmobile.mast.mraid.WebView;
 
+/**
+ * Main class used for rendering ad content.
+ * <p>
+ * Can be placed in XML layouts or created and placed in code.
+ * <p>
+ * To obtain ad content simply place an ad view of appropriate size in the view tree, set the zone and call update.
+ */
 public class MASTAdView extends ViewGroup
 {
 	public enum LogLevel
@@ -145,18 +155,37 @@ public class MASTAdView extends ViewGroup
 	private RequestListener requestListener;
 	private RichMediaListener richMediaListener;
 	
+	/**
+	 * Used to create instances for placement in code.  Only produces inline instances.
+	 * 
+	 * @param context
+	 */
 	public MASTAdView(Context context)
 	{
 		super(context);
 		init(false);
 	}
 	
+	/**
+	 * Used to create instances for placement in code.  Produces inline or interstitial instances.
+	 * 
+	 * @param context
+	 * @param interstitial set to true to produce interstitial instances.  Interstitial instances should
+	 * never be added to any view group parent.
+	 */
 	public MASTAdView(Context context, boolean interstitial)
 	{
 		super(context);
 		init(interstitial);
 	}
 	
+	/**
+	 * Used to create instances when placed in XML layouts.
+	 * The view should be positioned like any other view.
+	 * 
+	 * @param context
+	 * @param attrs
+	 */
 	public MASTAdView(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
@@ -164,6 +193,13 @@ public class MASTAdView extends ViewGroup
 		init(false);
 	}
 	
+	/**
+	 * Used to create instances when placed in XML layouts.
+	 * The view should be positioned like any other view.
+	 * 
+	 * @param context
+	 * @param attrs
+	 */
 	public MASTAdView(Context context, AttributeSet attrs, int defStyle)
 	{
 		super(context, attrs, defStyle);
@@ -223,11 +259,22 @@ public class MASTAdView extends ViewGroup
 		}
 	}
 	
+	/**
+	 * Accessor to the User-Agent header value the SDK will send to the ad network.
+	 * 
+	 * @return
+	 */
 	public String getUserAgent()
 	{
 		return userAgent;
 	}
 	
+	/**
+	 * Determines if the instance is configured as inline.
+	 * 
+	 * @return true if instance represents inline, false if it represents interstitial.
+	 * Interstitial instances should not be added to view layouts.
+	 */
 	public boolean isInline()
 	{
 		if (placementType == PlacementType.Inline)
@@ -236,6 +283,12 @@ public class MASTAdView extends ViewGroup
 		return false;
 	}
 	
+	/**
+	 * Determines if the instance is configured as interstitial.
+	 * 
+	 * @return true if instance represents interstitial, false if it represents inline.
+	 * Interstitial instances should not be added to view layouts.
+	 */
 	public boolean isInterstitial()
 	{
 		if (placementType == PlacementType.Interstitial)
@@ -244,151 +297,319 @@ public class MASTAdView extends ViewGroup
 		return false;
 	}
 	
+	/**
+	 * Sets the activity listener.  This listener provides information for user ad interaction events.
+	 * Set to null when no longer interested in events.
+	 * 
+	 * @param activityListener MASTAdViewDelegate.ActivityListener implementation
+	 */
 	public void setActivityListener(MASTAdViewDelegate.ActivityListener activityListener)
 	{
 		this.activityListener = activityListener;
 	}
-	
+
+	/**
+	 * Returns the currently configured activity listener.
+	 * 
+	 * @return MASTAdViewDelegate.ActivityListener set with setActivityListener().
+	 */
 	public MASTAdViewDelegate.ActivityListener getActivityListener()
 	{
 		return activityListener;
 	}
 	
+	/**
+	 * Sets the feature support handler.  This handler is used to control features of the SDK.
+	 * Set to override default behavior.
+	 * 
+	 * @param featureSupportHandler MASTAdViewDelegate.FeatureSupportHandler implementation
+	 */
 	public void setFeatureSupportHandler(MASTAdViewDelegate.FeatureSupportHandler featureSupportHandler)
 	{
 		this.featureSupportHandler = featureSupportHandler;
 	}
 	
+	/**
+	 * Returns the currently configured handler.
+	 * 
+	 * @return MASTAdViewDelegate.FeatureSupportHandler set with setFeatureSupportHandler().
+	 */
 	public MASTAdViewDelegate.FeatureSupportHandler getFeatureSupportHandler()
 	{
 		return featureSupportHandler;
 	}
 	
+	/**
+	 * Sets the internal browser listener.  This listener provides information on internal browser related events.
+	 * 
+	 * @param internalBrowserListener MASTAdViewDelegate.InternalBrowserListener implementation
+	 */
 	public void setInternalBrowserListener(MASTAdViewDelegate.InternalBrowserListener internalBrowserListener)
 	{
 		this.internalBrowserListener = internalBrowserListener;
 	}
 	
+	/**
+	 * Returns the currently configured listener.
+	 * 
+	 * @return MASTAdViewDelegate.InternalBrowserListener set with setInternalBrowserListener().
+	 */
 	public MASTAdViewDelegate.InternalBrowserListener getInternalBrowserListener()
 	{
 		return internalBrowserListener;
 	}
 	
+	/**
+	 * Sets the log listener.  This listener provides the ability to override default logging behavior.
+	 * 
+	 * @param internalBrowserListener MASTAdViewDelegate.LogListener implementation
+	 */
 	public void setLogListener(MASTAdViewDelegate.LogListener logListener)
 	{
 		this.logListener = logListener;
 	}
 	
+	/**
+	 * Returns the currently configured listener.
+	 * 
+	 * @return MASTAdViewDelegate.LogListener set with setLogListener().
+	 */
 	public MASTAdViewDelegate.LogListener getLogListener()
 	{
 		return logListener;
 	}
 	
+	/**
+	 * Sets the request listener.  This listener provides information on ad update events.
+	 * 
+	 * @param internalBrowserListener MASTAdViewDelegate.RequestListener implementation
+	 */
 	public void setRequestListener(MASTAdViewDelegate.RequestListener requestListener)
 	{
 		this.requestListener = requestListener;
 	}
 	
+	/**
+	 * Returns the currently configured listener.
+	 * 
+	 * @return MASTAdViewDelegate.RequestListener set with setRequestListener().
+	 */
 	public MASTAdViewDelegate.RequestListener getRequestListener()
 	{
 		return requestListener;
 	}
 	
+	/**
+	 * Sets the rich media listener.  This listener provides information on rich media events.
+	 * 
+	 * @param internalBrowserListener MASTAdViewDelegate.RichMediaListener implementation
+	 */
 	public void setRichMediaListener(MASTAdViewDelegate.RichMediaListener richMediaListener)
 	{
 		this.richMediaListener = richMediaListener;
 	}
 	
+	/**
+	 * Returns the currently configured listener.
+	 * 
+	 * @return MASTAdViewDelegate.RichMediaListener set with setRichMediaListener().
+	 */
 	public MASTAdViewDelegate.RichMediaListener getRichMediaListener()
 	{
 		return richMediaListener;
 	}
 	
+	/**
+	 * Specifies the URL of the ad network.  This defaults to Mocean's ad network.
+	 * 
+	 * @param adNetworkURL URL of the ad server (ex: http://ads.moceanads.com/ad);
+	 */
 	public void setAdNetworkURL(String adNetworkURL)
 	{
 		this.adNetworkURL = adNetworkURL;
 	}
 	
+	/**
+	 * Returns the currently configured ad network.
+	 * 
+	 * @return Currently configured ad network URL.
+	 */
 	public String getAdNetworkURL()
 	{
 		return adNetworkURL;
 	}
 	
+	/**
+	 * Collection of ad request parameters.  Allows setting extra network parameters.
+	 * <p>
+	 * The SDK will set various parameters based on configuration and other options.
+	 * For more information see http://developer.moceanmobile.com/Mocean_Ad_Request_API.
+	 * 
+	 * @return Map containing optional request parameters.
+	 */
 	public Map<String, String> getAdRequestParameters()
 	{
 		return adRequestParameters;
 	}
 	
+	/**
+	 * Sets the interval between updates.
+	 * <p>
+	 * Invoke update() after setting for changes to apply immediately.
+	 * 
+	 * @param updateInterval Time interval in seconds between ad requests.
+	 */
 	public void setUpdateInterval(int updateInterval)
 	{
 		this.updateInterval = updateInterval;
 	}
 	
+	/**
+	 * Returns the currently configured update interval.
+	 * 
+	 * @return Time interval in seconds between ad requests.
+	 */
 	public int getUpdateInterval()
 	{
 		return updateInterval;
 	}
 	
+	/**
+	 * Sets the zone on the ad network to obtain ad content.
+	 * <p>
+	 * REQUIRED - If not set updates will fail.
+	 * 
+	 * @param zone Ad network zone.
+	 */
 	public void setZone(int zone)
 	{
 		this.zone = zone;
 	}
 	
+	/**
+	 * Returns the currently configured ad network zone.
+	 * 
+	 * @return Ad network zone.
+	 */
 	public int getZone()
 	{
 		return zone;
 	}
 	
+	/**
+	 * Sets the instance test mode.  If set to test mode the instance will request test ads for the configured zone.
+	 * <p>
+	 * Warning: This should never be enabled for application releases.
+	 * 
+	 * @param test true to set test mode, false to disable test mode.
+	 */
 	public void setTest(boolean test)
 	{
 		this.test = test;
 	}
 	
+	/**
+	 * Access for test mode state of the instance.
+	 * 
+	 * @return true if the instance is set to test mode, false if test mode is disabled.
+	 */
 	public boolean isTest()
 	{
 		return test;
 	}
 	
+	/**
+	 * Used with interstitial to show a close button.  If not set, users will not see a close button
+	 * on interstitial ads.  Does nothing if used with inline instances.
+	 * 
+	 * @param showCloseButton true to show a close button, false to not show a close button.
+	 */
 	public void setShowCloseButton(boolean showCloseButton)
 	{
 		this.showCloseButton = showCloseButton;
+		
+		// TODO: Make this apply immediately after the fact, vs on showInterstitial.
 	}
 	
+	/**
+	 * Returns state of showing the close button for interstitial ads.
+	 *  
+	 * @return true if showing close button, false if close button will not be shown.
+	 */
 	public boolean getShowCloseButton()
 	{
 		return showCloseButton;
 	}
 	
+	/**
+	 * Sets the delay time between showing an interstitial with showInterstitial() and showing the close
+	 * button.  A value of 0 indicates the button should be shown immediately.
+	 * 
+	 * @param closeButtonDelay Time interval in seconds to delay showing a close button after showing interstitial ad.
+	 */
 	public void setCloseButtonDelay(int closeButtonDelay)
 	{
 		this.closeButtonDelay = closeButtonDelay;
 	}
 	
+	/**
+	 * Returns the currently configured close button delay.
+	 * 
+	 * @return Time interval in seconds to delay showing a close button after showing interstitial.
+	 */
 	public int getCloseButtonDelay()
 	{
 		return closeButtonDelay;
 	}
 	
+	/**
+	 * Allows custom close buttons to override SDK default.  If set the provided drawable will be used
+	 * for the close button for interstitial and rich media ads (if ad uses SDK provided close button).
+	 * 
+	 * @param closeButtonCustomDrawable Drawable used to override the default close button image or null to use the default.
+	 */
 	public void setCloseButtonCustomDrawable(Drawable closeButtonCustomDrawable)
 	{
 		this.closeButtonCustomDrawable = closeButtonCustomDrawable;
 	}
 	
+	/**
+	 * Returns the currently configured close button custom drawable.
+	 * 
+	 * @return Returns the custom close button drawable set with setCloseButtonCustomDrawable() or null if one is not set.
+	 */
 	public Drawable getCloseButtonCustomDrawable()
 	{
 		return closeButtonCustomDrawable;
 	}
 	
+	/**
+	 * Controls enablement of the internal browser.  If used, a dialog will be used to show a browser in the
+	 * application for ads that are clicked on (that open URLs).  If not used an intent is started to invoke
+	 * the system browser (or whatever is configured to handle the intent).
+	 * 
+	 * @param useInternalBrowser true to use the internal browser, false to not use the internal browser.
+	 */
 	public void setUseInternalBrowser(boolean useInternalBrowser)
 	{
 		this.useInternalBrowser = useInternalBrowser;
 	}
 	
+	/**
+	 * Returns the currently configured internal browser setting.
+	 * 
+	 * @return true if using the internal browser, false if not using the internal browser.
+	 */
 	public boolean getUseInternalBrowser()
 	{
 		return useInternalBrowser;
 	}
 	
+	/**
+	 * Determines if the internal browser is open.
+	 * 
+	 * @return true if the internal browser is open, false if not.
+	 */
 	public boolean isInternalBrowserOpen()
 	{
 		if ((browserDialog != null) && browserDialog.isShowing())
@@ -399,6 +620,13 @@ public class MASTAdView extends ViewGroup
 		return false;
 	}
 	
+	/**
+	 * Determines if location detection is enabled.  If enabled, the SDK will use the location services
+	 * of the device to determine the device's location ad add ad request parameters (lat/long) to the ad
+	 * request.  Location detection can be enabled with setLocationDetectionEnabled() or enableLocationDetection().
+	 * 
+	 * @return true if location detection is enabled, false if not
+	 */
 	public boolean isLocationDetectionEnabled()
 	{
 		if (locationManager != null)
@@ -408,10 +636,17 @@ public class MASTAdView extends ViewGroup
 
 		return false;
 	}
-	
-	// if enabled, uses optimum criteria for battery life
-	// if fine tuning is required, use enableLocationDetection
-	// usesPermission access fine or coarse location
+
+	/**
+	 * Enables or disable SDK location detection.  If enabled with this method the most
+	 * battery optimized settings are used.  For more fine tuned control over location detection
+	 * settings use enableLocationDetection().  This method is used to disable location detection
+	 * for either method of enabling location detection. 
+	 * <p>
+	 * Permissions for coarse or fine location detection may be required.
+	 * 
+	 * @param locationDetectionEnabled
+	 */
 	public void setLocationDetectionEnabled(boolean locationDetectionEnabled)
 	{
 		if (locationDetectionEnabled == false)
@@ -439,9 +674,16 @@ public class MASTAdView extends ViewGroup
 				criteria, null);
 	}
 	
-	// see LocationManager.requestLocationUpdates
-	// if  the provider is non-null then the criteria is ignored.
-	// disable with setLocationDetection(false)
+	/**
+	 * Enables location detection with specified criteria.  To disable location detection use 
+	 * setLocationDetectionEnabled(false).
+	 * 
+	 * @see LocationManager.requestLocationUpdates
+	 * @param minTime LocationManager.requestLocationUpdates minTime
+	 * @param minDistance LocationManager.requestLocationUpdates minDistance
+	 * @param criteria Criteria used to find an available provider.  Ignored if provider is non-null.
+	 * @param provider Named provider used by the LocationManager to obtain location updates. 
+	 */
 	public void enableLocationDetection(long minTime, float minDistance, Criteria criteria, String provider)
 	{
 		if ((provider == null) && (criteria == null))
@@ -452,7 +694,6 @@ public class MASTAdView extends ViewGroup
 		{
 			try
 			{
-				
 				if (provider == null)
 				{
 					List<String> providers = locationManager.getProviders(criteria, true);
@@ -479,21 +720,44 @@ public class MASTAdView extends ViewGroup
 		}
 	}
 	
+	/**
+	 * Sets the log level of the instance.  Logging is done through console logging.
+	 * 
+	 * @param logLevel LogLevel
+	 */
 	public void setLogLevel(LogLevel logLevel)
 	{
 		this.logLevel = logLevel;
 	}
 	
+	/**
+	 * Returns the currently configured log level.
+	 * 
+	 * @return currently configured LogLevel
+	 */
 	public LogLevel getLogLevel()
 	{
 		return logLevel;
 	}
 	
+	/**
+	 * Updates ad.
+	 * 
+	 * Invokes update(false).
+	*/
 	public void update()
 	{
 		update(false);
 	}
 	
+	/**
+	 * Invokes an update which requests and if received, renders ad content replacing any previous ad content.
+	 * If the force parameter is set to false the update will be deferred if the user is interacting with the 
+	 * current ad (rich media resize/expand or internal browser open).  If the force parameter is set to true
+	 * will close any interaction with the current ad before updating.
+	 * 
+	 * @param force true to force an update regardless of ad state, false to defer update if needed
+	 */
 	public void update(boolean force)
 	{
 		if (zone == 0)
@@ -545,6 +809,13 @@ public class MASTAdView extends ViewGroup
 		internalUpdate();
 	}
 	
+	/**
+	 * Resets instance state to it's default (doesn't reset configured parameters).
+	 * Stops update interval timer, closes internal browser if open, disables location detection.
+	 * <p>
+	 * Invoke this method to stop any ad processing.  This should be done for ads that have a update
+	 * time interval set with setUpdateInterval() before the owning context/activity is destroyed.
+	 */
 	public void reset()
 	{
 		deferredUpdate = false;
@@ -569,7 +840,9 @@ public class MASTAdView extends ViewGroup
 		setLocationDetectionEnabled(false);
 	}
 	
-	// main thread
+	/**
+	 * Removes any displayed ad content.
+	 */
 	public void removeContent()
 	{
 		deferredUpdate = false;
