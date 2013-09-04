@@ -31,6 +31,7 @@ public class WebView extends android.webkit.WebView
 	// For API10 and lower a string, for API11 and higher an InputStream
 	private Object mraidBridgeJavascript = null;
 	
+	//@SuppressWarnings("deprecation")
 	@SuppressLint("SetJavaScriptEnabled")
 	public WebView(Context context)
 	{
@@ -51,6 +52,7 @@ public class WebView extends android.webkit.WebView
 		
 		setWebChromeClient(new ChromeClient());
 		getSettings().setJavaScriptEnabled(true);
+		//getSettings().setPluginsEnabled(true);  // may be needed for inline video
 		
 		setOnTouchListener(new TouchListener());
 		

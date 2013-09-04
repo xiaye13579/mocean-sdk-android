@@ -1626,7 +1626,17 @@ public class MASTAdView extends ViewGroup
 			
 			if (bridge == mraidBridge)
 			{
-				updateMRAIDLayoutForState(bridge, State.Default);
+				switch (placementType)
+				{
+				case Inline:
+					updateMRAIDLayoutForState(bridge, State.Default);
+					break;
+					
+				case Interstitial:
+					updateMRAIDLayoutForState(bridge, State.Expanded);
+					break;
+				}
+				
 				bridge.setState(State.Default);
 			}
 			else
@@ -1841,6 +1851,11 @@ public class MASTAdView extends ViewGroup
 	// main thread
 	private void prepareCloseButton()
 	{
+		if (mraidExpandDialog != null)
+		{
+			mraidExpandDialog.setCloseImage(null);
+		}
+		
 		if (closeButtonFuture != null)
 		{
 			closeButtonFuture.cancel(true);
@@ -1851,6 +1866,17 @@ public class MASTAdView extends ViewGroup
 	    {
 	        switch (mraidBridge.getState())
 	        {
+	        	case Default:
+		        	if (placementType == PlacementType.Interstitial)
+		        	{
+		        		if (mraidBridge.getExpandProperties().useCustomClose() == false)
+		        		{
+		        			showCloseButton();
+		        		}
+		        		return;
+		        	}
+	        	break;
+	        	
 	            case Expanded:
 	                // When expanded use the built in button or the custom one, else nothing else.
 	                if (mraidBridge.getExpandProperties().useCustomClose() == false)
@@ -1917,6 +1943,11 @@ public class MASTAdView extends ViewGroup
 	        {
 	            case Loading:
 	            case Default:
+	            	if (placementType == PlacementType.Interstitial)
+	            	{
+	            		mraidExpandDialog.setCloseImage(closeButtonDrawable);
+	            		return;
+	            	}
 	            case Hidden:
 	                // Like text or image ads just put the close button at the top of the stack
 	                // on the ad view and not on the webview.
@@ -2157,7 +2188,14 @@ public class MASTAdView extends ViewGroup
 			if ((bridge != mraidBridge) && (bridge != mraidTwoPartBridge))
 				return;
 			
-			prepareCloseButton();
+			runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					prepareCloseButton();	
+				}
+			});
 		}
 
 		@Override
@@ -2763,6 +2801,8 @@ public class MASTAdView extends ViewGroup
 							break;
 						}
 					}
+					
+					resetMRAIDOrientation();
 				}
 			});
 		}
@@ -2782,11 +2822,11 @@ public class MASTAdView extends ViewGroup
 				break;
 				
 			case Interstitial:
-				if (mraidBridge != null)
-				{
-					updateMRAIDLayoutForState(mraidBridge, State.Expanded);
-					mraidBridge.setState(State.Default);
-				}
+				//if (mraidBridge != null)
+				//{
+				//	updateMRAIDLayoutForState(mraidBridge, State.Expanded);
+				//	mraidBridge.setState(State.Default);
+				//}
 				break;
 			}
 			
