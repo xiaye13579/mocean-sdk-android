@@ -1926,7 +1926,7 @@ public class MASTAdView extends ViewGroup
 			{
 				InputStream is = WebView.class.getResourceAsStream("/close_button.png");
 				closeButtonDrawable = new BitmapDrawable(getResources(), is);
-				((BitmapDrawable) closeButtonDrawable).setGravity(Gravity.CENTER);
+				//((BitmapDrawable) closeButtonDrawable).setGravity(Gravity.CENTER);
 			}
 			catch (Exception ex)
 			{
@@ -1945,7 +1945,7 @@ public class MASTAdView extends ViewGroup
 	            case Default:
 	            	if (placementType == PlacementType.Interstitial)
 	            	{
-	            		mraidExpandDialog.setCloseImage(closeButtonDrawable);
+	            		interstitialDialog.setCloseImage(closeButtonDrawable);
 	            		return;
 	            	}
 	            case Hidden:
@@ -2747,7 +2747,7 @@ public class MASTAdView extends ViewGroup
 	private class ExpandDialog extends Dialog
 	{
 		private ViewGroup container = null;
-		private View closeArea = null;
+		private ViewGroup closeArea = null;
 		
 		public ExpandDialog(Context context)
 		{
@@ -2762,7 +2762,7 @@ public class MASTAdView extends ViewGroup
 					new RelativeLayout.LayoutParams(dpToPx(CloseAreaSizeDp), dpToPx(CloseAreaSizeDp));
 			closeAreaLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 			closeAreaLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-			closeArea = new View(getContext());
+			closeArea = new RelativeLayout(getContext());
 			closeArea.setBackgroundColor(0x00000000);
 			container.addView(closeArea, closeAreaLayoutParams);
 			closeArea.setOnClickListener(new View.OnClickListener()
@@ -2891,11 +2891,24 @@ public class MASTAdView extends ViewGroup
 			}
 		}
 		
-		@SuppressWarnings("deprecation")
 		public void setCloseImage(Drawable image)
 		{
-        	// Supporting API8 and higher.  Avoiding reflection for now.
-			closeArea.setBackgroundDrawable(image);
+			closeArea.removeAllViews();
+			
+			if (image != null)
+			{
+				RelativeLayout.LayoutParams layoutParams = 
+						new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+				
+				int marginPx = pxToDp(15);
+				layoutParams.setMargins(marginPx, marginPx, marginPx, marginPx);
+				
+				ImageView imageView = new ImageView(getContext());
+				imageView.setBackgroundColor(0x00000000);
+				imageView.setImageDrawable(image);
+				
+				((RelativeLayout) closeArea).addView(imageView, layoutParams);
+			}
 		}
 		
 		@Override
