@@ -13,4 +13,15 @@ public class SimpleImage extends RefreshActivity {
 		MASTAdView adView = (MASTAdView) findViewById(R.id.adView);
 		adView.setLocationDetectionEnabled(true);
 	}
+	
+	@Override
+	protected void onDestroy()
+	{
+		// Need to disable location detection or reset the ad view to properly
+		// cleanup resources associated with location detection support.
+		MASTAdView adView = (MASTAdView) findViewById(R.id.adView);
+		adView.reset();
+		
+		super.onDestroy();
+	}
 }
