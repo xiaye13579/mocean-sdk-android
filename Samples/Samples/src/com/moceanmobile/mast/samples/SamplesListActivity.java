@@ -22,6 +22,9 @@ public class SamplesListActivity extends ListActivity
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		
+		// Use to check for potential leaks
+		//android.os.StrictMode.setVmPolicy(new android.os.StrictMode.VmPolicy.Builder().detectActivityLeaks().penaltyLog().build());
 
 		samplesListAdapter = new SamplesListAdapter();
 		
@@ -31,8 +34,8 @@ public class SamplesListActivity extends ListActivity
 		samplesListAdapter.addItem(new SamplesItem("Rich Media", SimpleRichMedia.class));
 		samplesListAdapter.addItem(new SamplesItem("Text", SimpleText.class));
 		
-		samplesListAdapter.addItem(new SamplesItem("Advanced", "Animation", AdvancedAnimation.class));
-		samplesListAdapter.addItem(new SamplesItem("Bottom", AdvancedBottom.class));
+		//samplesListAdapter.addItem(new SamplesItem("Advanced", "Animation", AdvancedAnimation.class));
+		samplesListAdapter.addItem(new SamplesItem("Advanced", "Bottom", AdvancedBottom.class));
 		samplesListAdapter.addItem(new SamplesItem("List", AdvancedList.class));
 		samplesListAdapter.addItem(new SamplesItem("Top and Bottom", AdvancedTopAndBottom.class));
 		
