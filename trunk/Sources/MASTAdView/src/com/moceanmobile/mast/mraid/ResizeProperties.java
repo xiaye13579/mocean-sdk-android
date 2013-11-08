@@ -162,7 +162,7 @@ public class ResizeProperties
 		if (allowOffscreen)
 			allowOffscreenString = Consts.True;
 		
-		String format = "{width:%d,height:%d,customClosePosition:'%s',offsetX:%d,offsetY:%d,allowOffscreen:'%s'}";
+		String format = "{width:%d,height:%d,customClosePosition:'%s',offsetX:%d,offsetY:%d,allowOffscreen:%s}";
 		Formatter formatter = new Formatter(Locale.US);
 		formatter.format(format, width, height, customClosePositionString, offsetX, offsetY, allowOffscreenString);
 		String toString = formatter.toString();
