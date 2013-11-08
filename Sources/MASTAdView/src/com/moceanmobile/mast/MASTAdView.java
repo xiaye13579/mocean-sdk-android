@@ -2758,6 +2758,22 @@ public class MASTAdView extends ViewGroup
 			container.setBackgroundColor(0xff000000);
 			setContentView(container, layoutParams);
 			
+			container.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					if (((imageView != null) && (imageView.getParent() == container)) ||
+						((textView != null) && (textView.getParent() == container)))
+					{
+						if ((adDescriptor != null) && (TextUtils.isEmpty(adDescriptor.getURL()) == false))
+						{
+							openUrl(adDescriptor.getURL(), false);
+						}
+					}
+				}
+			});
+			
 			RelativeLayout.LayoutParams closeAreaLayoutParams =
 					new RelativeLayout.LayoutParams(dpToPx(CloseAreaSizeDp), dpToPx(CloseAreaSizeDp));
 			closeAreaLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
@@ -2770,6 +2786,14 @@ public class MASTAdView extends ViewGroup
 				@Override
 				public void onClick(View v)
 				{
+					if (activityListener != null)
+					{
+						if (activityListener.onCloseButtonClick(MASTAdView.this) == true)
+						{
+							return;
+						}
+					}
+					
 					dismiss();
 				}
 			});
@@ -2778,8 +2802,6 @@ public class MASTAdView extends ViewGroup
 			{
 				// TODO: Resolve double close when ad invokes close (thus causing a dismiss and another close).
 				// Possibly synchronize set/get state on the bridge.
-				
-				// TODO: Prevent back key dismissing while interstitial and button not displayed.
 				
 				@Override
 				public void onDismiss(DialogInterface dialog)
@@ -2851,6 +2873,14 @@ public class MASTAdView extends ViewGroup
 				{
 					// Don't allow close until the close button is available.
 					return;
+				}
+				
+				if (activityListener != null)
+				{
+					if (activityListener.onCloseButtonClick(MASTAdView.this) == true)
+					{
+						return;
+					}
 				}
 			}
 			

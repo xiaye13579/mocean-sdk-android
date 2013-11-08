@@ -73,9 +73,14 @@ public interface MASTAdViewDelegate
 		 * the case of a interstitial rich media ad that closes itself.  It will not be
 		 * sent for rich media close buttons that collapse expanded or resized ads. 
 		 * 
-		 * @param adView
+		 * @param adView The MASTAdView instance invoking the method.
+		 * @return Boolean true if the caller has completely handled the click event and
+		 * wants to skip the default SDK click processing; return false if the caller has
+		 * only implemented a "side-effect" such as logging and wants the default SDK logic
+		 * to continue.  For MASTAdView instances that are interstitial implementations MUST
+		 * call closeInterstitial() if returning true from this method.
 		 */
-		public void onCloseButtonClick(MASTAdView adView);
+		public boolean onCloseButtonClick(MASTAdView adView);
 	}
 
 	public interface InternalBrowserListener
