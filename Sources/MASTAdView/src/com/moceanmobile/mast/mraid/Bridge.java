@@ -120,7 +120,7 @@ public class Bridge
         if (featureString == null)
             return;
 
-        String script = "mraid.setSupports('" + featureString + "', '" + supportedString + "');";
+        String script = "mraid.setSupports('" + featureString + "', " + supportedString + ");";
         webView.injectJavascript(script);
     }
 	
@@ -136,7 +136,7 @@ public class Bridge
         if (viewable)
             viewableString = Consts.True;
 
-        String script = "mraid.setViewable('" + viewableString + "');";
+        String script = "mraid.setViewable(" + viewableString + ");";
         webView.injectJavascript(script);
     }
     
@@ -233,7 +233,7 @@ public class Bridge
         if (success)
             successString = Consts.True;
 
-        String script = "mraid.firePictureAddedEvent('" + successString + "');";
+        String script = "mraid.firePictureAddedEvent(" + successString + ");";
         webView.injectJavascript(script);
     }
 	

@@ -70,7 +70,7 @@ public class ExpandProperties
 		if (useCustomClose)
 			useCustomCloseString = Consts.True;
 		
-		String format = "{width:%d,height:%d,useCustomClose:'%s'}";
+		String format = "{width:%d,height:%d,useCustomClose:%s}";
 		Formatter formatter = new Formatter(Locale.US);
 		formatter.format(format, width, height, useCustomCloseString);
 		String toString = formatter.toString();

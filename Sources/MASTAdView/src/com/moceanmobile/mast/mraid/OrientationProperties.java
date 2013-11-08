@@ -86,7 +86,7 @@ public class OrientationProperties
 				break;
 		}
 		
-		String format = "{allowOrientationChange:'%s',forceOrientation:'%s'}";
+		String format = "{allowOrientationChange:%s,forceOrientation:'%s'}";
 		Formatter formatter = new Formatter(Locale.US);
 		formatter.format(format, allowOrientationChangeString, forceOrientationString);
 		String toString = formatter.toString();
