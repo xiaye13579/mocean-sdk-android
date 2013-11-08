@@ -88,9 +88,11 @@ public class DelegateGeneric extends RefreshActivity
 		}
 
 		@Override
-		public void onCloseButtonClick(MASTAdView adView)
+		public boolean onCloseButtonClick(MASTAdView adView)
 		{
 			appendOutput("onCloseButtonClick");
+			
+			return false;
 		}		
 	}
 	
