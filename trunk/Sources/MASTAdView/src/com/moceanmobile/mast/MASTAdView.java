@@ -1186,9 +1186,14 @@ public class MASTAdView extends ViewGroup
         });
 	}
 	
-	// main/background thread
+	// main thread
 	private void performAdTracking()
 	{
+		if ((isInterstitial() == false) && (isShown() == false))
+		{
+			return;
+		}
+		
 		if (invokeTracking && (adDescriptor != null))
 		{
 			invokeTracking = false;
@@ -1400,6 +1405,15 @@ public class MASTAdView extends ViewGroup
 		super.onAttachedToWindow();
 		
 		performAdTracking();
+	}
+	
+	@Override
+	protected void onVisibilityChanged(View changedView, int visibility)
+	{
+		if (visibility == View.VISIBLE)
+		{
+			performAdTracking();
+		}
 	}
 	
 	@Override
