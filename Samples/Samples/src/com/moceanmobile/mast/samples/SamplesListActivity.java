@@ -46,6 +46,7 @@ public class SamplesListActivity extends ListActivity
 		samplesListAdapter.addItem(new SamplesItem("Third Party Request", DelegateThirdParty.class));
 		samplesListAdapter.addItem(new SamplesItem("Logging", DelegateLogging.class));
 		samplesListAdapter.addItem(new SamplesItem("No Content Zone", DelegateNoContent.class));
+		samplesListAdapter.addItem(new SamplesItem("Internal Browser", DelegateInternalBrowser.class));
 		
 		samplesListAdapter.addItem(new SamplesItem("Error", "Hide", ErrorHide.class));
 		samplesListAdapter.addItem(new SamplesItem("Image", ErrorImage.class));
