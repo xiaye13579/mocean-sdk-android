@@ -5,6 +5,8 @@ package com.moceanmobile.mast;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -1537,8 +1539,21 @@ public class MASTAdView extends ViewGroup
 			{
 				if ((bypassInternalBrowser == false) && useInternalBrowser)
 				{
-					openInternalBrowser(url);
-					return;
+					try 
+					{
+						URI uri = new URI(url);
+						String scheme = uri.getScheme();
+						if (scheme.startsWith("http"))
+						{
+							openInternalBrowser(url);
+							return;						
+						}
+					}
+					catch (URISyntaxException e)
+					{
+						// If it can't be parsed and validated as http/s don't
+						// bother with the internal browser.
+					}
 				}
 
 				if (activityListener != null)
@@ -1553,7 +1568,7 @@ public class MASTAdView extends ViewGroup
 				}
 				else
 				{
-					logEvent("Unable to start activity for browsing URL.", LogLevel.Error);
+					logEvent("Unable to start activity for browsing URL:" + url, LogLevel.Error);
 				}				
 			}
 		});
@@ -1576,10 +1591,14 @@ public class MASTAdView extends ViewGroup
 				}
 
 				@Override
-				public void browserDialogOpenUrl(BrowserDialog browserDialog, String url)
+				public void browserDialogOpenUrl(BrowserDialog browserDialog, String url, boolean dismiss)
 				{
 					openUrl(url, true);
-					browserDialog.dismiss();
+					
+					if (dismiss)
+					{
+						browserDialog.dismiss();
+					}
 				}
 			});
 		}

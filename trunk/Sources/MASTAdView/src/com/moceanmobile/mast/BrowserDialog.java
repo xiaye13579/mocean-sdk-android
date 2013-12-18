@@ -3,6 +3,9 @@
 //
 package com.moceanmobile.mast;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,6 +14,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -112,7 +116,7 @@ public class BrowserDialog extends Dialog
 			@Override
 			public void onClick(View v)
 			{
-				BrowserDialog.this.handler.browserDialogOpenUrl(BrowserDialog.this, webView.getUrl());
+				BrowserDialog.this.handler.browserDialogOpenUrl(BrowserDialog.this, webView.getUrl(), true);
 			}
 		});
 		actionBar.addView(imageButton, imageButtonLayout);
@@ -134,8 +138,10 @@ public class BrowserDialog extends Dialog
 		});
 	}
 	
-	public void loadUrl(String url2)
+	public void loadUrl(String url)
 	{
+		this.url = url;
+		
 		webView.stopLoading();
 		webView.clearHistory();
 		webView.loadUrl(url);
@@ -152,16 +158,37 @@ public class BrowserDialog extends Dialog
 	private class Client extends WebViewClient
 	{
 		@Override
-		public void onPageFinished(android.webkit.WebView view, String url)
+		public void onPageFinished(WebView view, String url)
 		{
 			backButton.setEnabled(view.canGoBack());
 			forwardButton.setEnabled(view.canGoForward());
+		}
+		
+		@Override
+		public boolean shouldOverrideUrlLoading(WebView view, String url)
+		{
+			try 
+			{
+				URI uri = new URI(url);
+				String scheme = uri.getScheme().toLowerCase();
+				if (scheme.startsWith("http"))
+				{
+					return false;
+				}
+			}
+			catch (URISyntaxException e)
+			{
+				// If it can't be parsed, don't try it.
+			}
+			
+			BrowserDialog.this.handler.browserDialogOpenUrl(BrowserDialog.this, url, false);
+			return true;
 		}
 	}
 	
 	public interface Handler
 	{
 		public void browserDialogDismissed(BrowserDialog browserDialog);
-		public void browserDialogOpenUrl(BrowserDialog browserDialog, String url);
+		public void browserDialogOpenUrl(BrowserDialog browserDialog, String url, boolean dismiss);
 	}
 }

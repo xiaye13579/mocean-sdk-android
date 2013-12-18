@@ -19,6 +19,7 @@
     <string name="title_activity_delegate_third_party">Delegate/Third Party Request</string>
     <string name="title_activity_delegate_logging">Delegate/Logging</string>
     <string name="title_activity_delegate_no_content">Delegate/No Content Zone</string>
+    <string name="title_activity_delegate_internal_browser">Delegate/Internal Browser</string>
     <string name="title_activity_error_hide">Error/Hide</string>
     <string name="title_activity_error_image">Error/Image</string>
     <string name="title_activity_error_reset">Error/Reset</string>

@@ -78,7 +78,7 @@ public class DelegateGeneric extends RefreshActivity
 		public boolean onOpenUrl(MASTAdView adView, String url)
 		{
 			appendOutput("onOpenUrl url:" + url);
-			return true;
+			return false;
 		}
 
 		@Override
@@ -91,7 +91,6 @@ public class DelegateGeneric extends RefreshActivity
 		public boolean onCloseButtonClick(MASTAdView adView)
 		{
 			appendOutput("onCloseButtonClick");
-			
 			return false;
 		}		
 	}

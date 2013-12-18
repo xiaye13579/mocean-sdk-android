@@ -102,6 +102,11 @@
             android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity
+            android:name="com.moceanmobile.mast.samples.DelegateInternalBrowser"
+            android:label="@string/title_activity_delegate_internal_browser"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
+        </activity>
+        <activity
             android:name="com.moceanmobile.mast.samples.ErrorHide"
             android:label="@string/title_activity_error_hide"
             android:configChanges="keyboardHidden|orientation|screenSize" >
