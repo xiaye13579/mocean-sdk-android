@@ -40,7 +40,7 @@ public class WebView extends android.webkit.WebView
 		try
 		{
 			WebViewClient.class.getMethod("shouldInterceptRequest", 
-					new Class[] {WebView.class, String.class});
+					new Class[] {android.webkit.WebView.class, String.class});
 			
 			hasAPI11 = true;
 			setWebViewClient(new ViewClientAPI11());
@@ -62,6 +62,13 @@ public class WebView extends android.webkit.WebView
 	public void setHandler(Handler handler)
 	{
 		this.handler = handler;
+	}
+	
+	public void loadUrl(String url, Bridge bridge)
+	{
+		addJavascriptInterface(bridge, MRAID_JAVASCRIPT_INTERFACE_NAME);
+
+		super.loadUrl(url);
 	}
 	
 	public void loadFragment(String fragment, Bridge bridge)
@@ -218,7 +225,7 @@ public class WebView extends android.webkit.WebView
 		@Override
 		protected void initJavascriptBridge()
 		{
-			InputStream is = WebView.class.getResourceAsStream("/assets/MASTMRAIDController.js");
+			InputStream is = WebView.class.getResourceAsStream("/MASTMRAIDController.js");
 			mraidBridgeJavascript = is;
 		}
 		
