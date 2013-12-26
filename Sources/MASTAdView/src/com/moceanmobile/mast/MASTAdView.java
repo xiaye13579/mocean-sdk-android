@@ -1394,7 +1394,7 @@ public class MASTAdView extends ViewGroup
 		mraidTwoPartBridgeInit = false;
 		mraidTwoPartBridge = new Bridge(mraidTwoPartWebView, mraidBridgeHandler);
 
-		mraidTwoPartWebView.loadUrl(url);
+		mraidTwoPartWebView.loadUrl(url, mraidTwoPartBridge);
 		
 		mraidExpandDialog = new ExpandDialog(getContext());
 		mraidExpandDialog.addView(mraidTwoPartWebView);
