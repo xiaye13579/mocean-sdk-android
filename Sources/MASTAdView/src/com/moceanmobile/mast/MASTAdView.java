@@ -1928,7 +1928,7 @@ public class MASTAdView extends ViewGroup
 	                {
 	                    showCloseButton();
 	                }
-	            	 
+
 	                return;
 	                
 	            case Resized:
@@ -2885,8 +2885,8 @@ public class MASTAdView extends ViewGroup
 				if (mraidTwoPartExpand == false)
 				{
 					updateMRAIDLayoutForState(mraidBridge, State.Expanded);
-					mraidBridge.setState(State.Expanded);
 				}
+				mraidBridge.setState(State.Expanded);
 				break;
 				
 			case Interstitial:
