@@ -63,6 +63,7 @@ import com.moceanmobile.mast.mraid.Consts.Feature;
 import com.moceanmobile.mast.mraid.Consts.ForceOrientation;
 import com.moceanmobile.mast.mraid.Consts.PlacementType;
 import com.moceanmobile.mast.mraid.Consts.State;
+import com.moceanmobile.mast.mraid.ExpandProperties;
 import com.moceanmobile.mast.mraid.OrientationProperties;
 import com.moceanmobile.mast.mraid.ResizeProperties;
 import com.moceanmobile.mast.mraid.WebView;
@@ -1674,6 +1675,11 @@ public class MASTAdView extends ViewGroup
 			}
 			else
 			{
+				// Copy expand properties from first part since the MRAID
+				// specification requires that expand properties be set 
+				// BEFORE invoking expand.
+				bridge.setExpandProperties(mraidBridge.getExpandProperties());
+				
 				updateMRAIDLayoutForState(bridge, State.Expanded);
 				bridge.setState(State.Expanded);
 			}
@@ -1912,10 +1918,17 @@ public class MASTAdView extends ViewGroup
 	        	
 	            case Expanded:
 	                // When expanded use the built in button or the custom one, else nothing else.
-	                if (mraidBridge.getExpandProperties().useCustomClose() == false)
+	            	ExpandProperties expandProperties = mraidBridge.getExpandProperties();
+	            	if (mraidTwoPartExpand && (mraidTwoPartBridge != null))
+	            	{
+	            		expandProperties = mraidTwoPartBridge.getExpandProperties();
+	            	}
+	            	
+	                if (expandProperties.useCustomClose() == false)
 	                {
 	                    showCloseButton();
 	                }
+	            	 
 	                return;
 	                
 	            case Resized:
