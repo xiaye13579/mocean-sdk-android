@@ -1394,6 +1394,7 @@ public class MASTAdView extends ViewGroup
 		mraidTwoPartWebView.setHandler(webViewHandler);
 		mraidTwoPartBridgeInit = false;
 		mraidTwoPartBridge = new Bridge(mraidTwoPartWebView, mraidBridgeHandler);
+		mraidTwoPartBridge.setExpandProperties(mraidBridge.getExpandProperties());
 
 		mraidTwoPartWebView.loadUrl(url, mraidTwoPartBridge);
 		
@@ -1919,7 +1920,7 @@ public class MASTAdView extends ViewGroup
 	            case Expanded:
 	                // When expanded use the built in button or the custom one, else nothing else.
 	            	ExpandProperties expandProperties = mraidBridge.getExpandProperties();
-	            	if (mraidTwoPartExpand && (mraidTwoPartBridge != null))
+	            	if (mraidTwoPartExpand && mraidTwoPartBridgeInit && (mraidTwoPartBridge != null))
 	            	{
 	            		expandProperties = mraidTwoPartBridge.getExpandProperties();
 	            	}
@@ -2177,7 +2178,7 @@ public class MASTAdView extends ViewGroup
 							addView(webView);
 						}
 						else
-						{
+						{	
 							mraidExpandDialog.removeView(mraidTwoPartWebView);
 							
 							mraidTwoPartWebView = null;
@@ -2878,7 +2879,7 @@ public class MASTAdView extends ViewGroup
 		protected void onStart()
 		{
 			super.onStart();
-
+			
 			switch (placementType)
 			{
 			case Inline:
@@ -2943,7 +2944,9 @@ public class MASTAdView extends ViewGroup
 					viewGroup.removeView(view);
 				}
 				
-				container.addView(view);
+				LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 
+						LayoutParams.MATCH_PARENT);
+				container.addView(view, layoutParams);
 			}
 			
 			closeArea.bringToFront();
