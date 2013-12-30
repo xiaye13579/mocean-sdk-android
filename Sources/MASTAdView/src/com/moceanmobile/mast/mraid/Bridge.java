@@ -318,7 +318,6 @@ public class Bridge
 
 				handler.mraidExpand(this, url);
 			}
-			
 			else if (Consts.CommandSetExpandProperties.equals(command))
 			{
                 ExpandProperties expandProperties = ExpandProperties.propertiesFromArgs(args);

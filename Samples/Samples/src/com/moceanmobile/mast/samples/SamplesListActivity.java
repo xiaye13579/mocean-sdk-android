@@ -40,6 +40,7 @@ public class SamplesListActivity extends ListActivity
 		samplesListAdapter.addItem(new SamplesItem("Top and Bottom", AdvancedTopAndBottom.class));
 		
 		samplesListAdapter.addItem(new SamplesItem("Custom", "Custom Ad Setup", CustomConfig.class));
+		samplesListAdapter.addItem(new SamplesItem("Web Rendering", WebViewTest.class));
 		
 		samplesListAdapter.addItem(new SamplesItem("Delegate", "Generic", DelegateGeneric.class));
 		samplesListAdapter.addItem(new SamplesItem("MRAID Events", DelegateMRAID.class));

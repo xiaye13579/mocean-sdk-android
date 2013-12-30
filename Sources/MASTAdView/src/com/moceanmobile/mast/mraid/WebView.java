@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
 
 import com.moceanmobile.mast.Defaults;
@@ -52,6 +53,7 @@ public class WebView extends android.webkit.WebView
 		
 		setWebChromeClient(new ChromeClient());
 		getSettings().setJavaScriptEnabled(true);
+		getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
 		//getSettings().setPluginsEnabled(true);  // may be needed for inline video
 		
 		setOnTouchListener(new TouchListener());
