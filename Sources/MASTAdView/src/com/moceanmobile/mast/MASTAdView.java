@@ -45,7 +45,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -224,6 +223,8 @@ public class MASTAdView extends ViewGroup
 		{
 			updateOnLayout = true;
 		}
+		
+		setOnClickListener(new OnClickHandler());
 		
 		initUserAgent();
 	}
@@ -1124,21 +1125,27 @@ public class MASTAdView extends ViewGroup
             	String img = adDescriptor.getImage();
                 if (TextUtils.isEmpty(img) == false)
                 {
-                	fetchImage(adDescriptor, img);
-                    return;
+                	if (verifyThirdPartyRendering(content, url, img))
+                	{
+                		fetchImage(adDescriptor, img);
+                    	return;
+                	}
                 }
 
                 final String txt = adDescriptor.getText();
                 if (TextUtils.isEmpty(txt) == false)
                 {
-                	runOnUiThread(new Runnable()
+                	if (verifyThirdPartyRendering(content, url, img))
                 	{
-                    	public void run()
-                    	{
-                			renderText(adDescriptor, txt);
-                    	}
-                    });
-                    return;
+	                	runOnUiThread(new Runnable()
+	                	{
+	                    	public void run()
+	                    	{
+	                			renderText(adDescriptor, txt);
+	                    	}
+	                    });
+	                    return;
+                	}
                 }
             }
             else if (TextUtils.isEmpty(content) == false)
@@ -1187,6 +1194,38 @@ public class MASTAdView extends ViewGroup
         		renderRichMedia(adDescriptor);
         	}
         });
+	}
+	
+	private boolean verifyThirdPartyRendering(String content, String url, String imgOrText)
+	{
+		// May as well attempt to render image or text if there's no content to render.
+		if (TextUtils.isEmpty(content))
+		{
+			return true;
+		}
+		
+		// If there is any script content then the ad must be rendered in the web view.
+		if (content.contains("<script"))
+		{
+			return false;
+		}
+		
+		// The content must contain both the url and the image url or text content and
+		// after removing the length of those pieces should be a length representative
+		// of simple <a and <img wrapping fluff to be validated.
+		if (content.contains(url) && content.contains(imgOrText))
+		{
+			int length = content.length();
+			length -= url.length();
+			length -= imgOrText.length();
+			
+			if (length < Defaults.DESCRIPTOR_THIRD_PARTY_VALIDATOR_LENGTH)
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	// main thread
@@ -1501,27 +1540,6 @@ public class MASTAdView extends ViewGroup
 	protected void onRestoreInstanceState(Parcelable parcelable)
 	{
 		super.onRestoreInstanceState(parcelable);
-	}
-	
-	@Override
-	public boolean onTouchEvent(MotionEvent event)
-	{	
-		switch (event.getAction())
-		{
-		case MotionEvent.ACTION_DOWN:
-			if (((imageView != null) && (imageView.getParent() == this)) ||
-				((textView != null) && (textView.getParent() == this)))
-			{
-				if ((adDescriptor != null) && (TextUtils.isEmpty(adDescriptor.getURL()) == false))
-				{
-					openUrl(adDescriptor.getURL(), false);
-					return true;
-				}
-			}
-			break;
-		}
-		
-		return false;
 	}
 	
 	// background/main thread
@@ -2025,6 +2043,22 @@ public class MASTAdView extends ViewGroup
 	            break;
 	        }
 	    }
+	}
+	
+	private class OnClickHandler implements View.OnClickListener
+	{
+		@Override
+		public void onClick(View view)
+		{
+			if (((imageView != null) && (imageView.getParent() == view)) ||
+				((textView != null) && (textView.getParent() == view)))
+			{
+				if ((adDescriptor != null) && (TextUtils.isEmpty(adDescriptor.getURL()) == false))
+				{
+					openUrl(adDescriptor.getURL(), false);
+				}
+			}
+		}
 	}
 	
 	private class WebViewHandler implements WebView.Handler
