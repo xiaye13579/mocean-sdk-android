@@ -27,6 +27,6 @@ Release Notes:
 - Added layout parameters to WebView when added to expand dialog.  This corrected bug
   introduced with API 17 where the expanded ad view would not fill the expand dialog.
 - Set flag to not use cache in WebView.
-
-
-
+- Replacing touch handler with click handler for image and text ad rendering.
+- Adding validation to third party ad descriptors that attempts to ensure image and
+  text ads are rendered natively only if it appears the server's parsing was proper.

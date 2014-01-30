@@ -15,6 +15,10 @@ public class Defaults
 	public static final int LOCATION_DETECTION_MINTIME = 10 * 60 * 1000; // 10 Minutes in ms
 	public static final int LOCATION_DETECTION_MINDISTANCE = 20; // Meters
 	
+	// How much content is allowed after parsing out click url and image or text content before
+	// falling through and rendering as html vs. native rendering.
+	public static final int DESCRIPTOR_THIRD_PARTY_VALIDATOR_LENGTH = 20;
+	
 	public static final String AD_NETWORK_URL = "http://ads.moceanads.com/ad";
 	
 	// Default injection HTML rich media ads.
