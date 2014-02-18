@@ -37,6 +37,7 @@ public class SamplesListActivity extends ListActivity
 		//samplesListAdapter.addItem(new SamplesItem("Advanced", "Animation", AdvancedAnimation.class));
 		samplesListAdapter.addItem(new SamplesItem("Advanced", "Bottom", AdvancedBottom.class));
 		samplesListAdapter.addItem(new SamplesItem("List", AdvancedList.class));
+		samplesListAdapter.addItem(new SamplesItem("List - Native", AdvancedListNative.class));
 		samplesListAdapter.addItem(new SamplesItem("Top and Bottom", AdvancedTopAndBottom.class));
 		
 		samplesListAdapter.addItem(new SamplesItem("Custom", "Custom Ad Setup", CustomConfig.class));

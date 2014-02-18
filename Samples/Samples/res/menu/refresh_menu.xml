@@ -3,7 +3,13 @@
     <item
         android:id="@+id/action_refresh"
         android:orderInCategory="100"
-        android:showAsAction="never"
+        android:showAsAction="ifRoom"
         android:title="@string/action_refresh"/>
+    
+        <item
+        android:id="@+id/action_zone"
+        android:orderInCategory="200"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_zone"/>
 
 </menu>

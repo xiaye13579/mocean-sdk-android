@@ -1,5 +1,6 @@
 package com.moceanmobile.mast.samples;
 
+import java.util.Date;
 import java.util.Map;
 
 import android.graphics.Rect;
@@ -39,12 +40,8 @@ public class DelegateGeneric extends RefreshActivity
 			public void run()
 			{
 				TextView textView = (TextView) findViewById(R.id.textView);
-				textView.append("\n" + content + "\n");
-				
-				int scrollY = (int) (textView.getLineCount() * textView.getLineHeight()) -
-						(textView.getBottom() - textView.getTop());
-				 
-				textView.scrollTo(0, scrollY);
+				textView.setText(new Date().toString() + "\n" + 
+						content + "\n\n" + textView.getText());
 			}
 		});
 	}
