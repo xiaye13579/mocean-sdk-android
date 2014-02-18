@@ -26,8 +26,12 @@ public abstract class RefreshActivity extends Activity
 	    switch (item.getItemId()) 
 	    {
 	        case R.id.action_refresh:
-	        	showRefreshPrompt(R.id.adView);
+	        	refreshAdView(R.id.adView);
 	            return true;
+	            
+	        case R.id.action_zone:
+	        	showRefreshPrompt(R.id.adView);
+	        	return true;
 	            
 	        default:
 	            return super.onOptionsItemSelected(item);
@@ -47,20 +51,26 @@ public abstract class RefreshActivity extends Activity
 		return adView.getZone();
 	}
 	
+	protected void refreshAdView(final int adViewId)
+	{
+		int zone = getAdZone(adViewId);
+		refreshAdViewWithZone(adViewId, zone);
+	}
+	
 	protected void showRefreshPrompt(final int adViewId)
 	{
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Refresh");
+		builder.setTitle(R.string.action_zone);
 
 		final EditText input = new EditText(this);
 		input.setInputType(InputType.TYPE_CLASS_NUMBER);
-		input.setHint("Zone");
+		input.setHint(R.string.action_zone);
 		input.setText(String.valueOf(getAdZone(adViewId)));
 		builder.setView(input);
 		
 		// Set up the buttons
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
-		{ 
+		builder.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener()
+		{
 		    @Override
 		    public void onClick(DialogInterface dialog, int which)
 		    {
@@ -75,7 +85,7 @@ public abstract class RefreshActivity extends Activity
 		    }
 		});
 		
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+		builder.setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener()
 		{
 		    @Override
 		    public void onClick(DialogInterface dialog, int which)

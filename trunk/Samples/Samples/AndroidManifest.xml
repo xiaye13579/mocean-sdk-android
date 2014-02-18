@@ -71,6 +71,11 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_advanced_list" >
         </activity>
+		<activity
+            android:name="com.moceanmobile.mast.samples.AdvancedListNative"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_advanced_list_native" >
+        </activity>
         <activity
             android:name="com.moceanmobile.mast.samples.AdvancedTopAndBottom"
             android:configChanges="keyboardHidden|orientation|screenSize"

@@ -2,7 +2,10 @@
 <resources>
 
     <string name="app_name">Samples</string>
+    <string name="button_ok">OK</string>
+    <string name="button_cancel">Cancel</string>
     <string name="action_refresh">Refresh</string>
+    <string name="action_zone">Zone</string>
     <string name="action_refresh_top">Refresh Top</string>
     <string name="action_refresh_bottom">Refresh Bottom</string>
     <string name="title_activity_simple_image">Simple/Image</string>
@@ -13,6 +16,7 @@
     <string name="title_activity_advanced_animation">Advanced/Animation</string>
     <string name="title_activity_advanced_bottom">Advanced/Bottom</string>
     <string name="title_activity_advanced_list">Advanced/List</string>
+    <string name="title_activity_advanced_list_native">Advanced/List - Native</string>
     <string name="title_activity_advanced_top_and_bottom">Advanced/Top and Bottom</string>
     <string name="title_activity_delegate_generic">Delegate/Generic</string>
     <string name="title_activity_delegate_mraid">Delegate/MRAID</string>

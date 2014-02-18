@@ -2072,7 +2072,7 @@ public class MASTAdView extends ViewGroup
 		@Override
 		public void webViewPageFinished(WebView webView)
 		{
-			if (mraidBridge.webView == webView)
+			if ((mraidBridge != null) && (mraidBridge.webView == webView))
 			{
 				initMRAIDBridge(mraidBridge);
 			}
