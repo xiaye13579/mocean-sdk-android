@@ -1,5 +1,5 @@
 /*
- * PubMatic Inc. (“PubMatic”) CONFIDENTIAL
+ * PubMatic Inc. (ï¿½PubMaticï¿½) CONFIDENTIAL
  * Unpublished Copyright (c) 2006-2014 PubMatic, All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains the property of PubMatic. The intellectual and technical concepts contained
@@ -71,11 +71,19 @@ public class MainActivity extends Activity
 		for (int i = 0; i < MAX_ADS; ++i)
 		{
 			MASTAdView adView = new MASTAdView(this);
+			/*
+			 * For adding default params in the request,use getAdRequestParameters()
+			 */
 			adView.getAdRequestParameters().put("size_x", String.valueOf(maxAdWidth));
 			adView.getAdRequestParameters().put("size_y", String.valueOf(maxAdHeight));
 			adView.setLogLevel(LogLevel.Debug);
 			adView.setZone(88269);
-			
+			/*
+			 * For adding custom params in the request,use getAdRequestCustomParameters().
+			 * Assume that 'age' is custom network param,then the code snippet will be : 
+			 */
+			adView.getAdRequestCustomParameters().put("age", "25");
+			adView.getAdRequestCustomParameters().put("age", "28");
 			AdQueue.getInstance().returnAd(adView);
 		}
 	}
