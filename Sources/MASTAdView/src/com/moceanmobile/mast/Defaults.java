@@ -1,5 +1,5 @@
 /*
- * PubMatic Inc. (“PubMatic”) CONFIDENTIAL
+ * PubMatic Inc. (ï¿½PubMaticï¿½) CONFIDENTIAL
  * Unpublished Copyright (c) 2006-2014 PubMatic, All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains the property of PubMatic. The intellectual and technical concepts contained
@@ -19,7 +19,7 @@ package com.moceanmobile.mast;
 
 public class Defaults
 {
-	public static final String SDK_VERSION = "3.1.2";
+	public static final String SDK_VERSION = "3.2";
 	
 	// This is used if the WebView's value returned is empty.
 	public static final String USER_AGENT = "MASTAdView/" + SDK_VERSION + " (Android)";
