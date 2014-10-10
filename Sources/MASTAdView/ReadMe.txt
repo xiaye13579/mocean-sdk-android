@@ -1,6 +1,6 @@
-Welcome to the Mocean Mobile SDK package for Android, version 3.1
+Welcome to the Mocean Mobile SDK package for Android, version 3.2
 /*
- * PubMatic Inc. (“PubMatic”) CONFIDENTIAL
+ * PubMatic Inc. (ï¿½PubMaticï¿½) CONFIDENTIAL
  * Unpublished Copyright (c) 2006-2014 PubMatic, All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains the property of PubMatic. The intellectual and technical concepts contained
@@ -45,3 +45,16 @@ Release Notes:
 - Replacing touch handler with click handler for image and text ad rendering.
 - Adding validation to third party ad descriptors that attempts to ensure image and
   text ads are rendered natively only if it appears the server's parsing was proper.
+  
+ 3.2
+ 
+Issues Fixed :  
+-Issue related to improper scaling of webView has been fixed. Now webView is scaling properly as expected.
+Features : 
+-Introduced new method in class MASTAdView â€“ getAdRequestCustomParameters()
+-User can now append multiple values for the same custom parameter in the ad request. 
+For instance: age=10&age15.
+-We have added common-collections-4.4.0 library to achieve this functionality. 
+-Now we have separate methods for adding default parameters and custom parameters as stated below.
+-getAdRequestParameters() - This method is used for adding default parameters in the request like size_x,size_y etc.
+-getAdRequestCustomParameters() - This method is used for adding custom network parameters defined by user, in the request.  
